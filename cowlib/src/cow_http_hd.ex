@@ -17511,7 +17511,7 @@ defmodule :cow_http_hd do
   end
 
   defp join_token_list([h | t], acc) do
-    join_token_list(t, [[h, ", "] | acc])
+    join_token_list(t, [h, ", " | acc])
   end
 
 end

@@ -1,14 +1,8 @@
 defmodule :cow_hpack do
   use Bitwise
   require Record
-
-  Record.defrecord(:r_state, :state,
-    size: 0,
-    max_size: 4096,
-    configured_max_size: 4096,
-    dyn_table: []
-  )
-
+  Record.defrecord(:r_state, :state, size: 0, max_size: 4096,
+                                 configured_max_size: 4096, dyn_table: [])
   def init() do
     r_state()
   end
@@ -25,12 +19,9 @@ defmodule :cow_hpack do
     decode(data, init())
   end
 
-  def decode(
-        <<0::size(2), 1::size(1), rest::bits>>,
-        state = r_state(configured_max_size: configMaxSize)
-      ) do
+  def decode(<<0 :: size(2), 1 :: size(1), rest :: bits>>,
+           state = r_state(configured_max_size: configMaxSize)) do
     {maxSize, rest2} = dec_int5(rest)
-
     cond do
       maxSize <= configMaxSize ->
         state2 = table_update_size(maxSize, state)
@@ -46,46 +37,56 @@ defmodule :cow_hpack do
     {:lists.reverse(acc), state}
   end
 
-  defp decode(<<1::size(1), rest::bits>>, state, acc) do
+  defp decode(<<1 :: size(1), rest :: bits>>, state, acc) do
     dec_indexed(rest, state, acc)
   end
 
-  defp decode(<<0::size(1), 1::size(1), 0::size(6), rest::bits>>, state, acc) do
+  defp decode(<<0 :: size(1), 1 :: size(1), 0 :: size(6),
+              rest :: bits>>,
+            state, acc) do
     dec_lit_index_new_name(rest, state, acc)
   end
 
-  defp decode(<<0::size(1), 1::size(1), rest::bits>>, state, acc) do
+  defp decode(<<0 :: size(1), 1 :: size(1), rest :: bits>>,
+            state, acc) do
     dec_lit_index_indexed_name(rest, state, acc)
   end
 
-  defp decode(<<0::size(8), rest::bits>>, state, acc) do
+  defp decode(<<0 :: size(8), rest :: bits>>, state, acc) do
     dec_lit_no_index_new_name(rest, state, acc)
   end
 
-  defp decode(<<0::size(4), rest::bits>>, state, acc) do
+  defp decode(<<0 :: size(4), rest :: bits>>, state, acc) do
     dec_lit_no_index_indexed_name(rest, state, acc)
   end
 
-  defp decode(<<0::size(3), 1::size(1), 0::size(4), rest::bits>>, state, acc) do
+  defp decode(<<0 :: size(3), 1 :: size(1), 0 :: size(4),
+              rest :: bits>>,
+            state, acc) do
     dec_lit_no_index_new_name(rest, state, acc)
   end
 
-  defp decode(<<0::size(3), 1::size(1), rest::bits>>, state, acc) do
+  defp decode(<<0 :: size(3), 1 :: size(1), rest :: bits>>,
+            state, acc) do
     dec_lit_no_index_indexed_name(rest, state, acc)
   end
 
-  defp dec_indexed(<<127::size(7), 0::size(1), int::size(7), rest::bits>>, state, acc) do
+  defp dec_indexed(<<127 :: size(7), 0 :: size(1), int :: size(7),
+              rest :: bits>>,
+            state, acc) do
     {name, value} = table_get(127 + int, state)
     decode(rest, state, [{name, value} | acc])
   end
 
-  defp dec_indexed(<<127::size(7), rest0::bits>>, state, acc) do
+  defp dec_indexed(<<127 :: size(7), rest0 :: bits>>, state,
+            acc) do
     {index, rest} = dec_big_int(rest0, 127, 0)
     {name, value} = table_get(index, state)
     decode(rest, state, [{name, value} | acc])
   end
 
-  defp dec_indexed(<<index::size(7), rest::bits>>, state, acc) do
+  defp dec_indexed(<<index :: size(7), rest :: bits>>, state,
+            acc) do
     {name, value} = table_get(index, state)
     decode(rest, state, [{name, value} | acc])
   end
@@ -95,22 +96,21 @@ defmodule :cow_hpack do
     dec_lit_index(rest2, state, acc, name)
   end
 
-  defp dec_lit_index_indexed_name(
-         <<63::size(6), 0::size(1), int::size(7), rest::bits>>,
-         state,
-         acc
-       ) do
+  defp dec_lit_index_indexed_name(<<63 :: size(6), 0 :: size(1), int :: size(7),
+              rest :: bits>>,
+            state, acc) do
     name = table_get_name(63 + int, state)
     dec_lit_index(rest, state, acc, name)
   end
 
-  defp dec_lit_index_indexed_name(<<63::size(6), rest0::bits>>, state, acc) do
+  defp dec_lit_index_indexed_name(<<63 :: size(6), rest0 :: bits>>, state, acc) do
     {index, rest} = dec_big_int(rest0, 63, 0)
     name = table_get_name(index, state)
     dec_lit_index(rest, state, acc, name)
   end
 
-  defp dec_lit_index_indexed_name(<<index::size(6), rest::bits>>, state, acc) do
+  defp dec_lit_index_indexed_name(<<index :: size(6), rest :: bits>>, state,
+            acc) do
     name = table_get_name(index, state)
     dec_lit_index(rest, state, acc, name)
   end
@@ -126,22 +126,21 @@ defmodule :cow_hpack do
     dec_lit_no_index(rest2, state, acc, name)
   end
 
-  defp dec_lit_no_index_indexed_name(
-         <<15::size(4), 0::size(1), int::size(7), rest::bits>>,
-         state,
-         acc
-       ) do
+  defp dec_lit_no_index_indexed_name(<<15 :: size(4), 0 :: size(1), int :: size(7),
+              rest :: bits>>,
+            state, acc) do
     name = table_get_name(15 + int, state)
     dec_lit_no_index(rest, state, acc, name)
   end
 
-  defp dec_lit_no_index_indexed_name(<<15::size(4), rest0::bits>>, state, acc) do
+  defp dec_lit_no_index_indexed_name(<<15 :: size(4), rest0 :: bits>>, state, acc) do
     {index, rest} = dec_big_int(rest0, 15, 0)
     name = table_get_name(index, state)
     dec_lit_no_index(rest, state, acc, name)
   end
 
-  defp dec_lit_no_index_indexed_name(<<index::size(4), rest::bits>>, state, acc) do
+  defp dec_lit_no_index_indexed_name(<<index :: size(4), rest :: bits>>, state,
+            acc) do
     name = table_get_name(index, state)
     dec_lit_no_index(rest, state, acc, name)
   end
@@ -151,75 +150,79 @@ defmodule :cow_hpack do
     decode(rest2, state, [{name, value} | acc])
   end
 
-  defp dec_int5(<<31::size(5), rest::bits>>) do
+  defp dec_int5(<<31 :: size(5), rest :: bits>>) do
     dec_big_int(rest, 31, 0)
   end
 
-  defp dec_int5(<<int::size(5), rest::bits>>) do
+  defp dec_int5(<<int :: size(5), rest :: bits>>) do
     {int, rest}
   end
 
-  defp dec_big_int(<<0::size(1), value::size(7), rest::bits>>, int, m) do
+  defp dec_big_int(<<0 :: size(1), value :: size(7),
+              rest :: bits>>,
+            int, m) do
     {int + (value <<< m), rest}
   end
 
-  defp dec_big_int(<<1::size(1), value::size(7), rest::bits>>, int, m) do
+  defp dec_big_int(<<1 :: size(1), value :: size(7),
+              rest :: bits>>,
+            int, m) do
     dec_big_int(rest, int + (value <<< m), m + 7)
   end
 
-  defp dec_str(<<0::size(1), 127::size(7), rest0::bits>>) do
+  defp dec_str(<<0 :: size(1), 127 :: size(7),
+              rest0 :: bits>>) do
     {length, rest1} = dec_big_int(rest0, 127, 0)
-    <<str::size(length)-binary, rest::bits>> = rest1
+    <<str :: size(length) - binary, rest :: bits>> = rest1
     {str, rest}
   end
 
-  defp dec_str(<<0::size(1), length::size(7), rest0::bits>>) do
-    <<str::size(length)-binary, rest::bits>> = rest0
+  defp dec_str(<<0 :: size(1), length :: size(7),
+              rest0 :: bits>>) do
+    <<str :: size(length) - binary, rest :: bits>> = rest0
     {str, rest}
   end
 
-  defp dec_str(<<1::size(1), 127::size(7), rest0::bits>>) do
+  defp dec_str(<<1 :: size(1), 127 :: size(7),
+              rest0 :: bits>>) do
     {length, rest} = dec_big_int(rest0, 127, 0)
     dec_huffman(rest, length, 0, <<>>)
   end
 
-  defp dec_str(<<1::size(1), length::size(7), rest::bits>>) do
+  defp dec_str(<<1 :: size(1), length :: size(7),
+              rest :: bits>>) do
     dec_huffman(rest, length, 0, <<>>)
   end
 
-  defp dec_huffman(<<a::size(4), b::size(4), r::bits>>, len, huff0, acc)
-       when len > 1 do
+  defp dec_huffman(<<a :: size(4), b :: size(4), r :: bits>>, len,
+            huff0, acc)
+      when len > 1 do
     {_, charA, huff1} = dec_huffman_lookup(huff0, a)
     {_, charB, huff} = dec_huffman_lookup(huff1, b)
-
-    case {charA, charB} do
+    case ({charA, charB}) do
       {:undefined, :undefined} ->
         dec_huffman(r, len - 1, huff, acc)
-
       {^charA, :undefined} ->
-        dec_huffman(r, len - 1, huff, <<acc::binary, charA>>)
-
+        dec_huffman(r, len - 1, huff, <<acc :: binary, charA>>)
       {:undefined, ^charB} ->
-        dec_huffman(r, len - 1, huff, <<acc::binary, charB>>)
-
+        dec_huffman(r, len - 1, huff, <<acc :: binary, charB>>)
       {^charA, ^charB} ->
-        dec_huffman(r, len - 1, huff, <<acc::binary, charA, charB>>)
+        dec_huffman(r, len - 1, huff,
+                      <<acc :: binary, charA, charB>>)
     end
   end
 
-  defp dec_huffman(<<a::size(4), b::size(4), rest::bits>>, 1, huff0, acc) do
+  defp dec_huffman(<<a :: size(4), b :: size(4), rest :: bits>>, 1,
+            huff0, acc) do
     {_, charA, huff} = dec_huffman_lookup(huff0, a)
     {:ok, charB, _} = dec_huffman_lookup(huff, b)
-
-    case {charA, charB} do
+    case ({charA, charB}) do
       {^charA, :undefined} ->
-        {<<acc::binary, charA>>, rest}
-
+        {<<acc :: binary, charA>>, rest}
       {:undefined, ^charB} ->
-        {<<acc::binary, charB>>, rest}
-
+        {<<acc :: binary, charB>>, rest}
       _ ->
-        {<<acc::binary, charA, charB>>, rest}
+        {<<acc :: binary, charA, charB>>, rest}
     end
   end
 
@@ -16615,45 +16618,35 @@ defmodule :cow_hpack do
     encode(headers, init(), :huffman, [])
   end
 
-  def encode(
-        headers,
-        state =
-          r_state(
-            max_size: maxSize,
-            configured_max_size: maxSize
-          )
-      ) do
+  def encode(headers,
+           state = r_state(max_size: maxSize,
+                       configured_max_size: maxSize)) do
     encode(headers, state, :huffman, [])
   end
 
-  def encode(
-        headers,
-        state0 = r_state(configured_max_size: maxSize)
-      ) do
+  def encode(headers,
+           state0 = r_state(configured_max_size: maxSize)) do
     state1 = table_update_size(maxSize, state0)
     {data, state} = encode(headers, state1, :huffman, [])
     {[enc_int5(maxSize, 1) | data], state}
   end
 
-  def encode(
-        headers,
-        state =
-          r_state(
-            max_size: maxSize,
-            configured_max_size: maxSize
-          ),
-        opts
-      ) do
+  def encode(headers,
+           state = r_state(max_size: maxSize,
+                       configured_max_size: maxSize),
+           opts) do
     encode(headers, state, huffman_opt(opts), [])
   end
 
-  def encode(headers, state0 = r_state(configured_max_size: maxSize), opts) do
+  def encode(headers,
+           state0 = r_state(configured_max_size: maxSize), opts) do
     state1 = table_update_size(maxSize, state0)
-    {data, state} = encode(headers, state1, huffman_opt(opts), [])
+    {data, state} = encode(headers, state1,
+                             huffman_opt(opts), [])
     {[enc_int5(maxSize, 1) | data], state}
   end
 
-  defp huffman_opt(%{:huffman => false}) do
+  defp huffman_opt(%{huffman: false}) do
     :no_huffman
   end
 
@@ -16665,85 +16658,68 @@ defmodule :cow_hpack do
     {:lists.reverse(acc), state}
   end
 
-  defp encode([{name, value0} | tail], state, huffmanOpt, acc) do
-    value =
-      cond do
-        is_binary(value0) ->
-          value0
-
-        true ->
-          :erlang.iolist_to_binary(value0)
-      end
-
+  defp encode([{name, value0} | tail], state, huffmanOpt,
+            acc) do
+    value = (cond do
+               is_binary(value0) ->
+                 value0
+               true ->
+                 :erlang.iolist_to_binary(value0)
+             end)
     header = {name, value}
-
-    case table_find(header, state) do
+    case (table_find(header, state)) do
       {:field, index} ->
-        encode(tail, state, huffmanOpt, [enc_int7(index, 1) | acc])
-
+        encode(tail, state, huffmanOpt,
+                 [enc_int7(index, 1) | acc])
       {:name, index} ->
         state2 = table_insert(header, state)
-
-        encode(tail, state2, huffmanOpt, [
-          [enc_int6(index, 1) | enc_str(value, huffmanOpt)]
-          | acc
-        ])
-
+        encode(tail, state2, huffmanOpt,
+                 [[enc_int6(index, 1) | enc_str(value, huffmanOpt)] |
+                      acc])
       :not_found ->
         state2 = table_insert(header, state)
-
-        encode(tail, state2, huffmanOpt, [
-          [
-            [<<0::size(1), 1::size(1), 0::size(6)>>, enc_str(name, huffmanOpt)]
-            | enc_str(value, huffmanOpt)
-          ]
-          | acc
-        ])
+        encode(tail, state2, huffmanOpt,
+                 [[<<0 :: size(1), 1 :: size(1), 0 :: size(6)>>,
+                       enc_str(name, huffmanOpt) | enc_str(value,
+                                                             huffmanOpt)] |
+                      acc])
     end
   end
 
   defp enc_int5(int, prefix) when int < 31 do
-    <<prefix::size(3), int::size(5)>>
+    <<prefix :: size(3), int :: size(5)>>
   end
 
   defp enc_int5(int, prefix) do
-    enc_big_int(
-      int - 31,
-      <<prefix::size(3), 31::size(5)>>
-    )
+    enc_big_int(int - 31,
+                  <<prefix :: size(3), 31 :: size(5)>>)
   end
 
   defp enc_int6(int, prefix) when int < 63 do
-    <<prefix::size(2), int::size(6)>>
+    <<prefix :: size(2), int :: size(6)>>
   end
 
   defp enc_int6(int, prefix) do
-    enc_big_int(
-      int - 63,
-      <<prefix::size(2), 63::size(6)>>
-    )
+    enc_big_int(int - 63,
+                  <<prefix :: size(2), 63 :: size(6)>>)
   end
 
   defp enc_int7(int, prefix) when int < 127 do
-    <<prefix::size(1), int::size(7)>>
+    <<prefix :: size(1), int :: size(7)>>
   end
 
   defp enc_int7(int, prefix) do
-    enc_big_int(
-      int - 127,
-      <<prefix::size(1), 127::size(7)>>
-    )
+    enc_big_int(int - 127,
+                  <<prefix :: size(1), 127 :: size(7)>>)
   end
 
   defp enc_big_int(int, acc) when int < 128 do
-    <<acc::binary, int::size(8)>>
+    <<acc :: binary, int :: size(8)>>
   end
 
   defp enc_big_int(int, acc) do
-    enc_big_int(
-      int >>> 7,
-      <<acc::binary, 1::size(1), int::size(7)>>
-    )
+    enc_big_int(int >>> 7,
+                  <<acc :: binary, 1 :: size(1), int :: size(7)>>)
   end
 
   defp enc_str(str, :huffman) do
@@ -16756,1068 +16732,1059 @@ defmodule :cow_hpack do
   end
 
   defp enc_huffman(<<>>, acc) do
-    case rem(bit_size(acc), 8) do
+    case (rem(bit_size(acc), 8)) do
       1 ->
-        <<acc::bits, 127::size(7)>>
-
+        <<acc :: bits, 127 :: size(7)>>
       2 ->
-        <<acc::bits, 63::size(6)>>
-
+        <<acc :: bits, 63 :: size(6)>>
       3 ->
-        <<acc::bits, 31::size(5)>>
-
+        <<acc :: bits, 31 :: size(5)>>
       4 ->
-        <<acc::bits, 15::size(4)>>
-
+        <<acc :: bits, 15 :: size(4)>>
       5 ->
-        <<acc::bits, 7::size(3)>>
-
+        <<acc :: bits, 7 :: size(3)>>
       6 ->
-        <<acc::bits, 3::size(2)>>
-
+        <<acc :: bits, 3 :: size(2)>>
       7 ->
-        <<acc::bits, 1::size(1)>>
-
+        <<acc :: bits, 1 :: size(1)>>
       0 ->
         acc
     end
   end
 
-  defp enc_huffman(<<0, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8184::size(13)>>)
+  defp enc_huffman(<<0, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8184 :: size(13)>>)
   end
 
-  defp enc_huffman(<<1, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_568::size(23)>>)
+  defp enc_huffman(<<1, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388568 :: size(23)>>)
   end
 
-  defp enc_huffman(<<2, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_426::size(28)>>)
+  defp enc_huffman(<<2, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435426 :: size(28)>>)
   end
 
-  defp enc_huffman(<<3, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_427::size(28)>>)
+  defp enc_huffman(<<3, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435427 :: size(28)>>)
   end
 
-  defp enc_huffman(<<4, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_428::size(28)>>)
+  defp enc_huffman(<<4, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435428 :: size(28)>>)
   end
 
-  defp enc_huffman(<<5, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_429::size(28)>>)
+  defp enc_huffman(<<5, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435429 :: size(28)>>)
   end
 
-  defp enc_huffman(<<6, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_430::size(28)>>)
+  defp enc_huffman(<<6, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435430 :: size(28)>>)
   end
 
-  defp enc_huffman(<<7, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_431::size(28)>>)
+  defp enc_huffman(<<7, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435431 :: size(28)>>)
   end
 
-  defp enc_huffman(<<8, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_432::size(28)>>)
+  defp enc_huffman(<<8, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435432 :: size(28)>>)
   end
 
-  defp enc_huffman(<<9, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_194::size(24)>>)
+  defp enc_huffman(<<9, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777194 :: size(24)>>)
   end
 
-  defp enc_huffman(<<10, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_073_741_820::size(30)>>)
+  defp enc_huffman(<<10, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1073741820 :: size(30)>>)
   end
 
-  defp enc_huffman(<<11, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_433::size(28)>>)
+  defp enc_huffman(<<11, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435433 :: size(28)>>)
   end
 
-  defp enc_huffman(<<12, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_434::size(28)>>)
+  defp enc_huffman(<<12, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435434 :: size(28)>>)
   end
 
-  defp enc_huffman(<<13, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_073_741_821::size(30)>>)
+  defp enc_huffman(<<13, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1073741821 :: size(30)>>)
   end
 
-  defp enc_huffman(<<14, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_435::size(28)>>)
+  defp enc_huffman(<<14, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435435 :: size(28)>>)
   end
 
-  defp enc_huffman(<<15, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_436::size(28)>>)
+  defp enc_huffman(<<15, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435436 :: size(28)>>)
   end
 
-  defp enc_huffman(<<16, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_437::size(28)>>)
+  defp enc_huffman(<<16, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435437 :: size(28)>>)
   end
 
-  defp enc_huffman(<<17, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_438::size(28)>>)
+  defp enc_huffman(<<17, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435438 :: size(28)>>)
   end
 
-  defp enc_huffman(<<18, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_439::size(28)>>)
+  defp enc_huffman(<<18, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435439 :: size(28)>>)
   end
 
-  defp enc_huffman(<<19, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_440::size(28)>>)
+  defp enc_huffman(<<19, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435440 :: size(28)>>)
   end
 
-  defp enc_huffman(<<20, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_441::size(28)>>)
+  defp enc_huffman(<<20, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435441 :: size(28)>>)
   end
 
-  defp enc_huffman(<<21, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_442::size(28)>>)
+  defp enc_huffman(<<21, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435442 :: size(28)>>)
   end
 
-  defp enc_huffman(<<22, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_073_741_822::size(30)>>)
+  defp enc_huffman(<<22, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1073741822 :: size(30)>>)
   end
 
-  defp enc_huffman(<<23, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_443::size(28)>>)
+  defp enc_huffman(<<23, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435443 :: size(28)>>)
   end
 
-  defp enc_huffman(<<24, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_444::size(28)>>)
+  defp enc_huffman(<<24, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435444 :: size(28)>>)
   end
 
-  defp enc_huffman(<<25, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_445::size(28)>>)
+  defp enc_huffman(<<25, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435445 :: size(28)>>)
   end
 
-  defp enc_huffman(<<26, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_446::size(28)>>)
+  defp enc_huffman(<<26, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435446 :: size(28)>>)
   end
 
-  defp enc_huffman(<<27, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_447::size(28)>>)
+  defp enc_huffman(<<27, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435447 :: size(28)>>)
   end
 
-  defp enc_huffman(<<28, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_448::size(28)>>)
+  defp enc_huffman(<<28, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435448 :: size(28)>>)
   end
 
-  defp enc_huffman(<<29, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_449::size(28)>>)
+  defp enc_huffman(<<29, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435449 :: size(28)>>)
   end
 
-  defp enc_huffman(<<30, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_450::size(28)>>)
+  defp enc_huffman(<<30, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435450 :: size(28)>>)
   end
 
-  defp enc_huffman(<<31, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_451::size(28)>>)
+  defp enc_huffman(<<31, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435451 :: size(28)>>)
   end
 
-  defp enc_huffman(<<32, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 20::size(6)>>)
+  defp enc_huffman(<<32, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 20 :: size(6)>>)
   end
 
-  defp enc_huffman(<<33, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1016::size(10)>>)
+  defp enc_huffman(<<33, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1016 :: size(10)>>)
   end
 
-  defp enc_huffman(<<34, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1017::size(10)>>)
+  defp enc_huffman(<<34, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1017 :: size(10)>>)
   end
 
-  defp enc_huffman(<<35, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4090::size(12)>>)
+  defp enc_huffman(<<35, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4090 :: size(12)>>)
   end
 
-  defp enc_huffman(<<36, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8185::size(13)>>)
+  defp enc_huffman(<<36, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8185 :: size(13)>>)
   end
 
-  defp enc_huffman(<<37, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 21::size(6)>>)
+  defp enc_huffman(<<37, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 21 :: size(6)>>)
   end
 
-  defp enc_huffman(<<38, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 248::size(8)>>)
+  defp enc_huffman(<<38, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 248 :: size(8)>>)
   end
 
-  defp enc_huffman(<<39, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2042::size(11)>>)
+  defp enc_huffman(<<39, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2042 :: size(11)>>)
   end
 
-  defp enc_huffman(<<40, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1018::size(10)>>)
+  defp enc_huffman(<<40, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1018 :: size(10)>>)
   end
 
-  defp enc_huffman(<<41, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1019::size(10)>>)
+  defp enc_huffman(<<41, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1019 :: size(10)>>)
   end
 
-  defp enc_huffman(<<42, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 249::size(8)>>)
+  defp enc_huffman(<<42, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 249 :: size(8)>>)
   end
 
-  defp enc_huffman(<<43, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2043::size(11)>>)
+  defp enc_huffman(<<43, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2043 :: size(11)>>)
   end
 
-  defp enc_huffman(<<44, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 250::size(8)>>)
+  defp enc_huffman(<<44, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 250 :: size(8)>>)
   end
 
-  defp enc_huffman(<<45, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 22::size(6)>>)
+  defp enc_huffman(<<45, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 22 :: size(6)>>)
   end
 
-  defp enc_huffman(<<46, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 23::size(6)>>)
+  defp enc_huffman(<<46, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 23 :: size(6)>>)
   end
 
-  defp enc_huffman(<<47, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 24::size(6)>>)
+  defp enc_huffman(<<47, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 24 :: size(6)>>)
   end
 
-  defp enc_huffman(<<48, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 0::size(5)>>)
+  defp enc_huffman(<<48, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 0 :: size(5)>>)
   end
 
-  defp enc_huffman(<<49, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1::size(5)>>)
+  defp enc_huffman(<<49, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1 :: size(5)>>)
   end
 
-  defp enc_huffman(<<50, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2::size(5)>>)
+  defp enc_huffman(<<50, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2 :: size(5)>>)
   end
 
-  defp enc_huffman(<<51, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 25::size(6)>>)
+  defp enc_huffman(<<51, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 25 :: size(6)>>)
   end
 
-  defp enc_huffman(<<52, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 26::size(6)>>)
+  defp enc_huffman(<<52, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 26 :: size(6)>>)
   end
 
-  defp enc_huffman(<<53, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 27::size(6)>>)
+  defp enc_huffman(<<53, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 27 :: size(6)>>)
   end
 
-  defp enc_huffman(<<54, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 28::size(6)>>)
+  defp enc_huffman(<<54, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 28 :: size(6)>>)
   end
 
-  defp enc_huffman(<<55, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 29::size(6)>>)
+  defp enc_huffman(<<55, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 29 :: size(6)>>)
   end
 
-  defp enc_huffman(<<56, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 30::size(6)>>)
+  defp enc_huffman(<<56, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 30 :: size(6)>>)
   end
 
-  defp enc_huffman(<<57, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 31::size(6)>>)
+  defp enc_huffman(<<57, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 31 :: size(6)>>)
   end
 
-  defp enc_huffman(<<58, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 92::size(7)>>)
+  defp enc_huffman(<<58, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 92 :: size(7)>>)
   end
 
-  defp enc_huffman(<<59, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 251::size(8)>>)
+  defp enc_huffman(<<59, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 251 :: size(8)>>)
   end
 
-  defp enc_huffman(<<60, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 32764::size(15)>>)
+  defp enc_huffman(<<60, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 32764 :: size(15)>>)
   end
 
-  defp enc_huffman(<<61, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 32::size(6)>>)
+  defp enc_huffman(<<61, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 32 :: size(6)>>)
   end
 
-  defp enc_huffman(<<62, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4091::size(12)>>)
+  defp enc_huffman(<<62, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4091 :: size(12)>>)
   end
 
-  defp enc_huffman(<<63, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1020::size(10)>>)
+  defp enc_huffman(<<63, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1020 :: size(10)>>)
   end
 
-  defp enc_huffman(<<64, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8186::size(13)>>)
+  defp enc_huffman(<<64, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8186 :: size(13)>>)
   end
 
-  defp enc_huffman(<<65, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 33::size(6)>>)
+  defp enc_huffman(<<65, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 33 :: size(6)>>)
   end
 
-  defp enc_huffman(<<66, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 93::size(7)>>)
+  defp enc_huffman(<<66, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 93 :: size(7)>>)
   end
 
-  defp enc_huffman(<<67, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 94::size(7)>>)
+  defp enc_huffman(<<67, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 94 :: size(7)>>)
   end
 
-  defp enc_huffman(<<68, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 95::size(7)>>)
+  defp enc_huffman(<<68, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 95 :: size(7)>>)
   end
 
-  defp enc_huffman(<<69, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 96::size(7)>>)
+  defp enc_huffman(<<69, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 96 :: size(7)>>)
   end
 
-  defp enc_huffman(<<70, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 97::size(7)>>)
+  defp enc_huffman(<<70, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 97 :: size(7)>>)
   end
 
-  defp enc_huffman(<<71, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 98::size(7)>>)
+  defp enc_huffman(<<71, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 98 :: size(7)>>)
   end
 
-  defp enc_huffman(<<72, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 99::size(7)>>)
+  defp enc_huffman(<<72, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 99 :: size(7)>>)
   end
 
-  defp enc_huffman(<<73, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 100::size(7)>>)
+  defp enc_huffman(<<73, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 100 :: size(7)>>)
   end
 
-  defp enc_huffman(<<74, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 101::size(7)>>)
+  defp enc_huffman(<<74, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 101 :: size(7)>>)
   end
 
-  defp enc_huffman(<<75, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 102::size(7)>>)
+  defp enc_huffman(<<75, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 102 :: size(7)>>)
   end
 
-  defp enc_huffman(<<76, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 103::size(7)>>)
+  defp enc_huffman(<<76, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 103 :: size(7)>>)
   end
 
-  defp enc_huffman(<<77, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 104::size(7)>>)
+  defp enc_huffman(<<77, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 104 :: size(7)>>)
   end
 
-  defp enc_huffman(<<78, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 105::size(7)>>)
+  defp enc_huffman(<<78, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 105 :: size(7)>>)
   end
 
-  defp enc_huffman(<<79, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 106::size(7)>>)
+  defp enc_huffman(<<79, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 106 :: size(7)>>)
   end
 
-  defp enc_huffman(<<80, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 107::size(7)>>)
+  defp enc_huffman(<<80, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 107 :: size(7)>>)
   end
 
-  defp enc_huffman(<<81, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 108::size(7)>>)
+  defp enc_huffman(<<81, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 108 :: size(7)>>)
   end
 
-  defp enc_huffman(<<82, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 109::size(7)>>)
+  defp enc_huffman(<<82, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 109 :: size(7)>>)
   end
 
-  defp enc_huffman(<<83, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 110::size(7)>>)
+  defp enc_huffman(<<83, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 110 :: size(7)>>)
   end
 
-  defp enc_huffman(<<84, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 111::size(7)>>)
+  defp enc_huffman(<<84, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 111 :: size(7)>>)
   end
 
-  defp enc_huffman(<<85, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 112::size(7)>>)
+  defp enc_huffman(<<85, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 112 :: size(7)>>)
   end
 
-  defp enc_huffman(<<86, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 113::size(7)>>)
+  defp enc_huffman(<<86, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 113 :: size(7)>>)
   end
 
-  defp enc_huffman(<<87, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 114::size(7)>>)
+  defp enc_huffman(<<87, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 114 :: size(7)>>)
   end
 
-  defp enc_huffman(<<88, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 252::size(8)>>)
+  defp enc_huffman(<<88, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 252 :: size(8)>>)
   end
 
-  defp enc_huffman(<<89, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 115::size(7)>>)
+  defp enc_huffman(<<89, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 115 :: size(7)>>)
   end
 
-  defp enc_huffman(<<90, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 253::size(8)>>)
+  defp enc_huffman(<<90, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 253 :: size(8)>>)
   end
 
-  defp enc_huffman(<<91, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8187::size(13)>>)
+  defp enc_huffman(<<91, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8187 :: size(13)>>)
   end
 
-  defp enc_huffman(<<92, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 524_272::size(19)>>)
+  defp enc_huffman(<<92, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 524272 :: size(19)>>)
   end
 
-  defp enc_huffman(<<93, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8188::size(13)>>)
+  defp enc_huffman(<<93, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8188 :: size(13)>>)
   end
 
-  defp enc_huffman(<<94, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16380::size(14)>>)
+  defp enc_huffman(<<94, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16380 :: size(14)>>)
   end
 
-  defp enc_huffman(<<95, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 34::size(6)>>)
+  defp enc_huffman(<<95, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 34 :: size(6)>>)
   end
 
-  defp enc_huffman(<<96, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 32765::size(15)>>)
+  defp enc_huffman(<<96, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 32765 :: size(15)>>)
   end
 
-  defp enc_huffman(<<97, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 3::size(5)>>)
+  defp enc_huffman(<<97, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 3 :: size(5)>>)
   end
 
-  defp enc_huffman(<<98, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 35::size(6)>>)
+  defp enc_huffman(<<98, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 35 :: size(6)>>)
   end
 
-  defp enc_huffman(<<99, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4::size(5)>>)
+  defp enc_huffman(<<99, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4 :: size(5)>>)
   end
 
-  defp enc_huffman(<<100, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 36::size(6)>>)
+  defp enc_huffman(<<100, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 36 :: size(6)>>)
   end
 
-  defp enc_huffman(<<101, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 5::size(5)>>)
+  defp enc_huffman(<<101, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 5 :: size(5)>>)
   end
 
-  defp enc_huffman(<<102, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 37::size(6)>>)
+  defp enc_huffman(<<102, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 37 :: size(6)>>)
   end
 
-  defp enc_huffman(<<103, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 38::size(6)>>)
+  defp enc_huffman(<<103, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 38 :: size(6)>>)
   end
 
-  defp enc_huffman(<<104, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 39::size(6)>>)
+  defp enc_huffman(<<104, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 39 :: size(6)>>)
   end
 
-  defp enc_huffman(<<105, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 6::size(5)>>)
+  defp enc_huffman(<<105, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 6 :: size(5)>>)
   end
 
-  defp enc_huffman(<<106, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 116::size(7)>>)
+  defp enc_huffman(<<106, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 116 :: size(7)>>)
   end
 
-  defp enc_huffman(<<107, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 117::size(7)>>)
+  defp enc_huffman(<<107, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 117 :: size(7)>>)
   end
 
-  defp enc_huffman(<<108, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 40::size(6)>>)
+  defp enc_huffman(<<108, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 40 :: size(6)>>)
   end
 
-  defp enc_huffman(<<109, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 41::size(6)>>)
+  defp enc_huffman(<<109, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 41 :: size(6)>>)
   end
 
-  defp enc_huffman(<<110, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 42::size(6)>>)
+  defp enc_huffman(<<110, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 42 :: size(6)>>)
   end
 
-  defp enc_huffman(<<111, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 7::size(5)>>)
+  defp enc_huffman(<<111, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 7 :: size(5)>>)
   end
 
-  defp enc_huffman(<<112, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 43::size(6)>>)
+  defp enc_huffman(<<112, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 43 :: size(6)>>)
   end
 
-  defp enc_huffman(<<113, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 118::size(7)>>)
+  defp enc_huffman(<<113, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 118 :: size(7)>>)
   end
 
-  defp enc_huffman(<<114, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 44::size(6)>>)
+  defp enc_huffman(<<114, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 44 :: size(6)>>)
   end
 
-  defp enc_huffman(<<115, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8::size(5)>>)
+  defp enc_huffman(<<115, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8 :: size(5)>>)
   end
 
-  defp enc_huffman(<<116, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 9::size(5)>>)
+  defp enc_huffman(<<116, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 9 :: size(5)>>)
   end
 
-  defp enc_huffman(<<117, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 45::size(6)>>)
+  defp enc_huffman(<<117, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 45 :: size(6)>>)
   end
 
-  defp enc_huffman(<<118, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 119::size(7)>>)
+  defp enc_huffman(<<118, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 119 :: size(7)>>)
   end
 
-  defp enc_huffman(<<119, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 120::size(7)>>)
+  defp enc_huffman(<<119, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 120 :: size(7)>>)
   end
 
-  defp enc_huffman(<<120, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 121::size(7)>>)
+  defp enc_huffman(<<120, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 121 :: size(7)>>)
   end
 
-  defp enc_huffman(<<121, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 122::size(7)>>)
+  defp enc_huffman(<<121, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 122 :: size(7)>>)
   end
 
-  defp enc_huffman(<<122, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 123::size(7)>>)
+  defp enc_huffman(<<122, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 123 :: size(7)>>)
   end
 
-  defp enc_huffman(<<123, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 32766::size(15)>>)
+  defp enc_huffman(<<123, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 32766 :: size(15)>>)
   end
 
-  defp enc_huffman(<<124, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2044::size(11)>>)
+  defp enc_huffman(<<124, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2044 :: size(11)>>)
   end
 
-  defp enc_huffman(<<125, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16381::size(14)>>)
+  defp enc_huffman(<<125, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16381 :: size(14)>>)
   end
 
-  defp enc_huffman(<<126, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8189::size(13)>>)
+  defp enc_huffman(<<126, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8189 :: size(13)>>)
   end
 
-  defp enc_huffman(<<127, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_452::size(28)>>)
+  defp enc_huffman(<<127, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435452 :: size(28)>>)
   end
 
-  defp enc_huffman(<<128, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_048_550::size(20)>>)
+  defp enc_huffman(<<128, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1048550 :: size(20)>>)
   end
 
-  defp enc_huffman(<<129, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_258::size(22)>>)
+  defp enc_huffman(<<129, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194258 :: size(22)>>)
   end
 
-  defp enc_huffman(<<130, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_048_551::size(20)>>)
+  defp enc_huffman(<<130, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1048551 :: size(20)>>)
   end
 
-  defp enc_huffman(<<131, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_048_552::size(20)>>)
+  defp enc_huffman(<<131, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1048552 :: size(20)>>)
   end
 
-  defp enc_huffman(<<132, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_259::size(22)>>)
+  defp enc_huffman(<<132, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194259 :: size(22)>>)
   end
 
-  defp enc_huffman(<<133, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_260::size(22)>>)
+  defp enc_huffman(<<133, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194260 :: size(22)>>)
   end
 
-  defp enc_huffman(<<134, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_261::size(22)>>)
+  defp enc_huffman(<<134, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194261 :: size(22)>>)
   end
 
-  defp enc_huffman(<<135, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_569::size(23)>>)
+  defp enc_huffman(<<135, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388569 :: size(23)>>)
   end
 
-  defp enc_huffman(<<136, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_262::size(22)>>)
+  defp enc_huffman(<<136, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194262 :: size(22)>>)
   end
 
-  defp enc_huffman(<<137, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_570::size(23)>>)
+  defp enc_huffman(<<137, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388570 :: size(23)>>)
   end
 
-  defp enc_huffman(<<138, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_571::size(23)>>)
+  defp enc_huffman(<<138, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388571 :: size(23)>>)
   end
 
-  defp enc_huffman(<<139, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_572::size(23)>>)
+  defp enc_huffman(<<139, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388572 :: size(23)>>)
   end
 
-  defp enc_huffman(<<140, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_573::size(23)>>)
+  defp enc_huffman(<<140, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388573 :: size(23)>>)
   end
 
-  defp enc_huffman(<<141, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_574::size(23)>>)
+  defp enc_huffman(<<141, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388574 :: size(23)>>)
   end
 
-  defp enc_huffman(<<142, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_195::size(24)>>)
+  defp enc_huffman(<<142, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777195 :: size(24)>>)
   end
 
-  defp enc_huffman(<<143, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_575::size(23)>>)
+  defp enc_huffman(<<143, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388575 :: size(23)>>)
   end
 
-  defp enc_huffman(<<144, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_196::size(24)>>)
+  defp enc_huffman(<<144, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777196 :: size(24)>>)
   end
 
-  defp enc_huffman(<<145, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_197::size(24)>>)
+  defp enc_huffman(<<145, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777197 :: size(24)>>)
   end
 
-  defp enc_huffman(<<146, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_263::size(22)>>)
+  defp enc_huffman(<<146, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194263 :: size(22)>>)
   end
 
-  defp enc_huffman(<<147, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_576::size(23)>>)
+  defp enc_huffman(<<147, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388576 :: size(23)>>)
   end
 
-  defp enc_huffman(<<148, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_198::size(24)>>)
+  defp enc_huffman(<<148, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777198 :: size(24)>>)
   end
 
-  defp enc_huffman(<<149, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_577::size(23)>>)
+  defp enc_huffman(<<149, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388577 :: size(23)>>)
   end
 
-  defp enc_huffman(<<150, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_578::size(23)>>)
+  defp enc_huffman(<<150, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388578 :: size(23)>>)
   end
 
-  defp enc_huffman(<<151, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_579::size(23)>>)
+  defp enc_huffman(<<151, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388579 :: size(23)>>)
   end
 
-  defp enc_huffman(<<152, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_580::size(23)>>)
+  defp enc_huffman(<<152, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388580 :: size(23)>>)
   end
 
-  defp enc_huffman(<<153, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_116::size(21)>>)
+  defp enc_huffman(<<153, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097116 :: size(21)>>)
   end
 
-  defp enc_huffman(<<154, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_264::size(22)>>)
+  defp enc_huffman(<<154, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194264 :: size(22)>>)
   end
 
-  defp enc_huffman(<<155, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_581::size(23)>>)
+  defp enc_huffman(<<155, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388581 :: size(23)>>)
   end
 
-  defp enc_huffman(<<156, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_265::size(22)>>)
+  defp enc_huffman(<<156, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194265 :: size(22)>>)
   end
 
-  defp enc_huffman(<<157, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_582::size(23)>>)
+  defp enc_huffman(<<157, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388582 :: size(23)>>)
   end
 
-  defp enc_huffman(<<158, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_583::size(23)>>)
+  defp enc_huffman(<<158, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388583 :: size(23)>>)
   end
 
-  defp enc_huffman(<<159, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_199::size(24)>>)
+  defp enc_huffman(<<159, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777199 :: size(24)>>)
   end
 
-  defp enc_huffman(<<160, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_266::size(22)>>)
+  defp enc_huffman(<<160, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194266 :: size(22)>>)
   end
 
-  defp enc_huffman(<<161, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_117::size(21)>>)
+  defp enc_huffman(<<161, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097117 :: size(21)>>)
   end
 
-  defp enc_huffman(<<162, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_048_553::size(20)>>)
+  defp enc_huffman(<<162, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1048553 :: size(20)>>)
   end
 
-  defp enc_huffman(<<163, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_267::size(22)>>)
+  defp enc_huffman(<<163, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194267 :: size(22)>>)
   end
 
-  defp enc_huffman(<<164, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_268::size(22)>>)
+  defp enc_huffman(<<164, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194268 :: size(22)>>)
   end
 
-  defp enc_huffman(<<165, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_584::size(23)>>)
+  defp enc_huffman(<<165, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388584 :: size(23)>>)
   end
 
-  defp enc_huffman(<<166, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_585::size(23)>>)
+  defp enc_huffman(<<166, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388585 :: size(23)>>)
   end
 
-  defp enc_huffman(<<167, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_118::size(21)>>)
+  defp enc_huffman(<<167, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097118 :: size(21)>>)
   end
 
-  defp enc_huffman(<<168, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_586::size(23)>>)
+  defp enc_huffman(<<168, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388586 :: size(23)>>)
   end
 
-  defp enc_huffman(<<169, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_269::size(22)>>)
+  defp enc_huffman(<<169, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194269 :: size(22)>>)
   end
 
-  defp enc_huffman(<<170, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_270::size(22)>>)
+  defp enc_huffman(<<170, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194270 :: size(22)>>)
   end
 
-  defp enc_huffman(<<171, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_200::size(24)>>)
+  defp enc_huffman(<<171, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777200 :: size(24)>>)
   end
 
-  defp enc_huffman(<<172, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_119::size(21)>>)
+  defp enc_huffman(<<172, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097119 :: size(21)>>)
   end
 
-  defp enc_huffman(<<173, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_271::size(22)>>)
+  defp enc_huffman(<<173, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194271 :: size(22)>>)
   end
 
-  defp enc_huffman(<<174, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_587::size(23)>>)
+  defp enc_huffman(<<174, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388587 :: size(23)>>)
   end
 
-  defp enc_huffman(<<175, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_588::size(23)>>)
+  defp enc_huffman(<<175, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388588 :: size(23)>>)
   end
 
-  defp enc_huffman(<<176, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_120::size(21)>>)
+  defp enc_huffman(<<176, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097120 :: size(21)>>)
   end
 
-  defp enc_huffman(<<177, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_121::size(21)>>)
+  defp enc_huffman(<<177, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097121 :: size(21)>>)
   end
 
-  defp enc_huffman(<<178, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_272::size(22)>>)
+  defp enc_huffman(<<178, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194272 :: size(22)>>)
   end
 
-  defp enc_huffman(<<179, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_122::size(21)>>)
+  defp enc_huffman(<<179, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097122 :: size(21)>>)
   end
 
-  defp enc_huffman(<<180, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_589::size(23)>>)
+  defp enc_huffman(<<180, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388589 :: size(23)>>)
   end
 
-  defp enc_huffman(<<181, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_273::size(22)>>)
+  defp enc_huffman(<<181, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194273 :: size(22)>>)
   end
 
-  defp enc_huffman(<<182, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_590::size(23)>>)
+  defp enc_huffman(<<182, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388590 :: size(23)>>)
   end
 
-  defp enc_huffman(<<183, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_591::size(23)>>)
+  defp enc_huffman(<<183, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388591 :: size(23)>>)
   end
 
-  defp enc_huffman(<<184, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_048_554::size(20)>>)
+  defp enc_huffman(<<184, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1048554 :: size(20)>>)
   end
 
-  defp enc_huffman(<<185, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_274::size(22)>>)
+  defp enc_huffman(<<185, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194274 :: size(22)>>)
   end
 
-  defp enc_huffman(<<186, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_275::size(22)>>)
+  defp enc_huffman(<<186, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194275 :: size(22)>>)
   end
 
-  defp enc_huffman(<<187, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_276::size(22)>>)
+  defp enc_huffman(<<187, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194276 :: size(22)>>)
   end
 
-  defp enc_huffman(<<188, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_592::size(23)>>)
+  defp enc_huffman(<<188, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388592 :: size(23)>>)
   end
 
-  defp enc_huffman(<<189, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_277::size(22)>>)
+  defp enc_huffman(<<189, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194277 :: size(22)>>)
   end
 
-  defp enc_huffman(<<190, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_278::size(22)>>)
+  defp enc_huffman(<<190, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194278 :: size(22)>>)
   end
 
-  defp enc_huffman(<<191, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_593::size(23)>>)
+  defp enc_huffman(<<191, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388593 :: size(23)>>)
   end
 
-  defp enc_huffman(<<192, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_832::size(26)>>)
+  defp enc_huffman(<<192, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108832 :: size(26)>>)
   end
 
-  defp enc_huffman(<<193, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_833::size(26)>>)
+  defp enc_huffman(<<193, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108833 :: size(26)>>)
   end
 
-  defp enc_huffman(<<194, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_048_555::size(20)>>)
+  defp enc_huffman(<<194, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1048555 :: size(20)>>)
   end
 
-  defp enc_huffman(<<195, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 524_273::size(19)>>)
+  defp enc_huffman(<<195, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 524273 :: size(19)>>)
   end
 
-  defp enc_huffman(<<196, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_279::size(22)>>)
+  defp enc_huffman(<<196, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194279 :: size(22)>>)
   end
 
-  defp enc_huffman(<<197, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_594::size(23)>>)
+  defp enc_huffman(<<197, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388594 :: size(23)>>)
   end
 
-  defp enc_huffman(<<198, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_280::size(22)>>)
+  defp enc_huffman(<<198, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194280 :: size(22)>>)
   end
 
-  defp enc_huffman(<<199, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 33_554_412::size(25)>>)
+  defp enc_huffman(<<199, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 33554412 :: size(25)>>)
   end
 
-  defp enc_huffman(<<200, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_834::size(26)>>)
+  defp enc_huffman(<<200, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108834 :: size(26)>>)
   end
 
-  defp enc_huffman(<<201, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_835::size(26)>>)
+  defp enc_huffman(<<201, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108835 :: size(26)>>)
   end
 
-  defp enc_huffman(<<202, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_836::size(26)>>)
+  defp enc_huffman(<<202, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108836 :: size(26)>>)
   end
 
-  defp enc_huffman(<<203, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_694::size(27)>>)
+  defp enc_huffman(<<203, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217694 :: size(27)>>)
   end
 
-  defp enc_huffman(<<204, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_695::size(27)>>)
+  defp enc_huffman(<<204, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217695 :: size(27)>>)
   end
 
-  defp enc_huffman(<<205, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_837::size(26)>>)
+  defp enc_huffman(<<205, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108837 :: size(26)>>)
   end
 
-  defp enc_huffman(<<206, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_201::size(24)>>)
+  defp enc_huffman(<<206, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777201 :: size(24)>>)
   end
 
-  defp enc_huffman(<<207, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 33_554_413::size(25)>>)
+  defp enc_huffman(<<207, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 33554413 :: size(25)>>)
   end
 
-  defp enc_huffman(<<208, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 524_274::size(19)>>)
+  defp enc_huffman(<<208, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 524274 :: size(19)>>)
   end
 
-  defp enc_huffman(<<209, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_123::size(21)>>)
+  defp enc_huffman(<<209, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097123 :: size(21)>>)
   end
 
-  defp enc_huffman(<<210, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_838::size(26)>>)
+  defp enc_huffman(<<210, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108838 :: size(26)>>)
   end
 
-  defp enc_huffman(<<211, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_696::size(27)>>)
+  defp enc_huffman(<<211, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217696 :: size(27)>>)
   end
 
-  defp enc_huffman(<<212, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_697::size(27)>>)
+  defp enc_huffman(<<212, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217697 :: size(27)>>)
   end
 
-  defp enc_huffman(<<213, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_839::size(26)>>)
+  defp enc_huffman(<<213, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108839 :: size(26)>>)
   end
 
-  defp enc_huffman(<<214, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_698::size(27)>>)
+  defp enc_huffman(<<214, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217698 :: size(27)>>)
   end
 
-  defp enc_huffman(<<215, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_202::size(24)>>)
+  defp enc_huffman(<<215, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777202 :: size(24)>>)
   end
 
-  defp enc_huffman(<<216, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_124::size(21)>>)
+  defp enc_huffman(<<216, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097124 :: size(21)>>)
   end
 
-  defp enc_huffman(<<217, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_125::size(21)>>)
+  defp enc_huffman(<<217, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097125 :: size(21)>>)
   end
 
-  defp enc_huffman(<<218, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_840::size(26)>>)
+  defp enc_huffman(<<218, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108840 :: size(26)>>)
   end
 
-  defp enc_huffman(<<219, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_841::size(26)>>)
+  defp enc_huffman(<<219, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108841 :: size(26)>>)
   end
 
-  defp enc_huffman(<<220, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_453::size(28)>>)
+  defp enc_huffman(<<220, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435453 :: size(28)>>)
   end
 
-  defp enc_huffman(<<221, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_699::size(27)>>)
+  defp enc_huffman(<<221, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217699 :: size(27)>>)
   end
 
-  defp enc_huffman(<<222, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_700::size(27)>>)
+  defp enc_huffman(<<222, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217700 :: size(27)>>)
   end
 
-  defp enc_huffman(<<223, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_701::size(27)>>)
+  defp enc_huffman(<<223, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217701 :: size(27)>>)
   end
 
-  defp enc_huffman(<<224, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_048_556::size(20)>>)
+  defp enc_huffman(<<224, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1048556 :: size(20)>>)
   end
 
-  defp enc_huffman(<<225, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_203::size(24)>>)
+  defp enc_huffman(<<225, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777203 :: size(24)>>)
   end
 
-  defp enc_huffman(<<226, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 1_048_557::size(20)>>)
+  defp enc_huffman(<<226, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 1048557 :: size(20)>>)
   end
 
-  defp enc_huffman(<<227, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_126::size(21)>>)
+  defp enc_huffman(<<227, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097126 :: size(21)>>)
   end
 
-  defp enc_huffman(<<228, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_281::size(22)>>)
+  defp enc_huffman(<<228, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194281 :: size(22)>>)
   end
 
-  defp enc_huffman(<<229, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_127::size(21)>>)
+  defp enc_huffman(<<229, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097127 :: size(21)>>)
   end
 
-  defp enc_huffman(<<230, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 2_097_128::size(21)>>)
+  defp enc_huffman(<<230, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 2097128 :: size(21)>>)
   end
 
-  defp enc_huffman(<<231, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_595::size(23)>>)
+  defp enc_huffman(<<231, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388595 :: size(23)>>)
   end
 
-  defp enc_huffman(<<232, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_282::size(22)>>)
+  defp enc_huffman(<<232, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194282 :: size(22)>>)
   end
 
-  defp enc_huffman(<<233, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 4_194_283::size(22)>>)
+  defp enc_huffman(<<233, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 4194283 :: size(22)>>)
   end
 
-  defp enc_huffman(<<234, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 33_554_414::size(25)>>)
+  defp enc_huffman(<<234, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 33554414 :: size(25)>>)
   end
 
-  defp enc_huffman(<<235, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 33_554_415::size(25)>>)
+  defp enc_huffman(<<235, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 33554415 :: size(25)>>)
   end
 
-  defp enc_huffman(<<236, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_204::size(24)>>)
+  defp enc_huffman(<<236, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777204 :: size(24)>>)
   end
 
-  defp enc_huffman(<<237, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 16_777_205::size(24)>>)
+  defp enc_huffman(<<237, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 16777205 :: size(24)>>)
   end
 
-  defp enc_huffman(<<238, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_842::size(26)>>)
+  defp enc_huffman(<<238, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108842 :: size(26)>>)
   end
 
-  defp enc_huffman(<<239, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 8_388_596::size(23)>>)
+  defp enc_huffman(<<239, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 8388596 :: size(23)>>)
   end
 
-  defp enc_huffman(<<240, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_843::size(26)>>)
+  defp enc_huffman(<<240, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108843 :: size(26)>>)
   end
 
-  defp enc_huffman(<<241, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_702::size(27)>>)
+  defp enc_huffman(<<241, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217702 :: size(27)>>)
   end
 
-  defp enc_huffman(<<242, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_844::size(26)>>)
+  defp enc_huffman(<<242, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108844 :: size(26)>>)
   end
 
-  defp enc_huffman(<<243, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_845::size(26)>>)
+  defp enc_huffman(<<243, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108845 :: size(26)>>)
   end
 
-  defp enc_huffman(<<244, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_703::size(27)>>)
+  defp enc_huffman(<<244, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217703 :: size(27)>>)
   end
 
-  defp enc_huffman(<<245, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_704::size(27)>>)
+  defp enc_huffman(<<245, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217704 :: size(27)>>)
   end
 
-  defp enc_huffman(<<246, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_705::size(27)>>)
+  defp enc_huffman(<<246, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217705 :: size(27)>>)
   end
 
-  defp enc_huffman(<<247, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_706::size(27)>>)
+  defp enc_huffman(<<247, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217706 :: size(27)>>)
   end
 
-  defp enc_huffman(<<248, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_707::size(27)>>)
+  defp enc_huffman(<<248, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217707 :: size(27)>>)
   end
 
-  defp enc_huffman(<<249, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 268_435_454::size(28)>>)
+  defp enc_huffman(<<249, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 268435454 :: size(28)>>)
   end
 
-  defp enc_huffman(<<250, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_708::size(27)>>)
+  defp enc_huffman(<<250, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217708 :: size(27)>>)
   end
 
-  defp enc_huffman(<<251, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_709::size(27)>>)
+  defp enc_huffman(<<251, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217709 :: size(27)>>)
   end
 
-  defp enc_huffman(<<252, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_710::size(27)>>)
+  defp enc_huffman(<<252, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217710 :: size(27)>>)
   end
 
-  defp enc_huffman(<<253, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_711::size(27)>>)
+  defp enc_huffman(<<253, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217711 :: size(27)>>)
   end
 
-  defp enc_huffman(<<254, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 134_217_712::size(27)>>)
+  defp enc_huffman(<<254, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 134217712 :: size(27)>>)
   end
 
-  defp enc_huffman(<<255, r::bits>>, a) do
-    enc_huffman(r, <<a::bits, 67_108_846::size(26)>>)
+  defp enc_huffman(<<255, r :: bits>>, a) do
+    enc_huffman(r, <<a :: bits, 67108846 :: size(26)>>)
   end
 
   defp table_find(header = {name, _}, state) do
-    case table_find_field(header, state) do
+    case (table_find_field(header, state)) do
       :not_found ->
-        case table_find_name(name, state) do
+        case (table_find_name(name, state)) do
           notFound = :not_found ->
             notFound
-
           found ->
             {:name, found}
         end
-
       found ->
         {:field, found}
     end
@@ -18805,29 +18772,21 @@ defmodule :cow_hpack do
     name
   end
 
-  defp table_insert(
-         entry = {name, value},
-         state = r_state(size: size, max_size: maxSize, dyn_table: dynamicTable)
-       ) do
+  defp table_insert(entry = {name, value},
+            state = r_state(size: size, max_size: maxSize,
+                        dyn_table: dynamicTable)) do
     entrySize = byte_size(name) + byte_size(value) + 32
-
     cond do
       entrySize + size <= maxSize ->
-        r_state(state,
-          size: size + entrySize,
-          dyn_table: [{entrySize, entry} | dynamicTable]
-        )
-
+        r_state(state, size: size + entrySize, 
+                   dyn_table: [{entrySize, entry} | dynamicTable])
       entrySize <= maxSize ->
-        {dynamicTable2, size2} = table_resize(dynamicTable, maxSize - entrySize, 0, [])
-
-        r_state(state,
-          size: size2 + entrySize,
-          dyn_table: [{entrySize, entry} | dynamicTable2]
-        )
-
+        {dynamicTable2, size2} = table_resize(dynamicTable,
+                                                maxSize - entrySize, 0, [])
+        r_state(state, size: size2 + entrySize, 
+                   dyn_table: [{entrySize, entry} | dynamicTable2])
       entrySize > maxSize ->
-        r_state(state, size: 0, dyn_table: [])
+        r_state(state, size: 0,  dyn_table: [])
     end
   end
 
@@ -18836,25 +18795,30 @@ defmodule :cow_hpack do
   end
 
   defp table_resize([{entrySize, _} | _], maxSize, size, acc)
-       when size + entrySize > maxSize do
+      when size + entrySize > maxSize do
     {:lists.reverse(acc), size}
   end
 
-  defp table_resize([entry = {entrySize, _} | tail], maxSize, size, acc) do
-    table_resize(tail, maxSize, size + entrySize, [entry | acc])
+  defp table_resize([entry = {entrySize, _} | tail], maxSize, size,
+            acc) do
+    table_resize(tail, maxSize, size + entrySize,
+                   [entry | acc])
   end
 
   defp table_update_size(0, state) do
-    r_state(state, size: 0, max_size: 0, dyn_table: [])
+    r_state(state, size: 0,  max_size: 0,  dyn_table: [])
   end
 
   defp table_update_size(maxSize, state = r_state(size: currentSize))
-       when currentSize <= maxSize do
+      when currentSize <= maxSize do
     r_state(state, max_size: maxSize)
   end
 
   defp table_update_size(maxSize, state = r_state(dyn_table: dynTable)) do
-    {dynTable2, size} = table_resize(dynTable, maxSize, 0, [])
-    r_state(state, size: size, max_size: maxSize, dyn_table: dynTable2)
+    {dynTable2, size} = table_resize(dynTable, maxSize, 0,
+                                       [])
+    r_state(state, size: size,  max_size: maxSize, 
+               dyn_table: dynTable2)
   end
+
 end

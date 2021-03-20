@@ -204,9 +204,8 @@ defmodule :cow_link do
     {:value, {_, rel}, params2} = :lists.keytake("rel", 1,
                                                    params1)
     params = filter_out_duplicates(params2, %{})
-    [%{:target => target,
-         :rel
-         =>
+    [%{target: target,
+         rel:
          for << <<c>> <- rel >>, into: <<>> do
            <<case (c) do
                ?A ->
@@ -265,7 +264,7 @@ defmodule :cow_link do
                  c
              end>>
          end,
-         :attributes => params} |
+         attributes: params} |
          acc]
   end
 
@@ -277,50 +276,49 @@ defmodule :cow_link do
     filter_out_duplicates(tail, state)
   end
 
-  defp filter_out_duplicates([{"anchor", _} | tail], state = %{:anchor => true}) do
+  defp filter_out_duplicates([{"anchor", _} | tail], state = %{anchor: true}) do
     filter_out_duplicates(tail, state)
   end
 
-  defp filter_out_duplicates([{"media", _} | tail], state = %{:media => true}) do
+  defp filter_out_duplicates([{"media", _} | tail], state = %{media: true}) do
     filter_out_duplicates(tail, state)
   end
 
-  defp filter_out_duplicates([{"title", _} | tail], state = %{:title => true}) do
+  defp filter_out_duplicates([{"title", _} | tail], state = %{title: true}) do
     filter_out_duplicates(tail, state)
   end
 
-  defp filter_out_duplicates([{"title*", _} | tail],
-            state = %{:title_star => true}) do
+  defp filter_out_duplicates([{"title*", _} | tail], state = %{title_star: true}) do
     filter_out_duplicates(tail, state)
   end
 
-  defp filter_out_duplicates([{"type", _} | tail], state = %{:type => true}) do
+  defp filter_out_duplicates([{"type", _} | tail], state = %{type: true}) do
     filter_out_duplicates(tail, state)
   end
 
   defp filter_out_duplicates([tuple = {"anchor", _} | tail], state) do
     [tuple | filter_out_duplicates(tail,
-                                     %{state | :anchor => true})]
+                                     Map.put(state, :anchor, true))]
   end
 
   defp filter_out_duplicates([tuple = {"media", _} | tail], state) do
     [tuple | filter_out_duplicates(tail,
-                                     %{state | :media => true})]
+                                     Map.put(state, :media, true))]
   end
 
   defp filter_out_duplicates([tuple = {"title", _} | tail], state) do
     [tuple | filter_out_duplicates(tail,
-                                     %{state | :title => true})]
+                                     Map.put(state, :title, true))]
   end
 
   defp filter_out_duplicates([tuple = {"title*", _} | tail], state) do
     [tuple | filter_out_duplicates(tail,
-                                     %{state | :title_star => true})]
+                                     Map.put(state, :title_star, true))]
   end
 
   defp filter_out_duplicates([tuple = {"type", _} | tail], state) do
     [tuple | filter_out_duplicates(tail,
-                                     %{state | :type => true})]
+                                     Map.put(state, :type, true))]
   end
 
   defp filter_out_duplicates([tuple | tail], state) do
@@ -331,16 +329,16 @@ defmodule :cow_link do
     resolve_link(link, contextURI, %{})
   end
 
-  def resolve_link(link = %{:target => targetURI}, :undefined, _) do
+  def resolve_link(link = %{target: targetURI}, :undefined, _) do
     case (:uri_string.parse(targetURI)) do
-      uRIMap = %{:scheme => _} ->
-        %{link | :target => :uri_string.normalize(uRIMap)}
+      uRIMap = %{scheme: _} ->
+        Map.put(link, :target, :uri_string.normalize(uRIMap))
       _ ->
         false
     end
   end
 
-  def resolve_link(link = %{:attributes => params}, contextURI,
+  def resolve_link(link = %{attributes: params}, contextURI,
            opts) do
     allowAnchor = :maps.get(:allow_anchor, opts, true)
     case (:lists.keyfind("anchor", 1, params)) do
@@ -353,37 +351,32 @@ defmodule :cow_link do
     end
   end
 
-  defp do_resolve_link(link = %{:target => targetURI}, contextURI) do
-    %{link
-      |
-      :target
-      =>
-      :uri_string.recompose(resolve(targetURI, contextURI))}
+  defp do_resolve_link(link = %{target: targetURI}, contextURI) do
+    Map.put(link, :target,
+                    :uri_string.recompose(resolve(targetURI, contextURI)))
   end
 
   defp resolve(uRI, baseURI) do
     case (resolve1(ensure_map_uri(uRI), baseURI)) do
-      targetURI = %{:path => path0} ->
-        %{:path => path} = :uri_string.normalize(%{:path
-                                                   =>
-                                                   path0},
-                                                   [:return_map])
-        %{targetURI | :path => path}
+      targetURI = %{path: path0} ->
+        %{path: path} = :uri_string.normalize(%{path: path0},
+                                                [:return_map])
+        Map.put(targetURI, :path, path)
       targetURI ->
         targetURI
     end
   end
 
-  defp resolve1(uRI = %{:scheme => _}, _) do
+  defp resolve1(uRI = %{scheme: _}, _) do
     uRI
   end
 
-  defp resolve1(uRI = %{:host => _}, baseURI) do
-    %{:scheme => scheme} = ensure_map_uri(baseURI)
-    %{uRI | :scheme => scheme}
+  defp resolve1(uRI = %{host: _}, baseURI) do
+    %{scheme: scheme} = ensure_map_uri(baseURI)
+    Map.put(uRI, :scheme, scheme)
   end
 
-  defp resolve1(uRI = %{:path => <<>>}, baseURI0) do
+  defp resolve1(uRI = %{path: <<>>}, baseURI0) do
     baseURI = ensure_map_uri(baseURI0)
     keys = (case (:maps.is_key(:query, uRI)) do
               true ->
@@ -394,25 +387,23 @@ defmodule :cow_link do
     :maps.merge(uRI, :maps.with(keys, baseURI))
   end
 
-  defp resolve1(uRI = %{:path => <<"/", _ :: bits>>}, baseURI0) do
+  defp resolve1(uRI = %{path: <<"/", _ :: bits>>}, baseURI0) do
     baseURI = ensure_map_uri(baseURI0)
     :maps.merge(uRI,
                   :maps.with([:scheme, :host, :port], baseURI))
   end
 
-  defp resolve1(uRI = %{:path => path}, baseURI0) do
+  defp resolve1(uRI = %{path: path}, baseURI0) do
     baseURI = ensure_map_uri(baseURI0)
-    :maps.merge(%{uRI
-                  |
-                  :path => merge_paths(path, baseURI)},
+    :maps.merge(%{uRI | path: merge_paths(path, baseURI)},
                   :maps.with([:scheme, :host, :port], baseURI))
   end
 
-  defp merge_paths(path, %{:host => _, :path => <<>>}) do
+  defp merge_paths(path, %{host: _, path: <<>>}) do
     <<?/, path :: binary>>
   end
 
-  defp merge_paths(path, %{:path => basePath0}) do
+  defp merge_paths(path, %{path: basePath0}) do
     case (:string.split(basePath0, <<?/>>, :trailing)) do
       [basePath, _] ->
         <<basePath :: binary, ?/, path :: binary>>
@@ -436,13 +427,15 @@ defmodule :cow_link do
                   end)
   end
 
-  defp do_link(%{:target => targetURI, :rel => rel,
-              :attributes => params}) do
-    [?<, targetURI, ">; rel=\"", rel, ?",
-       for {key, value} <- params do
-         ["; ", key, "=\"",
-            escape(:erlang.iolist_to_binary(value), <<>>), ?"]
-       end]
+  defp do_link(%{target: targetURI, rel: rel,
+              attributes: params}) do
+    [?<, targetURI, ">; rel=\"", rel, ?", for {key,
+                                       value} <- params do
+                                  ["; ", key, "=\"",
+                                               escape(:erlang.iolist_to_binary(value),
+                                                        <<>>),
+                                                   ?"]
+                                end]
   end
 
   defp escape(<<>>, acc) do

@@ -1,42 +1,29 @@
 defmodule :cowboy_children do
   use Bitwise
   require Record
-
-  Record.defrecord(:r_child, :child,
-    pid: :undefined,
-    streamid: :undefined,
-    shutdown: :undefined,
-    timer: :undefined
-  )
-
+  Record.defrecord(:r_child, :child, pid: :undefined,
+                                 streamid: :undefined, shutdown: :undefined,
+                                 timer: :undefined)
   def init() do
     []
   end
 
   def up(children, pid, streamID, shutdown) do
-    [
-      r_child(pid: pid, streamid: streamID, shutdown: shutdown)
-      | children
-    ]
+    [r_child(pid: pid, streamid: streamID, shutdown: shutdown) |
+         children]
   end
 
   def down(children0, pid) do
-    case :lists.keytake(pid, r_child(:pid), children0) do
+    case (:lists.keytake(pid, r_child(:pid), children0)) do
       {:value, r_child(streamid: streamID, timer: ref), children} ->
-        _ =
-          case ref do
-            :undefined ->
-              :ok
-
-            _ ->
-              :erlang.cancel_timer(
-                ref,
-                [{:async, true}, {:info, false}]
-              )
-          end
-
+        _ = (case (ref) do
+               :undefined ->
+                 :ok
+               _ ->
+                 :erlang.cancel_timer(ref,
+                                        [{:async, true}, {:info, false}])
+             end)
         {:ok, streamID, children}
-
       false ->
         :error
     end
@@ -44,12 +31,12 @@ defmodule :cowboy_children do
 
   def shutdown(children0, streamID) do
     for child <- children0 do
-      case child do
+      case (child) do
         r_child(pid: pid, streamid: ^streamID, shutdown: shutdown) ->
           :erlang.exit(pid, :shutdown)
-          ref = :erlang.start_timer(shutdown, self(), {:shutdown, pid})
-          r_child(child, streamid: :undefined, timer: ref)
-
+          ref = :erlang.start_timer(shutdown, self(),
+                                      {:shutdown, pid})
+          r_child(child, streamid: :undefined,  timer: ref)
         _ ->
           child
       end
@@ -57,31 +44,25 @@ defmodule :cowboy_children do
   end
 
   def shutdown_timeout(children, ref, pid) do
-    case :lists.keyfind(pid, r_child(:pid), children) do
+    case (:lists.keyfind(pid, r_child(:pid), children)) do
       r_child(timer: ^ref) ->
         :erlang.exit(pid, :kill)
         :ok
-
       _ ->
         :ok
     end
   end
 
   def terminate(children) do
-    _ =
-      for r_child(pid: pid, timer: tRef) <- children do
-        case tRef do
-          :undefined ->
-            :erlang.exit(pid, :shutdown)
-
-          _ ->
-            :erlang.cancel_timer(
-              tRef,
-              [{:async, true}, {:info, false}]
-            )
-        end
-      end
-
+    _ = (for r_child(pid: pid, timer: tRef) <- children do
+           case (tRef) do
+             :undefined ->
+               :erlang.exit(pid, :shutdown)
+             _ ->
+               :erlang.cancel_timer(tRef,
+                                      [{:async, true}, {:info, false}])
+           end
+         end)
     before_terminate_loop(children)
   end
 
@@ -91,31 +72,22 @@ defmodule :cowboy_children do
 
   defp before_terminate_loop(children) do
     time = longest_shutdown_time(children, 0)
-
-    tRef =
-      case time do
-        :infinity ->
-          :undefined
-
-        _ ->
-          :erlang.start_timer(time, self(), :terminate)
-      end
-
+    tRef = (case (time) do
+              :infinity ->
+                :undefined
+              _ ->
+                :erlang.start_timer(time, self(), :terminate)
+            end)
     terminate_loop(children, tRef)
   end
 
   defp terminate_loop([], tRef) do
-    case tRef do
+    case (tRef) do
       :undefined ->
         :ok
-
       _ ->
-        _ =
-          :erlang.cancel_timer(
-            tRef,
-            [{:async, true}, {:info, false}]
-          )
-
+        _ = :erlang.cancel_timer(tRef,
+                                   [{:async, true}, {:info, false}])
         :ok
     end
   end
@@ -123,29 +95,21 @@ defmodule :cowboy_children do
   defp terminate_loop(children, tRef) do
     receive do
       {:EXIT, pid, _} when tRef === :undefined ->
-        {:value, r_child(shutdown: shutdown), children1} =
-          :lists.keytake(pid, r_child(:pid), children)
-
-        case shutdown do
+        {:value, r_child(shutdown: shutdown),
+           children1} = :lists.keytake(pid, r_child(:pid), children)
+        case (shutdown) do
           :infinity ->
             before_terminate_loop(children1)
-
           _ ->
             terminate_loop(children1, tRef)
         end
-
       {:EXIT, pid, _} ->
-        terminate_loop(
-          :lists.keydelete(pid, r_child(:pid), children),
-          tRef
-        )
-
+        terminate_loop(:lists.keydelete(pid, r_child(:pid), children),
+                         tRef)
       {:timeout, ^tRef, :terminate} ->
-        _ =
-          for r_child(pid: pid) <- children do
-            :erlang.exit(pid, :kill)
-          end
-
+        _ = (for r_child(pid: pid) <- children do
+               :erlang.exit(pid, :kill)
+             end)
         :ok
     end
   end
@@ -155,7 +119,7 @@ defmodule :cowboy_children do
   end
 
   defp longest_shutdown_time([r_child(shutdown: childTime) | tail], time)
-       when childTime > time do
+      when childTime > time do
     longest_shutdown_time(tail, childTime)
   end
 
@@ -163,7 +127,8 @@ defmodule :cowboy_children do
     longest_shutdown_time(tail, time)
   end
 
-  def handle_supervisor_call(:which_children, {from, tag}, children, module) do
+  def handle_supervisor_call(:which_children, {from, tag}, children,
+           module) do
     send(from, {tag, which_children(children, module)})
     :ok
   end
@@ -191,6 +156,8 @@ defmodule :cowboy_children do
 
   defp count_children(children) do
     count = length(children)
-    [{:specs, 1}, {:active, count}, {:supervisors, 0}, {:workers, count}]
+    [{:specs, 1}, {:active, count}, {:supervisors, 0},
+                                        {:workers, count}]
   end
+
 end

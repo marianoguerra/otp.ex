@@ -211,7 +211,7 @@ defmodule :cow_multipart do
 
   def boundary() do
     :cow_base64url.encode(:crypto.strong_rand_bytes(48),
-                            %{:padding => false})
+                            %{padding: false})
   end
 
   def first_part(boundary, headers) do
@@ -227,7 +227,7 @@ defmodule :cow_multipart do
   end
 
   defp headers_to_iolist([{n, v} | tail], acc) do
-    headers_to_iolist(tail, [["\r\n", v, ": ", n] | acc])
+    headers_to_iolist(tail, ["\r\n", v, ": ", n | acc])
   end
 
   def close(boundary) do

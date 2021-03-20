@@ -2,10 +2,11 @@ defmodule :cowboy_clock do
   use Bitwise
   @behaviour :gen_server
   require Record
-  Record.defrecord(:r_state, :state, universaltime: :undefined, rfc1123: <<>>, tref: :undefined)
-
+  Record.defrecord(:r_state, :state, universaltime: :undefined,
+                                 rfc1123: <<>>, tref: :undefined)
   def start_link() do
-    :gen_server.start_link({:local, :cowboy_clock}, :cowboy_clock, [], [])
+    :gen_server.start_link({:local, :cowboy_clock},
+                             :cowboy_clock, [], [])
   end
 
   def stop() do
@@ -26,12 +27,10 @@ defmodule :cowboy_clock do
   end
 
   def init([]) do
-    :cowboy_clock =
-      :ets.new(
-        :cowboy_clock,
-        [:set, :protected, :named_table, {:read_concurrency, true}]
-      )
-
+    :cowboy_clock = :ets.new(:cowboy_clock,
+                               [:set, :protected, :named_table,
+                                                      {:read_concurrency,
+                                                         true}])
     t = :erlang.universaltime()
     b = update_rfc1123(<<>>, :undefined, t)
     tRef = :erlang.send_after(1000, self(), :update)
@@ -51,10 +50,8 @@ defmodule :cowboy_clock do
     {:noreply, state}
   end
 
-  def handle_info(
-        :update,
-        r_state(universaltime: prev, rfc1123: b1, tref: tRef0)
-      ) do
+  def handle_info(:update,
+           r_state(universaltime: prev, rfc1123: b1, tref: tRef0)) do
     _ = :erlang.cancel_timer(tRef0)
     t = :erlang.universaltime()
     b2 = update_rfc1123(b1, prev, t)
@@ -79,46 +76,49 @@ defmodule :cowboy_clock do
     bin
   end
 
-  defp update_rfc1123(<<keep::size(23)-binary, _::bits>>, {date, {h, m, _}}, {date, {h, m, s}}) do
-    <<keep::binary, pad_int(s)::binary, " GMT">>
+  defp update_rfc1123(<<keep :: size(23) - binary, _ :: bits>>,
+            {date, {h, m, _}}, {date, {h, m, s}}) do
+    <<keep :: binary, pad_int(s) :: binary, " GMT">>
   end
 
-  defp update_rfc1123(<<keep::size(20)-binary, _::bits>>, {date, {h, _, _}}, {date, {h, m, s}}) do
-    <<keep::binary, pad_int(m)::binary, ?:, pad_int(s)::binary, " GMT">>
+  defp update_rfc1123(<<keep :: size(20) - binary, _ :: bits>>,
+            {date, {h, _, _}}, {date, {h, m, s}}) do
+    <<keep :: binary, pad_int(m) :: binary, ?:,
+        pad_int(s) :: binary, " GMT">>
   end
 
-  defp update_rfc1123(<<keep::size(17)-binary, _::bits>>, {date, _}, {date, {h, m, s}}) do
-    <<keep::binary, pad_int(h)::binary, ?:, pad_int(m)::binary, ?:, pad_int(s)::binary, " GMT">>
+  defp update_rfc1123(<<keep :: size(17) - binary, _ :: bits>>,
+            {date, _}, {date, {h, m, s}}) do
+    <<keep :: binary, pad_int(h) :: binary, ?:,
+        pad_int(m) :: binary, ?:, pad_int(s) :: binary, " GMT">>
   end
 
-  defp update_rfc1123(
-         <<_::size(7)-binary, keep::size(10)-binary, _::bits>>,
-         {{y, mo, _}, _},
-         {date = {y, mo, d}, {h, m, s}}
-       ) do
+  defp update_rfc1123(<<_ :: size(7) - binary,
+              keep :: size(10) - binary, _ :: bits>>,
+            {{y, mo, _}, _}, {date = {y, mo, d}, {h, m, s}}) do
     wday = :calendar.day_of_the_week(date)
-
-    <<weekday(wday)::binary, ", ", pad_int(d)::binary, keep::binary, pad_int(h)::binary, ?:,
-      pad_int(m)::binary, ?:, pad_int(s)::binary, " GMT">>
+    <<weekday(wday) :: binary, ", ", pad_int(d) :: binary,
+        keep :: binary, pad_int(h) :: binary, ?:,
+        pad_int(m) :: binary, ?:, pad_int(s) :: binary, " GMT">>
   end
 
-  defp update_rfc1123(
-         <<_::size(11)-binary, keep::size(6)-binary, _::bits>>,
-         {{y, _, _}, _},
-         {date = {y, mo, d}, {h, m, s}}
-       ) do
+  defp update_rfc1123(<<_ :: size(11) - binary,
+              keep :: size(6) - binary, _ :: bits>>,
+            {{y, _, _}, _}, {date = {y, mo, d}, {h, m, s}}) do
     wday = :calendar.day_of_the_week(date)
-
-    <<weekday(wday)::binary, ", ", pad_int(d)::binary, " ", month(mo)::binary, keep::binary,
-      pad_int(h)::binary, ?:, pad_int(m)::binary, ?:, pad_int(s)::binary, " GMT">>
+    <<weekday(wday) :: binary, ", ", pad_int(d) :: binary, " ",
+        month(mo) :: binary, keep :: binary,
+        pad_int(h) :: binary, ?:, pad_int(m) :: binary, ?:,
+        pad_int(s) :: binary, " GMT">>
   end
 
   defp update_rfc1123(_, _, {date = {y, mo, d}, {h, m, s}}) do
     wday = :calendar.day_of_the_week(date)
-
-    <<weekday(wday)::binary, ", ", pad_int(d)::binary, " ", month(mo)::binary, " ",
-      :erlang.integer_to_binary(y)::binary, " ", pad_int(h)::binary, ?:, pad_int(m)::binary, ?:,
-      pad_int(s)::binary, " GMT">>
+    <<weekday(wday) :: binary, ", ", pad_int(d) :: binary, " ",
+        month(mo) :: binary, " ",
+        :erlang.integer_to_binary(y) :: binary, " ",
+        pad_int(h) :: binary, ?:, pad_int(m) :: binary, ?:,
+        pad_int(s) :: binary, " GMT">>
   end
 
   defp pad_int(x) when x < 10 do
@@ -204,4 +204,5 @@ defmodule :cowboy_clock do
   defp month(12) do
     "Dec"
   end
+
 end

@@ -1,81 +1,70 @@
 defmodule :cowboy_req do
   use Bitwise
-
-  def method(%{:method => method}) do
+  def method(%{method: method}) do
     method
   end
 
-  def version(%{:version => version}) do
+  def version(%{version: version}) do
     version
   end
 
-  def peer(%{:peer => peer}) do
+  def peer(%{peer: peer}) do
     peer
   end
 
-  def sock(%{:sock => sock}) do
+  def sock(%{sock: sock}) do
     sock
   end
 
-  def cert(%{:cert => cert}) do
+  def cert(%{cert: cert}) do
     cert
   end
 
-  def scheme(%{:scheme => scheme}) do
+  def scheme(%{scheme: scheme}) do
     scheme
   end
 
-  def host(%{:host => host}) do
+  def host(%{host: host}) do
     host
   end
 
-  def host_info(%{:host_info => hostInfo}) do
+  def host_info(%{host_info: hostInfo}) do
     hostInfo
   end
 
-  def port(%{:port => port}) do
+  def port(%{port: port}) do
     port
   end
 
-  def path(%{:path => path}) do
+  def path(%{path: path}) do
     path
   end
 
-  def path_info(%{:path_info => pathInfo}) do
+  def path_info(%{path_info: pathInfo}) do
     pathInfo
   end
 
-  def qs(%{:qs => qs}) do
+  def qs(%{qs: qs}) do
     qs
   end
 
-  def parse_qs(%{:qs => qs}) do
+  def parse_qs(%{qs: qs}) do
     try do
       :cow_qs.parse_qs(qs)
     catch
       _, _ ->
-        :erlang.raise(
-          :exit,
-          {:request_error, :qs,
-           :"Malformed query string; application/x-www-form-urlencoded expected."},
-          __STACKTRACE__
-        )
+        :erlang.raise(:exit, {:request_error, :qs, :"Malformed query string; application/x-www-form-urlencoded expected."},
+                        __STACKTRACE__)
     end
   end
 
   def match_qs(fields, req) do
-    case filter(
-           fields,
-           kvlist_to_map(fields, parse_qs(req))
-         ) do
+    case (filter(fields,
+                   kvlist_to_map(fields, parse_qs(req)))) do
       {:ok, map} ->
         map
-
       {:error, errors} ->
-        exit(
-          {:request_error, {:match_qs, errors},
-           :"Query string validation constraints failed for the reasons provided."}
-        )
+        exit({:request_error, {:match_qs, errors}, :"Query string validation constraints failed for the reasons provided."})
     end
   end
 
@@ -83,33 +72,27 @@ defmodule :cowboy_req do
     uri(req, %{})
   end
 
-  def uri(
-        %{:scheme => scheme0, :host => host0, :port => port0, :path => path0, :qs => qs0},
-        opts
-      ) do
-    scheme =
-      case :maps.get(:scheme, opts, scheme0) do
-        s = :undefined ->
-          s
-
-        s ->
-          :erlang.iolist_to_binary(s)
-      end
-
+  def uri(%{scheme: scheme0, host: host0, port: port0,
+             path: path0, qs: qs0},
+           opts) do
+    scheme = (case (:maps.get(:scheme, opts, scheme0)) do
+                s = :undefined ->
+                  s
+                s ->
+                  :erlang.iolist_to_binary(s)
+              end)
     host = :maps.get(:host, opts, host0)
     port = :maps.get(:port, opts, port0)
-
-    {path, qs} =
-      case :maps.get(:path, opts, path0) do
-        "*" ->
-          {<<>>, <<>>}
-
-        p ->
-          {p, :maps.get(:qs, opts, qs0)}
-      end
-
+    {path, qs} = (case (:maps.get(:path, opts, path0)) do
+                    "*" ->
+                      {<<>>, <<>>}
+                    p ->
+                      {p, :maps.get(:qs, opts, qs0)}
+                  end)
     fragment = :maps.get(:fragment, opts, :undefined)
-    [uri_host(scheme, scheme0, port, host), uri_path(path), uri_qs(qs), uri_fragment(fragment)]
+    [uri_host(scheme, scheme0, port, host), uri_path(path),
+                                                uri_qs(qs),
+                                                    uri_fragment(fragment)]
   end
 
   defp uri_host(_, _, _, :undefined) do
@@ -117,12 +100,12 @@ defmodule :cowboy_req do
   end
 
   defp uri_host(scheme, scheme0, port, host) do
-    case :erlang.iolist_size(host) do
+    case (:erlang.iolist_size(host)) do
       0 ->
         <<>>
-
       _ ->
-        [uri_scheme(scheme), "//", host, uri_port(scheme, scheme0, port)]
+        [uri_scheme(scheme), "//", host, uri_port(scheme, scheme0,
+                                                 port)]
     end
   end
 
@@ -131,10 +114,9 @@ defmodule :cowboy_req do
   end
 
   defp uri_scheme(scheme) do
-    case :erlang.iolist_size(scheme) do
+    case (:erlang.iolist_size(scheme)) do
       0 ->
         scheme
-
       _ ->
         [scheme, ?:]
     end
@@ -177,10 +159,9 @@ defmodule :cowboy_req do
   end
 
   defp uri_qs(qs) do
-    case :erlang.iolist_size(qs) do
+    case (:erlang.iolist_size(qs)) do
       0 ->
         qs
-
       _ ->
         [??, qs]
     end
@@ -191,10 +172,9 @@ defmodule :cowboy_req do
   end
 
   defp uri_fragment(fragment) do
-    case :erlang.iolist_size(fragment) do
+    case (:erlang.iolist_size(fragment)) do
       0 ->
         fragment
-
       _ ->
         [?#, fragment]
     end
@@ -204,12 +184,11 @@ defmodule :cowboy_req do
     binding(name, req, :undefined)
   end
 
-  def binding(name, %{:bindings => bindings}, default)
+  def binding(name, %{bindings: bindings}, default)
       when is_atom(name) do
-    case bindings do
+    case (bindings) do
       %{^name => value} ->
         value
-
       _ ->
         default
     end
@@ -219,7 +198,7 @@ defmodule :cowboy_req do
     default
   end
 
-  def bindings(%{:bindings => bindings}) do
+  def bindings(%{bindings: bindings}) do
     bindings
   end
 
@@ -231,11 +210,11 @@ defmodule :cowboy_req do
     header(name, req, :undefined)
   end
 
-  def header(name, %{:headers => headers}, default) do
+  def header(name, %{headers: headers}, default) do
     :maps.get(name, headers, default)
   end
 
-  def headers(%{:headers => headers}) do
+  def headers(%{headers: headers}) do
     headers
   end
 
@@ -256,12 +235,8 @@ defmodule :cowboy_req do
       parse_header(name, req, default, parse_header_fun(name))
     catch
       _, _ ->
-        :erlang.raise(
-          :exit,
-          {:request_error, {:header, name},
-           :"Malformed header. Please consult the relevant specification."},
-          __STACKTRACE__
-        )
+        :erlang.raise(:exit,
+                        {:request_error, {:header, name}, :"Malformed header. Please consult the relevant specification."}, __STACKTRACE__)
     end
   end
 
@@ -382,59 +357,43 @@ defmodule :cowboy_req do
   end
 
   defp parse_header(name, req, default, parseFun) do
-    case header(name, req) do
+    case (header(name, req)) do
       :undefined ->
         default
-
       value ->
         parseFun.(value)
     end
   end
 
-  def filter_cookies(names0, req = %{:headers => headers}) do
-    names =
-      for n <- names0 do
-        cond do
-          is_atom(n) ->
-            :erlang.atom_to_binary(n, :utf8)
-
-          true ->
-            n
-        end
-      end
-
-    case header("cookie", req) do
+  def filter_cookies(names0, req = %{headers: headers}) do
+    names = (for n <- names0 do
+               cond do
+                 is_atom(n) ->
+                   :erlang.atom_to_binary(n, :utf8)
+                 true ->
+                   n
+               end
+             end)
+    case (header("cookie", req)) do
       :undefined ->
         req
-
       value0 ->
         cookies0 = :binary.split(value0, <<?;>>)
-
-        cookies =
-          :lists.filter(
-            fn cookie ->
-              :lists.member(cookie_name(cookie), names)
-            end,
-            cookies0
-          )
-
-        value =
-          :erlang.iolist_to_binary(
-            :lists.join(
-              ?;,
-              cookies
-            )
-          )
-
-        %{req | :headers => %{headers | "cookie" => value}}
+        cookies = :lists.filter(fn cookie ->
+                                     :lists.member(cookie_name(cookie), names)
+                                end,
+                                  cookies0)
+        value = :erlang.iolist_to_binary(:lists.join(?;,
+                                                       cookies))
+        Map.put(req, :headers, Map.put(headers, "cookie", value))
     end
   end
 
-  defp cookie_name(<<?\s, rest::binary>>) do
+  defp cookie_name(<<?\s, rest :: binary>>) do
     cookie_name(rest)
   end
 
-  defp cookie_name(<<?\t, rest::binary>>) do
+  defp cookie_name(<<?\t, rest :: binary>>) do
     cookie_name(rest)
   end
 
@@ -446,12 +405,12 @@ defmodule :cowboy_req do
     name
   end
 
-  defp cookie_name(<<?=, _::bits>>, name) do
+  defp cookie_name(<<?=, _ :: bits>>, name) do
     name
   end
 
-  defp cookie_name(<<c, rest::bits>>, acc) do
-    cookie_name(rest, <<acc::binary, c>>)
+  defp cookie_name(<<c, rest :: bits>>, acc) do
+    cookie_name(rest, <<acc :: binary, c>>)
   end
 
   def parse_cookies(req) do
@@ -459,26 +418,20 @@ defmodule :cowboy_req do
   end
 
   def match_cookies(fields, req) do
-    case filter(
-           fields,
-           kvlist_to_map(fields, parse_cookies(req))
-         ) do
+    case (filter(fields,
+                   kvlist_to_map(fields, parse_cookies(req)))) do
       {:ok, map} ->
         map
-
       {:error, errors} ->
-        exit(
-          {:request_error, {:match_cookies, errors},
-           :"Cookie validation constraints failed for the reasons provided."}
-        )
+        exit({:request_error, {:match_cookies, errors}, :"Cookie validation constraints failed for the reasons provided."})
     end
   end
 
-  def has_body(%{:has_body => hasBody}) do
+  def has_body(%{has_body: hasBody}) do
     hasBody
   end
 
-  def body_length(%{:body_length => length}) do
+  def body_length(%{body_length: length}) do
     length
   end
 
@@ -486,143 +439,119 @@ defmodule :cowboy_req do
     read_body(req, %{})
   end
 
-  def read_body(req = %{:has_body => false}, _) do
+  def read_body(req = %{has_body: false}, _) do
     {:ok, <<>>, req}
   end
 
-  def read_body(req = %{:has_read_body => true}, _) do
+  def read_body(req = %{has_read_body: true}, _) do
     {:ok, <<>>, req}
   end
 
   def read_body(req, opts) do
-    length = :maps.get(:length, opts, 8_000_000)
+    length = :maps.get(:length, opts, 8000000)
     period = :maps.get(:period, opts, 15000)
     timeout = :maps.get(:timeout, opts, period + 1000)
     ref = make_ref()
     cast({:read_body, self(), ref, length, period}, req)
-
     receive do
       {:request_body, ^ref, :nofin, body} ->
         {:more, body, req}
-
       {:request_body, ^ref, :fin, bodyLength, body} ->
         {:ok, body, set_body_length(req, bodyLength)}
-    after
-      timeout ->
-        exit(:timeout)
+    after timeout ->
+      exit(:timeout)
     end
   end
 
-  defp set_body_length(req = %{:headers => headers}, bodyLength) do
-    %{
-      req
-      | :headers => %{headers | "content-length" => :erlang.integer_to_binary(bodyLength)},
-        :body_length => bodyLength,
-        :has_read_body => true
-    }
+  defp set_body_length(req = %{headers: headers}, bodyLength) do
+    Map.merge(req, %{headers:
+                     Map.put(headers, "content-length",
+                                        :erlang.integer_to_binary(bodyLength)),
+                       body_length: bodyLength, has_read_body: true})
   end
 
   def read_urlencoded_body(req) do
-    read_urlencoded_body(
-      req,
-      %{:length => 64000, :period => 5000}
-    )
+    read_urlencoded_body(req,
+                           %{length: 64000, period: 5000})
   end
 
   def read_urlencoded_body(req0, opts) do
-    case read_body(req0, opts) do
+    case (read_body(req0, opts)) do
       {:ok, body, req} ->
         try do
           {:ok, :cow_qs.parse_qs(body), req}
         catch
           _, _ ->
-            :erlang.raise(
-              :exit,
-              {:request_error, :urlencoded_body,
-               :"Malformed body; application/x-www-form-urlencoded expected."},
-              __STACKTRACE__
-            )
+            :erlang.raise(:exit,
+                            {:request_error, :urlencoded_body, :"Malformed body; application/x-www-form-urlencoded expected."},
+                            __STACKTRACE__)
         end
-
       {:more, body, _} ->
         length = :maps.get(:length, opts, 64000)
-
         cond do
           byte_size(body) < length ->
-            exit(
-              {:request_error, :timeout,
-               :"The request body was not received within the configured time."}
-            )
-
+            exit({:request_error, :timeout, :"The request body was not received within the configured time."})
           true ->
-            exit(
-              {:request_error, :payload_too_large,
-               :"The request body is larger than allowed by configuration."}
-            )
+            exit({:request_error, :payload_too_large, :"The request body is larger than allowed by configuration."})
         end
     end
   end
 
   def read_and_match_urlencoded_body(fields, req) do
-    read_and_match_urlencoded_body(fields, req, %{:length => 64000, :period => 5000})
+    read_and_match_urlencoded_body(fields, req,
+                                     %{length: 64000, period: 5000})
   end
 
   def read_and_match_urlencoded_body(fields, req0, opts) do
     {:ok, qs, req} = read_urlencoded_body(req0, opts)
-
-    case filter(fields, kvlist_to_map(fields, qs)) do
+    case (filter(fields, kvlist_to_map(fields, qs))) do
       {:ok, map} ->
         {:ok, map, req}
-
       {:error, errors} ->
-        exit(
-          {:request_error, {:read_and_match_urlencoded_body, errors},
-           :"Urlencoded request body validation constraints failed for the reasons provided."}
-        )
+        exit({:request_error,
+                {:read_and_match_urlencoded_body, errors}, :"Urlencoded request body validation constraints failed for the reasons provided."})
     end
   end
 
   def read_part(req) do
-    read_part(req, %{:length => 64000, :period => 5000})
+    read_part(req, %{length: 64000, period: 5000})
   end
 
   def read_part(req, opts) do
-    case :maps.is_key(:multipart, req) do
+    case (:maps.is_key(:multipart, req)) do
       true ->
         {data, req2} = stream_multipart(req, opts, :headers)
         read_part(data, opts, req2)
-
       false ->
         read_part(init_multipart(req), opts)
     end
   end
 
-  defp read_part(buffer, opts, req = %{:multipart => {boundary, _}}) do
+  defp read_part(buffer, opts,
+            req = %{multipart: {boundary, _}}) do
     try do
       :cow_multipart.parse_headers(buffer, boundary)
     catch
       _, _ ->
-        :erlang.raise(
-          :exit,
-          {:request_error, {:multipart, :headers}, :"Malformed body; multipart expected."},
-          __STACKTRACE__
-        )
+        :erlang.raise(:exit,
+                        {:request_error, {:multipart, :headers}, :"Malformed body; multipart expected."},
+                        __STACKTRACE__)
     else
       :more ->
         {data, req2} = stream_multipart(req, opts, :headers)
-        read_part(<<buffer::binary, data::binary>>, opts, req2)
-
+        read_part(<<buffer :: binary, data :: binary>>, opts,
+                    req2)
       {:more, buffer2} ->
         {data, req2} = stream_multipart(req, opts, :headers)
-        read_part(<<buffer2::binary, data::binary>>, opts, req2)
-
+        read_part(<<buffer2 :: binary, data :: binary>>, opts,
+                    req2)
       {:ok, headers0, rest} ->
         headers = :maps.from_list(headers0)
         true = map_size(headers) === length(headers0)
-        {:ok, headers, %{req | :multipart => {boundary, rest}}}
-
+        {:ok, headers,
+           Map.put(req, :multipart, {boundary, rest})}
       {:done, _} ->
-        {:done, %{req | :multipart => :done}}
+        {:done, Map.put(req, :multipart, :done)}
     end
   end
 
@@ -631,81 +560,70 @@ defmodule :cowboy_req do
   end
 
   def read_part_body(req, opts) do
-    case :maps.is_key(:multipart, req) do
+    case (:maps.is_key(:multipart, req)) do
       true ->
         read_part_body(<<>>, opts, req, <<>>)
-
       false ->
         read_part_body(init_multipart(req), opts)
     end
   end
 
-  defp read_part_body(buffer, opts, req = %{:multipart => {boundary, _}}, acc) do
-    length = :maps.get(:length, opts, 8_000_000)
-
-    case byte_size(acc) > length do
+  defp read_part_body(buffer, opts, req = %{multipart: {boundary, _}},
+            acc) do
+    length = :maps.get(:length, opts, 8000000)
+    case (byte_size(acc) > length) do
       true ->
-        {:more, acc, %{req | :multipart => {boundary, buffer}}}
-
+        {:more, acc,
+           Map.put(req, :multipart, {boundary, buffer})}
       false ->
         {data, req2} = stream_multipart(req, opts, :body)
-
-        case :cow_multipart.parse_body(
-               <<buffer::binary, data::binary>>,
-               boundary
-             ) do
+        case (:cow_multipart.parse_body(<<buffer :: binary,
+                                            data :: binary>>,
+                                          boundary)) do
           {:ok, body} ->
-            read_part_body(<<>>, opts, req2, <<acc::binary, body::binary>>)
-
+            read_part_body(<<>>, opts, req2,
+                             <<acc :: binary, body :: binary>>)
           {:ok, body, rest} ->
-            read_part_body(rest, opts, req2, <<acc::binary, body::binary>>)
-
+            read_part_body(rest, opts, req2,
+                             <<acc :: binary, body :: binary>>)
           :done ->
             {:ok, acc, req2}
-
           {:done, body} ->
-            {:ok, <<acc::binary, body::binary>>, req2}
-
+            {:ok, <<acc :: binary, body :: binary>>, req2}
           {:done, body, rest} ->
-            {:ok, <<acc::binary, body::binary>>, %{req2 | :multipart => {boundary, rest}}}
+            {:ok, <<acc :: binary, body :: binary>>,
+               Map.put(req2, :multipart, {boundary, rest})}
         end
     end
   end
 
   defp init_multipart(req) do
     {"multipart", _, params} = parse_header("content-type", req)
-
-    case :lists.keyfind("boundary", 1, params) do
+    case (:lists.keyfind("boundary", 1, params)) do
       {_, boundary} ->
-        %{req | :multipart => {boundary, <<>>}}
-
+        Map.put(req, :multipart, {boundary, <<>>})
       false ->
-        exit(
-          {:request_error, {:multipart, :boundary},
-           :"Missing boundary parameter for multipart media type."}
-        )
+        exit({:request_error, {:multipart, :boundary}, :"Missing boundary parameter for multipart media type."})
     end
   end
 
-  defp stream_multipart(req = %{:multipart => :done}, _, _) do
+  defp stream_multipart(req = %{multipart: :done}, _, _) do
     {<<>>, req}
   end
 
-  defp stream_multipart(req = %{:multipart => {_, <<>>}}, opts, type) do
-    case read_body(req, opts) do
+  defp stream_multipart(req = %{multipart: {_, <<>>}}, opts, type) do
+    case (read_body(req, opts)) do
       {:more, data, req2} ->
         {data, req2}
-
       {:ok, <<>>, _} ->
         exit({:request_error, {:multipart, type}, :"Malformed body; multipart expected."})
-
       {:ok, data, req2} ->
         {data, req2}
     end
   end
 
-  defp stream_multipart(req = %{:multipart => {boundary, buffer}}, _, _) do
-    {buffer, %{req | :multipart => {boundary, <<>>}}}
+  defp stream_multipart(req = %{multipart: {boundary, buffer}}, _, _) do
+    {buffer, Map.put(req, :multipart, {boundary, <<>>})}
   end
 
   def set_resp_cookie(name, value, req) do
@@ -715,33 +633,34 @@ defmodule :cowboy_req do
   def set_resp_cookie(name, value, req, opts) do
     cookie = :cow_cookie.setcookie(name, value, opts)
     respCookies = :maps.get(:resp_cookies, req, %{})
-    %{req | :resp_cookies => %{respCookies | name => cookie}}
+    Map.put(req, :resp_cookies,
+                   Map.put(respCookies, name, cookie))
   end
 
-  def set_resp_header(name, value, req = %{:resp_headers => respHeaders}) do
-    %{req | :resp_headers => %{respHeaders | name => value}}
+  def set_resp_header(name, value,
+           req = %{resp_headers: respHeaders}) do
+    Map.put(req, :resp_headers,
+                   Map.put(respHeaders, name, value))
   end
 
   def set_resp_header(name, value, req) do
-    %{req | :resp_headers => %{name => value}}
+    Map.put(req, :resp_headers, %{name => value})
   end
 
-  def set_resp_headers(
-        headers,
-        req = %{:resp_headers => respHeaders}
-      ) do
-    %{req | :resp_headers => :maps.merge(respHeaders, headers)}
+  def set_resp_headers(headers, req = %{resp_headers: respHeaders}) do
+    Map.put(req, :resp_headers,
+                   :maps.merge(respHeaders, headers))
   end
 
   def set_resp_headers(headers, req) do
-    %{req | :resp_headers => headers}
+    Map.put(req, :resp_headers, headers)
   end
 
   def resp_header(name, req) do
     resp_header(name, req, :undefined)
   end
 
-  def resp_header(name, %{:resp_headers => headers}, default) do
+  def resp_header(name, %{resp_headers: headers}, default) do
     :maps.get(name, headers, default)
   end
 
@@ -749,7 +668,7 @@ defmodule :cowboy_req do
     default
   end
 
-  def resp_headers(%{:resp_headers => respHeaders}) do
+  def resp_headers(%{resp_headers: respHeaders}) do
     respHeaders
   end
 
@@ -758,10 +677,10 @@ defmodule :cowboy_req do
   end
 
   def set_resp_body(body, req) do
-    %{req | :resp_body => body}
+    Map.put(req, :resp_body, body)
   end
 
-  def has_resp_header(name, %{:resp_headers => respHeaders}) do
+  def has_resp_header(name, %{resp_headers: respHeaders}) do
     :maps.is_key(name, respHeaders)
   end
 
@@ -769,11 +688,11 @@ defmodule :cowboy_req do
     false
   end
 
-  def has_resp_body(%{:resp_body => {:sendfile, _, _, _}}) do
+  def has_resp_body(%{resp_body: {:sendfile, _, _, _}}) do
     true
   end
 
-  def has_resp_body(%{:resp_body => respBody}) do
+  def has_resp_body(%{resp_body: respBody}) do
     :erlang.iolist_size(respBody) > 0
   end
 
@@ -781,8 +700,9 @@ defmodule :cowboy_req do
     false
   end
 
-  def delete_resp_header(name, req = %{:resp_headers => respHeaders}) do
-    %{req | :resp_headers => :maps.remove(name, respHeaders)}
+  def delete_resp_header(name, req = %{resp_headers: respHeaders}) do
+    Map.put(req, :resp_headers,
+                   :maps.remove(name, respHeaders))
   end
 
   def delete_resp_header(_, req) do
@@ -793,13 +713,12 @@ defmodule :cowboy_req do
     inform(status, %{}, req)
   end
 
-  def inform(_, _, %{:has_sent_resp => _}) do
+  def inform(_, _, %{has_sent_resp: _}) do
     :erlang.error(:function_clause)
   end
 
-  def inform(status, headers, req)
-      when is_integer(status) or
-             is_binary(status) do
+  def inform(status, headers, req) when is_integer(status) or
+                                      is_binary(status) do
     cast({:inform, status, headers}, req)
   end
 
@@ -807,7 +726,7 @@ defmodule :cowboy_req do
     reply(status, %{}, req)
   end
 
-  def reply(status, headers, req = %{:resp_body => body}) do
+  def reply(status, headers, req = %{resp_body: body}) do
     reply(status, headers, body, req)
   end
 
@@ -815,23 +734,21 @@ defmodule :cowboy_req do
     reply(status, headers, <<>>, req)
   end
 
-  def reply(_, _, _, %{:has_sent_resp => _}) do
+  def reply(_, _, _, %{has_sent_resp: _}) do
     :erlang.error(:function_clause)
   end
 
   def reply(status, headers, {:sendfile, _, 0, _}, req)
       when is_integer(status) or is_binary(status) do
-    do_reply(status, %{headers | "content-length" => "0"}, <<>>, req)
+    do_reply(status, Map.put(headers, "content-length", "0"), <<>>, req)
   end
 
-  def reply(status, headers, sendFile = {:sendfile, _, len, _}, req)
+  def reply(status, headers,
+           sendFile = {:sendfile, _, len, _}, req)
       when is_integer(status) or is_binary(status) do
-    do_reply(
-      status,
-      %{headers | "content-length" => :erlang.integer_to_binary(len)},
-      sendFile,
-      req
-    )
+    do_reply(status,
+               Map.put(headers, "content-length", :erlang.integer_to_binary(len)),
+               sendFile, req)
   end
 
   def reply(status, headers, body, req)
@@ -840,56 +757,49 @@ defmodule :cowboy_req do
     do_reply(status, headers, body, req)
   end
 
-  def reply(status = <<"204", _::bits>>, headers, body, req) do
+  def reply(status = <<"204", _ :: bits>>, headers, body, req) do
     0 = :erlang.iolist_size(body)
     do_reply(status, headers, body, req)
   end
 
-  def reply(status = <<"304", _::bits>>, headers, body, req) do
+  def reply(status = <<"304", _ :: bits>>, headers, body, req) do
     0 = :erlang.iolist_size(body)
     do_reply(status, headers, body, req)
   end
 
   def reply(status, headers, body, req)
       when is_integer(status) or is_binary(status) do
-    do_reply(
-      status,
-      %{headers | "content-length" => :erlang.integer_to_binary(:erlang.iolist_size(body))},
-      body,
-      req
-    )
+    do_reply(status,
+               Map.put(headers, "content-length",
+                                  :erlang.integer_to_binary(:erlang.iolist_size(body))),
+               body, req)
   end
 
-  defp do_reply(status, headers, _, req = %{:method => "HEAD"}) do
-    cast(
-      {:response, status, response_headers(headers, req), <<>>},
-      req
-    )
-
+  defp do_reply(status, headers, _, req = %{method: "HEAD"}) do
+    cast({:response, status, response_headers(headers, req),
+            <<>>},
+           req)
     done_replying(req, true)
   end
 
   defp do_reply(status, headers, body, req) do
-    cast(
-      {:response, status, response_headers(headers, req), body},
-      req
-    )
-
+    cast({:response, status, response_headers(headers, req),
+            body},
+           req)
     done_replying(req, true)
   end
 
   defp done_replying(req, hasSentResp) do
-    :maps.without(
-      [:resp_cookies, :resp_headers, :resp_body],
-      %{req | :has_sent_resp => hasSentResp}
-    )
+    :maps.without([:resp_cookies, :resp_headers,
+                                      :resp_body],
+                    Map.put(req, :has_sent_resp, hasSentResp))
   end
 
   def stream_reply(status, req) do
     stream_reply(status, %{}, req)
   end
 
-  def stream_reply(_, _, %{:has_sent_resp => _}) do
+  def stream_reply(_, _, %{has_sent_resp: _}) do
     :erlang.error(:function_clause)
   end
 
@@ -897,7 +807,7 @@ defmodule :cowboy_req do
     reply(status, headers, <<>>, req)
   end
 
-  def stream_reply(status = <<"204", _::bits>>, headers = %{}, req) do
+  def stream_reply(status = <<"204", _ :: bits>>, headers = %{}, req) do
     reply(status, headers, <<>>, req)
   end
 
@@ -905,21 +815,18 @@ defmodule :cowboy_req do
     reply(status, headers, <<>>, req)
   end
 
-  def stream_reply(status = <<"304", _::bits>>, headers = %{}, req) do
+  def stream_reply(status = <<"304", _ :: bits>>, headers = %{}, req) do
     reply(status, headers, <<>>, req)
   end
 
   def stream_reply(status, headers = %{}, req)
       when is_integer(status) or is_binary(status) do
-    cast(
-      {:headers, status, response_headers(headers, req)},
-      req
-    )
-
+    cast({:headers, status, response_headers(headers, req)},
+           req)
     done_replying(req, :headers)
   end
 
-  def stream_body(_, _, %{:method => "HEAD", :has_sent_resp => :headers}) do
+  def stream_body(_, _, %{method: "HEAD", has_sent_resp: :headers}) do
     :ok
   end
 
@@ -927,38 +834,38 @@ defmodule :cowboy_req do
     :ok
   end
 
-  def stream_body({:sendfile, _, 0, _}, isFin = :fin, req = %{:has_sent_resp => :headers}) do
+  def stream_body({:sendfile, _, 0, _}, isFin = :fin,
+           req = %{has_sent_resp: :headers}) do
     stream_body({:data, self(), isFin, <<>>}, req)
   end
 
-  def stream_body({:sendfile, o, b, p}, isFin, req = %{:has_sent_resp => :headers})
-      when is_integer(o) and o >= 0 and is_integer(b) and
-             b > 0 do
-    stream_body(
-      {:data, self(), isFin, {:sendfile, o, b, p}},
-      req
-    )
+  def stream_body({:sendfile, o, b, p}, isFin,
+           req = %{has_sent_resp: :headers})
+      when (is_integer(o) and o >= 0 and is_integer(b) and
+              b > 0) do
+    stream_body({:data, self(), isFin,
+                   {:sendfile, o, b, p}},
+                  req)
   end
 
-  def stream_body(data, isFin = :nofin, req = %{:has_sent_resp => :headers})
+  def stream_body(data, isFin = :nofin,
+           req = %{has_sent_resp: :headers})
       when not is_tuple(data) do
-    case :erlang.iolist_size(data) do
+    case (:erlang.iolist_size(data)) do
       0 ->
         :ok
-
       _ ->
         stream_body({:data, self(), isFin, data}, req)
     end
   end
 
-  def stream_body(data, isFin, req = %{:has_sent_resp => :headers})
+  def stream_body(data, isFin, req = %{has_sent_resp: :headers})
       when not is_tuple(data) do
     stream_body({:data, self(), isFin, data}, req)
   end
 
-  defp stream_body(msg, req = %{:pid => pid}) do
+  defp stream_body(msg, req = %{pid: pid}) do
     cast(msg, req)
-
     receive do
       {:data_ack, ^pid} ->
         :ok
@@ -969,14 +876,14 @@ defmodule :cowboy_req do
     stream_events([event], isFin, req)
   end
 
-  def stream_events(events, isFin, req = %{:has_sent_resp => :headers}) do
-    stream_body(
-      {:data, self(), isFin, :cow_sse.events(events)},
-      req
-    )
+  def stream_events(events, isFin,
+           req = %{has_sent_resp: :headers}) do
+    stream_body({:data, self(), isFin,
+                   :cow_sse.events(events)},
+                  req)
   end
 
-  def stream_trailers(trailers, req = %{:has_sent_resp => :headers}) do
+  def stream_trailers(trailers, req = %{has_sent_resp: :headers}) do
     cast({:trailers, trailers}, req)
   end
 
@@ -984,57 +891,48 @@ defmodule :cowboy_req do
     push(path, headers, req, %{})
   end
 
-  def push(path, headers, req = %{:scheme => scheme0, :host => host0, :port => port0}, opts) do
+  def push(path, headers,
+           req = %{scheme: scheme0, host: host0, port: port0},
+           opts) do
     method = :maps.get(:method, opts, "GET")
     scheme = :maps.get(:scheme, opts, scheme0)
     host = :maps.get(:host, opts, host0)
     port = :maps.get(:port, opts, port0)
     qs = :maps.get(:qs, opts, <<>>)
-
-    cast(
-      {:push, method, scheme, host, port, path, qs, headers},
-      req
-    )
+    cast({:push, method, scheme, host, port, path, qs,
+            headers},
+           req)
   end
 
-  def cast(msg, %{:pid => pid, :streamid => streamID}) do
+  def cast(msg, %{pid: pid, streamid: streamID}) do
     send(pid, {{pid, streamID}, msg})
     :ok
   end
 
   def response_headers(headers0, req) do
     respHeaders = :maps.get(:resp_headers, req, %{})
-
-    headers =
-      :maps.merge(
-        %{"date" => :cowboy_clock.rfc1123(), "server" => "Cowboy"},
-        :maps.merge(respHeaders, headers0)
-      )
-
-    case :maps.get(:resp_cookies, req, :undefined) do
+    headers = :maps.merge(%{"date" => :cowboy_clock.rfc1123(),
+                              "server" => "Cowboy"},
+                            :maps.merge(respHeaders, headers0))
+    case (:maps.get(:resp_cookies, req, :undefined)) do
       :undefined ->
         headers
-
       respCookies ->
-        %{headers | "set-cookie" => :maps.values(respCookies)}
+        Map.put(headers, "set-cookie", :maps.values(respCookies))
     end
   end
 
   defp kvlist_to_map(fields, kvList) do
-    keys =
-      for k <- fields do
-        case k do
-          {key, _} ->
-            key
-
-          {key, _, _} ->
-            key
-
-          key ->
-            key
-        end
-      end
-
+    keys = (for k <- fields do
+              case (k) do
+                {key, _} ->
+                  key
+                {key, _, _} ->
+                  key
+                key ->
+                  key
+              end
+            end)
     kvlist_to_map(keys, kvList, %{})
   end
 
@@ -1050,19 +948,18 @@ defmodule :cowboy_req do
         kvlist_to_map(keys, tail, map)
     else
       atom ->
-        case :lists.member(atom, keys) do
+        case (:lists.member(atom, keys)) do
           true ->
-            case :maps.find(atom, map) do
+            case (:maps.find(atom, map)) do
               {:ok, mapValue} when is_list(mapValue) ->
-                kvlist_to_map(keys, tail, %{map | atom => [value | mapValue]})
-
+                kvlist_to_map(keys, tail,
+                                Map.put(map, atom, [value | mapValue]))
               {:ok, mapValue} ->
-                kvlist_to_map(keys, tail, %{map | atom => [value, mapValue]})
-
+                kvlist_to_map(keys, tail,
+                                Map.put(map, atom, [value, mapValue]))
               :error ->
-                kvlist_to_map(keys, tail, %{map | atom => value})
+                kvlist_to_map(keys, tail, Map.put(map, atom, value))
             end
-
           false ->
             kvlist_to_map(keys, tail, map)
         end
@@ -1074,49 +971,47 @@ defmodule :cowboy_req do
   end
 
   defp filter([], map, errors) do
-    case :maps.size(errors) do
+    case (:maps.size(errors)) do
       0 ->
         {:ok, map}
-
       _ ->
         {:error, errors}
     end
   end
 
   defp filter([{key, constraints} | tail], map, errors) do
-    filter_constraints(tail, map, errors, key, :maps.get(key, map), constraints)
+    filter_constraints(tail, map, errors, key,
+                         :maps.get(key, map), constraints)
   end
 
-  defp filter([{key, constraints, default} | tail], map, errors) do
-    case :maps.find(key, map) do
+  defp filter([{key, constraints, default} | tail], map,
+            errors) do
+    case (:maps.find(key, map)) do
       {:ok, value} ->
-        filter_constraints(tail, map, errors, key, value, constraints)
-
+        filter_constraints(tail, map, errors, key, value,
+                             constraints)
       :error ->
-        filter(tail, %{map | key => default}, errors)
+        filter(tail, Map.put(map, key, default), errors)
     end
   end
 
   defp filter([key | tail], map, errors) do
-    case :maps.is_key(key, map) do
+    case (:maps.is_key(key, map)) do
       true ->
         filter(tail, map, errors)
-
       false ->
-        filter(tail, map, %{errors | key => :required})
+        filter(tail, map, Map.put(errors, key, :required))
     end
   end
 
   defp filter_constraints(tail, map, errors, key, value0, constraints) do
-    case :cowboy_constraints.validate(
-           value0,
-           constraints
-         ) do
+    case (:cowboy_constraints.validate(value0,
+                                         constraints)) do
       {:ok, value} ->
-        filter(tail, %{map | key => value}, errors)
-
+        filter(tail, Map.put(map, key, value), errors)
       {:error, reason} ->
-        filter(tail, map, %{errors | key => reason})
+        filter(tail, map, Map.put(errors, key, reason))
     end
   end
+
 end

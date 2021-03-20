@@ -1,6 +1,5 @@
 defmodule :cowboy_bstr do
   use Bitwise
-
   def capitalize_token(b) do
     capitalize_token(b, true, <<>>)
   end
@@ -9,26 +8,28 @@ defmodule :cowboy_bstr do
     acc
   end
 
-  defp capitalize_token(<<?-, rest::bits>>, _, acc) do
-    capitalize_token(rest, true, <<acc::binary, ?->>)
+  defp capitalize_token(<<?-, rest :: bits>>, _, acc) do
+    capitalize_token(rest, true, <<acc :: binary, ?->>)
   end
 
-  defp capitalize_token(<<c, rest::bits>>, true, acc) do
-    capitalize_token(rest, false, <<acc::binary, char_to_upper(c)>>)
+  defp capitalize_token(<<c, rest :: bits>>, true, acc) do
+    capitalize_token(rest, false,
+                       <<acc :: binary, char_to_upper(c)>>)
   end
 
-  defp capitalize_token(<<c, rest::bits>>, false, acc) do
-    capitalize_token(rest, false, <<acc::binary, char_to_lower(c)>>)
+  defp capitalize_token(<<c, rest :: bits>>, false, acc) do
+    capitalize_token(rest, false,
+                       <<acc :: binary, char_to_lower(c)>>)
   end
 
   def to_lower(b) do
-    for <<(<<c>> <- b)>>, into: <<>> do
+    for << <<c>> <- b >>, into: <<>> do
       <<char_to_lower(c)>>
     end
   end
 
   def to_upper(b) do
-    for <<(<<c>> <- b)>>, into: <<>> do
+    for << <<c>> <- b >>, into: <<>> do
       <<char_to_upper(c)>>
     end
   end
@@ -248,4 +249,5 @@ defmodule :cowboy_bstr do
   def char_to_upper(ch) do
     ch
   end
+
 end

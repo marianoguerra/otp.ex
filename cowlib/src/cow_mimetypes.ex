@@ -1,22 +1,19 @@
 defmodule :cow_mimetypes do
   use Bitwise
-
   def all(path) do
-    case :filename.extension(path) do
+    case (:filename.extension(path)) do
       <<>> ->
         {"application", "octet-stream", []}
-
-      <<?., ext::binary>> ->
+      <<?., ext :: binary>> ->
         all_ext(:erlang.list_to_binary(:string.to_lower(:erlang.binary_to_list(ext))))
     end
   end
 
   def web(path) do
-    case :filename.extension(path) do
+    case (:filename.extension(path)) do
       <<>> ->
         {"application", "octet-stream", []}
-
-      <<?., ext::binary>> ->
+      <<?., ext :: binary>> ->
         web_ext(:erlang.list_to_binary(:string.to_lower(:erlang.binary_to_list(ext))))
     end
   end
@@ -4024,4 +4021,5 @@ defmodule :cow_mimetypes do
   defp web_ext(_) do
     {"application", "octet-stream", []}
   end
+
 end

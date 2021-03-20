@@ -1,6 +1,5 @@
 defmodule :cowboy_constraints do
   use Bitwise
-
   def validate(value, constraints) when is_list(constraints) do
     apply_list(:forward, value, constraints)
   end
@@ -18,7 +17,8 @@ defmodule :cowboy_constraints do
   end
 
   def format_error({constraint, reason, value}) do
-    apply_constraint(:format_error, {reason, value}, constraint)
+    apply_constraint(:format_error, {reason, value},
+                       constraint)
   end
 
   defp apply_list(_, value, []) do
@@ -26,10 +26,9 @@ defmodule :cowboy_constraints do
   end
 
   defp apply_list(type, value0, [constraint | tail]) do
-    case apply_constraint(type, value0, constraint) do
+    case (apply_constraint(type, value0, constraint)) do
       {:ok, value} ->
         apply_list(type, value, tail)
-
       {:error, reason} ->
         {:error, {constraint, reason, value0}}
     end
@@ -73,13 +72,13 @@ defmodule :cowboy_constraints do
     {:error, :empty}
   end
 
-  defp nonempty(type, value)
-       when type !== :format_error and
-              is_binary(value) do
+  defp nonempty(type, value) when (type !== :format_error and
+                               is_binary(value)) do
     {:ok, value}
   end
 
   defp nonempty(:format_error, {:empty, value}) do
     :io_lib.format('The value ~p is empty.', [value])
   end
+
 end

@@ -1,8 +1,7 @@
 defmodule :cow_date do
   use Bitwise
-
   def parse_date(dateBin) do
-    date = {{_, _, d}, {h, m, s}} = http_date(dateBin)
+    date = ({{_, _, d}, {h, m, s}} = http_date(dateBin))
     true = d >= 0 and d <= 31
     true = h >= 0 and h <= 23
     true = m >= 0 and m <= 59
@@ -10,280 +9,292 @@ defmodule :cow_date do
     date
   end
 
-  defp http_date(<<"Mon, ", d1, d2, " ", r::bits>>) do
+  defp http_date(<<"Mon, ", d1, d2, " ", r :: bits>>) do
     fixdate(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Tue, ", d1, d2, " ", r::bits>>) do
+  defp http_date(<<"Tue, ", d1, d2, " ", r :: bits>>) do
     fixdate(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Wed, ", d1, d2, " ", r::bits>>) do
+  defp http_date(<<"Wed, ", d1, d2, " ", r :: bits>>) do
     fixdate(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Thu, ", d1, d2, " ", r::bits>>) do
+  defp http_date(<<"Thu, ", d1, d2, " ", r :: bits>>) do
     fixdate(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Fri, ", d1, d2, " ", r::bits>>) do
+  defp http_date(<<"Fri, ", d1, d2, " ", r :: bits>>) do
     fixdate(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Sat, ", d1, d2, " ", r::bits>>) do
+  defp http_date(<<"Sat, ", d1, d2, " ", r :: bits>>) do
     fixdate(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Sun, ", d1, d2, " ", r::bits>>) do
+  defp http_date(<<"Sun, ", d1, d2, " ", r :: bits>>) do
     fixdate(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Monday, ", d1, d2, "-", r::bits>>) do
+  defp http_date(<<"Monday, ", d1, d2, "-", r :: bits>>) do
     rfc850_date(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Tuesday, ", d1, d2, "-", r::bits>>) do
+  defp http_date(<<"Tuesday, ", d1, d2, "-", r :: bits>>) do
     rfc850_date(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Wednesday, ", d1, d2, "-", r::bits>>) do
+  defp http_date(<<"Wednesday, ", d1, d2, "-", r :: bits>>) do
     rfc850_date(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Thursday, ", d1, d2, "-", r::bits>>) do
+  defp http_date(<<"Thursday, ", d1, d2, "-", r :: bits>>) do
     rfc850_date(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Friday, ", d1, d2, "-", r::bits>>) do
+  defp http_date(<<"Friday, ", d1, d2, "-", r :: bits>>) do
     rfc850_date(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Saturday, ", d1, d2, "-", r::bits>>) do
+  defp http_date(<<"Saturday, ", d1, d2, "-", r :: bits>>) do
     rfc850_date(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Sunday, ", d1, d2, "-", r::bits>>) do
+  defp http_date(<<"Sunday, ", d1, d2, "-", r :: bits>>) do
     rfc850_date(r, (d1 - ?0) * 10 + (d2 - ?0))
   end
 
-  defp http_date(<<"Mon ", r::bits>>) do
+  defp http_date(<<"Mon ", r :: bits>>) do
     asctime_date(r)
   end
 
-  defp http_date(<<"Tue ", r::bits>>) do
+  defp http_date(<<"Tue ", r :: bits>>) do
     asctime_date(r)
   end
 
-  defp http_date(<<"Wed ", r::bits>>) do
+  defp http_date(<<"Wed ", r :: bits>>) do
     asctime_date(r)
   end
 
-  defp http_date(<<"Thu ", r::bits>>) do
+  defp http_date(<<"Thu ", r :: bits>>) do
     asctime_date(r)
   end
 
-  defp http_date(<<"Fri ", r::bits>>) do
+  defp http_date(<<"Fri ", r :: bits>>) do
     asctime_date(r)
   end
 
-  defp http_date(<<"Sat ", r::bits>>) do
+  defp http_date(<<"Sat ", r :: bits>>) do
     asctime_date(r)
   end
 
-  defp http_date(<<"Sun ", r::bits>>) do
+  defp http_date(<<"Sun ", r :: bits>>) do
     asctime_date(r)
   end
 
-  defp fixdate(
-         <<"Jan ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 1, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Jan ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        1, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Feb ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 2, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Feb ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        2, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Mar ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 3, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Mar ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        3, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Apr ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 4, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Apr ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        4, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"May ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 5, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"May ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        5, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Jun ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 6, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Jun ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        6, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Jul ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 7, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Jul ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        7, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Aug ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 8, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Aug ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        8, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Sep ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 9, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Sep ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        9, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Oct ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 10, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Oct ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        10, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Nov ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 11, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Nov ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        11, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp fixdate(
-         <<"Dec ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 12, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp fixdate(<<"Dec ", y1, y2, y3, y4, " ", h1, h2, ":", m1, m2, ":",
+              s1, s2, " GMT">>,
+            day) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        12, day},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Jan-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Jan-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 1, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Feb-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Feb-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 2, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Mar-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Mar-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 3, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Apr-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Apr-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 4, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"May-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"May-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 5, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Jun-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Jun-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 6, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Jul-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Jul-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 7, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Aug-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Aug-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 8, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Sep-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Sep-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 9, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Oct-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Oct-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 10, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Nov-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Nov-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 11, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp rfc850_date(
-         <<"Dec-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " GMT">>,
-         day
-       ) do
+  defp rfc850_date(<<"Dec-", y1, y2, " ", h1, h2, ":", m1, m2, ":", s1, s2,
+              " GMT">>,
+            day) do
     {{rfc850_year((y1 - ?0) * 10 + (y2 - ?0)), 12, day},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
   defp rfc850_year(y) when y > 50 do
@@ -294,88 +305,100 @@ defmodule :cow_date do
     y + 2000
   end
 
-  defp asctime_date(
-         <<"Jan ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 1, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Jan ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        1, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Feb ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 2, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Feb ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        2, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Mar ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 3, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Mar ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        3, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Apr ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 4, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Apr ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        4, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"May ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 5, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"May ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        5, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Jun ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 6, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Jun ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        6, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Jul ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 7, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Jul ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        7, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Aug ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 8, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Aug ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        8, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Sep ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 9, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Sep ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        9, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Oct ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 10, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Oct ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        10, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Nov ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 11, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Nov ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        11, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
-  defp asctime_date(
-         <<"Dec ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ", y1, y2, y3, y4>>
-       ) do
-    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0), 12, asctime_day(d1, d2)},
-     {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0), (s1 - ?0) * 10 + (s2 - ?0)}}
+  defp asctime_date(<<"Dec ", d1, d2, " ", h1, h2, ":", m1, m2, ":", s1, s2, " ",
+              y1, y2, y3, y4>>) do
+    {{(y1 - ?0) * 1000 + (y2 - ?0) * 100 + (y3 - ?0) * 10 + (y4 - ?0),
+        12, asctime_day(d1, d2)},
+       {(h1 - ?0) * 10 + (h2 - ?0), (m1 - ?0) * 10 + (m2 - ?0),
+          (s1 - ?0) * 10 + (s2 - ?0)}}
   end
 
   defp asctime_day(?\s, d2) do
@@ -392,18 +415,18 @@ defmodule :cow_date do
 
   def rfc2109({date = {y, mo, d}, {h, mi, s}}) do
     wday = :calendar.day_of_the_week(date)
-
-    <<weekday(wday)::binary, ", ", pad_int(d)::binary, "-", month(mo)::binary, "-",
-      year(y)::binary, " ", pad_int(h)::binary, ":", pad_int(mi)::binary, ":", pad_int(s)::binary,
-      " GMT">>
+    <<weekday(wday) :: binary, ", ", pad_int(d) :: binary, "-",
+        month(mo) :: binary, "-", year(y) :: binary, " ",
+        pad_int(h) :: binary, ":", pad_int(mi) :: binary, ":",
+        pad_int(s) :: binary, " GMT">>
   end
 
   def rfc7231({date = {y, mo, d}, {h, mi, s}}) do
     wday = :calendar.day_of_the_week(date)
-
-    <<weekday(wday)::binary, ", ", pad_int(d)::binary, " ", month(mo)::binary, " ",
-      year(y)::binary, " ", pad_int(h)::binary, ":", pad_int(mi)::binary, ":", pad_int(s)::binary,
-      " GMT">>
+    <<weekday(wday) :: binary, ", ", pad_int(d) :: binary, " ",
+        month(mo) :: binary, " ", year(y) :: binary, " ",
+        pad_int(h) :: binary, ":", pad_int(mi) :: binary, ":",
+        pad_int(s) :: binary, " GMT">>
   end
 
   defp pad_int(0) do
@@ -973,4 +996,5 @@ defmodule :cow_date do
   defp year(year) do
     :erlang.integer_to_binary(year)
   end
+
 end

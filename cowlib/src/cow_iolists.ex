@@ -1,11 +1,9 @@
 defmodule :cow_iolists do
   use Bitwise
-
   def split(n, iolist) do
-    case split(n, iolist, []) do
+    case (split(n, iolist, [])) do
       {:ok, before, after__} ->
         {before, after__}
-
       {:more, _, before} ->
         {:lists.reverse(before), <<>>}
     end
@@ -24,18 +22,18 @@ defmodule :cow_iolists do
   end
 
   defp split(n, binary, acc) when is_binary(binary) do
-    <<before::size(n)-binary, after__::bits>> = binary
+    <<before :: size(n) - binary, after__ :: bits>> = binary
     {:ok, :lists.reverse([before | acc]), after__}
   end
 
   defp split(n, [binary | tail], acc)
-       when byte_size(binary) <= n do
+      when byte_size(binary) <= n do
     split(n - byte_size(binary), tail, [binary | acc])
   end
 
   defp split(n, [binary | tail], acc)
-       when is_binary(binary) do
-    <<before::size(n)-binary, after__::bits>> = binary
+      when is_binary(binary) do
+    <<before :: size(n) - binary, after__ :: bits>> = binary
     {:ok, :lists.reverse([before | acc]), [after__ | tail]}
   end
 
@@ -44,12 +42,12 @@ defmodule :cow_iolists do
   end
 
   defp split(n, [list | tail], acc0) do
-    case split(n, list, acc0) do
+    case (split(n, list, acc0)) do
       {:ok, before, after__} ->
         {:ok, before, [after__ | tail]}
-
       {:more, more, acc} ->
         split(more, tail, acc)
     end
   end
+
 end

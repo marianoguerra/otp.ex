@@ -1,47 +1,45 @@
 defmodule :cow_http do
   use Bitwise
-
   def parse_request_line(data) do
     {pos, _} = :binary.match(data, "\r")
-    <<requestLine::size(pos)-binary, "\r\n", rest::bits>> = data
-    [method, target, version0] = :binary.split(requestLine, <<?\s>>, [:trim_all, :global])
-
-    version =
-      case version0 do
-        "HTTP/1.1" ->
-          :"HTTP/1.1"
-
-        "HTTP/1.0" ->
-          :"HTTP/1.0"
-      end
-
+    <<requestLine :: size(pos) - binary, "\r\n",
+        rest :: bits>> = data
+    [method, target, version0] = :binary.split(requestLine,
+                                                 <<?\s>>, [:trim_all, :global])
+    version = (case (version0) do
+                 "HTTP/1.1" ->
+                   :"HTTP/1.1"
+                 "HTTP/1.0" ->
+                   :"HTTP/1.0"
+               end)
     {method, target, version, rest}
   end
 
-  def parse_status_line(<<"HTTP/1.1 200 OK\r\n", rest::bits>>) do
+  def parse_status_line(<<"HTTP/1.1 200 OK\r\n", rest :: bits>>) do
     {:"HTTP/1.1", 200, "OK", rest}
   end
 
-  def parse_status_line(<<"HTTP/1.1 404 Not Found\r\n", rest::bits>>) do
+  def parse_status_line(<<"HTTP/1.1 404 Not Found\r\n", rest :: bits>>) do
     {:"HTTP/1.1", 404, "Not Found", rest}
   end
 
-  def parse_status_line(<<"HTTP/1.1 500 Internal Server Error\r\n", rest::bits>>) do
+  def parse_status_line(<<"HTTP/1.1 500 Internal Server Error\r\n", rest :: bits>>) do
     {:"HTTP/1.1", 500, "Internal Server Error", rest}
   end
 
-  def parse_status_line(<<"HTTP/1.1 ", status::bits>>) do
+  def parse_status_line(<<"HTTP/1.1 ", status :: bits>>) do
     parse_status_line(status, :"HTTP/1.1")
   end
 
-  def parse_status_line(<<"HTTP/1.0 ", status::bits>>) do
+  def parse_status_line(<<"HTTP/1.0 ", status :: bits>>) do
     parse_status_line(status, :"HTTP/1.0")
   end
 
-  defp parse_status_line(<<h, t, u, " ", rest::bits>>, version) do
+  defp parse_status_line(<<h, t, u, " ", rest :: bits>>, version) do
     status = status_to_integer(h, t, u)
     {pos, _} = :binary.match(rest, "\r")
-    <<statusStr::size(pos)-binary, "\r\n", rest2::bits>> = rest
+    <<statusStr :: size(pos) - binary, "\r\n",
+        rest2 :: bits>> = rest
     {version, status, statusStr, rest2}
   end
 
@@ -50,18 +48,16 @@ defmodule :cow_http do
   end
 
   def status_to_integer(status) do
-    case status do
+    case (status) do
       <<h, t, u>> ->
         status_to_integer(h, t, u)
-
-      <<h, t, u, " ", _::bits>> ->
+      <<h, t, u, " ", _ :: bits>> ->
         status_to_integer(h, t, u)
     end
   end
 
-  defp status_to_integer(h, t, u)
-       when ?0 <= h and h <= ?9 and
-              ?0 <= t and t <= ?9 and ?0 <= u and u <= ?9 do
+  defp status_to_integer(h, t, u) when (?0 <= h and h <= ?9 and
+                           ?0 <= t and t <= ?9 and ?0 <= u and u <= ?9) do
     (h - ?0) * 100 + (t - ?0) * 10 + (u - ?0)
   end
 
@@ -69,7 +65,7 @@ defmodule :cow_http do
     parse_header(data, [])
   end
 
-  defp parse_header(<<?\r, ?\n, rest::bits>>, acc) do
+  defp parse_header(<<?\r, ?\n, rest :: bits>>, acc) do
     {:lists.reverse(acc), rest}
   end
 
@@ -77,121 +73,90 @@ defmodule :cow_http do
     parse_hd_name(data, acc, <<>>)
   end
 
-  defp parse_hd_name(<<c, rest::bits>>, acc, soFar) do
-    case c do
+  defp parse_hd_name(<<c, rest :: bits>>, acc, soFar) do
+    case (c) do
       ?: ->
         parse_hd_before_value(rest, acc, soFar)
-
       ?\s ->
         parse_hd_name_ws(rest, acc, soFar)
-
       ?\t ->
         parse_hd_name_ws(rest, acc, soFar)
-
       _ ->
-        case c do
+        case (c) do
           ?A ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?a>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?a>>)
           ?B ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?b>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?b>>)
           ?C ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?c>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?c>>)
           ?D ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?d>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?d>>)
           ?E ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?e>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?e>>)
           ?F ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?f>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?f>>)
           ?G ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?g>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?g>>)
           ?H ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?h>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?h>>)
           ?I ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?i>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?i>>)
           ?J ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?j>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?j>>)
           ?K ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?k>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?k>>)
           ?L ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?l>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?l>>)
           ?M ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?m>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?m>>)
           ?N ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?n>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?n>>)
           ?O ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?o>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?o>>)
           ?P ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?p>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?p>>)
           ?Q ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?q>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?q>>)
           ?R ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?r>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?r>>)
           ?S ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?s>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?s>>)
           ?T ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?t>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?t>>)
           ?U ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?u>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?u>>)
           ?V ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?v>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?v>>)
           ?W ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?w>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?w>>)
           ?X ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?x>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?x>>)
           ?Y ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?y>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?y>>)
           ?Z ->
-            parse_hd_name(rest, acc, <<soFar::binary, ?z>>)
-
+            parse_hd_name(rest, acc, <<soFar :: binary, ?z>>)
           ^c ->
-            parse_hd_name(rest, acc, <<soFar::binary, c>>)
+            parse_hd_name(rest, acc, <<soFar :: binary, c>>)
         end
     end
   end
 
-  defp parse_hd_name_ws(<<c, rest::bits>>, acc, name) do
-    case c do
+  defp parse_hd_name_ws(<<c, rest :: bits>>, acc, name) do
+    case (c) do
       ?: ->
         parse_hd_before_value(rest, acc, name)
-
       ?\s ->
         parse_hd_name_ws(rest, acc, name)
-
       ?\t ->
         parse_hd_name_ws(rest, acc, name)
     end
   end
 
-  defp parse_hd_before_value(<<?\s, rest::bits>>, acc, name) do
+  defp parse_hd_before_value(<<?\s, rest :: bits>>, acc, name) do
     parse_hd_before_value(rest, acc, name)
   end
 
-  defp parse_hd_before_value(<<?\t, rest::bits>>, acc, name) do
+  defp parse_hd_before_value(<<?\t, rest :: bits>>, acc, name) do
     parse_hd_before_value(rest, acc, name)
   end
 
@@ -199,19 +164,18 @@ defmodule :cow_http do
     parse_hd_value(data, acc, name, <<>>)
   end
 
-  defp parse_hd_value(<<?\r, rest::bits>>, acc, name, soFar) do
-    case rest do
-      <<?\n, c, rest2::bits>> when c === ?\s or c === ?\t ->
-        parse_hd_value(rest2, acc, name, <<soFar::binary, c>>)
-
-      <<?\n, rest2::bits>> ->
+  defp parse_hd_value(<<?\r, rest :: bits>>, acc, name, soFar) do
+    case (rest) do
+      <<?\n, c, rest2 :: bits>> when c === ?\s or c === ?\t ->
+        parse_hd_value(rest2, acc, name, <<soFar :: binary, c>>)
+      <<?\n, rest2 :: bits>> ->
         value = clean_value_ws_end(soFar, byte_size(soFar) - 1)
         parse_header(rest2, [{name, value} | acc])
     end
   end
 
-  defp parse_hd_value(<<c, rest::bits>>, acc, name, soFar) do
-    parse_hd_value(rest, acc, name, <<soFar::binary, c>>)
+  defp parse_hd_value(<<c, rest :: bits>>, acc, name, soFar) do
+    parse_hd_value(rest, acc, name, <<soFar :: binary, c>>)
   end
 
   defp clean_value_ws_end(_, -1) do
@@ -219,16 +183,14 @@ defmodule :cow_http do
   end
 
   defp clean_value_ws_end(value, n) do
-    case :binary.at(value, n) do
+    case (:binary.at(value, n)) do
       ?\s ->
         clean_value_ws_end(value, n - 1)
-
       ?\t ->
         clean_value_ws_end(value, n - 1)
-
       _ ->
         s = n + 1
-        <<value2::size(s)-binary, _::bits>> = value
+        <<value2 :: size(s) - binary, _ :: bits>> = value
         value2
     end
   end
@@ -241,28 +203,28 @@ defmodule :cow_http do
     {path, <<>>}
   end
 
-  defp parse_fullpath(<<?#, _::bits>>, path) do
+  defp parse_fullpath(<<?#, _ :: bits>>, path) do
     {path, <<>>}
   end
 
-  defp parse_fullpath(<<??, qs::bits>>, path) do
+  defp parse_fullpath(<<??, qs :: bits>>, path) do
     parse_fullpath_query(qs, path, <<>>)
   end
 
-  defp parse_fullpath(<<c, rest::bits>>, soFar) do
-    parse_fullpath(rest, <<soFar::binary, c>>)
+  defp parse_fullpath(<<c, rest :: bits>>, soFar) do
+    parse_fullpath(rest, <<soFar :: binary, c>>)
   end
 
   defp parse_fullpath_query(<<>>, path, query) do
     {path, query}
   end
 
-  defp parse_fullpath_query(<<?#, _::bits>>, path, query) do
+  defp parse_fullpath_query(<<?#, _ :: bits>>, path, query) do
     {path, query}
   end
 
-  defp parse_fullpath_query(<<c, rest::bits>>, path, soFar) do
-    parse_fullpath_query(rest, path, <<soFar::binary, c>>)
+  defp parse_fullpath_query(<<c, rest :: bits>>, path, soFar) do
+    parse_fullpath_query(rest, path, <<soFar :: binary, c>>)
   end
 
   def parse_version("HTTP/1.1") do
@@ -274,22 +236,16 @@ defmodule :cow_http do
   end
 
   def request(method, path, version, headers) do
-    [
-      method,
-      " ",
-      path,
-      " ",
-      version(version),
-      "\r\n",
-      for {n, v} <- headers do
-        [n, ": ", v, "\r\n"]
-      end,
-      "\r\n"
-    ]
+    [method, " ", path, " ", version(version), "\r\n", for {n,
+                                                     v} <- headers do
+                                                [n, ": ", v, "\r\n"]
+                                              end,
+                                                  "\r\n"]
   end
 
   def response(status, version, headers) do
-    [version(version), " ", status(status), "\r\n", headers(headers), "\r\n"]
+    [version(version), " ", status(status), "\r\n",
+                                              headers(headers), "\r\n"]
   end
 
   def headers(headers) do
@@ -561,4 +517,5 @@ defmodule :cow_http do
   defp status(b) when is_binary(b) do
     b
   end
+
 end
