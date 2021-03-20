@@ -189,7 +189,25 @@ defmodule :m_calendar do
     unit = :proplists.get_value(:unit, options, :second)
 
     [
-      [y1, y2, y3, y4, ?-, mon1, mon2, ?-, d1, d2, _T, h1, h2, ?:, min1, min2, ?:, s1, s2]
+      y1,
+      y2,
+      y3,
+      y4,
+      ?-,
+      mon1,
+      mon2,
+      ?-,
+      d1,
+      d2,
+      _T,
+      h1,
+      h2,
+      ?:,
+      min1,
+      min2,
+      ?:,
+      s1,
+      s2
       | timeStr
     ] = dateTimeString
 
@@ -708,11 +726,11 @@ defmodule :m_calendar do
   end
 
   defp pad4(n) when n < 10 do
-    [[?0, ?0, ?0] | :erlang.integer_to_list(n)]
+    [?0, ?0, ?0 | :erlang.integer_to_list(n)]
   end
 
   defp pad4(n) when n < 100 do
-    [[?0, ?0] | :erlang.integer_to_list(n)]
+    [?0, ?0 | :erlang.integer_to_list(n)]
   end
 
   defp pad4(n) when n < 1000 do

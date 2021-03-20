@@ -5,9 +5,14 @@ defmodule :m_observer_backend do
                                      n_procs: 0, wall_clock: :undefined,
                                      runtime: :undefined, run_queue: 0,
                                      alloc_areas: [],
-                                     memi: [{:total, 0}, {:processes, 0},
-                                              {:ets, 0}, {:atom, 0}, {:code, 0},
-                                              {:binary, 0}],
+                                     memi: [{:total, 0}, {:processes, 0}, {:ets,
+                                                                             0},
+                                                                              {:atom,
+                                                                                 0},
+                                                                                  {:code,
+                                                                                     0},
+                                                                                      {:binary,
+                                                                                         0}],
                                      procinfo: [])
   Record.defrecord(:r_etop_proc_info, :etop_proc_info, pid: :undefined,
                                           mem: 0, reds: 0, name: :undefined,
@@ -41,45 +46,65 @@ defmodule :m_observer_backend do
                                1
                            end)
     {{_, input}, {_, output}} = :erlang.statistics(:io)
-    [[{:uptime,
-         :erlang.element(1, :erlang.statistics(:wall_clock))},
-        {:run_queue, :erlang.statistics(:run_queue)},
-        {:io_input, input}, {:io_output, output},
-        {:logical_processors,
-           :erlang.system_info(:logical_processors)},
-        {:logical_processors_online,
-           :erlang.system_info(:logical_processors_online)},
-        {:logical_processors_available,
-           :erlang.system_info(:logical_processors_available)},
-        {:schedulers, :erlang.system_info(:schedulers)},
-        {:schedulers_online, schedulersOnline},
-        {:schedulers_available, schedulersAvailable},
-        {:otp_release, :erlang.system_info(:otp_release)},
-        {:version, :erlang.system_info(:version)},
-        {:system_architecture,
-           :erlang.system_info(:system_architecture)},
-        {:kernel_poll, :erlang.system_info(:kernel_poll)},
-        {:smp_support, :erlang.system_info(:smp_support)},
-        {:threads, :erlang.system_info(:threads)},
-        {:thread_pool_size,
-           :erlang.system_info(:thread_pool_size)},
-        {:wordsize_internal,
-           :erlang.system_info({:wordsize, :internal})},
-        {:wordsize_external,
-           :erlang.system_info({:wordsize, :external})},
-        {:alloc_info, alloc_info()},
-        {:process_count, :erlang.system_info(:process_count)},
-        {:atom_limit, :erlang.system_info(:atom_limit)},
-        {:atom_count, :erlang.system_info(:atom_count)},
-        {:process_limit, :erlang.system_info(:process_limit)},
-        {:process_count, :erlang.system_info(:process_count)},
-        {:port_limit, :erlang.system_info(:port_limit)},
-        {:port_count, :erlang.system_info(:port_count)},
-        {:ets_limit, :erlang.system_info(:ets_limit)},
-        {:ets_count, :erlang.system_info(:ets_count)},
-        {:dist_buf_busy_limit,
-           :erlang.system_info(:dist_buf_busy_limit)}] |
-         memInfo]
+    [{:uptime,
+        :erlang.element(1, :erlang.statistics(:wall_clock))},
+         {:run_queue, :erlang.statistics(:run_queue)},
+             {:io_input, input}, {:io_output, output},
+                                     {:logical_processors,
+                                        :erlang.system_info(:logical_processors)},
+                                         {:logical_processors_online,
+                                            :erlang.system_info(:logical_processors_online)},
+                                             {:logical_processors_available,
+                                                :erlang.system_info(:logical_processors_available)},
+                                                 {:schedulers,
+                                                    :erlang.system_info(:schedulers)},
+                                                     {:schedulers_online,
+                                                        schedulersOnline},
+                                                         {:schedulers_available,
+                                                            schedulersAvailable},
+                                                             {:otp_release,
+                                                                :erlang.system_info(:otp_release)},
+                                                                 {:version,
+                                                                    :erlang.system_info(:version)},
+                                                                     {:system_architecture,
+                                                                        :erlang.system_info(:system_architecture)},
+                                                                         {:kernel_poll,
+                                                                            :erlang.system_info(:kernel_poll)},
+                                                                             {:smp_support,
+                                                                                :erlang.system_info(:smp_support)},
+                                                                                 {:threads,
+                                                                                    :erlang.system_info(:threads)},
+                                                                                     {:thread_pool_size,
+                                                                                        :erlang.system_info(:thread_pool_size)},
+                                                                                         {:wordsize_internal,
+                                                                                            :erlang.system_info({:wordsize,
+                                                                                                                   :internal})},
+                                                                                             {:wordsize_external,
+                                                                                                :erlang.system_info({:wordsize,
+                                                                                                                       :external})},
+                                                                                                 {:alloc_info,
+                                                                                                    alloc_info()},
+                                                                                                     {:process_count,
+                                                                                                        :erlang.system_info(:process_count)},
+                                                                                                         {:atom_limit,
+                                                                                                            :erlang.system_info(:atom_limit)},
+                                                                                                             {:atom_count,
+                                                                                                                :erlang.system_info(:atom_count)},
+                                                                                                                 {:process_limit,
+                                                                                                                    :erlang.system_info(:process_limit)},
+                                                                                                                     {:process_count,
+                                                                                                                        :erlang.system_info(:process_count)},
+                                                                                                                         {:port_limit,
+                                                                                                                            :erlang.system_info(:port_limit)},
+                                                                                                                             {:port_count,
+                                                                                                                                :erlang.system_info(:port_count)},
+                                                                                                                                 {:ets_limit,
+                                                                                                                                    :erlang.system_info(:ets_limit)},
+                                                                                                                                     {:ets_count,
+                                                                                                                                        :erlang.system_info(:ets_count)},
+                                                                                                                                         {:dist_buf_busy_limit,
+                                                                                                                                            :erlang.system_info(:dist_buf_busy_limit)} |
+                                                                                                                                             memInfo]
   end
 
   defp alloc_info() do
@@ -152,7 +177,7 @@ defmodule :m_observer_backend do
 
   def get_port_list() do
     extraItems = [:monitors, :monitored_by, :parallelism,
-                    :locking, :queue_size, :memory]
+                                                :locking, :queue_size, :memory]
     for p <- :erlang.ports() do
       (
         [{:port_id, p} | :erlang.port_info(p)] ++ port_info(p,
@@ -196,42 +221,44 @@ defmodule :m_observer_backend do
                                 {:ok, {lAddr, lPort}} when (is_tuple(lAddr) and
                                                               is_integer(lPort))
                                                            ->
-                                  [{:local_address, lAddr},
-                                     {:local_port, lPort}]
+                                  [{:local_address, lAddr}, {:local_port,
+                                                               lPort}]
                                 {:ok, lAddr} ->
                                   [{:local_address, lAddr}]
                                 {:error, _} ->
                                   []
                               end) ++ (case (:inet.getopts(port,
                                                              [:active,
-                                                                :broadcast,
-                                                                :buffer,
-                                                                :bind_to_device,
-                                                                :delay_send,
-                                                                :deliver,
-                                                                :dontroute,
-                                                                :exit_on_close,
-                                                                :header,
-                                                                :high_msgq_watermark,
-                                                                :high_watermark,
-                                                                :ipv6_v6only,
-                                                                :keepalive,
-                                                                :linger,
-                                                                :low_msgq_watermark,
-                                                                :low_watermark,
-                                                                :mode, :netns,
-                                                                :nodelay,
-                                                                :packet,
-                                                                :packet_size,
-                                                                :priority,
-                                                                :read_packets,
-                                                                :recbuf,
-                                                                :reuseaddr,
-                                                                :send_timeout,
-                                                                :send_timeout_close,
-                                                                :show_econnreset,
-                                                                :sndbuf, :tos,
-                                                                :tclass])) do
+                                                                  :broadcast,
+                                                                      :buffer,
+                                                                          :bind_to_device,
+                                                                              :delay_send,
+                                                                                  :deliver,
+                                                                                      :dontroute,
+                                                                                          :exit_on_close,
+                                                                                              :header,
+                                                                                                  :high_msgq_watermark,
+                                                                                                      :high_watermark,
+                                                                                                          :ipv6_v6only,
+                                                                                                              :keepalive,
+                                                                                                                  :linger,
+                                                                                                                      :low_msgq_watermark,
+                                                                                                                          :low_watermark,
+                                                                                                                              :mode,
+                                                                                                                                  :netns,
+                                                                                                                                      :nodelay,
+                                                                                                                                          :packet,
+                                                                                                                                              :packet_size,
+                                                                                                                                                  :priority,
+                                                                                                                                                      :read_packets,
+                                                                                                                                                          :recbuf,
+                                                                                                                                                              :reuseaddr,
+                                                                                                                                                                  :send_timeout,
+                                                                                                                                                                      :send_timeout_close,
+                                                                                                                                                                          :show_econnreset,
+                                                                                                                                                                              :sndbuf,
+                                                                                                                                                                                  :tos,
+                                                                                                                                                                                      :tclass])) do
                                          {:ok, opts} ->
                                            [{:options, opts}]
                                          {:error, _} ->
@@ -291,14 +318,31 @@ defmodule :m_observer_backend do
                            :mnesia_tab)
                   memory = :ets.info(id,
                                        :memory) * :erlang.system_info(:wordsize)
-                  tab = [{:name, name}, {:id, tabId},
-                           {:protection, protection}, {:owner, owner},
-                           {:size, :ets.info(id, :size)}, {:reg_name, regName},
-                           {:type, :ets.info(id, :type)},
-                           {:keypos, :ets.info(id, :keypos)},
-                           {:heir, :ets.info(id, :heir)}, {:memory, memory},
-                           {:compressed, :ets.info(id, :compressed)},
-                           {:fixed, :ets.info(id, :fixed)}]
+                  tab = [{:name, name}, {:id, tabId}, {:protection,
+                                                         protection},
+                                                          {:owner, owner},
+                                                              {:size,
+                                                                 :ets.info(id,
+                                                                             :size)},
+                                                                  {:reg_name,
+                                                                     regName},
+                                                                      {:type,
+                                                                         :ets.info(id,
+                                                                                     :type)},
+                                                                          {:keypos,
+                                                                             :ets.info(id,
+                                                                                         :keypos)},
+                                                                              {:heir,
+                                                                                 :ets.info(id,
+                                                                                             :heir)},
+                                                                                  {:memory,
+                                                                                     memory},
+                                                                                      {:compressed,
+                                                                                         :ets.info(id,
+                                                                                                     :compressed)},
+                                                                                          {:fixed,
+                                                                                             :ets.info(id,
+                                                                                                         :fixed)}]
                   [tab | acc]
                 catch
                   _, _What ->
@@ -323,23 +367,32 @@ defmodule :m_observer_backend do
                            :system_tab)
                   ignore(name === :schema, :mnesia_tab)
                   storage = :mnesia.table_info(id, :storage_type)
-                  tab0 = [{:name, name}, {:owner, owner},
-                            {:size, :mnesia.table_info(id, :size)},
-                            {:reg_name, regName},
-                            {:type, :mnesia.table_info(id, :type)},
-                            {:keypos, 2},
-                            {:memory,
-                               :mnesia.table_info(id,
-                                                    :memory) * :erlang.system_info(:wordsize)},
-                            {:storage, storage},
-                            {:index, :mnesia.table_info(id, :index)}]
+                  tab0 = [{:name, name}, {:owner, owner}, {:size,
+                                                             :mnesia.table_info(id,
+                                                                                  :size)},
+                                                              {:reg_name,
+                                                                 regName},
+                                                                  {:type,
+                                                                     :mnesia.table_info(id,
+                                                                                          :type)},
+                                                                      {:keypos,
+                                                                         2},
+                                                                          {:memory,
+                                                                             :mnesia.table_info(id,
+                                                                                                  :memory) * :erlang.system_info(:wordsize)},
+                                                                              {:storage,
+                                                                                 storage},
+                                                                                  {:index,
+                                                                                     :mnesia.table_info(id,
+                                                                                                          :index)}]
                   tab = (cond do
                            storage == :disc_only_copies ->
                              [{:fixed, :dets.info(id, :safe_fixed)} | tab0]
                            storage == :ram_copies or storage == :disc_copies ->
-                             [[{:fixed, :ets.info(id, :fixed)},
-                                 {:compressed, :ets.info(id, :compressed)}] |
-                                  tab0]
+                             [{:fixed, :ets.info(id, :fixed)}, {:compressed,
+                                                                  :ets.info(id,
+                                                                              :compressed)} |
+                                                                   tab0]
                            true ->
                              tab0
                          end)
@@ -428,11 +481,14 @@ defmodule :m_observer_backend do
 
   defp etop_memi() do
     try do
-      [{:total, :c.memory(:total)},
-         {:processes, :c.memory(:processes)},
-         {:ets, :c.memory(:ets)}, {:atom, :c.memory(:atom)},
-         {:code, :c.memory(:code)},
-         {:binary, :c.memory(:binary)}]
+      [{:total, :c.memory(:total)}, {:processes,
+                                       :c.memory(:processes)},
+                                        {:ets, :c.memory(:ets)}, {:atom,
+                                                                    :c.memory(:atom)},
+                                                                     {:code,
+                                                                        :c.memory(:code)},
+                                                                         {:binary,
+                                                                            :c.memory(:binary)}]
     catch
       :error, :notsup ->
         :undefined
@@ -445,14 +501,17 @@ defmodule :m_observer_backend do
 
   defp etop_collect([p | ps], acc) do
     fs = [:registered_name, :initial_call, :memory,
-            :reductions, :current_function, :message_queue_len]
+                                               :reductions, :current_function,
+                                                                :message_queue_len]
     case (:erlang.process_info(p, fs)) do
       :undefined ->
         etop_collect(ps, acc)
       [{:registered_name, reg}, {:initial_call, initial},
-         {:memory, mem}, {:reductions, reds},
-         {:current_function, current},
-         {:message_queue_len, qlen}] ->
+                                    {:memory, mem}, {:reductions, reds},
+                                                        {:current_function,
+                                                           current},
+                                                            {:message_queue_len,
+                                                               qlen}] ->
         name = (case (reg) do
                   [] ->
                     initial_call(initial, p)
@@ -935,43 +994,104 @@ defmodule :m_observer_backend do
 
   defp sys_tables() do
     [:ac_tab, :asn1, :cdv_dump_index_table, :cdv_menu_table,
-       :cdv_decode_heap_table, :cell_id, :cell_pos, :clist,
-       :cover_internal_data_table,
-       :cover_collected_remote_data_table,
-       :cover_binary_code_table, :code, :code_names, :cookies,
-       :corba_policy, :corba_policy_associations, :dets,
-       :dets_owners, :dets_registry, :disk_log_names,
-       :disk_log_pids, :eprof, :erl_atom_cache,
-       :erl_epmd_nodes, :etop_accum_tab, :etop_tr,
-       :ets_coverage_data, :file_io_servers, :gs_mapping,
-       :gs_names, :gstk_db, :gstk_grid_cellid,
-       :gstk_grid_cellpos, :gstk_grid_id, :httpd, :id,
-       :ign_req_index, :ign_requests, :index, :inet_cache,
-       :inet_db, :inet_hosts, :InitialReferences, :int_db,
-       :interpreter_includedirs_macros, :ir_WstringDef,
-       :lmcounter, :locks, :mnesia_gvar, :mnesia_stats,
-       :pg2_table, :pg, :queue, :schema, :shell_records,
-       :snmp_agent_table, :snmp_local_db2, :snmp_mib_data,
-       :snmp_note_store, :snmp_symbolic_ets, :tkFun, :tkLink,
-       :tkPriv, :ttb, :ttb_history_table, :udp_fds, :udp_pids]
+                                                :cdv_decode_heap_table,
+                                                    :cell_id, :cell_pos, :clist,
+                                                                             :cover_internal_data_table,
+                                                                                 :cover_collected_remote_data_table,
+                                                                                     :cover_binary_code_table,
+                                                                                         :code,
+                                                                                             :code_names,
+                                                                                                 :cookies,
+                                                                                                     :corba_policy,
+                                                                                                         :corba_policy_associations,
+                                                                                                             :dets,
+                                                                                                                 :dets_owners,
+                                                                                                                     :dets_registry,
+                                                                                                                         :disk_log_names,
+                                                                                                                             :disk_log_pids,
+                                                                                                                                 :eprof,
+                                                                                                                                     :erl_atom_cache,
+                                                                                                                                         :erl_epmd_nodes,
+                                                                                                                                             :etop_accum_tab,
+                                                                                                                                                 :etop_tr,
+                                                                                                                                                     :ets_coverage_data,
+                                                                                                                                                         :file_io_servers,
+                                                                                                                                                             :gs_mapping,
+                                                                                                                                                                 :gs_names,
+                                                                                                                                                                     :gstk_db,
+                                                                                                                                                                         :gstk_grid_cellid,
+                                                                                                                                                                             :gstk_grid_cellpos,
+                                                                                                                                                                                 :gstk_grid_id,
+                                                                                                                                                                                     :httpd,
+                                                                                                                                                                                         :id,
+                                                                                                                                                                                             :ign_req_index,
+                                                                                                                                                                                                 :ign_requests,
+                                                                                                                                                                                                     :index,
+                                                                                                                                                                                                         :inet_cache,
+                                                                                                                                                                                                             :inet_db,
+                                                                                                                                                                                                                 :inet_hosts,
+                                                                                                                                                                                                                     :InitialReferences,
+                                                                                                                                                                                                                         :int_db,
+                                                                                                                                                                                                                             :interpreter_includedirs_macros,
+                                                                                                                                                                                                                                 :ir_WstringDef,
+                                                                                                                                                                                                                                     :lmcounter,
+                                                                                                                                                                                                                                         :locks,
+                                                                                                                                                                                                                                             :mnesia_gvar,
+                                                                                                                                                                                                                                                 :mnesia_stats,
+                                                                                                                                                                                                                                                     :pg2_table,
+                                                                                                                                                                                                                                                         :pg,
+                                                                                                                                                                                                                                                             :queue,
+                                                                                                                                                                                                                                                                 :schema,
+                                                                                                                                                                                                                                                                     :shell_records,
+                                                                                                                                                                                                                                                                         :snmp_agent_table,
+                                                                                                                                                                                                                                                                             :snmp_local_db2,
+                                                                                                                                                                                                                                                                                 :snmp_mib_data,
+                                                                                                                                                                                                                                                                                     :snmp_note_store,
+                                                                                                                                                                                                                                                                                         :snmp_symbolic_ets,
+                                                                                                                                                                                                                                                                                             :tkFun,
+                                                                                                                                                                                                                                                                                                 :tkLink,
+                                                                                                                                                                                                                                                                                                     :tkPriv,
+                                                                                                                                                                                                                                                                                                         :ttb,
+                                                                                                                                                                                                                                                                                                             :ttb_history_table,
+                                                                                                                                                                                                                                                                                                                 :udp_fds,
+                                                                                                                                                                                                                                                                                                                     :udp_pids]
   end
 
   defp sys_processes() do
     [:auth, :code_server, :global_name_server, :inet_db,
-       :mnesia_recover, :net_kernel, :pg, :timer_server,
-       :wxe_master]
+                                                   :mnesia_recover, :net_kernel,
+                                                                        :pg,
+                                                                            :timer_server,
+                                                                                :wxe_master]
   end
 
   defp mnesia_tables() do
     [:ir_AliasDef, :ir_ArrayDef, :ir_AttributeDef,
-       :ir_ConstantDef, :ir_Contained, :ir_Container,
-       :ir_EnumDef, :ir_ExceptionDef, :ir_IDLType,
-       :ir_IRObject, :ir_InterfaceDef, :ir_ModuleDef, :ir_ORB,
-       :ir_OperationDef, :ir_PrimitiveDef, :ir_Repository,
-       :ir_SequenceDef, :ir_StringDef, :ir_StructDef,
-       :ir_TypedefDef, :ir_UnionDef, :logTable,
-       :logTransferTable, :mesh_meas, :mesh_type,
-       :mnesia_clist, :orber_CosNaming, :orber_objkeys, :user]
+                                     :ir_ConstantDef, :ir_Contained,
+                                                          :ir_Container,
+                                                              :ir_EnumDef,
+                                                                  :ir_ExceptionDef,
+                                                                      :ir_IDLType,
+                                                                          :ir_IRObject,
+                                                                              :ir_InterfaceDef,
+                                                                                  :ir_ModuleDef,
+                                                                                      :ir_ORB,
+                                                                                          :ir_OperationDef,
+                                                                                              :ir_PrimitiveDef,
+                                                                                                  :ir_Repository,
+                                                                                                      :ir_SequenceDef,
+                                                                                                          :ir_StringDef,
+                                                                                                              :ir_StructDef,
+                                                                                                                  :ir_TypedefDef,
+                                                                                                                      :ir_UnionDef,
+                                                                                                                          :logTable,
+                                                                                                                              :logTransferTable,
+                                                                                                                                  :mesh_meas,
+                                                                                                                                      :mesh_type,
+                                                                                                                                          :mnesia_clist,
+                                                                                                                                              :orber_CosNaming,
+                                                                                                                                                  :orber_objkeys,
+                                                                                                                                                      :user]
   end
 
   defp ignore(true, reason) do

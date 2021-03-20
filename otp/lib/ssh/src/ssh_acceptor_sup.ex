@@ -127,7 +127,7 @@ defmodule :m_ssh_acceptor_sup do
   end
 
   def init([address, port, profile, options]) do
-    supFlags = %{:strategy => :one_for_one, :intensity => 10, :period => 3600}
+    supFlags = %{strategy: :one_for_one, intensity: 10, period: 3600}
     childSpecs = [child_spec(address, port, profile, options)]
     {:ok, {supFlags, childSpecs}}
   end
@@ -146,9 +146,9 @@ defmodule :m_ssh_acceptor_sup do
       )
 
     %{
-      :id => id(address, port, profile),
-      :start => {:ssh_acceptor, :start_link, [port, address, options, timeout]},
-      :restart => :transient
+      id: id(address, port, profile),
+      start: {:ssh_acceptor, :start_link, [port, address, options, timeout]},
+      restart: :transient
     }
   end
 

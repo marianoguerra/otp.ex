@@ -417,7 +417,7 @@ defmodule :m_erts_alloc_config do
 
   defp save_ai(
          alc,
-         [[{:instance, _, _}, {:instance, _, _}] | _]
+         [{:instance, _, _}, {:instance, _, _} | _]
        ) do
     r_alloc(alc, enabled: true, need_config_change: true)
   end

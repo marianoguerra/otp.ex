@@ -232,15 +232,15 @@ defmodule :m_edoc_wiki do
     expand_new_line(cs, l + 1, [c | as])
   end
 
-  defp expand_new_line([[?=, ?=, ?=, ?=] | cs], l, as) do
+  defp expand_new_line([?=, ?=, ?=, ?= | cs], l, as) do
     expand_heading(cs, 2, l, as)
   end
 
-  defp expand_new_line([[?=, ?=, ?=] | cs], l, as) do
+  defp expand_new_line([?=, ?=, ?= | cs], l, as) do
     expand_heading(cs, 1, l, as)
   end
 
-  defp expand_new_line([[?=, ?=] | cs], l, as) do
+  defp expand_new_line([?=, ?= | cs], l, as) do
     expand_heading(cs, 0, l, as)
   end
 
@@ -248,11 +248,11 @@ defmodule :m_edoc_wiki do
     expand(cs, l, as)
   end
 
-  defp expand([[?`, ?'] | cs], l, as) do
+  defp expand([?`, ?' | cs], l, as) do
     expand(cs, l, [?` | as])
   end
 
-  defp expand([[?`, ?`, ?`] | cs], l, as) do
+  defp expand([?`, ?`, ?` | cs], l, as) do
     {cs1, skipped} = strip_empty_lines(cs)
 
     n =
@@ -276,7 +276,7 @@ defmodule :m_edoc_wiki do
     expand_triple(cs1, l + skipped, ss ++ '[ATADC[!<>erp<' ++ as)
   end
 
-  defp expand([[?`, ?`] | cs], l, as) do
+  defp expand([?`, ?` | cs], l, as) do
     expand_double(:edoc_lib.strip_space(cs), l, '>edoc<' ++ as)
   end
 
@@ -308,7 +308,7 @@ defmodule :m_edoc_wiki do
     {cs1, cs2} = :edoc_lib.split_at(cs, ?\n)
 
     case :edoc_lib.strip_space(:lists.reverse(cs1)) do
-      [[?=, ?=] | cs3] ->
+      [?=, ?= | cs3] ->
         {es, ts} =
           :lists.splitwith(
             fn x ->
@@ -399,7 +399,7 @@ defmodule :m_edoc_wiki do
     expand_double(cs, l, as, l)
   end
 
-  defp expand_double([[?', ?'] | cs], l, as, _L0) do
+  defp expand_double([?', ?' | cs], l, as, _L0) do
     expand(cs, l, '>edoc/<' ++ :edoc_lib.strip_space(as))
   end
 
@@ -431,11 +431,11 @@ defmodule :m_edoc_wiki do
     expand_triple(cs, l, as, l)
   end
 
-  defp expand_triple([[?', ?', ?'] | cs], l, as, _L0) do
+  defp expand_triple([?', ?', ?' | cs], l, as, _L0) do
     expand(cs, l, '>erp/<>]]' ++ :edoc_lib.strip_space(as))
   end
 
-  defp expand_triple([[?], ?], ?>] | cs], l, as, l0) do
+  defp expand_triple([?], ?], ?> | cs], l, as, l0) do
     expand_triple(cs, l, ';tg&]]' ++ as, l0)
   end
 

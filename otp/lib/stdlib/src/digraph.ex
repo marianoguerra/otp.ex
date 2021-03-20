@@ -331,7 +331,7 @@ defmodule :m_digraph do
     :ets.delete(r_digraph(g, :etab), e)
   end
 
-  defp rm_edges([[v1, v2] | vs], g) do
+  defp rm_edges([v1, v2 | vs], g) do
     rm_edge(v1, v2, g)
     rm_edges([v2 | vs], g)
   end

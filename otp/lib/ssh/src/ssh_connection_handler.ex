@@ -4302,7 +4302,13 @@ defmodule :m_ssh_connection_handler do
         :connection_events,
         {:return_from, {:ssh_connection_handler, :handle_event, 4}, ret}
       ) do
-    ['Connection event result\n', :io_lib.format('~p~n', [:ssh_dbg.reduce_state(ret, r_data())])]
+    [
+      'Connection event result\n',
+      :io_lib.format(
+        '~p~n',
+        [:ssh_dbg.reduce_state(ret, r_data())]
+      )
+    ]
   end
 
   def ssh_dbg_format(

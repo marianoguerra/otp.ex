@@ -102,7 +102,10 @@ defmodule :m_mnesia_loader do
     etsOpts = :proplists.get_value(:ets, storageProps, [])
 
     args = [
-      [{:keypos, 2}, :public, :named_table, type]
+      {:keypos, 2},
+      :public,
+      :named_table,
+      type
       | etsOpts
     ]
 
@@ -137,7 +140,10 @@ defmodule :m_mnesia_loader do
     etsOpts = :proplists.get_value(:ets, storageProps, [])
 
     args = [
-      [{:keypos, 2}, :public, :named_table, type]
+      {:keypos, 2},
+      :public,
+      :named_table,
+      type
       | etsOpts
     ]
 
@@ -185,12 +191,14 @@ defmodule :m_mnesia_loader do
     detsOpts = :proplists.get_value(:dets, storageProps, [])
 
     args = [
-      [
-        {:file, :mnesia_lib.tab2dat(tab)},
-        {:type, :mnesia_lib.disk_type(tab, type)},
-        {:keypos, 2},
-        {:repair, :mnesia_monitor.get_env(:auto_repair)}
-      ]
+      {:file, :mnesia_lib.tab2dat(tab)},
+      {:type,
+       :mnesia_lib.disk_type(
+         tab,
+         type
+       )},
+      {:keypos, 2},
+      {:repair, :mnesia_monitor.get_env(:auto_repair)}
       | detsOpts
     ]
 
@@ -498,13 +506,15 @@ defmodule :m_mnesia_loader do
           )
 
         args = [
-          [
-            {:file, tmp},
-            {:keypos, 2},
-            {:estimated_no_objects, size},
-            {:repair, :mnesia_monitor.get_env(:auto_repair)},
-            {:type, :mnesia_lib.disk_type(tab, r_cstruct(cs, :type))}
-          ]
+          {:file, tmp},
+          {:keypos, 2},
+          {:estimated_no_objects, size},
+          {:repair, :mnesia_monitor.get_env(:auto_repair)},
+          {:type,
+           :mnesia_lib.disk_type(
+             tab,
+             r_cstruct(cs, :type)
+           )}
           | detsOpts
         ]
 
@@ -522,11 +532,7 @@ defmodule :m_mnesia_loader do
 
       storage == :ram_copies or storage == :disc_copies ->
         etsOpts = :proplists.get_value(:ets, storageProps, [])
-
-        args = [
-          [{:keypos, 2}, :public, :named_table, r_cstruct(cs, :type)]
-          | etsOpts
-        ]
+        args = [{:keypos, 2}, :public, :named_table, r_cstruct(cs, :type) | etsOpts]
 
         case :mnesia_monitor.unsafe_mktab(tab, args) do
           ^tab ->
@@ -788,12 +794,14 @@ defmodule :m_mnesia_loader do
         detsOpts = :proplists.get_value(:dets, storageProps, [])
 
         args = [
-          [
-            {:file, :mnesia_lib.tab2dat(tab)},
-            {:type, :mnesia_lib.disk_type(tab, type)},
-            {:keypos, 2},
-            {:repair, :mnesia_monitor.get_env(:auto_repair)}
-          ]
+          {:file, :mnesia_lib.tab2dat(tab)},
+          {:type,
+           :mnesia_lib.disk_type(
+             tab,
+             type
+           )},
+          {:keypos, 2},
+          {:repair, :mnesia_monitor.get_env(:auto_repair)}
           | detsOpts
         ]
 

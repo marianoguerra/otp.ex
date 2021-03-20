@@ -75,7 +75,7 @@ defmodule :m_dialyzer_contracts do
       [_] ->
         true
 
-      [[_, _] | _] ->
+      [_, _ | _] ->
         false
     end
   end
@@ -973,7 +973,7 @@ defmodule :m_dialyzer_contracts do
           [^v] ->
             :digraph.del_edge(g, {v, v})
 
-          [[^v, v1] | _] ->
+          [^v, v1 | _] ->
             :digraph.del_edge(g, {v, v1})
         end
       end,

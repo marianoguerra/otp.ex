@@ -1003,7 +1003,7 @@ defmodule :m_mnesia_frag do
              is_integer(count2) and count2 >= 0 ->
         case node_diff(node, count, node2, count2, pool) do
           :less ->
-            [[{node, count}, head] | tail]
+            [{node, count}, head | tail]
 
           :greater ->
             [head | insert_dist(cs, node, count, tail, pool)]
@@ -1203,7 +1203,7 @@ defmodule :m_mnesia_frag do
     cs2 = replace_frag_hash(cs, fH2)
     tabDef = :mnesia_schema.vsn_cs2list(cs2)
     baseOp = {:op, :change_table_frag, {:add_frag, sortedNs}, tabDef}
-    [[baseOp, newOp] | splitOps]
+    [baseOp, newOp | splitOps]
   end
 
   defp replace_frag_hash(cs, fH) when elem(fH, 0) === :frag_state do
@@ -1306,10 +1306,8 @@ defmodule :m_mnesia_frag do
             oldOid = {oldFrag, key}
 
             ops2 = [
-              [
-                {:op, :rec, :unknown, {newOid, [rec], :write}},
-                {:op, :rec, :unknown, {oldOid, [oldOid], :delete}}
-              ]
+              {:op, :rec, :unknown, {newOid, [rec], :write}},
+              {:op, :rec, :unknown, {oldOid, [oldOid], :delete}}
               | ops
             ]
 
@@ -1358,7 +1356,7 @@ defmodule :m_mnesia_frag do
         cs2 = replace_frag_hash(cs, fH2)
         tabDef = :mnesia_schema.vsn_cs2list(cs2)
         baseOp = {:op, :change_table_frag, :del_frag, tabDef}
-        [[baseOp, lastOp] | mergeOps]
+        [baseOp, lastOp | mergeOps]
 
       _ ->
         :mnesia.abort({:no_exists, tab})
@@ -1466,10 +1464,8 @@ defmodule :m_mnesia_frag do
             oldOid = {oldFrag, key}
 
             ops2 = [
-              [
-                {:op, :rec, :unknown, {newOid, [rec], :write}},
-                {:op, :rec, :unknown, {oldOid, [oldOid], :delete}}
-              ]
+              {:op, :rec, :unknown, {newOid, [rec], :write}},
+              {:op, :rec, :unknown, {oldOid, [oldOid], :delete}}
               | ops
             ]
 

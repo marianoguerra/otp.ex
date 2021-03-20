@@ -59,7 +59,7 @@ defmodule :m_beam_ssa_funs do
       ) ->
         {_, name, arity} = :beam_ssa.get_anno(:func_info, f)
         trampoline = r_b_local(name: r_b_literal(val: name), arity: arity)
-        %{trampolines | trampoline => actual}
+        Map.put(trampolines, trampoline, actual)
 
       _ ->
         trampolines

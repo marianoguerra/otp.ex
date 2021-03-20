@@ -265,15 +265,15 @@ defmodule :m_edoc_lib do
     split_at_stop(cs, [])
   end
 
-  defp split_at_stop([[?., ?\s] | cs], as) do
+  defp split_at_stop([?., ?\s | cs], as) do
     {:lists.reverse(as), cs}
   end
 
-  defp split_at_stop([[?., ?\t] | cs], as) do
+  defp split_at_stop([?., ?\t | cs], as) do
     {:lists.reverse(as), cs}
   end
 
-  defp split_at_stop([[?., ?\n] | cs], as) do
+  defp split_at_stop([?., ?\n | cs], as) do
     {:lists.reverse(as), cs}
   end
 
@@ -439,15 +439,15 @@ defmodule :m_edoc_lib do
     end_of_sentence(cs, last, [])
   end
 
-  defp end_of_sentence([[c = ?., ?\s] | _], _, as) do
+  defp end_of_sentence([c = ?., ?\s | _], _, as) do
     end_of_sentence_1(c, true, as)
   end
 
-  defp end_of_sentence([[c = ?., ?\t] | _], _, as) do
+  defp end_of_sentence([c = ?., ?\t | _], _, as) do
     end_of_sentence_1(c, true, as)
   end
 
-  defp end_of_sentence([[c = ?., ?\n] | _], _, as) do
+  defp end_of_sentence([c = ?., ?\n | _], _, as) do
     end_of_sentence_1(c, true, as)
   end
 
@@ -455,15 +455,15 @@ defmodule :m_edoc_lib do
     end_of_sentence_1(c, last, as)
   end
 
-  defp end_of_sentence([[c = ?!, ?\s] | _], _, as) do
+  defp end_of_sentence([c = ?!, ?\s | _], _, as) do
     end_of_sentence_1(c, true, as)
   end
 
-  defp end_of_sentence([[c = ?!, ?\t] | _], _, as) do
+  defp end_of_sentence([c = ?!, ?\t | _], _, as) do
     end_of_sentence_1(c, true, as)
   end
 
-  defp end_of_sentence([[c = ?!, ?\n] | _], _, as) do
+  defp end_of_sentence([c = ?!, ?\n | _], _, as) do
     end_of_sentence_1(c, true, as)
   end
 

@@ -74,14 +74,7 @@ defmodule :m_beam_jump do
     eliminate_moves(is, d, [i | acc])
   end
 
-  defp eliminate_moves(
-         [
-           [{:test, :is_eq_exact, _, [reg, val]} = i, {:block, blkIs0}]
-           | is
-         ],
-         d0,
-         acc
-       ) do
+  defp eliminate_moves([{:test, :is_eq_exact, _, [reg, val]} = i, {:block, blkIs0} | is], d0, acc) do
     d = update_unsafe_labels(i, d0)
     regVal = {reg, val}
     blkIs = eliminate_moves_blk(blkIs0, regVal)
@@ -107,7 +100,7 @@ defmodule :m_beam_jump do
     end
   end
 
-  defp eliminate_moves([[{:label, lbl}, {:block, blkIs0} = blk] | is], d, acc0) do
+  defp eliminate_moves([{:label, lbl}, {:block, blkIs0} = blk | is], d, acc0) do
     acc = [{:label, lbl} | acc0]
 
     case {no_fallthrough(acc0), d} do
@@ -142,10 +135,7 @@ defmodule :m_beam_jump do
   end
 
   defp eliminate_moves_call(
-         [
-           [{:%, {:var_info, {:x, 0}, info}} = anno, {:block, blkIs0} = blk]
-           | is
-         ],
+         [{:%, {:var_info, {:x, 0}, info}} = anno, {:block, blkIs0} = blk | is],
          d,
          acc0
        ) do
@@ -245,7 +235,7 @@ defmodule :m_beam_jump do
     {:literal, other}
   end
 
-  defp update_value_dict([[lit, {:f, lbl}] | t], reg, d0) do
+  defp update_value_dict([lit, {:f, lbl} | t], reg, d0) do
     d =
       case d0 do
         %{^lbl => :unsafe} ->
@@ -258,7 +248,7 @@ defmodule :m_beam_jump do
           %{d0 | lbl => :unsafe}
 
         %{} ->
-          %{d0 | lbl => {reg, lit}}
+          Map.put(d0, lbl, {reg, lit})
       end
 
     update_value_dict(t, reg, d)
@@ -269,7 +259,7 @@ defmodule :m_beam_jump do
   end
 
   defp add_unsafe_label(l, d) do
-    %{d | l => :unsafe}
+    Map.put(d, l, :unsafe)
   end
 
   defp update_unsafe_labels(i, d) do
@@ -278,7 +268,7 @@ defmodule :m_beam_jump do
   end
 
   defp update_unsafe_labels_1([l | ls], d) do
-    update_unsafe_labels_1(ls, %{d | l => :unsafe})
+    update_unsafe_labels_1(ls, Map.put(d, l, :unsafe))
   end
 
   defp update_unsafe_labels_1([], d) do
@@ -309,7 +299,7 @@ defmodule :m_beam_jump do
         insert_labels(is, lc, [i | acc])
 
       true ->
-        insert_labels(is, lc + 1, [[{:label, lc}, i] | acc])
+        insert_labels(is, lc + 1, [{:label, lc}, i | acc])
     end
   end
 
@@ -345,13 +335,13 @@ defmodule :m_beam_jump do
 
     case dict0 do
       %{^seq => label} ->
-        lbls = %{lbls0 | l => label}
+        lbls = Map.put(lbls0, l, label)
         share_1(is, safe, dict0, lbls, [], [[lbl, {:jump, {:f, label}}] | acc])
 
       %{} ->
         case map_size(safe) === 0 or is_shareable(seq) do
           true ->
-            dict = %{dict0 | seq => l}
+            dict = Map.put(dict0, seq, l)
             share_1(is, safe, dict, lbls0, [], [[lbl | seq] | acc])
 
           false ->
@@ -387,7 +377,8 @@ defmodule :m_beam_jump do
 
   defp share_1(
          [
-           [{:jump, {:f, to}} = i, {:label, from} = lbl]
+           {:jump, {:f, to}} = i,
+           {:label, from} = lbl
            | is
          ],
          safe,
@@ -396,7 +387,7 @@ defmodule :m_beam_jump do
          _Seq,
          acc
        ) do
-    lbls = %{lbls0 | from => to}
+    lbls = Map.put(lbls0, from, to)
     share_1(is, safe, dict0, lbls, [], [[lbl, i] | acc])
   end
 
@@ -523,10 +514,10 @@ defmodule :m_beam_jump do
               a
 
             %{^l => other} ->
-              %{a | l => :ordsets.add_element(scope, other)}
+              Map.put(a, l, :ordsets.add_element(scope, other))
 
             %{} ->
-              %{a | l => [scope]}
+              Map.put(a, l, [scope])
           end
         end,
         safe0,
@@ -551,7 +542,7 @@ defmodule :m_beam_jump do
       false ->
         eliminate_fallthroughs(
           is,
-          [[lbl, {:jump, {:f, l}}] | acc]
+          [lbl, {:jump, {:f, l}} | acc]
         )
 
       true ->
@@ -611,14 +602,11 @@ defmodule :m_beam_jump do
     extract_seq_1(is, [line | acc])
   end
 
-  defp extract_seq_1(
-         [[{:label, _}, {:func_info, _, _, _}] | _],
-         _
-       ) do
+  defp extract_seq_1([{:label, _}, {:func_info, _, _, _} | _], _) do
     :no
   end
 
-  defp extract_seq_1([[{:label, lbl}, {:jump, {:f, lbl}}] | _], _) do
+  defp extract_seq_1([{:label, lbl}, {:jump, {:f, lbl}} | _], _) do
     :no
   end
 
@@ -708,15 +696,16 @@ defmodule :m_beam_jump do
     skip_unreachable(is, [i | acc], label_used([fail | vls], st))
   end
 
-  defp opt([[{:label, from} = i, {:label, to}] | is], acc, r_st(replace: replace) = st) do
-    opt([i | is], acc, r_st(st, replace: %{replace | to => from}))
+  defp opt([{:label, from} = i, {:label, to} | is], acc, r_st(replace: replace) = st) do
+    opt([i | is], acc, r_st(st, replace: Map.put(replace, to, from)))
   end
 
   defp opt(
          [
            {:jump, {:f, _} = x}
            | [
-               [{:label, _}, {:jump, x}]
+               {:label, _},
+               {:jump, x}
                | _
              ] = is
          ],
@@ -801,7 +790,7 @@ defmodule :m_beam_jump do
   end
 
   defp collect_labels_1([{:label, l} | is], label, entry, acc, st) do
-    collect_labels_1(is, label, entry, %{acc | l => label}, st)
+    collect_labels_1(is, label, entry, Map.put(acc, l, label), st)
   end
 
   defp collect_labels_1(is, _Label, _Entry, acc, st) do
@@ -984,7 +973,7 @@ defmodule :m_beam_jump do
   end
 
   defp initial_labels(
-         [[{:func_info, _, _, _}, {:label, lbl}] | _],
+         [{:func_info, _, _, _}, {:label, lbl} | _],
          acc
        ) do
     :cerl_sets.from_list([lbl | acc])
@@ -1007,18 +996,20 @@ defmodule :m_beam_jump do
     unshare_short(is, short)
   end
 
-  defp unshare_collect_short([[{:label, l}, :return] | is], map) do
-    unshare_collect_short(is, %{map | l => [:return]})
+  defp unshare_collect_short([{:label, l}, :return | is], map) do
+    unshare_collect_short(is, Map.put(map, l, [:return]))
   end
 
   defp unshare_collect_short(
          [
-           [{:label, l}, {:deallocate, _} = d, :return]
+           {:label, l},
+           {:deallocate, _} = d,
+           :return
            | is
          ],
          map
        ) do
-    unshare_collect_short(is, %{map | l => [d, :return]})
+    unshare_collect_short(is, Map.put(map, l, [d, :return]))
   end
 
   defp unshare_collect_short([_ | is], map) do

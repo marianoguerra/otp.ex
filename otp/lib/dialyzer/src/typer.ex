@@ -779,7 +779,7 @@ defmodule :m_typer do
     {:no_spec, opts}
   end
 
-  defp cl([['--plt', plt] | opts]) do
+  defp cl(['--plt', plt | opts]) do
     {{:plt, plt}, opts}
   end
 
@@ -794,7 +794,7 @@ defmodule :m_typer do
     end
   end
 
-  defp cl([['-I', dir] | opts]) do
+  defp cl(['-I', dir | opts]) do
     {{:inc, dir}, opts}
   end
 
@@ -825,11 +825,11 @@ defmodule :m_typer do
     {{:files_r, files}, restOpts}
   end
 
-  defp cl([['-pa', dir] | opts]) do
+  defp cl(['-pa', dir | opts]) do
     {{:pa, dir}, opts}
   end
 
-  defp cl([['-pz', dir] | opts]) do
+  defp cl(['-pz', dir | opts]) do
     {{:pz, dir}, opts}
   end
 

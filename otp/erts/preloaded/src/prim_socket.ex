@@ -32,10 +32,10 @@ defmodule :m_prim_socket do
     extra_1 =
       case useRegistry do
         :undefined ->
-          %{extra | :registry => pid}
+          Map.put(extra, :registry, pid)
 
         _ ->
-          %{extra | :registry => pid, :use_registry => useRegistry}
+          Map.merge(extra, %{registry: pid, use_registry: useRegistry})
       end
 
     extra_2 =
@@ -44,12 +44,11 @@ defmodule :m_prim_socket do
           extra_1
 
         _ ->
-          %{
-            extra_1
-            | :debug => true,
-              :socket_debug => true,
-              :debug_filename => enc_path(debugFilename)
-          }
+          Map.merge(extra_1, %{
+            debug: true,
+            socket_debug: true,
+            debug_filename: enc_path(debugFilename)
+          })
       end
 
     :ok =
@@ -163,11 +162,11 @@ defmodule :m_prim_socket do
   end
 
   def info(sockRef) do
-    %{:protocol => numProtocol} = info = nif_info(sockRef)
+    %{protocol: numProtocol} = info = nif_info(sockRef)
 
     case p_get(:protocols) do
       %{^numProtocol => [protocol | _]} ->
-        %{info | :protocol => protocol}
+        %{info | protocol: protocol}
 
       %{} ->
         info
@@ -175,15 +174,15 @@ defmodule :m_prim_socket do
   end
 
   def debug(d) do
-    nif_command(%{:command => :debug, :data => d})
+    nif_command(%{command: :debug, data: d})
   end
 
   def socket_debug(d) do
-    nif_command(%{:command => :socket_debug, :data => d})
+    nif_command(%{command: :socket_debug, data: d})
   end
 
   def use_registry(d) do
-    nif_command(%{:command => :use_registry, :data => d})
+    nif_command(%{command: :use_registry, data: d})
   end
 
   def supports() do
@@ -321,9 +320,9 @@ defmodule :m_prim_socket do
   def open(fD, opts) when is_map(opts) do
     try do
       case opts do
-        %{:protocol => protocol} ->
+        %{protocol: protocol} ->
           numProtocol = enc_protocol(protocol)
-          %{opts | :protocol => numProtocol}
+          %{opts | protocol: numProtocol}
 
         %{} ->
           opts
@@ -351,8 +350,8 @@ defmodule :m_prim_socket do
     try do
       {enc_protocol(protocol),
        case opts do
-         %{:netns => path} when is_list(path) ->
-           %{opts | :netns => enc_path(path)}
+         %{netns: path} when is_list(path) ->
+           %{opts | netns: enc_path(path)}
 
          _ ->
            opts
@@ -546,11 +545,11 @@ defmodule :m_prim_socket do
     else
       eFlags ->
         case nif_recvmsg(sockRef, recvRef, bufSz, ctrlSz, eFlags) do
-          {:ok, %{:ctrl => []}} = result ->
+          {:ok, %{ctrl: []}} = result ->
             result
 
-          {:ok, %{:ctrl => cmsgs} = msg} ->
-            {:ok, %{msg | :ctrl => dec_cmsgs(cmsgs, p_get(:protocols))}}
+          {:ok, %{ctrl: cmsgs} = msg} ->
+            {:ok, %{msg | ctrl: dec_cmsgs(cmsgs, p_get(:protocols))}}
 
           result ->
             result
@@ -717,23 +716,23 @@ defmodule :m_prim_socket do
     :erlang.error({:invalid, {:protocol, proto}})
   end
 
-  def enc_sockaddr(%{:family => :inet} = sockAddr) do
-    :maps.merge(%{:port => 0, :addr => :any}, sockAddr)
+  def enc_sockaddr(%{family: :inet} = sockAddr) do
+    :maps.merge(%{port: 0, addr: :any}, sockAddr)
   end
 
-  def enc_sockaddr(%{:family => :inet6} = sockAddr) do
+  def enc_sockaddr(%{family: :inet6} = sockAddr) do
     :maps.merge(
-      %{:port => 0, :addr => :any, :flowinfo => 0, :scope_id => 0},
+      %{port: 0, addr: :any, flowinfo: 0, scope_id: 0},
       sockAddr
     )
   end
 
-  def enc_sockaddr(%{:family => :local, :path => path} = sockAddr) do
+  def enc_sockaddr(%{family: :local, path: path} = sockAddr) do
     cond do
       is_list(path) and 0 <= length(path) and
           length(path) <= 255 ->
         binPath = enc_path(path)
-        enc_sockaddr(%{sockAddr | :path => binPath})
+        enc_sockaddr(Map.put(sockAddr, :path, binPath))
 
       is_binary(path) and 0 <= byte_size(path) and
           byte_size(path) <= 255 ->
@@ -744,11 +743,11 @@ defmodule :m_prim_socket do
     end
   end
 
-  def enc_sockaddr(%{:family => :local} = sockAddr) do
+  def enc_sockaddr(%{family: :local} = sockAddr) do
     :erlang.error({:invalid, {:sockaddr, sockAddr, :path}})
   end
 
-  def enc_sockaddr(%{:family => _} = sockAddr) do
+  def enc_sockaddr(%{family: _} = sockAddr) do
     sockAddr
   end
 
@@ -804,11 +803,11 @@ defmodule :m_prim_socket do
     :erlang.error({:invalid, {:msg_flags, flags}})
   end
 
-  defp enc_msg(%{:ctrl => []} = m) do
+  defp enc_msg(%{ctrl: []} = m) do
     enc_msg(:maps.remove(:ctrl, m))
   end
 
-  defp enc_msg(%{:iov => iOV} = m)
+  defp enc_msg(%{iov: iOV} = m)
        when is_list(iOV) and
               iOV !== [] do
     :maps.map(
@@ -834,7 +833,7 @@ defmodule :m_prim_socket do
   end
 
   defp enc_cmsgs(cmsgs, protocols) do
-    for %{:level => level} = cmsg <- cmsgs do
+    for %{level: level} = cmsg <- cmsgs do
       cond do
         is_atom(level) ->
           case protocols do
@@ -842,7 +841,7 @@ defmodule :m_prim_socket do
               cmsg
 
             %{^level => l} ->
-              %{cmsg | :level => l}
+              %{cmsg | level: l}
 
             %{} ->
               throw({:invalid, {:protocol, level}})
@@ -855,10 +854,10 @@ defmodule :m_prim_socket do
   end
 
   defp dec_cmsgs(cmsgs, protocols) do
-    for %{:level => level} = cmsg <- cmsgs do
+    for %{level: level} = cmsg <- cmsgs do
       case protocols do
         %{^level => [l | _]} when is_integer(level) ->
-          %{cmsg | :level => l}
+          %{cmsg | level: l}
 
         %{} ->
           cmsg

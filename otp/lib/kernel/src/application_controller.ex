@@ -1932,14 +1932,14 @@ defmodule :m_application_controller do
           true ->
             :erlang.apply(:logger, :macro_log, [
               %{
-                :mfa => {:application_controller, :do_change_apps, 3},
-                :line => 1553,
-                :file => 'otp/lib/kernel/src/application_controller.erl'
+                mfa: {:application_controller, :do_change_apps, 3},
+                line: 1553,
+                file: 'otp/lib/kernel/src/application_controller.erl'
               },
               :error,
               '~tp: ~w: ~ts~n',
               [sysFName, line, str],
-              %{:error_logger => %{:tag => :error}}
+              %{error_logger: %{tag: :error}}
             ])
 
           false ->
@@ -2026,7 +2026,7 @@ defmodule :m_application_controller do
     end
   end
 
-  defp conv([[key, val] | t]) do
+  defp conv([key, val | t]) do
     [{make_term(key), make_term(val)} | conv(t)]
   end
 
@@ -2055,14 +2055,14 @@ defmodule :m_application_controller do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:application_controller, :handle_make_term_error, 3},
-            :line => 1633,
-            :file => 'otp/lib/kernel/src/application_controller.erl'
+            mfa: {:application_controller, :handle_make_term_error, 3},
+            line: 1633,
+            file: 'otp/lib/kernel/src/application_controller.erl'
           },
           :error,
           'application_controller: ~ts: ~ts~n',
           [mod.format_error(reason), str],
-          %{:error_logger => %{:tag => :error}}
+          %{error_logger: %{tag: :error}}
         ])
 
       false ->
@@ -2474,23 +2474,23 @@ defmodule :m_application_controller do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:application_controller, :info_started, 2},
-            :line => 1931,
-            :file => 'otp/lib/kernel/src/application_controller.erl'
+            mfa: {:application_controller, :info_started, 2},
+            line: 1931,
+            file: 'otp/lib/kernel/src/application_controller.erl'
           },
           :info,
           %{
-            :label => {:application_controller, :progress},
-            :report => [{:application, name}, {:started_at, node}]
+            label: {:application_controller, :progress},
+            report: [{:application, name}, {:started_at, node}]
           },
           %{
-            :domain => [:otp, :sasl],
-            :report_cb => &:application_controller.format_log/2,
-            :logger_formatter => %{:title => 'PROGRESS REPORT'},
-            :error_logger => %{
-              :tag => :info_report,
-              :type => :progress,
-              :report_cb => &:application_controller.format_log/1
+            domain: [:otp, :sasl],
+            report_cb: &:application_controller.format_log/2,
+            logger_formatter: %{title: 'PROGRESS REPORT'},
+            error_logger: %{
+              tag: :info_report,
+              type: :progress,
+              report_cb: &:application_controller.format_log/1
             }
           }
         ])
@@ -2508,22 +2508,22 @@ defmodule :m_application_controller do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:application_controller, :info_exited, 3},
-            :line => 1943,
-            :file => 'otp/lib/kernel/src/application_controller.erl'
+            mfa: {:application_controller, :info_exited, 3},
+            line: 1943,
+            file: 'otp/lib/kernel/src/application_controller.erl'
           },
           :notice,
           %{
-            :label => {:application_controller, :exit},
-            :report => [{:application, name}, {:exited, reason}, {:type, type}]
+            label: {:application_controller, :exit},
+            report: [{:application, name}, {:exited, reason}, {:type, type}]
           },
           %{
-            :domain => [:otp],
-            :report_cb => &:application_controller.format_log/2,
-            :error_logger => %{
-              :tag => :info_report,
-              :type => :std_info,
-              :report_cb => &:application_controller.format_log/1
+            domain: [:otp],
+            report_cb: &:application_controller.format_log/2,
+            error_logger: %{
+              tag: :info_report,
+              type: :std_info,
+              report_cb: &:application_controller.format_log/1
             }
           }
         ])
@@ -2535,13 +2535,7 @@ defmodule :m_application_controller do
 
   def format_log(logReport) do
     depth = :error_logger.get_format_depth()
-
-    formatOpts = %{
-      :chars_limit => :unlimited,
-      :depth => depth,
-      :single_line => false,
-      :encoding => :utf8
-    }
+    formatOpts = %{chars_limit: :unlimited, depth: depth, single_line: false, encoding: :utf8}
 
     format_log_multi(
       limit_report(logReport, depth),
@@ -2555,47 +2549,38 @@ defmodule :m_application_controller do
 
   defp limit_report(
          %{
-           :label => {:application_controller, :progress},
-           :report => [{:application, _} = application, {:started_at, node}]
+           label: {:application_controller, :progress},
+           report: [{:application, _} = application, {:started_at, node}]
          } = logReport,
          depth
        ) do
-    %{logReport | :report => [application, {:started_at, :io_lib.limit_term(node, depth)}]}
+    Map.put(logReport, :report, [application, {:started_at, :io_lib.limit_term(node, depth)}])
   end
 
   defp limit_report(
          %{
-           :label => {:application_controller, :exit},
-           :report => [{:application, _} = application, {:exited, reason}, {:type, type}]
+           label: {:application_controller, :exit},
+           report: [{:application, _} = application, {:exited, reason}, {:type, type}]
          } = logReport,
          depth
        ) do
-    %{
-      logReport
-      | :report => [
-          application,
-          {:exited, :io_lib.limit_term(reason, depth)},
-          {:type, :io_lib.limit_term(type, depth)}
-        ]
-    }
+    Map.put(logReport, :report, [
+      application,
+      {:exited, :io_lib.limit_term(reason, depth)},
+      {:type, :io_lib.limit_term(type, depth)}
+    ])
   end
 
   def format_log(report, formatOpts0) do
-    default = %{
-      :chars_limit => :unlimited,
-      :depth => :unlimited,
-      :single_line => false,
-      :encoding => :utf8
-    }
-
+    default = %{chars_limit: :unlimited, depth: :unlimited, single_line: false, encoding: :utf8}
     formatOpts = :maps.merge(default, formatOpts0)
 
     ioOpts =
       case formatOpts do
-        %{:chars_limit => :unlimited} ->
+        %{chars_limit: :unlimited} ->
           []
 
-        %{:chars_limit => limit} ->
+        %{chars_limit: limit} ->
           [{:chars_limit, limit}]
       end
 
@@ -2605,10 +2590,10 @@ defmodule :m_application_controller do
 
   defp format_log_single(
          %{
-           :label => {:application_controller, :progress},
-           :report => [{:application, name}, {:started_at, node}]
+           label: {:application_controller, :progress},
+           report: [{:application, name}, {:started_at, node}]
          },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = 'Application: ' ++ p ++ '. Started at: ' ++ p ++ '.'
@@ -2627,10 +2612,10 @@ defmodule :m_application_controller do
 
   defp format_log_single(
          %{
-           :label => {:application_controller, :exit},
-           :report => [{:application, name}, {:exited, reason}, {:type, type}]
+           label: {:application_controller, :exit},
+           report: [{:application, name}, {:exited, reason}, {:type, type}]
          },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = :lists.append(['Application: ', p, '. Exited: ', p, '. Type: ', p, '.'])
@@ -2653,10 +2638,10 @@ defmodule :m_application_controller do
 
   defp format_log_multi(
          %{
-           :label => {:application_controller, :progress},
-           :report => [{:application, name}, {:started_at, node}]
+           label: {:application_controller, :progress},
+           report: [{:application, name}, {:started_at, node}]
          },
-         %{:depth => depth} = formatOpts
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = :lists.append(['    application: ', p, '~n', '    started_at: ', p, '~n'])
@@ -2675,10 +2660,10 @@ defmodule :m_application_controller do
 
   defp format_log_multi(
          %{
-           :label => {:application_controller, :exit},
-           :report => [{:application, name}, {:exited, reason}, {:type, type}]
+           label: {:application_controller, :exit},
+           report: [{:application, name}, {:exited, reason}, {:type, type}]
          },
-         %{:depth => depth} = formatOpts
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
 
@@ -2697,7 +2682,7 @@ defmodule :m_application_controller do
     {format, args}
   end
 
-  defp p(%{:single_line => single, :depth => depth, :encoding => enc}) do
+  defp p(%{single_line: single, depth: depth, encoding: enc}) do
     '~' ++ single(single) ++ mod(enc) ++ p(depth)
   end
 

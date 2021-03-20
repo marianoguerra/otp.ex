@@ -84,13 +84,13 @@ defmodule :m_edoc_scanner do
     scan_number(c, cs, toks, pos)
   end
 
-  defp scan1([[?-, c] | cs], toks, pos)
+  defp scan1([?-, c | cs], toks, pos)
        when c >= ?0 and
               c <= ?9 do
     scan_signed_number(?-, c, cs, toks, pos)
   end
 
-  defp scan1([[?+, c] | cs], toks, pos)
+  defp scan1([?+, c | cs], toks, pos)
        when c >= ?0 and
               c <= ?9 do
     scan_signed_number(?+, c, cs, toks, pos)
@@ -175,39 +175,39 @@ defmodule :m_edoc_scanner do
     end
   end
 
-  defp scan1([[?=, ?>] | cs], toks, pos) do
+  defp scan1([?=, ?> | cs], toks, pos) do
     scan1(cs, [{:"=>", pos} | toks], pos)
   end
 
-  defp scan1([[?<, ?<] | cs], toks, pos) do
+  defp scan1([?<, ?< | cs], toks, pos) do
     scan1(cs, [{:"<<", pos} | toks], pos)
   end
 
-  defp scan1([[?>, ?>] | cs], toks, pos) do
+  defp scan1([?>, ?> | cs], toks, pos) do
     scan1(cs, [{:">>", pos} | toks], pos)
   end
 
-  defp scan1([[?-, ?>] | cs], toks, pos) do
+  defp scan1([?-, ?> | cs], toks, pos) do
     scan1(cs, [{:->, pos} | toks], pos)
   end
 
-  defp scan1([[?:, ?=] | cs], toks, pos) do
+  defp scan1([?:, ?= | cs], toks, pos) do
     scan1(cs, [{:":=", pos} | toks], pos)
   end
 
-  defp scan1([[?:, ?:] | cs], toks, pos) do
+  defp scan1([?:, ?: | cs], toks, pos) do
     scan1(cs, [{:"::", pos} | toks], pos)
   end
 
-  defp scan1([[?/, ?/] | cs], toks, pos) do
+  defp scan1([?/, ?/ | cs], toks, pos) do
     scan1(cs, [{:"//", pos} | toks], pos)
   end
 
-  defp scan1([[?., ?., ?.] | cs], toks, pos) do
+  defp scan1([?., ?., ?. | cs], toks, pos) do
     scan1(cs, [{:..., pos} | toks], pos)
   end
 
-  defp scan1([[?., ?.] | cs], toks, pos) do
+  defp scan1([?., ?. | cs], toks, pos) do
     scan1(cs, [{:.., pos} | toks], pos)
   end
 
@@ -369,16 +369,15 @@ defmodule :m_edoc_scanner do
     {:error, :truncated_char}
   end
 
-  defp scan_escape([[o1, o2, o3] | cs], pos)
+  defp scan_escape([o1, o2, o3 | cs], pos)
        when o1 >= ?0 and
-              o1 <= ?3 and o2 >= ?0 and
-              o2 <= ?7 and o3 >= ?0 and
-              o3 <= ?7 do
+              o1 <= ?3 and o2 >= ?0 and o2 <= ?7 and
+              o3 >= ?0 and o3 <= ?7 do
     val = (o1 * 8 + o2) * 8 + o3 - 73 * ?0
     {val, cs, pos}
   end
 
-  defp scan_escape([[o1, o2] | cs], pos)
+  defp scan_escape([o1, o2 | cs], pos)
        when o1 >= ?0 and
               o1 <= ?7 and o2 >= ?0 and o2 <= ?7 do
     val = o1 * 8 + o2 - 9 * ?0
@@ -389,11 +388,11 @@ defmodule :m_edoc_scanner do
     {o1 - ?0, cs, pos}
   end
 
-  defp scan_escape([[?x, ?{] | cs], pos) do
+  defp scan_escape([?x, ?{ | cs], pos) do
     scan_hex(cs, pos, [])
   end
 
-  defp scan_escape([[?x, h1, h2] | cs], pos)
+  defp scan_escape([?x, h1, h2 | cs], pos)
        when (h1 >= ?0 and h1 <= ?9) or (h1 >= ?A and h1 <= ?F) or
               (h1 >= ?a and h1 <= ?f and
                  h2 >= ?0 and h2 <= ?9) or (h2 >= ?A and h2 <= ?F) or (h2 >= ?a and h2 <= ?f) do
@@ -401,7 +400,7 @@ defmodule :m_edoc_scanner do
     {val, cs, pos}
   end
 
-  defp scan_escape([[?^, c] | cs], pos) do
+  defp scan_escape([?^, c | cs], pos) do
     cond do
       c >= ?@ and c <= ?_ ->
         {c - ?@, cs, pos}
@@ -524,9 +523,9 @@ defmodule :m_edoc_scanner do
     {stack, cs, pos}
   end
 
-  defp scan_after_int([[?., c] | cs0], ncs0, toks, sPos, cPos)
+  defp scan_after_int([?., c | cs0], ncs0, toks, sPos, cPos)
        when c >= ?0 and c <= ?9 do
-    {ncs, cs, cPos1} = scan_integer(cs0, [[c, ?.] | ncs0], cPos)
+    {ncs, cs, cPos1} = scan_integer(cs0, [c, ?. | ncs0], cPos)
     scan_after_fraction(cs, ncs, toks, sPos, cPos1)
   end
 

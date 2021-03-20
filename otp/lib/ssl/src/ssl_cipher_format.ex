@@ -1036,17 +1036,17 @@ defmodule :m_ssl_cipher_format do
     connection_cb: :undefined
   )
 
-  def suite_map_to_str(%{:key_exchange => :null, :cipher => :null, :mac => :null, :prf => :null}) do
+  def suite_map_to_str(%{key_exchange: :null, cipher: :null, mac: :null, prf: :null}) do
     'TLS_EMPTY_RENEGOTIATION_INFO_SCSV'
   end
 
-  def suite_map_to_str(%{:key_exchange => :any, :cipher => cipher, :mac => :aead, :prf => pRF}) do
+  def suite_map_to_str(%{key_exchange: :any, cipher: cipher, mac: :aead, prf: pRF}) do
     'TLS_' ++
       :string.to_upper(:erlang.atom_to_list(cipher)) ++
       '_' ++ :string.to_upper(:erlang.atom_to_list(pRF))
   end
 
-  def suite_map_to_str(%{:key_exchange => kex, :cipher => cipher, :mac => :aead, :prf => pRF}) do
+  def suite_map_to_str(%{key_exchange: kex, cipher: cipher, mac: :aead, prf: pRF}) do
     'TLS_' ++
       :string.to_upper(:erlang.atom_to_list(kex)) ++
       '_WITH_' ++
@@ -1054,7 +1054,7 @@ defmodule :m_ssl_cipher_format do
       '_' ++ :string.to_upper(:erlang.atom_to_list(pRF))
   end
 
-  def suite_map_to_str(%{:key_exchange => kex, :cipher => cipher, :mac => mac}) do
+  def suite_map_to_str(%{key_exchange: kex, cipher: cipher, mac: mac}) do
     'TLS_' ++
       :string.to_upper(:erlang.atom_to_list(kex)) ++
       '_WITH_' ++
@@ -1063,7 +1063,7 @@ defmodule :m_ssl_cipher_format do
   end
 
   def suite_str_to_map('TLS_EMPTY_RENEGOTIATION_INFO_SCSV') do
-    %{:key_exchange => :null, :cipher => :null, :mac => :null, :prf => :null}
+    %{key_exchange: :null, cipher: :null, mac: :null, prf: :null}
   end
 
   def suite_str_to_map(suiteStr) do
@@ -1073,9 +1073,9 @@ defmodule :m_ssl_cipher_format do
       [rest] ->
         tls_1_3_suite_str_to_map(rest)
 
-      [[prefix, kex] | rest]
-      when prefix == 'SPR' or
-             prefix == 'PSK' or prefix == 'DHE' or prefix == 'ECDHE' ->
+      [prefix, kex | rest]
+      when prefix == 'SPR' or prefix == 'PSK' or
+             prefix == 'DHE' or prefix == 'ECDHE' ->
         pre_tls_1_3_suite_str_to_map(prefix ++ '_' ++ kex, rest)
 
       [kex | rest] ->
@@ -1083,15 +1083,15 @@ defmodule :m_ssl_cipher_format do
     end
   end
 
-  def suite_map_to_openssl_str(%{:key_exchange => :any, :mac => :aead} = suite) do
+  def suite_map_to_openssl_str(%{key_exchange: :any, mac: :aead} = suite) do
     suite_map_to_str(suite)
   end
 
-  def suite_map_to_openssl_str(%{:key_exchange => :null} = suite) do
+  def suite_map_to_openssl_str(%{key_exchange: :null} = suite) do
     suite_map_to_str(suite)
   end
 
-  def suite_map_to_openssl_str(%{:key_exchange => :rsa = kex, :cipher => cipher, :mac => mac})
+  def suite_map_to_openssl_str(%{key_exchange: :rsa = kex, cipher: cipher, mac: mac})
       when cipher == 'des_cbc' or cipher == '3des_ede_cbc' do
     openssl_cipher_name(
       kex,
@@ -1100,9 +1100,9 @@ defmodule :m_ssl_cipher_format do
   end
 
   def suite_map_to_openssl_str(%{
-        :key_exchange => kex,
-        :cipher => :chacha20_poly1305 = cipher,
-        :mac => :aead
+        key_exchange: kex,
+        cipher: :chacha20_poly1305 = cipher,
+        mac: :aead
       }) do
     openssl_suite_start(:string.to_upper(:erlang.atom_to_list(kex))) ++
       openssl_cipher_name(
@@ -1111,12 +1111,7 @@ defmodule :m_ssl_cipher_format do
       )
   end
 
-  def suite_map_to_openssl_str(%{
-        :key_exchange => kex,
-        :cipher => cipher,
-        :mac => :aead,
-        :prf => pRF
-      }) do
+  def suite_map_to_openssl_str(%{key_exchange: kex, cipher: cipher, mac: :aead, prf: pRF}) do
     openssl_suite_start(:string.to_upper(:erlang.atom_to_list(kex))) ++
       openssl_cipher_name(
         kex,
@@ -1124,7 +1119,7 @@ defmodule :m_ssl_cipher_format do
       ) ++ '-' ++ :string.to_upper(:erlang.atom_to_list(pRF))
   end
 
-  def suite_map_to_openssl_str(%{:key_exchange => kex, :cipher => cipher, :mac => mac}) do
+  def suite_map_to_openssl_str(%{key_exchange: kex, cipher: cipher, mac: mac}) do
     openssl_suite_start(:string.to_upper(:erlang.atom_to_list(kex))) ++
       openssl_cipher_name(
         kex,
@@ -1225,642 +1220,622 @@ defmodule :m_ssl_cipher_format do
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 0::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :null, :cipher => :null, :mac => :null, :prf => :null}
+    %{key_exchange: :null, cipher: :null, mac: :null, prf: :null}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 255::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :null, :cipher => :null, :mac => :null, :prf => :null}
+    %{key_exchange: :null, cipher: :null, mac: :null, prf: :null}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 4::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :rc4_128, :mac => :md5, :prf => :default_prf}
+    %{key_exchange: :rsa, cipher: :rc4_128, mac: :md5, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 5::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 9::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :des_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa, cipher: :des_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 10::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 18::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_dss, :cipher => :des_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_dss, cipher: :des_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 19::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_dss, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_dss, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 21::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :des_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_rsa, cipher: :des_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 22::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_rsa, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 47::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 50::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_dss, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_dss, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 51::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_rsa, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 53::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 56::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_dss, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_dss, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 57::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_rsa, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 60::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :rsa, cipher: :aes_128_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 61::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :aes_256_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :rsa, cipher: :aes_256_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 64::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_dss, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :dhe_dss, cipher: :aes_128_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 103::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :dhe_rsa, cipher: :aes_128_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 106::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_dss, :cipher => :aes_256_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :dhe_dss, cipher: :aes_256_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 107::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :aes_256_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :dhe_rsa, cipher: :aes_256_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 24::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :rc4_128, :mac => :md5, :prf => :default_prf}
+    %{key_exchange: :dh_anon, cipher: :rc4_128, mac: :md5, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 26::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :des_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dh_anon, cipher: :des_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 27::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dh_anon, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 52::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dh_anon, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 58::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dh_anon, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 108::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :dh_anon, cipher: :aes_128_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 109::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :aes_256_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :dh_anon, cipher: :aes_256_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 138::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :psk, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 139::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :psk, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 140::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :psk, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 141::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :psk, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 142::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_psk, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 143::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_psk, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 144::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_psk, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 145::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_psk, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 146::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa_psk, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 147::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa_psk, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 148::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa_psk, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 149::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa_psk, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 44::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :null, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :psk, cipher: :null, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 45::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :null, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :dhe_psk, cipher: :null, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 46::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :null, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :rsa_psk, cipher: :null, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 168::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :psk, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 169::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :psk, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 170::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dhe_psk, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 171::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :dhe_psk, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 172::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :rsa_psk, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 173::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :rsa_psk, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 174::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :psk, cipher: :aes_128_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 175::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_256_cbc, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :psk, cipher: :aes_256_cbc, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 178::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :dhe_psk, cipher: :aes_128_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 179::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_256_cbc, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :dhe_psk, cipher: :aes_256_cbc, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 182::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :rsa_psk, cipher: :aes_128_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 183::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :aes_256_cbc, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :rsa_psk, cipher: :aes_256_cbc, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 176::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :null, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :psk, cipher: :null, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 177::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :null, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :psk, cipher: :null, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 180::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :null, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :dhe_psk, cipher: :null, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 181::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :null, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :dhe_psk, cipher: :null, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 184::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :null, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :rsa_psk, cipher: :null, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 185::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa_psk, :cipher => :null, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :rsa_psk, cipher: :null, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 51::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_psk, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 52::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_psk, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 53::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_psk, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 54::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_psk, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 55::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :ecdhe_psk, cipher: :aes_128_cbc, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 56::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :aes_256_cbc, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :ecdhe_psk, cipher: :aes_256_cbc, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 58::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :null, :mac => :sha256, :prf => :default_prf}
+    %{key_exchange: :ecdhe_psk, cipher: :null, mac: :sha256, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 59::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :null, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :ecdhe_psk, cipher: :null, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<208::size(8)-unsigned-big-integer, 1::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :aes_128_gcm, :mac => :null, :prf => :sha256}
+    %{key_exchange: :ecdhe_psk, cipher: :aes_128_gcm, mac: :null, prf: :sha256}
   end
 
   def suite_bin_to_map(<<208::size(8)-unsigned-big-integer, 2::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :aes_256_gcm, :mac => :null, :prf => :sha384}
+    %{key_exchange: :ecdhe_psk, cipher: :aes_256_gcm, mac: :null, prf: :sha384}
   end
 
   def suite_bin_to_map(<<208::size(8)-unsigned-big-integer, 5::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :aes_128_ccm, :mac => :null, :prf => :sha256}
+    %{key_exchange: :ecdhe_psk, cipher: :aes_128_ccm, mac: :null, prf: :sha256}
   end
 
   def suite_bin_to_map(<<208::size(8)-unsigned-big-integer, 3::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_psk, :cipher => :aes_128_ccm_8, :mac => :null, :prf => :sha256}
+    %{key_exchange: :ecdhe_psk, cipher: :aes_128_ccm_8, mac: :null, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 26::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_anon, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_anon, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 27::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_rsa, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_rsa, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 28::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_dss, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_dss, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 29::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_anon, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_anon, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 30::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_rsa, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_rsa, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 31::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_dss, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_dss, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 32::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_anon, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_anon, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 33::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_rsa, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_rsa, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 34::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :srp_dss, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :srp_dss, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 1::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_ecdsa, :cipher => :null, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_ecdsa, cipher: :null, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 2::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_ecdsa, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_ecdsa, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 3::size(8)-unsigned-big-integer>>) do
-    %{
-      :key_exchange => :ecdh_ecdsa,
-      :cipher => :"3des_ede_cbc",
-      :mac => :sha,
-      :prf => :default_prf
-    }
+    %{key_exchange: :ecdh_ecdsa, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 4::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_ecdsa, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_ecdsa, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 5::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_ecdsa, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_ecdsa, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 6::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_ecdsa, :cipher => :null, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_ecdsa, cipher: :null, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 7::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_ecdsa, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_ecdsa, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 8::size(8)-unsigned-big-integer>>) do
-    %{
-      :key_exchange => :ecdhe_ecdsa,
-      :cipher => :"3des_ede_cbc",
-      :mac => :sha,
-      :prf => :default_prf
-    }
+    %{key_exchange: :ecdhe_ecdsa, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 9::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_ecdsa, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_ecdsa, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 10::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_ecdsa, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_ecdsa, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 11::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :null, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_rsa, cipher: :null, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 12::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_rsa, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 13::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_rsa, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 14::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_rsa, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 15::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_rsa, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 16::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :null, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_rsa, cipher: :null, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 17::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_rsa, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 18::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_rsa, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 19::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_rsa, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 20::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdhe_rsa, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 21::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_anon, :cipher => :null, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_anon, cipher: :null, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 22::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_anon, :cipher => :rc4_128, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_anon, cipher: :rc4_128, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 23::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_anon, :cipher => :"3des_ede_cbc", :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_anon, cipher: :"3des_ede_cbc", mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 24::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_anon, :cipher => :aes_128_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_anon, cipher: :aes_128_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 25::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_anon, :cipher => :aes_256_cbc, :mac => :sha, :prf => :default_prf}
+    %{key_exchange: :ecdh_anon, cipher: :aes_256_cbc, mac: :sha, prf: :default_prf}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 35::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_ecdsa, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :sha256}
+    %{key_exchange: :ecdhe_ecdsa, cipher: :aes_128_cbc, mac: :sha256, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 36::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_ecdsa, :cipher => :aes_256_cbc, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :ecdhe_ecdsa, cipher: :aes_256_cbc, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 37::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_ecdsa, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :sha256}
+    %{key_exchange: :ecdh_ecdsa, cipher: :aes_128_cbc, mac: :sha256, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 38::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_ecdsa, :cipher => :aes_256_cbc, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :ecdh_ecdsa, cipher: :aes_256_cbc, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 39::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :sha256}
+    %{key_exchange: :ecdhe_rsa, cipher: :aes_128_cbc, mac: :sha256, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 40::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :aes_256_cbc, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :ecdhe_rsa, cipher: :aes_256_cbc, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 41::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :aes_128_cbc, :mac => :sha256, :prf => :sha256}
+    %{key_exchange: :ecdh_rsa, cipher: :aes_128_cbc, mac: :sha256, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 42::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :aes_256_cbc, :mac => :sha384, :prf => :sha384}
+    %{key_exchange: :ecdh_rsa, cipher: :aes_256_cbc, mac: :sha384, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 156::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 157::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :rsa, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 158::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dhe_rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 159::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :dhe_rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 160::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_rsa, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dh_rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 161::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_rsa, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :dh_rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 162::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_dss, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dhe_dss, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 163::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_dss, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :dhe_dss, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 164::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_dss, :cipher => :aes_128_gcm, :mac => :null, :prf => :sha256}
+    %{key_exchange: :dh_dss, cipher: :aes_128_gcm, mac: :null, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 165::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_dss, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :dh_dss, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 166::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dh_anon, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<0::size(8)-unsigned-big-integer, 167::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dh_anon, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :dh_anon, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 43::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_ecdsa, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :ecdhe_ecdsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 44::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_ecdsa, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :ecdhe_ecdsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 45::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_ecdsa, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :ecdh_ecdsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 46::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_ecdsa, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :ecdh_ecdsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 47::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :ecdhe_rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 48::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :ecdhe_rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 49::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :ecdh_rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 50::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdh_rsa, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :ecdh_rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 164::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_128_ccm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :psk, cipher: :aes_128_ccm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 165::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_256_ccm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :psk, cipher: :aes_256_ccm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 166::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_128_ccm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dhe_psk, cipher: :aes_128_ccm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 167::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_256_ccm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dhe_psk, cipher: :aes_256_ccm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 168::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_128_ccm_8, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :psk, cipher: :aes_128_ccm_8, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 169::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :psk, :cipher => :aes_256_ccm_8, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :psk, cipher: :aes_256_ccm_8, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 170::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_128_ccm_8, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dhe_psk, cipher: :aes_128_ccm_8, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<192::size(8)-unsigned-big-integer, 171::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_psk, :cipher => :aes_256_ccm_8, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dhe_psk, cipher: :aes_256_ccm_8, mac: :aead, prf: :sha256}
   end
 
-  def suite_bin_to_map(%{
-        :key_exchange => :psk_dhe,
-        :cipher => :aes_256_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_bin_to_map(%{key_exchange: :psk_dhe, cipher: :aes_256_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 171::size(8)-unsigned-big-integer>>
   end
 
   def suite_bin_to_map(<<204::size(8)-unsigned-big-integer, 168::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :ecdhe_rsa, :cipher => :chacha20_poly1305, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :ecdhe_rsa, cipher: :chacha20_poly1305, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<204::size(8)-unsigned-big-integer, 169::size(8)-unsigned-big-integer>>) do
-    %{
-      :key_exchange => :ecdhe_ecdsa,
-      :cipher => :chacha20_poly1305,
-      :mac => :aead,
-      :prf => :sha256
-    }
+    %{key_exchange: :ecdhe_ecdsa, cipher: :chacha20_poly1305, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<204::size(8)-unsigned-big-integer, 170::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :dhe_rsa, :cipher => :chacha20_poly1305, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :dhe_rsa, cipher: :chacha20_poly1305, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<19::size(8)-unsigned-big-integer, 1::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :any, :cipher => :aes_128_gcm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :any, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<19::size(8)-unsigned-big-integer, 2::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :any, :cipher => :aes_256_gcm, :mac => :aead, :prf => :sha384}
+    %{key_exchange: :any, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}
   end
 
   def suite_bin_to_map(<<19::size(8)-unsigned-big-integer, 3::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :any, :cipher => :chacha20_poly1305, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :any, cipher: :chacha20_poly1305, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<19::size(8)-unsigned-big-integer, 4::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :any, :cipher => :aes_128_ccm, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :any, cipher: :aes_128_ccm, mac: :aead, prf: :sha256}
   end
 
   def suite_bin_to_map(<<19::size(8)-unsigned-big-integer, 5::size(8)-unsigned-big-integer>>) do
-    %{:key_exchange => :any, :cipher => :aes_128_ccm_8, :mac => :aead, :prf => :sha256}
+    %{key_exchange: :any, cipher: :aes_128_ccm_8, mac: :aead, prf: :sha256}
   end
 
   def suite_legacy(bin) when is_binary(bin) do
     suite_legacy(suite_bin_to_map(bin))
   end
 
-  def suite_legacy(%{:key_exchange => keyExchange, :cipher => cipher, :mac => hash, :prf => prf}) do
+  def suite_legacy(%{key_exchange: keyExchange, cipher: cipher, mac: hash, prf: prf}) do
     case prf do
       :default_prf ->
         {keyExchange, cipher, hash}
@@ -1870,958 +1845,728 @@ defmodule :m_ssl_cipher_format do
     end
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa, :cipher => :rc4_128, :mac => :md5}) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :rc4_128, mac: :md5}) do
     <<0::size(8)-unsigned-big-integer, 4::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :rc4_128, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 5::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa, :cipher => :des_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :des_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 9::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 10::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_dss, :cipher => :des_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_dss, cipher: :des_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 18::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_dss, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_dss, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 19::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_rsa, :cipher => :des_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :des_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 21::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_rsa, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 22::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dh_anon, :cipher => :rc4_128, :mac => :md5}) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :rc4_128, mac: :md5}) do
     <<0::size(8)-unsigned-big-integer, 24::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dh_anon, :cipher => :des_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :des_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 26::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dh_anon, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 27::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_128_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 47::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_dss, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_dss, cipher: :aes_128_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 50::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_rsa, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_128_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 51::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dh_anon, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :aes_128_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 52::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_256_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 53::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_dss, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_dss, cipher: :aes_256_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 56::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_rsa, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_256_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 57::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dh_anon, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :aes_256_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 58::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa, :cipher => :aes_128_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_128_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 60::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa, :cipher => :aes_256_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_256_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 61::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_dss, :cipher => :aes_128_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_dss, cipher: :aes_128_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 64::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_rsa, :cipher => :aes_128_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_128_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 103::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_dss, :cipher => :aes_256_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_dss, cipher: :aes_256_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 106::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_rsa, :cipher => :aes_256_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_256_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 107::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dh_anon, :cipher => :aes_128_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :aes_128_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 108::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dh_anon, :cipher => :aes_256_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :aes_256_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 109::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :rc4_128, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 138::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 139::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_128_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 140::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_256_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 141::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :rc4_128, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 142::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 143::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_128_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 144::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_256_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 145::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :rc4_128, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 146::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 147::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :aes_128_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 148::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :aes_256_cbc, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 149::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :null, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :null, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 44::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :null, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :null, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 45::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :null, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :null, mac: :sha}) do
     <<0::size(8)-unsigned-big-integer, 46::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :psk,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 168::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :psk,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 169::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_psk,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 170::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_psk,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 171::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :rsa_psk,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 172::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :rsa_psk,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 173::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :aes_128_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_128_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 174::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :aes_256_cbc, :mac => :sha384}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_256_cbc, mac: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 175::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :aes_128_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_128_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 178::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :aes_256_cbc, :mac => :sha384}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_256_cbc, mac: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 179::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :aes_128_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :aes_128_cbc, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 182::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :aes_256_cbc, :mac => :sha384}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :aes_256_cbc, mac: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 183::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :null, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :null, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 176::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :psk, :cipher => :null, :mac => :sha384}) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :null, mac: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 177::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :null, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :null, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 180::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :dhe_psk, :cipher => :null, :mac => :sha384}) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :null, mac: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 181::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :null, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :null, mac: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 184::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :rsa_psk, :cipher => :null, :mac => :sha384}) do
+  def suite_map_to_bin(%{key_exchange: :rsa_psk, cipher: :null, mac: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 185::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_psk, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :rc4_128, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 51::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_psk, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 52::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_psk, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 53::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_psk, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 54::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_psk, :cipher => :aes_128_cbc, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :aes_128_cbc, mac: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 55::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_psk, :cipher => :aes_256_cbc, :mac => :sha384}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :aes_256_cbc, mac: :sha384}) do
     <<192::size(8)-unsigned-big-integer, 56::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_psk, :cipher => :null, :mac => :sha256}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :null, mac: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 58::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_psk, :cipher => :null, :mac => :sha384}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :null, mac: :sha384}) do
     <<192::size(8)-unsigned-big-integer, 59::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_psk,
-        :cipher => :aes_128_gcm,
-        :mac => :null,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :aes_128_gcm, mac: :null, prf: :sha256}) do
     <<208::size(8)-unsigned-big-integer, 1::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_psk,
-        :cipher => :aes_256_gcm,
-        :mac => :null,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :aes_256_gcm, mac: :null, prf: :sha384}) do
     <<208::size(8)-unsigned-big-integer, 2::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_psk,
-        :cipher => :aes_128_ccm_8,
-        :mac => :null,
-        :prf => :sha256
+        key_exchange: :ecdhe_psk,
+        cipher: :aes_128_ccm_8,
+        mac: :null,
+        prf: :sha256
       }) do
     <<208::size(8)-unsigned-big-integer, 3::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_psk,
-        :cipher => :aes_128_ccm,
-        :mac => :null,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_psk, cipher: :aes_128_ccm, mac: :null, prf: :sha256}) do
     <<208::size(8)-unsigned-big-integer, 5::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_anon, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_anon, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 26::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_rsa, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_rsa, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 27::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_dss, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_dss, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 28::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_anon, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_anon, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 29::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_rsa, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_rsa, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 30::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_dss, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_dss, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 31::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_anon, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_anon, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 32::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_rsa, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_rsa, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 33::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :srp_dss, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :srp_dss, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 34::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_ecdsa, :cipher => :null, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_ecdsa, cipher: :null, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 1::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_ecdsa, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_ecdsa, cipher: :rc4_128, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 2::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_ecdsa, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_ecdsa, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 3::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_ecdsa, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_ecdsa, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 4::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_ecdsa, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_ecdsa, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 5::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_ecdsa, :cipher => :null, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_ecdsa, cipher: :null, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 6::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_ecdsa, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_ecdsa, cipher: :rc4_128, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 7::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_ecdsa, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_ecdsa, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 8::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_ecdsa, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_ecdsa, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 9::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_ecdsa, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_ecdsa, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 10::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_rsa, :cipher => :null, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_rsa, cipher: :null, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 11::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_rsa, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_rsa, cipher: :rc4_128, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 12::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_rsa, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_rsa, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 13::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_rsa, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_rsa, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 14::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_rsa, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_rsa, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 15::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_rsa, :cipher => :null, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_rsa, cipher: :null, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 16::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_rsa, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_rsa, cipher: :rc4_128, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 17::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_rsa, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_rsa, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 18::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_rsa, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_rsa, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 19::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdhe_rsa, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_rsa, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 20::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_anon, :cipher => :null, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_anon, cipher: :null, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 21::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_anon, :cipher => :rc4_128, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_anon, cipher: :rc4_128, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 22::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_anon, :cipher => :"3des_ede_cbc", :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_anon, cipher: :"3des_ede_cbc", mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 23::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_anon, :cipher => :aes_128_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_anon, cipher: :aes_128_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 24::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{:key_exchange => :ecdh_anon, :cipher => :aes_256_cbc, :mac => :sha}) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_anon, cipher: :aes_256_cbc, mac: :sha}) do
     <<192::size(8)-unsigned-big-integer, 25::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_ecdsa,
-        :cipher => :aes_128_cbc,
-        :mac => :sha256,
-        :prf => :sha256
+        key_exchange: :ecdhe_ecdsa,
+        cipher: :aes_128_cbc,
+        mac: :sha256,
+        prf: :sha256
       }) do
     <<192::size(8)-unsigned-big-integer, 35::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_ecdsa,
-        :cipher => :aes_256_cbc,
-        :mac => :sha384,
-        :prf => :sha384
+        key_exchange: :ecdhe_ecdsa,
+        cipher: :aes_256_cbc,
+        mac: :sha384,
+        prf: :sha384
       }) do
     <<192::size(8)-unsigned-big-integer, 36::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdh_ecdsa,
-        :cipher => :aes_128_cbc,
-        :mac => :sha256,
-        :prf => :sha256
+        key_exchange: :ecdh_ecdsa,
+        cipher: :aes_128_cbc,
+        mac: :sha256,
+        prf: :sha256
       }) do
     <<192::size(8)-unsigned-big-integer, 37::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdh_ecdsa,
-        :cipher => :aes_256_cbc,
-        :mac => :sha384,
-        :prf => :sha384
+        key_exchange: :ecdh_ecdsa,
+        cipher: :aes_256_cbc,
+        mac: :sha384,
+        prf: :sha384
       }) do
     <<192::size(8)-unsigned-big-integer, 38::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_rsa,
-        :cipher => :aes_128_cbc,
-        :mac => :sha256,
-        :prf => :sha256
+        key_exchange: :ecdhe_rsa,
+        cipher: :aes_128_cbc,
+        mac: :sha256,
+        prf: :sha256
       }) do
     <<192::size(8)-unsigned-big-integer, 39::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_rsa,
-        :cipher => :aes_256_cbc,
-        :mac => :sha384,
-        :prf => :sha384
+        key_exchange: :ecdhe_rsa,
+        cipher: :aes_256_cbc,
+        mac: :sha384,
+        prf: :sha384
       }) do
     <<192::size(8)-unsigned-big-integer, 40::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdh_rsa,
-        :cipher => :aes_128_cbc,
-        :mac => :sha256,
-        :prf => :sha256
+        key_exchange: :ecdh_rsa,
+        cipher: :aes_128_cbc,
+        mac: :sha256,
+        prf: :sha256
       }) do
     <<192::size(8)-unsigned-big-integer, 41::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdh_rsa,
-        :cipher => :aes_256_cbc,
-        :mac => :sha384,
-        :prf => :sha384
+        key_exchange: :ecdh_rsa,
+        cipher: :aes_256_cbc,
+        mac: :sha384,
+        prf: :sha384
       }) do
     <<192::size(8)-unsigned-big-integer, 42::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :rsa,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 156::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :rsa,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 157::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_rsa,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 158::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_rsa,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 159::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dh_rsa,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dh_rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 160::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dh_rsa,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dh_rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 161::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_dss,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_dss, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 162::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_dss,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_dss, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 163::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dh_dss,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dh_dss, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 164::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dh_dss,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dh_dss, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 165::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dh_anon,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<0::size(8)-unsigned-big-integer, 166::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dh_anon,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dh_anon, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<0::size(8)-unsigned-big-integer, 167::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_ecdsa,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
+        key_exchange: :ecdhe_ecdsa,
+        cipher: :aes_128_gcm,
+        mac: :aead,
+        prf: :sha256
       }) do
     <<192::size(8)-unsigned-big-integer, 43::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_ecdsa,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
+        key_exchange: :ecdhe_ecdsa,
+        cipher: :aes_256_gcm,
+        mac: :aead,
+        prf: :sha384
       }) do
     <<192::size(8)-unsigned-big-integer, 44::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdh_ecdsa,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
+        key_exchange: :ecdh_ecdsa,
+        cipher: :aes_128_gcm,
+        mac: :aead,
+        prf: :sha256
       }) do
     <<192::size(8)-unsigned-big-integer, 45::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdh_ecdsa,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
+        key_exchange: :ecdh_ecdsa,
+        cipher: :aes_256_gcm,
+        mac: :aead,
+        prf: :sha384
       }) do
     <<192::size(8)-unsigned-big-integer, 46::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_rsa,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 47::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_rsa,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :ecdhe_rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<192::size(8)-unsigned-big-integer, 48::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :ecdh_rsa,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_rsa, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 49::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :ecdh_rsa,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :ecdh_rsa, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<192::size(8)-unsigned-big-integer, 50::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_rsa,
-        :cipher => :chacha20_poly1305,
-        :mac => :aead,
-        :prf => :sha256
+        key_exchange: :ecdhe_rsa,
+        cipher: :chacha20_poly1305,
+        mac: :aead,
+        prf: :sha256
       }) do
     <<204::size(8)-unsigned-big-integer, 168::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :ecdhe_ecdsa,
-        :cipher => :chacha20_poly1305,
-        :mac => :aead,
-        :prf => :sha256
+        key_exchange: :ecdhe_ecdsa,
+        cipher: :chacha20_poly1305,
+        mac: :aead,
+        prf: :sha256
       }) do
     <<204::size(8)-unsigned-big-integer, 169::size(8)-unsigned-big-integer>>
   end
 
   def suite_map_to_bin(%{
-        :key_exchange => :dhe_rsa,
-        :cipher => :chacha20_poly1305,
-        :mac => :aead,
-        :prf => :sha256
+        key_exchange: :dhe_rsa,
+        cipher: :chacha20_poly1305,
+        mac: :aead,
+        prf: :sha256
       }) do
     <<204::size(8)-unsigned-big-integer, 170::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :psk,
-        :cipher => :aes_128_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_128_ccm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 164::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :psk,
-        :cipher => :aes_256_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_256_ccm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 165::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_psk,
-        :cipher => :aes_128_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_128_ccm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 166::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_psk,
-        :cipher => :aes_256_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_256_ccm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 167::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :rsa,
-        :cipher => :aes_128_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_128_ccm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 156::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :rsa,
-        :cipher => :aes_256_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_256_ccm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 157::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_rsa,
-        :cipher => :aes_128_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_128_ccm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 159::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_rsa,
-        :cipher => :aes_256_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_256_ccm, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 158::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :psk,
-        :cipher => :aes_128_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_128_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 168::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :psk,
-        :cipher => :aes_256_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :psk, cipher: :aes_256_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 169::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_psk,
-        :cipher => :aes_128_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_128_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 170::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_psk,
-        :cipher => :aes_256_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_psk, cipher: :aes_256_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 171::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :rsa,
-        :cipher => :aes_128_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_128_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 161::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :rsa,
-        :cipher => :aes_256_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :rsa, cipher: :aes_256_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 160::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_rsa,
-        :cipher => :aes_128_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_128_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 162::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :dhe_rsa,
-        :cipher => :aes_256_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :dhe_rsa, cipher: :aes_256_ccm_8, mac: :aead, prf: :sha256}) do
     <<192::size(8)-unsigned-big-integer, 163::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :any,
-        :cipher => :aes_128_gcm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :any, cipher: :aes_128_gcm, mac: :aead, prf: :sha256}) do
     <<19::size(8)-unsigned-big-integer, 1::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :any,
-        :cipher => :aes_256_gcm,
-        :mac => :aead,
-        :prf => :sha384
-      }) do
+  def suite_map_to_bin(%{key_exchange: :any, cipher: :aes_256_gcm, mac: :aead, prf: :sha384}) do
     <<19::size(8)-unsigned-big-integer, 2::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :any,
-        :cipher => :chacha20_poly1305,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :any, cipher: :chacha20_poly1305, mac: :aead, prf: :sha256}) do
     <<19::size(8)-unsigned-big-integer, 3::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :any,
-        :cipher => :aes_128_ccm,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :any, cipher: :aes_128_ccm, mac: :aead, prf: :sha256}) do
     <<19::size(8)-unsigned-big-integer, 4::size(8)-unsigned-big-integer>>
   end
 
-  def suite_map_to_bin(%{
-        :key_exchange => :any,
-        :cipher => :aes_128_ccm_8,
-        :mac => :aead,
-        :prf => :sha256
-      }) do
+  def suite_map_to_bin(%{key_exchange: :any, cipher: :aes_128_ccm_8, mac: :aead, prf: :sha256}) do
     <<19::size(8)-unsigned-big-integer, 5::size(8)-unsigned-big-integer>>
   end
 
   defp tls_1_3_suite_str_to_map(cipherStr) do
     {cipher, mac, prf} = cipher_str_to_algs(:any, cipherStr, '')
-    %{:key_exchange => :any, :mac => mac, :cipher => cipher, :prf => prf}
+    %{key_exchange: :any, mac: mac, cipher: cipher, prf: prf}
   end
 
   defp pre_tls_1_3_suite_str_to_map(kexStr, rest) do
     kex = algo_str_to_atom(kexStr)
     [cipherStr, algStr] = :string.split(rest, '_', :trailing)
     {cipher, mac, prf} = cipher_str_to_algs(kex, cipherStr, algStr)
-    %{:key_exchange => kex, :mac => mac, :cipher => cipher, :prf => prf}
+    %{key_exchange: kex, mac: mac, cipher: cipher, prf: prf}
   end
 
   defp cipher_str_to_algs(_, cipherStr, 'CCM' = end__) do
@@ -3072,7 +2817,7 @@ defmodule :m_ssl_cipher_format do
     kex = algo_str_to_atom(kex_name_from_openssl(kex0))
     [cipherStr, algStr] = :string.split(rest, '-', :trailing)
     {cipher, mac, prf} = openssl_cipher_str_to_algs(kex, cipherStr, algStr)
-    %{:key_exchange => kex, :mac => mac, :cipher => cipher, :prf => prf}
+    %{key_exchange: kex, mac: mac, cipher: cipher, prf: prf}
   end
 
   defp openssl_cipher_str_to_algs(_, cipherStr, 'CCM' = end__) do

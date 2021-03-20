@@ -7,7 +7,7 @@ defmodule :m_shell_docs do
     beam_language: :erlang,
     format: "application/erlang+html",
     module_doc: :undefined,
-    metadata: %{:otp_doc_vsn => {1, 0, 0}},
+    metadata: %{otp_doc_vsn: {1, 0, 0}},
     docs: :undefined
   )
 
@@ -264,7 +264,7 @@ defmodule :m_shell_docs do
     normalize_trim(t, trim)
   end
 
-  defp normalize_trim([[b1, b2] | t], trim)
+  defp normalize_trim([b1, b2 | t], trim)
        when is_binary(b1) and
               is_binary(b2) do
     normalize_trim(
@@ -703,13 +703,13 @@ defmodule :m_shell_docs do
     grouping =
       :lists.foldl(
         fn
-          {_Group, _Anno, _Sig, _Doc, %{:equiv => group}} = func, acc ->
+          {_Group, _Anno, _Sig, _Doc, %{equiv: group}} = func, acc ->
             members = :maps.get(group, acc, [])
-            %{acc | group => [func | members]}
+            Map.put(acc, group, [func | members])
 
           {group, _Anno, _Sig, _Doc, _Meta} = func, acc ->
             members = :maps.get(group, acc, [])
-            %{acc | group => [func | members]}
+            Map.put(acc, group, [func | members])
         end,
         %{},
         :lists.sort(fDocs)
@@ -760,7 +760,7 @@ defmodule :m_shell_docs do
     )
   end
 
-  defp render_signature({{_Type, _F, _A}, _Anno, _Sigs, _Docs, %{:signature => specs} = meta}) do
+  defp render_signature({{_Type, _F, _A}, _Anno, _Sigs, _Docs, %{signature: specs} = meta}) do
     :lists.flatmap(
       fn aSTSpec ->
         pPSpec =
@@ -815,16 +815,18 @@ defmodule :m_shell_docs do
     end
   end
 
-  defp render_meta_(%{:since => vsn} = m) do
+  defp render_meta_(%{since: vsn} = m) do
     [
-      [{:dt, [], "Since"}, {:dd, [], [vsn]}]
+      {:dt, [], "Since"},
+      {:dd, [], [vsn]}
       | render_meta_(:maps.remove(:since, m))
     ]
   end
 
-  defp render_meta_(%{:deprecated => depr} = m) do
+  defp render_meta_(%{deprecated: depr} = m) do
     [
-      [{:dt, [], "Deprecated"}, {:dd, [], [depr]}]
+      {:dt, [], "Deprecated"},
+      {:dd, [], [depr]}
       | render_meta_(:maps.remove(:deprecated, m))
     ]
   end
@@ -1108,7 +1110,7 @@ defmodule :m_shell_docs do
     render_docs(content, state, pos, ind, d)
   end
 
-  defp render_words(words, [[_, :types] | state], pos, ind, acc, cols) do
+  defp render_words(words, [_, :types | state], pos, ind, acc, cols) do
     render_words(words, state, pos, ind + 2, acc, cols)
   end
 
@@ -1148,7 +1150,7 @@ defmodule :m_shell_docs do
 
   defp render_type_signature(
          name,
-         r_config(docs: r_docs_v1(metadata: %{:types => allTypes}))
+         r_config(docs: r_docs_v1(metadata: %{types: allTypes}))
        ) do
     case (for type = {tName, _} <- :maps.keys(allTypes),
               tName === name do

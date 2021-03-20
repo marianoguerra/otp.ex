@@ -1142,7 +1142,7 @@ defmodule :m_ssl_alert do
          r_alert(
            level: level,
            description: description,
-           where: %{:line => line, :file => mod},
+           where: %{line: line, file: mod},
            role: role
          )
        ) do
@@ -1175,11 +1175,7 @@ defmodule :m_ssl_alert do
     r_alert(
       level: 2,
       description: 50,
-      where: %{
-        :mfa => {:ssl_alert, :decode, 3},
-        :line => 131,
-        :file => 'otp/lib/ssl/src/ssl_alert.erl'
-      },
+      where: %{mfa: {:ssl_alert, :decode, 3}, line: 131, file: 'otp/lib/ssl/src/ssl_alert.erl'},
       reason: :too_many_remote_alerts
     )
   end
@@ -1195,11 +1191,7 @@ defmodule :m_ssl_alert do
       r_alert(
         level: level,
         description: description,
-        where: %{
-          :mfa => {:ssl_alert, :decode, 3},
-          :line => 133,
-          :file => 'otp/lib/ssl/src/ssl_alert.erl'
-        }
+        where: %{mfa: {:ssl_alert, :decode, 3}, line: 133, file: 'otp/lib/ssl/src/ssl_alert.erl'}
       )
 
     decode(rest, [alert | acc], n + 1)
@@ -1216,11 +1208,7 @@ defmodule :m_ssl_alert do
       r_alert(
         level: level,
         description: description,
-        where: %{
-          :mfa => {:ssl_alert, :decode, 3},
-          :line => 136,
-          :file => 'otp/lib/ssl/src/ssl_alert.erl'
-        }
+        where: %{mfa: {:ssl_alert, :decode, 3}, line: 136, file: 'otp/lib/ssl/src/ssl_alert.erl'}
       )
 
     :lists.reverse([alert | acc])
@@ -1230,11 +1218,7 @@ defmodule :m_ssl_alert do
     r_alert(
       level: 2,
       description: 47,
-      where: %{
-        :mfa => {:ssl_alert, :decode, 3},
-        :line => 139,
-        :file => 'otp/lib/ssl/src/ssl_alert.erl'
-      },
+      where: %{mfa: {:ssl_alert, :decode, 3}, line: 139, file: 'otp/lib/ssl/src/ssl_alert.erl'},
       reason: :failed_to_decode_remote_alert
     )
   end

@@ -188,16 +188,17 @@ defmodule :m_binary do
 
   defp do_replace(h, [{a, b} | t], replacement, n) do
     [
-      [
-        :binary.part(h, {n, a - n}),
-        cond do
-          is_list(replacement) ->
-            do_insert(replacement, :binary.part(h, {a, b}))
+      :binary.part(h, {n, a - n}),
+      cond do
+        is_list(replacement) ->
+          do_insert(
+            replacement,
+            :binary.part(h, {a, b})
+          )
 
-          true ->
-            replacement
-        end
-      ]
+        true ->
+          replacement
+      end
       | do_replace(h, t, replacement, a + b)
     ]
   end
@@ -207,7 +208,7 @@ defmodule :m_binary do
   end
 
   defp do_insert([h | t], r) do
-    [[h, r] | do_insert(t, r)]
+    [h, r | do_insert(t, r)]
   end
 
   defp splitat(h, n, []) do

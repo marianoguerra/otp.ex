@@ -265,7 +265,11 @@ defmodule :m_asn1ct_gen_check do
     nameStr = :erlang.atom_to_list(name)
 
     [
-      [nameStr, '(', defMarker, ') ->\n', 'true;\n']
+      nameStr,
+      '(',
+      defMarker,
+      ') ->\n',
+      'true;\n'
       | case do_gen(gen, t, default) do
           {:literal, literal} ->
             [
@@ -555,18 +559,22 @@ defmodule :m_asn1ct_gen_check do
 
   defp gen_components(name, tag, cs) do
     [
-      [:erlang.atom_to_list(name), '(Value) ->\n', 'case Value of\n', '{', term2str(tag)]
+      :erlang.atom_to_list(name),
+      '(Value) ->\n',
+      'case Value of\n',
+      '{',
+      term2str(tag)
       | gen_cs_1(cs, 1, [])
     ]
   end
 
   defp gen_cs_1([{:literal, lit} | t], i, acc) do
-    [[',\n', term2str(lit)] | gen_cs_1(t, i, acc)]
+    [',\n', term2str(lit) | gen_cs_1(t, i, acc)]
   end
 
   defp gen_cs_1([h | t], i, acc) do
     var = 'E' ++ :erlang.integer_to_list(i)
-    [[',\n', var] | gen_cs_1(t, i + 1, [{var, h} | acc])]
+    [',\n', var | gen_cs_1(t, i + 1, [{var, h} | acc])]
   end
 
   defp gen_cs_1([], _, acc) do
@@ -574,7 +582,7 @@ defmodule :m_asn1ct_gen_check do
   end
 
   defp gen_cs_2([{var, {:exception, func, args}} | t], sep) do
-    [[sep, func, '(', var, arg2str(args), ')'] | gen_cs_2(t, ',\n')]
+    [sep, func, '(', var, arg2str(args), ')' | gen_cs_2(t, ',\n')]
   end
 
   defp gen_cs_2([], _) do
@@ -583,7 +591,10 @@ defmodule :m_asn1ct_gen_check do
 
   defp gen_map_components(name, cs) do
     [
-      [:erlang.atom_to_list(name), '(Value) ->\n', 'case Value of\n', '\#{']
+      :erlang.atom_to_list(name),
+      '(Value) ->\n',
+      'case Value of\n',
+      '\#{'
       | gen_map_cs_1(cs, 1, '', [])
     ]
   end
@@ -591,12 +602,12 @@ defmodule :m_asn1ct_gen_check do
   defp gen_map_cs_1([{name, {:literal, lit}} | t], i, sep, acc) do
     var = 'E' ++ :erlang.integer_to_list(i)
     g = var ++ ' =:= ' ++ term2str(lit)
-    [[sep, term2str(name), ':=', var] | gen_map_cs_1(t, i + 1, ',\n', [{:guard, g} | acc])]
+    [sep, term2str(name), ':=', var | gen_map_cs_1(t, i + 1, ',\n', [{:guard, g} | acc])]
   end
 
   defp gen_map_cs_1([{name, exc} | t], i, sep, acc) do
     var = 'E' ++ :erlang.integer_to_list(i)
-    [[sep, term2str(name), ':=', var] | gen_map_cs_1(t, i + 1, ',\n', [{:exc, {var, exc}} | acc])]
+    [sep, term2str(name), ':=', var | gen_map_cs_1(t, i + 1, ',\n', [{:exc, {var, exc}} | acc])]
   end
 
   defp gen_map_cs_1([], _, _, acc) do
@@ -620,13 +631,18 @@ defmodule :m_asn1ct_gen_check do
         ['} ->\n' | body]
 
       [_ | _] ->
-        [['} when ', g, ' ->\n'] | body]
+        ['} when ', g, ' ->\n' | body]
     end
   end
 
   defp gen_map_cs_2([{var, {:exception, func, args}} | t], sep) do
     [
-      [sep, func, '(', var, arg2str(args), ')']
+      sep,
+      func,
+      '(',
+      var,
+      arg2str(args),
+      ')'
       | gen_map_cs_2(
           t,
           ',\n'
@@ -640,14 +656,15 @@ defmodule :m_asn1ct_gen_check do
 
   defp gen_sof(name, cs) do
     [
-      [
-        :erlang.atom_to_list(name),
-        '(Value) ->\n',
-        'case length(Value) of\n',
-        :erlang.integer_to_list(length(cs)),
-        ' -> ok;\n_ -> throw(false)\nend,\nT0 = lists:sort(Value)'
-      ]
-      | gen_sof_1(cs, 1)
+      :erlang.atom_to_list(name),
+      '(Value) ->\n',
+      'case length(Value) of\n',
+      :erlang.integer_to_list(length(cs)),
+      ' -> ok;\n_ -> throw(false)\nend,\nT0 = lists:sort(Value)'
+      | gen_sof_1(
+          cs,
+          1
+        )
     ]
   end
 
@@ -658,27 +675,28 @@ defmodule :m_asn1ct_gen_check do
     prev = 'T' ++ :erlang.integer_to_list(i - 1)
 
     [
-      [
-        ',\n',
-        '[',
-        h,
-        case cs do
-          [] ->
-            []
+      ',\n',
+      '[',
+      h,
+      case cs do
+        [] ->
+          []
 
-          [_ | _] ->
-            ['|', t]
-        end,
-        '] = ',
-        prev,
-        ',\n',
-        func,
-        '(',
-        h,
-        arg2str(args),
-        ')'
-      ]
-      | gen_sof_1(cs, i + 1)
+        [_ | _] ->
+          ['|', t]
+      end,
+      '] = ',
+      prev,
+      ',\n',
+      func,
+      '(',
+      h,
+      arg2str(args),
+      ')'
+      | gen_sof_1(
+          cs,
+          i + 1
+        )
     ]
   end
 

@@ -206,7 +206,7 @@ defmodule :m_release_handler do
     end
   end
 
-  def create_RELEASES([[root, relFile] | libDirs]) do
+  def create_RELEASES([root, relFile | libDirs]) do
     create_RELEASES(root, :filename.join(root, 'releases'), relFile, libDirs)
   end
 
@@ -1178,7 +1178,7 @@ defmodule :m_release_handler do
         case get_base_libs(r_release(currentRelease, :libs)) do
           {:ok, _, restLibs} ->
             tmpErtsVsn = r_release(toRelease, :erts_vsn)
-            tmpLibs = [[kernel, stdlib, sasl] | restLibs]
+            tmpLibs = [kernel, stdlib, sasl | restLibs]
 
             tmpRelease =
               r_release(currentRelease,

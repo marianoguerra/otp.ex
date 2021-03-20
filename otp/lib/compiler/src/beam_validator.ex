@@ -155,8 +155,8 @@ defmodule :m_beam_validator do
 
     case code do
       [{:label, ^entry} | is] ->
-        info = %{:arity => arity, :parameter_info => find_parameter_info(is, %{})}
-        build_function_table(fs, %{acc | entry => info})
+        info = %{arity: arity, parameter_info: find_parameter_info(is, %{})}
+        build_function_table(fs, Map.put(acc, entry, info))
 
       _ ->
         build_function_table(fs, acc)
@@ -168,7 +168,7 @@ defmodule :m_beam_validator do
   end
 
   defp find_parameter_info([{:%, {:var_info, reg, info}} | is], acc) do
-    find_parameter_info(is, %{acc | reg => info})
+    find_parameter_info(is, Map.put(acc, reg, info))
   end
 
   defp find_parameter_info([{:%, _} | is], acc) do
@@ -281,7 +281,7 @@ defmodule :m_beam_validator do
          r_vst(current: st0, ref_ctr: counter0, branched: branched0, labels: labels0) = vst
        ) do
     {st, counter} = merge_states(lbl, st0, branched0, counter0)
-    branched = %{branched0 | lbl => st}
+    branched = Map.put(branched0, lbl, st)
     labels = :cerl_sets.add_element(lbl, labels0)
     r_vst(vst, current: st, ref_ctr: counter, branched: branched, labels: labels)
   end
@@ -722,7 +722,7 @@ defmodule :m_beam_validator do
          {:make_fun2, {:f, lbl}, _, _, numFree},
          r_vst(ft: ft) = vst0
        ) do
-    %{:arity => arity0} = :erlang.map_get(lbl, ft)
+    %{arity: arity0} = :erlang.map_get(lbl, ft)
     arity = arity0 - numFree
     true = arity >= 0
     vst = prune_x_regs(numFree, vst0)
@@ -742,7 +742,7 @@ defmodule :m_beam_validator do
       end
 
     numFree = length(env)
-    %{:arity => arity0} = :erlang.map_get(lbl, ft)
+    %{arity: arity0} = :erlang.map_get(lbl, ft)
     arity = arity0 - numFree
     true = arity >= 0
     vst = eat_heap_fun(vst0)
@@ -1550,7 +1550,7 @@ defmodule :m_beam_validator do
     )
   end
 
-  defp clobber_map_vals([[key, dst] | t], map, vst0) do
+  defp clobber_map_vals([key, dst | t], map, vst0) do
     case is_reg_initialized(dst, vst0) do
       true ->
         vst = extract_term(:any, {:bif, :map_get}, [key, map], dst, vst0)
@@ -1583,7 +1583,7 @@ defmodule :m_beam_validator do
     :erlang.error({:not_a_register, v})
   end
 
-  defp extract_map_keys([[key, _Val] | t]) do
+  defp extract_map_keys([key, _Val | t]) do
     [key | extract_map_keys(t)]
   end
 
@@ -1591,7 +1591,7 @@ defmodule :m_beam_validator do
     []
   end
 
-  defp extract_map_vals([[key, dst] | vs], map, vst0, vsti0) do
+  defp extract_map_vals([key, dst | vs], map, vst0, vsti0) do
     assert_term(key, vst0)
 
     case bif_types(:map_get, [key, map], vst0) do
@@ -1643,7 +1643,7 @@ defmodule :m_beam_validator do
     pmt_1(list, vst, map)
   end
 
-  defp pmt_1([[key0, value0] | list], vst, acc0) do
+  defp pmt_1([key0, value0 | list], vst, acc0) do
     key = normalize(get_term_type(key0, vst))
     value = normalize(get_term_type(value0, vst))
     {acc, _, _} = :beam_call_types.types(:maps, :put, [key, value, acc0])
@@ -1861,7 +1861,7 @@ defmodule :m_beam_validator do
     ctxRef = get_reg_vref(ctx, vst)
     posRef = get_reg_vref(pos, vst)
     r_st(ms_positions: msPos0) = st0
-    msPos = %{msPos0 | ctxRef => posRef}
+    msPos = Map.put(msPos0, ctxRef, posRef)
     st = r_st(st0, ms_positions: msPos)
     r_vst(vst, current: st)
   end
@@ -1957,7 +1957,7 @@ defmodule :m_beam_validator do
   defp verify_call_args({:f, lbl}, live, r_vst(ft: ft) = vst) do
     case ft do
       %{^lbl => funcInfo} ->
-        %{:arity => ^live, :parameter_info => paramInfo} = funcInfo
+        %{arity: ^live, parameter_info: paramInfo} = funcInfo
         verify_local_args(live - 1, paramInfo, %{}, vst)
 
       %{} ->
@@ -1996,7 +1996,7 @@ defmodule :m_beam_validator do
 
           %{} ->
             verify_arg_type(reg, type, paramInfo, vst)
-            verify_local_args(x - 1, paramInfo, %{ctxRefs | vRef => reg}, vst)
+            verify_local_args(x - 1, paramInfo, Map.put(ctxRefs, vRef, reg), vst)
         end
 
       type ->
@@ -2088,7 +2088,7 @@ defmodule :m_beam_validator do
     ys =
       case ys0 do
         %{^src => ref} ->
-          %{ys0 | dst => ref}
+          Map.put(ys0, dst, ref)
 
         %{} ->
           :erlang.error({:invalid_shift, src, dst})
@@ -2166,7 +2166,7 @@ defmodule :m_beam_validator do
     r_vst(vst, current: st)
   end
 
-  defp assert_choices([[{tag, _}, {:f, _}] | t]) do
+  defp assert_choices([{tag, _}, {:f, _} | t]) do
     cond do
       tag === :atom or tag === :float or tag === :integer ->
         assert_choices_1(t, tag)
@@ -2180,11 +2180,11 @@ defmodule :m_beam_validator do
     :ok
   end
 
-  defp assert_choices_1([[{tag, _}, {:f, _}] | t], tag) do
+  defp assert_choices_1([{tag, _}, {:f, _} | t], tag) do
     assert_choices_1(t, tag)
   end
 
-  defp assert_choices_1([[_, {:f, _}] | _], _Tag) do
+  defp assert_choices_1([_, {:f, _} | _], _Tag) do
     :erlang.error(:bad_select_list)
   end
 
@@ -2192,8 +2192,7 @@ defmodule :m_beam_validator do
     :ok
   end
 
-  defp assert_arities([[arity, {:f, _}] | t])
-       when is_integer(arity) do
+  defp assert_arities([arity, {:f, _} | t]) when is_integer(arity) do
     assert_arities(t)
   end
 
@@ -2307,7 +2306,7 @@ defmodule :m_beam_validator do
     :ok
   end
 
-  defp assert_unique_map_keys([[_, _] | _] = ls) do
+  defp assert_unique_map_keys([_, _ | _] = ls) do
     vs =
       for l <- ls do
         assert_literal(l)
@@ -2370,7 +2369,7 @@ defmodule :m_beam_validator do
     vst
   end
 
-  defp validate_select_val(fail, [[val, {:f, l}] | t], src, vst0) do
+  defp validate_select_val(fail, [val, {:f, l} | t], src, vst0) do
     vst =
       branch(
         l,
@@ -2396,7 +2395,7 @@ defmodule :m_beam_validator do
     vst
   end
 
-  defp validate_select_tuple_arity(fail, [[arity, {:f, l}] | t], tuple, vst0) do
+  defp validate_select_tuple_arity(fail, [arity, {:f, l} | t], tuple, vst0) do
     type = r_t_tuple(exact: true, size: arity)
 
     vst =
@@ -2614,7 +2613,7 @@ defmodule :m_beam_validator do
 
       _ ->
         check_try_catch_tags(tag, dst, vst)
-        ys = %{ys0 | dst => tag}
+        ys = Map.put(ys0, dst, tag)
         st = r_st(st0, ys: ys)
         remove_fragility(dst, r_vst(vst, current: st))
     end
@@ -2629,7 +2628,7 @@ defmodule :m_beam_validator do
          r_vst(current: r_st(ys: ys0) = st0) = vst
        ) do
     _ = get_tag_type(reg, vst)
-    ys = %{ys0 | reg => :initialized}
+    ys = Map.put(ys0, reg, :initialized)
     r_vst(vst, current: r_st(st0, ys: ys))
   end
 
@@ -2751,7 +2750,7 @@ defmodule :m_beam_validator do
   defp set_reg_vref(ref, {:x, _} = dst, vst) do
     check_limit(dst)
     r_vst(current: r_st(xs: xs0) = st0) = vst
-    st = r_st(st0, xs: %{xs0 | dst => ref})
+    st = r_st(st0, xs: Map.put(xs0, dst, ref))
     r_vst(vst, current: st)
   end
 
@@ -2766,7 +2765,7 @@ defmodule :m_beam_validator do
         :erlang.error(tag)
 
       %{^dst => _} ->
-        st = r_st(st0, ys: %{ys0 | dst => ref})
+        st = r_st(st0, ys: Map.put(ys0, dst, ref))
         r_vst(vst, current: st)
 
       %{} ->
@@ -2814,7 +2813,7 @@ defmodule :m_beam_validator do
 
   defp set_type(type, r_value_ref() = ref, r_vst(current: r_st(vs: vs0) = st) = vst) do
     %{^ref => r_value() = entry} = vs0
-    vs = %{vs0 | ref => r_value(entry, type: type)}
+    vs = Map.put(vs0, ref, r_value(entry, type: type))
     r_vst(vst, current: r_st(st, vs: vs))
   end
 
@@ -2824,7 +2823,7 @@ defmodule :m_beam_validator do
 
   defp new_value(type, op, ss, r_vst(current: r_st(vs: vs0) = st, ref_ctr: counter) = vst) do
     ref = r_value_ref(id: counter)
-    vs = %{vs0 | ref => r_value(op: op, args: ss, type: type)}
+    vs = Map.put(vs0, ref, r_value(op: op, args: ss, type: type))
     {ref, r_vst(vst, current: r_st(st, vs: vs), ref_ctr: counter + 1)}
   end
 
@@ -3246,7 +3245,7 @@ defmodule :m_beam_validator do
          r_vst(current: st0, branched: branched0, ref_ctr: counter0) = vst
        ) do
     {st, counter} = merge_states(l, st0, branched0, counter0)
-    branched = %{branched0 | l => st}
+    branched = Map.put(branched0, l, st)
     r_vst(vst, branched: branched, ref_ctr: counter)
   end
 
@@ -3335,11 +3334,11 @@ defmodule :m_beam_validator do
     case {rsA, rsB} do
       {%{^reg => r_value_ref() = refA}, %{reg => r_value_ref() = refB}} ->
         {ref, merge, counter} = merge_vrefs(refA, refB, merge0, counter0)
-        merge_regs_1(keys, rsA, rsB, %{regs | reg => ref}, merge, counter)
+        merge_regs_1(keys, rsA, rsB, Map.put(regs, reg, ref), merge, counter)
 
       {%{^reg => tagA}, %{^reg => tagB}} ->
         {:y, _} = reg
-        merge_regs_1(keys, rsA, rsB, %{regs | reg => merge_tags(tagA, tagB)}, merge0, counter0)
+        merge_regs_1(keys, rsA, rsB, Map.put(regs, reg, merge_tags(tagA, tagB)), merge0, counter0)
 
       {%{}, %{}} ->
         merge_regs_1(keys, rsA, rsB, regs, merge0, counter0)
@@ -3375,7 +3374,7 @@ defmodule :m_beam_validator do
   end
 
   defp merge_vrefs(ref, ref, merge, counter) do
-    {ref, %{merge | ref => ref}, counter}
+    {ref, Map.put(merge, ref, ref), counter}
   end
 
   defp merge_vrefs(refA, refB, merge, counter) do
@@ -3387,7 +3386,7 @@ defmodule :m_beam_validator do
 
       %{} ->
         ref = r_value_ref(id: counter)
-        {ref, %{merge | key => ref}, counter + 1}
+        {ref, Map.put(merge, key, ref), counter + 1}
     end
   end
 
@@ -3424,14 +3423,14 @@ defmodule :m_beam_validator do
           r_value(entryA, type: joinedType)
       end
 
-    acc = %{acc0 | same => entry}
+    acc = Map.put(acc0, same, entry)
     mv_args(args, vsA, vsB, acc)
   end
 
   defp mv_1({refA, refB}, new, vsA, vsB, acc) do
     r_value(type: typeA) = :erlang.map_get(refA, vsA)
     r_value(type: typeB) = :erlang.map_get(refB, vsB)
-    %{acc | new => r_value(op: :join, args: [], type: join(typeA, typeB))}
+    Map.put(acc, new, r_value(op: :join, args: [], type: join(typeA, typeB)))
   end
 
   defp mv_args([r_value_ref() = arg | args], vsA, vsB, acc0) do
@@ -3474,7 +3473,7 @@ defmodule :m_beam_validator do
     case {msPosA, msPosB} do
       {%{^key => pos}, %{^key => pos}}
       when :erlang.is_map_key(pos, vs) ->
-        merge_ms_positions_1(keys, msPosA, msPosB, vs, %{acc | key => pos})
+        merge_ms_positions_1(keys, msPosA, msPosB, vs, Map.put(acc, key, pos))
 
       {%{}, %{}} ->
         merge_ms_positions_1(keys, msPosA, msPosB, vs, acc)

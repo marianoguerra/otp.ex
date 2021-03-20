@@ -254,7 +254,7 @@ defmodule :m_slave do
     '"' ++ prog ++ '"'
   end
 
-  defp do_quote_progname([[prog, arg] | args]) do
+  defp do_quote_progname([prog, arg | args]) do
     case :os.find_executable(prog) do
       false ->
         do_quote_progname([prog ++ ' ' ++ arg | args])

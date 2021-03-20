@@ -918,15 +918,15 @@ defmodule :m_system_information do
     )
   end
 
-  defp gp_meets_min_req([[x, y, z] | _Vs], [x, y, z]) do
+  defp gp_meets_min_req([x, y, z | _Vs], [x, y, z]) do
     true
   end
 
-  defp gp_meets_min_req([[x, y, z] | _Vs], [xReq, yReq, zReq]) do
+  defp gp_meets_min_req([x, y, z | _Vs], [xReq, yReq, zReq]) do
     meets_min_req({x, y, z}, {xReq, yReq, zReq})
   end
 
-  defp gp_meets_min_req([[x, y, z] | vs], [[x, y, z] | vReqs]) do
+  defp gp_meets_min_req([x, y, z | vs], [x, y, z | vReqs]) do
     gp_meets_min_req_tail(vs, vReqs)
   end
 
@@ -955,8 +955,8 @@ defmodule :m_system_information do
   end
 
   defp mk_gp_vsn_list(vsn) do
-    [[x, y, z] | tail] = :erlang.tuple_to_list(vsn)
-    [[x, y, z] | remove_trailing_zeroes(tail)]
+    [x, y, z | tail] = :erlang.tuple_to_list(vsn)
+    [x, y, z | remove_trailing_zeroes(tail)]
   end
 
   defp remove_trailing_zeroes([]) do

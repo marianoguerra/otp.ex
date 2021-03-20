@@ -107,8 +107,8 @@ defmodule :m_ssh_tcpip_forward_acceptor_sup do
   end
 
   def init([]) do
-    supFlags = %{:strategy => :simple_one_for_one, :intensity => 10, :period => 3600}
-    childSpecs = [%{:id => :undefined, :start => {:ssh_tcpip_forward_acceptor, :start_link, []}}]
+    supFlags = %{strategy: :simple_one_for_one, intensity: 10, period: 3600}
+    childSpecs = [%{id: :undefined, start: {:ssh_tcpip_forward_acceptor, :start_link, []}}]
     {:ok, {supFlags, childSpecs}}
   end
 end

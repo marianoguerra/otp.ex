@@ -358,7 +358,7 @@ defmodule :m_erpc do
     [{m, f, a, []}]
   end
 
-  def trim_stack([[{m, f, a, _} = sF, cF] | _], m, f, a)
+  def trim_stack([{m, f, a, _} = sF, cF | _], m, f, a)
       when :erlang.element(
              1,
              cF
@@ -387,7 +387,7 @@ defmodule :m_erpc do
     throw(:use_all)
   end
 
-  defp trim_stack_aux([[{m, f, aL, _} = sF, cF] | _], m, f, a)
+  defp trim_stack_aux([{m, f, aL, _} = sF, cF | _], m, f, a)
        when :erlang.element(
               1,
               cF

@@ -2204,7 +2204,7 @@ defmodule :m_cover do
 
         vars3 = r_vars(vars2, no_bump_lines: noBumpLines)
         mungedBody1 = maybe_fix_last_expr(mungedBody, vars3, lastExprBumpLines)
-        mungedExprs1 = [[mungedExpr, bump] | mungedBody1]
+        mungedExprs1 = [mungedExpr, bump | mungedBody1]
         munge_body(body, vars3, mungedExprs1, newBumps)
     end
   end
@@ -2617,7 +2617,7 @@ defmodule :m_cover do
             vars2
           )
 
-        munge_qs(qs, vars3, [[nQ, mungedTrue] | mQs])
+        munge_qs(qs, vars3, [nQ, mungedTrue | mQs])
     end
   end
 
@@ -2742,7 +2742,14 @@ defmodule :m_cover do
   end
 
   defp patch_code1(tuple, key) when tuple_size(tuple) >= 3 do
-    acc = [:erlang.element(2, tuple), :erlang.element(1, tuple)]
+    acc = [
+      :erlang.element(2, tuple),
+      :erlang.element(
+        1,
+        tuple
+      )
+    ]
+
     patch_code_tuple(3, tuple_size(tuple), tuple, key, acc)
   end
 
@@ -2803,7 +2810,7 @@ defmodule :m_cover do
   defp counters_mapping_table(mod) do
     mapping = counters_mapping(mod)
     cref = get_counters_ref(mod)
-    %{:size => size} = :counters.info(cref)
+    %{size: size} = :counters.info(cref)
     [{mod, size} | mapping]
   end
 
@@ -2956,7 +2963,7 @@ defmodule :m_cover do
            revsplit(srcFile)
          ) do
       {t, [_ | _]} ->
-        :filename.join([[beamDir, '..', 'src'] | :lists.reverse(t)])
+        :filename.join([beamDir, '..', 'src' | :lists.reverse(t)])
 
       {_, []} ->
         false
@@ -3205,7 +3212,8 @@ defmodule :m_cover do
 
   defp merge_clauses(
          [
-           [{{m, f, a, _C1}, r1}, {{m, f, a, c2}, r2}]
+           {{m, f, a, _C1}, r1},
+           {{m, f, a, c2}, r2}
            | clauses
          ],
          mFun,
@@ -3409,8 +3417,18 @@ defmodule :m_cover do
                   :string.pad(:erlang.integer_to_list(mo), 2, :leading, ?0),
                   :string.pad(:erlang.integer_to_list(d), 2, :leading, ?0),
                   :string.pad(:erlang.integer_to_list(h), 2, :leading, ?0),
-                  :string.pad(:erlang.integer_to_list(mi), 2, :leading, ?0),
-                  :string.pad(:erlang.integer_to_list(s), 2, :leading, ?0)
+                  :string.pad(
+                    :erlang.integer_to_list(mi),
+                    2,
+                    :leading,
+                    ?0
+                  ),
+                  :string.pad(
+                    :erlang.integer_to_list(s),
+                    2,
+                    :leading,
+                    ?0
+                  )
                 ]
               )
 
@@ -3894,15 +3912,15 @@ defmodule :m_cover do
   end
 
   defp escape_lt_and_gt1([?< | t], acc) do
-    escape_lt_and_gt1(t, [[?;, ?t, ?l, ?&] | acc])
+    escape_lt_and_gt1(t, [?;, ?t, ?l, ?& | acc])
   end
 
   defp escape_lt_and_gt1([?> | t], acc) do
-    escape_lt_and_gt1(t, [[?;, ?t, ?g, ?&] | acc])
+    escape_lt_and_gt1(t, [?;, ?t, ?g, ?& | acc])
   end
 
   defp escape_lt_and_gt1([?& | t], acc) do
-    escape_lt_and_gt1(t, [[?;, ?p, ?m, ?a, ?&] | acc])
+    escape_lt_and_gt1(t, [?;, ?p, ?m, ?a, ?& | acc])
   end
 
   defp escape_lt_and_gt1([], acc) do

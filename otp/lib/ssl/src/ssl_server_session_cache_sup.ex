@@ -1069,15 +1069,15 @@ defmodule :m_ssl_server_session_cache_sup do
            ) do
         {:ok, cb} when is_atom(cb) ->
           initArgs = session_cb_init_args()
-          %{:session_cb => cb, :session_cb_init_args => initArgs}
+          %{session_cb: cb, session_cb_init_args: initArgs}
 
         _ ->
-          %{:session_cb => :ssl_server_session_cache_db, :session_cb_init_args => []}
+          %{session_cb: :ssl_server_session_cache_db, session_cb_init_args: []}
       end
 
     lifeTime = session_lifetime()
     max = max_session_cache_size()
-    [%{cbOpts | :lifetime => lifeTime, :max => max}]
+    [Map.merge(cbOpts, %{lifetime: lifeTime, max: max})]
   end
 
   defp session_cb_init_args() do

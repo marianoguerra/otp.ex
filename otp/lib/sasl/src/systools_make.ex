@@ -324,7 +324,8 @@ defmodule :m_systools_make do
 
   defp do_replace_module_load(
          [
-           [{:path, [oldAppPath]}, {:primLoad, oldMods}]
+           {:path, [oldAppPath]},
+           {:primLoad, oldMods}
            | oldRest
          ],
          new,
@@ -333,7 +334,8 @@ defmodule :m_systools_make do
     case :re.run(oldAppPath, mP, [{:capture, :none}]) do
       :nomatch ->
         [
-          [{:path, [oldAppPath]}, {:primLoad, oldMods}]
+          {:path, [oldAppPath]},
+          {:primLoad, oldMods}
           | do_replace_module_load(oldRest, new, mP)
         ]
 
@@ -351,10 +353,7 @@ defmodule :m_systools_make do
   end
 
   defp get_module_load(
-         [
-           [{:path, [appPath]}, {:primLoad, mods}]
-           | rest
-         ],
+         [{:path, [appPath]}, {:primLoad, mods} | rest],
          mP
        ) do
     case :re.run(appPath, mP, [{:capture, :none}]) do
@@ -498,7 +497,8 @@ defmodule :m_systools_make do
     ] = :lists.reverse(script)
 
     :lists.reverse([
-      [{:progress, :started}, {:apply, {:release_handler, :new_emulator_upgrade, args}}]
+      {:progress, :started},
+      {:apply, {:release_handler, :new_emulator_upgrade, args}}
       | revScript
     ])
   end
@@ -1672,7 +1672,12 @@ defmodule :m_systools_make do
        [
          {:preLoaded, preloaded},
          {:progress, :preloaded},
-         {:path, create_mandatory_path(appls, pathFlag, variables)},
+         {:path,
+          create_mandatory_path(
+            appls,
+            pathFlag,
+            variables
+          )},
          {:primLoad, mandatory},
          {:kernel_load_completed},
          {:progress, :kernel_load_completed}
@@ -2045,10 +2050,10 @@ defmodule :m_systools_make do
     fullName = name ++ '-' ++ vsn
 
     case reverse(dir) do
-      [['ebin', ^name] | d] ->
+      ['ebin', ^name | d] ->
         {:ok, reverse(d)}
 
-      [['ebin', ^fullName] | d] ->
+      ['ebin', ^fullName | d] ->
         {:ok, reverse(d)}
 
       _ ->
@@ -2116,18 +2121,16 @@ defmodule :m_systools_make do
       ) do
     {:application, name,
      [
-       [
-         {:description, d},
-         {:vsn, v},
-         {:id, id},
-         {:modules, m},
-         {:registered, regs},
-         {:applications, app},
-         {:included_applications, incs},
-         {:env, env},
-         {:maxT, maxT},
-         {:maxP, maxP}
-       ]
+       {:description, d},
+       {:vsn, v},
+       {:id, id},
+       {:modules, m},
+       {:registered, regs},
+       {:applications, app},
+       {:included_applications, incs},
+       {:env, env},
+       {:maxT, maxT},
+       {:maxP, maxP}
        | behave([{:start_phases, sF}, {:mod, mod}])
      ]}
   end
@@ -2433,7 +2436,7 @@ defmodule :m_systools_make do
           ['.' | path1]
 
         relDir ->
-          [[relDir, '.'] | path1]
+          [relDir, '.' | path1]
       end
 
     case lookup_file('start.boot', path) do
@@ -2803,7 +2806,7 @@ defmodule :m_systools_make do
     duplicates(keysort(1, x), [])
   end
 
-  defp duplicates([[h1, h2] | t], l) do
+  defp duplicates([h1, h2 | t], l) do
     case {:erlang.element(1, h1), :erlang.element(1, h2)} do
       {x, x} ->
         duplicates([h2 | t], [{h1, h2} | l])

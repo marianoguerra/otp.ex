@@ -7,7 +7,7 @@ defmodule :m_docgen_xml_to_chunk do
     beam_language: :erlang,
     format: "application/erlang+html",
     module_doc: :undefined,
-    metadata: %{:otp_doc_vsn => {1, 0, 0}},
+    metadata: %{otp_doc_vsn: {1, 0, 0}},
     docs: :undefined
   )
 
@@ -54,7 +54,7 @@ defmodule :m_docgen_xml_to_chunk do
         :io.format('Failed to create chunks: ~p~n', [reason])
         :erlang.halt(1)
 
-      {:docs_v1, _, _, _, _, %{:source => s}, []}
+      {:docs_v1, _, _, _, _, %{source: s}, []}
       when s !== '../xml/gen_fsm.xml' and s !== '../xml/shell_default.xml' and
              s !== '../xml/user.xml' and s !== '../xml/wxClipboardTextEvent.xml' and
              s !== '../xml/wxDisplayChangedEvent.xml' and s !== '../xml/wxGBSizerItem.xml' and
@@ -130,7 +130,8 @@ defmodule :m_docgen_xml_to_chunk do
          r_state(
            tags: [_ | t],
            dom: [
-             [{cName, cAttributes, cContent}, {pName, pAttributes, pContent} = _Parent]
+             {cName, cAttributes, cContent},
+             {pName, pAttributes, pContent} = _Parent
              | d
            ]
          ) = state
@@ -674,9 +675,7 @@ defmodule :m_docgen_xml_to_chunk do
           %{}
 
         ghLink ->
-          %{
-            :edit_url => :erlang.iolist_to_binary(['https://github.com/erlang/otp/edit/', ghLink])
-          }
+          %{edit_url: :erlang.iolist_to_binary(['https://github.com/erlang/otp/edit/', ghLink])}
       end
 
     verifyNameList = fn nameList, test ->
@@ -700,16 +699,16 @@ defmodule :m_docgen_xml_to_chunk do
           editLink
 
         sinces ->
-          %{
-            editLink
-            | :since =>
-                :unicode.characters_to_binary(
-                  :lists.join(
-                    ',',
-                    :lists.usort(sinces)
-                  )
-                )
-          }
+          Map.put(
+            editLink,
+            :since,
+            :unicode.characters_to_binary(
+              :lists.join(
+                ',',
+                :lists.usort(sinces)
+              )
+            )
+          )
       end
 
     functions =
@@ -757,17 +756,19 @@ defmodule :m_docgen_xml_to_chunk do
                {:name, f},
                {:arity, :erlang.list_to_integer(a)},
                {:signature, [:erlang.iolist_to_binary([f, '/', a])]},
-               {:meta, %{mD | :signature => specs}}
+               {:meta, Map.put(mD, :signature, specs)}
              ], doc}
           end
 
           base = makeFunc.(hd(sortedFAs), sinceMD, contentsNoName)
           {baseF, baseA} = hd(sortedFAs)
 
-          mD = %{
-            sinceMD
-            | :equiv => {:function, :erlang.list_to_atom(baseF), :erlang.list_to_integer(baseA)}
-          }
+          mD =
+            Map.put(
+              sinceMD,
+              :equiv,
+              {:function, :erlang.list_to_atom(baseF), :erlang.list_to_integer(baseA)}
+            )
 
           equiv =
             :lists.map(
@@ -794,13 +795,10 @@ defmodule :m_docgen_xml_to_chunk do
                         []
                       )
 
-                    %{
-                      fAAcc
-                      | fA => [
-                          strip_tags(nameString)
-                          | slogan
-                        ]
-                    }
+                    Map.put(fAAcc, fA, [
+                      strip_tags(nameString)
+                      | slogan
+                    ])
                   end,
                   acc,
                   fAs
@@ -833,7 +831,8 @@ defmodule :m_docgen_xml_to_chunk do
                  {:name, f},
                  {:arity, a},
                  {:signature, signature},
-                 {:meta, %{sinceMD | :equiv => {:function, :erlang.list_to_atom(baseF), baseA}}}
+                 {:meta,
+                  Map.put(sinceMD, :equiv, {:function, :erlang.list_to_atom(baseF), baseA})}
                ], []}
             end
 
@@ -866,7 +865,7 @@ defmodule :m_docgen_xml_to_chunk do
     parse_args(:unicode.characters_to_list(args), 1, [])
   end
 
-  defp parse_args([[?[, ?,] | t], arity, []) do
+  defp parse_args([?[, ?, | t], arity, []) do
     parse_args(t, arity, [?[]) ++ parse_args(t, arity + 1, [])
   end
 
@@ -1060,7 +1059,7 @@ defmodule :m_docgen_xml_to_chunk do
                 %{}
 
               sig ->
-                %{:signature => [sig]}
+                %{signature: [sig]}
             end
 
           metaDepr =
@@ -1070,15 +1069,15 @@ defmodule :m_docgen_xml_to_chunk do
                    typeArity
                  ) do
               {:deprecated, text} ->
-                %{
-                  metaSig
-                  | :deprecated =>
-                      :unicode.characters_to_binary(
-                        :erl_lint.format_error(
-                          {:deprecated_type, {module, typeName, typeArity}, text}
-                        )
-                      )
-                }
+                Map.put(
+                  metaSig,
+                  :deprecated,
+                  :unicode.characters_to_binary(
+                    :erl_lint.format_error(
+                      {:deprecated_type, {module, typeName, typeArity}, text}
+                    )
+                  )
+                )
 
               :no ->
                 metaSig
@@ -1125,24 +1124,22 @@ defmodule :m_docgen_xml_to_chunk do
                    arity
                  ) do
               {:deprecated, text} ->
-                %{
-                  metaWSpec
-                  | :deprecated =>
-                      :unicode.characters_to_binary(
-                        :erl_lint.format_error({:deprecated, {module, name, arity}, text})
-                      )
-                }
+                Map.put(
+                  metaWSpec,
+                  :deprecated,
+                  :unicode.characters_to_binary(
+                    :erl_lint.format_error({:deprecated, {module, name, arity}, text})
+                  )
+                )
 
               {:deprecated, replacement, rel} ->
-                %{
-                  metaWSpec
-                  | :deprecated =>
-                      :unicode.characters_to_binary(
-                        :erl_lint.format_error(
-                          {:deprecated, {module, name, arity}, replacement, rel}
-                        )
-                      )
-                }
+                Map.put(
+                  metaWSpec,
+                  :deprecated,
+                  :unicode.characters_to_binary(
+                    :erl_lint.format_error({:deprecated, {module, name, arity}, replacement, rel})
+                  )
+                )
 
               _ ->
                 metaWSpec
@@ -1168,7 +1165,7 @@ defmodule :m_docgen_xml_to_chunk do
   defp docs_v1_entry(kind, anno, name, arity, signature, metadata, docContents) do
     annoWLine =
       case metadata do
-        %{:signature => [sig | _]} ->
+        %{signature: [sig | _]} ->
           sigAnno = :erlang.element(2, sig)
           :erl_anno.set_line(:erl_anno.line(sigAnno), anno)
 
@@ -1213,9 +1210,9 @@ defmodule :m_docgen_xml_to_chunk do
 
   defp add_spec(
          {:raw_abstract_v1, aST},
-         meta = %{:signature => specs}
+         meta = %{signature: specs}
        ) do
-    %{meta | :signature => add_spec_clauses(aST, merge_clauses(specs, %{}))}
+    %{meta | signature: add_spec_clauses(aST, merge_clauses(specs, %{}))}
   end
 
   defp add_spec(_, meta) do
@@ -1227,16 +1224,16 @@ defmodule :m_docgen_xml_to_chunk do
   end
 
   defp add_types({:raw_abstract_v1, aST}, meta) do
-    %{
-      meta
-      | :types =>
-          :maps.from_list(
-            for t = {:attribute, _, tO, {name, _, args}} <- aST,
-                tO === :type or tO === :opaque do
-              {{name, length(args)}, t}
-            end
-          )
-    }
+    Map.put(
+      meta,
+      :types,
+      :maps.from_list(
+        for t = {:attribute, _, tO, {name, _, args}} <- aST,
+            tO === :type or tO === :opaque do
+          {{name, length(args)}, t}
+        end
+      )
+    )
   end
 
   defp add_spec_clauses(aST, [{{f, a}, clauses} | t]) do
@@ -1283,7 +1280,7 @@ defmodule :m_docgen_xml_to_chunk do
   defp merge_clauses([{f, a, clause} | t], acc) do
     merge_clauses(
       t,
-      %{acc | {f, a} => [clause | :maps.get({f, a}, acc, [])]}
+      Map.put(acc, {f, a}, [clause | :maps.get({f, a}, acc, [])])
     )
   end
 

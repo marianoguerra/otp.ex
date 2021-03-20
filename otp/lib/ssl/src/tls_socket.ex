@@ -1093,7 +1093,11 @@ defmodule :m_tls_socket do
           'localhost',
           port,
           socket,
-          {sslOpts, emulated_socket_options(emOpts, r_socket_options()), trackers},
+          {sslOpts,
+           emulated_socket_options(
+             emOpts,
+             r_socket_options()
+           ), trackers},
           self(),
           cbInfo
         ]
@@ -1396,42 +1400,39 @@ defmodule :m_tls_socket do
     [{:packet_size, 0}, {:packet, 0}, {:header, 0}, {:active, true}, {:mode, :list}]
   end
 
-  def inherit_tracker(listenSocket, emOpts, %{:erl_dist => false} = sslOpts) do
+  def inherit_tracker(listenSocket, emOpts, %{erl_dist: false} = sslOpts) do
     :ssl_listen_tracker_sup.start_child([listenSocket, emOpts, sslOpts])
   end
 
-  def inherit_tracker(listenSocket, emOpts, %{:erl_dist => true} = sslOpts) do
+  def inherit_tracker(listenSocket, emOpts, %{erl_dist: true} = sslOpts) do
     :ssl_listen_tracker_sup.start_child_dist([listenSocket, emOpts, sslOpts])
   end
 
-  defp session_tickets_tracker(_, _, %{:erl_dist => false, :session_tickets => :disabled}) do
+  defp session_tickets_tracker(_, _, %{erl_dist: false, session_tickets: :disabled}) do
     {:ok, :disabled}
   end
 
   defp session_tickets_tracker(lifetime, ticketStoreSize, %{
-         :erl_dist => false,
-         :session_tickets => mode,
-         :anti_replay => antiReplay
+         erl_dist: false,
+         session_tickets: mode,
+         anti_replay: antiReplay
        }) do
     :tls_server_session_ticket_sup.start_child([mode, lifetime, ticketStoreSize, antiReplay])
   end
 
-  defp session_tickets_tracker(lifetime, ticketStoreSize, %{
-         :erl_dist => true,
-         :session_tickets => mode
-       }) do
+  defp session_tickets_tracker(lifetime, ticketStoreSize, %{erl_dist: true, session_tickets: mode}) do
     :tls_server_session_ticket_sup.start_child_dist([mode, lifetime, ticketStoreSize])
   end
 
-  def session_id_tracker(%{:versions => [{3, 4}]}) do
+  def session_id_tracker(%{versions: [{3, 4}]}) do
     {:ok, :not_relevant}
   end
 
-  def session_id_tracker(%{:erl_dist => false}) do
+  def session_id_tracker(%{erl_dist: false}) do
     :ssl_server_session_cache_sup.start_child(:ssl_server_session_cache_sup.session_opts())
   end
 
-  def session_id_tracker(%{:erl_dist => true}) do
+  def session_id_tracker(%{erl_dist: true}) do
     :ssl_server_session_cache_sup.start_child_dist(:ssl_server_session_cache_sup.session_opts())
   end
 

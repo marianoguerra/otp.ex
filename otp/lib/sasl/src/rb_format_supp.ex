@@ -92,7 +92,8 @@ defmodule :m_rb_format_supp do
 
   defp format_neighbours([data | rest]) do
     [
-      [{:newline, 1}, {:items, {'Neighbour process', data}}]
+      {:newline, 1},
+      {:items, {'Neighbour process', data}}
       | format_neighbours(rest)
     ]
   end
@@ -113,7 +114,8 @@ defmodule :m_rb_format_supp do
       {:items,
        {'Child process',
         [
-          [{:errorContext, errorContext}, {:reason, reason}]
+          {:errorContext, errorContext},
+          {:reason, reason}
           | :lists.map(
               fn cI ->
                 transform_mfa(cI)

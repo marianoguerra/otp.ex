@@ -694,7 +694,7 @@ defmodule :m_xref_utils do
     )
   end
 
-  defp path([[e1, e2] | p], g, l) do
+  defp path([e1, e2 | p], g, l) do
     case :digraph.get_short_path(g, e1, e2) do
       false ->
         false

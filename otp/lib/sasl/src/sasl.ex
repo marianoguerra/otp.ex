@@ -189,7 +189,7 @@ defmodule :m_sasl do
   end
 
   defp add_sasl_logger(dest, level) do
-    fC = %{:legacy_header => true, :single_line => false}
+    fC = %{legacy_header: true, single_line: false}
 
     case level do
       :info ->
@@ -201,14 +201,14 @@ defmodule :m_sasl do
 
     :ok =
       :logger.add_handler(:sasl, :logger_std_h, %{
-        :level => level,
-        :filter_default => :stop,
-        :filters => [
+        level: level,
+        filter_default: :stop,
+        filters: [
           {:remote_gl, {&:logger_filters.remote_gl/2, :stop}},
           {:sasl_domain, {&:logger_filters.domain/2, {:log, :equal, [:otp, :sasl]}}}
         ],
-        :config => %{:type => dest},
-        :formatter => {:logger_formatter, fC}
+        config: %{type: dest},
+        formatter: {:logger_formatter, fC}
       })
   end
 
@@ -255,7 +255,7 @@ defmodule :m_sasl do
   end
 
   defp allow_progress() do
-    %{:level => pL} = :logger.get_primary_config()
+    %{level: pL} = :logger.get_primary_config()
 
     case :logger.compare_levels(:info, pL) do
       :lt ->

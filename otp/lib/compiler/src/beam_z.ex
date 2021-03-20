@@ -33,59 +33,58 @@ defmodule :m_beam_z do
   end
 
   defp undo_renames([
-         [{:apply, a}, {:deallocate, n}, :return]
+         {:apply, a},
+         {:deallocate, n},
+         :return
          | is
        ]) do
     [{:apply_last, a, n} | undo_renames(is)]
   end
 
+  defp undo_renames([{:call, a, f}, {:%, {:var_info, {:x, 0}, _}}, {:deallocate, n}, :return | is]) do
+    [{:call_last, a, f, n} | undo_renames(is)]
+  end
+
   defp undo_renames([
-         [{:call, a, f}, {:%, {:var_info, {:x, 0}, _}}, {:deallocate, n}, :return]
+         {:call, a, f},
+         {:deallocate, n},
+         :return
          | is
        ]) do
     [{:call_last, a, f, n} | undo_renames(is)]
   end
 
   defp undo_renames([
-         [{:call, a, f}, {:deallocate, n}, :return]
-         | is
-       ]) do
-    [{:call_last, a, f, n} | undo_renames(is)]
-  end
-
-  defp undo_renames([
-         [{:call_ext, a, f}, {:%, {:var_info, {:x, 0}, _}}, {:deallocate, n}, :return]
-         | is
+         {:call_ext, a, f},
+         {:%, {:var_info, {:x, 0}, _}},
+         {:deallocate, n},
+         :return | is
        ]) do
     [{:call_ext_last, a, f, n} | undo_renames(is)]
   end
 
   defp undo_renames([
-         [{:call_ext, a, f}, {:deallocate, n}, :return]
+         {:call_ext, a, f},
+         {:deallocate, n},
+         :return
          | is
        ]) do
     [{:call_ext_last, a, f, n} | undo_renames(is)]
   end
 
-  defp undo_renames([
-         [{:call, a, f}, {:%, {:var_info, {:x, 0}, _}}, :return]
-         | is
-       ]) do
+  defp undo_renames([{:call, a, f}, {:%, {:var_info, {:x, 0}, _}}, :return | is]) do
     [{:call_only, a, f} | undo_renames(is)]
   end
 
-  defp undo_renames([[{:call, a, f}, :return] | is]) do
+  defp undo_renames([{:call, a, f}, :return | is]) do
     [{:call_only, a, f} | undo_renames(is)]
   end
 
-  defp undo_renames([
-         [{:call_ext, a, f}, {:%, {:var_info, {:x, 0}, _}}, :return]
-         | is
-       ]) do
+  defp undo_renames([{:call_ext, a, f}, {:%, {:var_info, {:x, 0}, _}}, :return | is]) do
     [{:call_ext_only, a, f} | undo_renames(is)]
   end
 
-  defp undo_renames([[{:call_ext, a, f}, :return] | is]) do
+  defp undo_renames([{:call_ext, a, f}, :return | is]) do
     [{:call_ext_only, a, f} | undo_renames(is)]
   end
 
@@ -106,14 +105,16 @@ defmodule :m_beam_z do
   end
 
   defp undo_renames([
-         [{:get_hd, src, dst1}, {:get_tl, src, dst2}]
+         {:get_hd, src, dst1},
+         {:get_tl, src, dst2}
          | is
        ]) do
     [{:get_list, src, dst1, dst2} | undo_renames(is)]
   end
 
   defp undo_renames([
-         [{:get_tl, src, dst2}, {:get_hd, src, dst1}]
+         {:get_tl, src, dst2},
+         {:get_hd, src, dst1}
          | is
        ]) do
     [{:get_list, src, dst1, dst2} | undo_renames(is)]
@@ -262,14 +263,16 @@ defmodule :m_beam_z do
   end
 
   defp eliminate_init_yregs([
-         [{:allocate, ns, live}, {:init_yregs, _}]
+         {:allocate, ns, live},
+         {:init_yregs, _}
          | is
        ]) do
     [{:allocate_zero, ns, live} | eliminate_init_yregs(is)]
   end
 
   defp eliminate_init_yregs([
-         [{:allocate_heap, ns, nh, live}, {:init_yregs, _}]
+         {:allocate_heap, ns, nh, live},
+         {:init_yregs, _}
          | is
        ]) do
     [

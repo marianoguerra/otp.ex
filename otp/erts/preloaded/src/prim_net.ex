@@ -52,10 +52,10 @@ defmodule :m_prim_net do
         {:ok,
          for addr <- addrs do
            case addr do
-             %{:protocol => num} ->
+             %{protocol: num} ->
                case protocols do
                  %{^num => protocol} ->
-                   %{addr | :protocol => protocol}
+                   %{addr | protocol: protocol}
 
                  %{} ->
                    addr

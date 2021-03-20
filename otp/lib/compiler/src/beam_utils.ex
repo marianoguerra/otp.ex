@@ -266,7 +266,7 @@ defmodule :m_beam_utils do
     {reverse(ss), reverse(ds)}
   end
 
-  defp split_even([[s, d] | rs], ss, ds) do
+  defp split_even([s, d | rs], ss, ds) do
     split_even(rs, [s | ss], [d | ds])
   end
 end

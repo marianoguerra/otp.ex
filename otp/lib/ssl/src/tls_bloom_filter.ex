@@ -4,20 +4,20 @@ defmodule :m_tls_bloom_filter do
   def new(k, m) do
     size = round(:math.ceil(m / 8))
     bitField = :binary.copy(<<0>>, size)
-    %{:k => k, :m => m, :current => bitField, :old => bitField}
+    %{k: k, m: m, current: bitField, old: bitField}
   end
 
   def add_elem(
-        %{:k => k, :m => m, :current => bitField0} = bloomFilter,
+        %{k: k, m: m, current: bitField0} = bloomFilter,
         elem
       ) do
     hash = hash(elem, k, m)
     bitField = set_bits(bitField0, hash)
-    %{bloomFilter | :current => bitField}
+    Map.put(bloomFilter, :current, bitField)
   end
 
   def contains(
-        %{:k => k, :m => m, :current => bFCurrent, :old => bFOld},
+        %{k: k, m: m, current: bFCurrent, old: bFOld},
         elem
       ) do
     hash = hash(elem, k, m)
@@ -36,10 +36,10 @@ defmodule :m_tls_bloom_filter do
       )
   end
 
-  def rotate(%{:m => m, :current => bFCurrent} = bloomFilter) do
+  def rotate(%{m: m, current: bFCurrent} = bloomFilter) do
     size = round(:math.ceil(m / 8))
     bFNew = :binary.copy(<<0>>, size)
-    %{bloomFilter | :current => bFNew, :old => bFCurrent}
+    %{bloomFilter | current: bFNew, old: bFCurrent}
   end
 
   defp bit_is_set(<<1::size(1), _::bitstring>>, 0) do

@@ -2672,23 +2672,12 @@ defmodule :m_ssh_message do
          acc,
          0
        ) do
-    :erlang.list_to_tuple(
-      :lists.reverse([
-        [x, erl_boolean(bool)]
-        | acc
-      ])
-    )
+    :erlang.list_to_tuple(:lists.reverse([x, erl_boolean(bool) | acc]))
   end
 
   defp decode_kex_init(<<bool::size(8)-unsigned-big-integer>>, acc, 0) do
     x = 0
-
-    :erlang.list_to_tuple(
-      :lists.reverse([
-        [x, erl_boolean(bool)]
-        | acc
-      ])
-    )
+    :erlang.list_to_tuple(:lists.reverse([x, erl_boolean(bool) | acc]))
   end
 
   defp decode_kex_init(

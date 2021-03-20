@@ -361,7 +361,7 @@ defmodule :m_qlc_pt do
       fn anno ->
         n = :erl_anno.line(anno)
         [{^n, data}] = :ets.lookup(nodeInfo, n)
-        nData = %{data | :inside_lc => true}
+        nData = Map.put(data, :inside_lc, true)
         true = :ets.insert(nodeInfo, {n, nData})
         anno
       end,
@@ -388,7 +388,7 @@ defmodule :m_qlc_pt do
 
   defp lc_loc(n, nodeInfo) do
     case :ets.lookup(nodeInfo, n) do
-      [{^n, %{:inside_lc => true}}] ->
+      [{^n, %{inside_lc: true}}] ->
         true
 
       [{^n, _}] ->
@@ -398,7 +398,7 @@ defmodule :m_qlc_pt do
 
   defp genvar_pos(location, s) do
     case :ets.lookup(r_state(s, :node_info), location) do
-      [{^location, %{:genvar_pos => pos}}] ->
+      [{^location, %{genvar_pos: pos}}] ->
         pos
 
       [] ->
@@ -549,13 +549,11 @@ defmodule :m_qlc_pt do
   end
 
   defp compile_options(options) do
-    no = [
-      [:report, :report_errors, :report_warnings, :P, :E]
-      | bitstr_options()
-    ]
+    no = [:report, :report_errors, :report_warnings, :P, :E | bitstr_options()]
 
     [
-      [:strong_validation, :return]
+      :strong_validation,
+      :return
       | skip_options(
           no,
           options
@@ -590,7 +588,7 @@ defmodule :m_qlc_pt do
           location = :erl_anno.location(anno)
           [{^location, data}] = :ets.lookup(nodeInfo, location)
           pos = {location0, :erlang.get(:qlc_current_file), origVar}
-          nData = %{data | :genvar_pos => pos}
+          nData = Map.put(data, :genvar_pos, pos)
           true = :ets.insert(nodeInfo, {location, nData})
           newVar
         end
@@ -683,7 +681,11 @@ defmodule :m_qlc_pt do
       lcL = get_lcid_line(id)
 
       [rL, fun, go, nGV, s0, rL0, go0, aT, err] =
-        aux_vars([:RL, :Fun, :Go, :C, :S0, :RL0, :Go0, :AT, :E], lcNo, allVars)
+        aux_vars(
+          [:RL, :Fun, :Go, :C, :S0, :RL0, :Go0, :AT, :E],
+          lcNo,
+          allVars
+        )
 
       :ok
 
@@ -725,8 +727,15 @@ defmodule :m_qlc_pt do
         pack_args(
           abst_vars(
             [
-              [s0, rL0, fun, go0]
-              | replace(allIVs, allIVs, nil)
+              s0,
+              rL0,
+              fun,
+              go0
+              | replace(
+                  allIVs,
+                  allIVs,
+                  nil
+                )
             ],
             l
           ),
@@ -1175,7 +1184,16 @@ defmodule :m_qlc_pt do
 
         {:fun, l,
          {:clauses,
-          [{:clause, l, [h], [], [{:match, l, f, fun}, closure({:call, l, f, [f, h]}, l)]}]}}
+          [
+            {:clause, l, [h], [],
+             [
+               {:match, l, f, fun},
+               closure(
+                 {:call, l, f, [f, h]},
+                 l
+               )
+             ]}
+          ]}}
     end
   end
 
@@ -3705,7 +3723,7 @@ defmodule :m_qlc_pt do
     f = fn anno ->
       n = next_slot(nodeInfo)
       location = :erl_anno.location(anno)
-      data = {n, %{:location => location}}
+      data = {n, %{location: location}}
       true = :ets.insert(nodeInfo, data)
       :erl_anno.new(n)
     end
@@ -3747,7 +3765,7 @@ defmodule :m_qlc_pt do
 
   defp restore_loc(location, r_state(node_info: nodeInfo)) do
     case :ets.lookup(nodeInfo, location) do
-      [{^location, %{:location => origLocation}}] ->
+      [{^location, %{location: origLocation}}] ->
         origLocation
 
       [{^location}] ->
@@ -3922,14 +3940,14 @@ defmodule :m_qlc_pt do
     location = :erl_anno.location(anno)
 
     case :ets.lookup(nodeInfo, location) do
-      [{^location, %{:name => _}}] ->
+      [{^location, %{name: _}}] ->
         true
 
       [{^location, data}] ->
         true =
           :ets.insert(
             nodeInfo,
-            {location, %{data | :name => name}}
+            {location, Map.put(data, :name, name)}
           )
 
       [] ->
@@ -3987,7 +4005,7 @@ defmodule :m_qlc_pt do
     nodeInfo = r_state(state, :node_info)
 
     case :ets.lookup(nodeInfo, location) do
-      [{^location, %{:name => name}}] ->
+      [{^location, %{name: name}}] ->
         {:var, anno, name}
 
       _ ->

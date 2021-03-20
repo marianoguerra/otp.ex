@@ -27,7 +27,7 @@ defmodule :m_tftp_logger do
   defp add_timestamp(format, data) do
     time = :erlang.timestamp()
     {{_Y, _Mo, _D}, {h, mi, s}} = :calendar.now_to_universal_time(time)
-    {'~s:~s:~s tftp: ' ++ format, [[t(h), t(mi), t(s)] | data]}
+    {'~s:~s:~s tftp: ' ++ format, [t(h), t(mi), t(s) | data]}
   end
 
   defp t(int) do

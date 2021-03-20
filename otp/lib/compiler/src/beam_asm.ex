@@ -76,7 +76,7 @@ defmodule :m_beam_asm do
         is0
       )
 
-    bef ++ [[el, :on_load] | is]
+    bef ++ [el, :on_load | is]
   end
 
   defp assemble_1([{:function, name, arity, entry, asm} | t], exp, dict0, acc) do
@@ -266,7 +266,8 @@ defmodule :m_beam_asm do
     size = byte_size(contents)
 
     [
-      [<<id::binary, size::size(32)>>, contents]
+      <<id::binary, size::size(32)>>,
+      contents
       | pad(size)
     ]
   end
@@ -275,11 +276,7 @@ defmodule :m_beam_asm do
        when byte_size(id) === 4 and is_binary(head) and
               is_binary(contents) do
     size = byte_size(head) + byte_size(contents)
-
-    [
-      [<<id::binary, size::size(32), head::binary>>, contents]
-      | pad(size)
-    ]
+    [<<id::binary, size::size(32), head::binary>>, contents | pad(size)]
   end
 
   defp chunk(id, head, contents) when is_list(contents) do
@@ -446,7 +443,8 @@ defmodule :m_beam_asm do
       {:op, op} ->
         make_op(
           :erlang.list_to_tuple([
-            [op, fail]
+            op,
+            fail
             | args ++ [dest]
           ]),
           dict
@@ -456,7 +454,8 @@ defmodule :m_beam_asm do
         encode_op(
           bifOp,
           [
-            [fail, {:extfunc, :erlang, bif, arity}]
+            fail,
+            {:extfunc, :erlang, bif, arity}
             | args ++ [dest]
           ],
           dict
@@ -482,7 +481,9 @@ defmodule :m_beam_asm do
     encode_op(
       bifOp,
       [
-        [fail, live, {:extfunc, :erlang, bif, arity}]
+        fail,
+        live,
+        {:extfunc, :erlang, bif, arity}
         | args ++ [dest]
       ],
       dict
@@ -513,7 +514,7 @@ defmodule :m_beam_asm do
          dict
        )
        when is_list(ops) do
-    encode_op(cond__, [[fail, op, live] | ops ++ [dst]], dict)
+    encode_op(cond__, [fail, op, live | ops ++ [dst]], dict)
   end
 
   defp make_op(

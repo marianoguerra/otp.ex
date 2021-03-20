@@ -290,7 +290,14 @@ defmodule :m_edoc_types do
   end
 
   def to_xml(r_t_fun(args: as, range: t), env) do
-    {:fun, [{:argtypes, map(&wrap_utype/2, as, env)}, wrap_utype(t, env)]}
+    {:fun,
+     [
+       {:argtypes, map(&wrap_utype/2, as, env)},
+       wrap_utype(
+         t,
+         env
+       )
+     ]}
   end
 
   def to_xml(r_t_map(types: ts), env) do
@@ -374,7 +381,7 @@ defmodule :m_edoc_types do
   end
 
   def to_xml(r_t_spec(name: n, type: t, defs: ds), env) do
-    {:typespec, [[to_xml(n, env), wrap_utype(t, env)] | map(&to_xml/2, ds, env)]}
+    {:typespec, [to_xml(n, env), wrap_utype(t, env) | map(&to_xml/2, ds, env)]}
   end
 
   def to_xml(
@@ -383,7 +390,8 @@ defmodule :m_edoc_types do
       ) do
     {:typedef,
      [
-       [to_xml(n, env), {:argtypes, map(&wrap_utype/2, as, env)}]
+       to_xml(n, env),
+       {:argtypes, map(&wrap_utype/2, as, env)}
        | map(&to_xml/2, ds, env)
      ]}
   end
@@ -391,8 +399,9 @@ defmodule :m_edoc_types do
   def to_xml(r_t_typedef(name: n, args: as, type: t, defs: ds), env) do
     {:typedef,
      [
-       [to_xml(n, env), {:argtypes, map(&wrap_utype/2, as, env)}, wrap_type(t, env)]
-       | map(&to_xml/2, ds, env)
+       to_xml(n, env),
+       {:argtypes, map(&wrap_utype/2, as, env)},
+       wrap_type(t, env) | map(&to_xml/2, ds, env)
      ]}
   end
 

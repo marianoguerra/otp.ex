@@ -248,7 +248,11 @@ defmodule :m_os do
       :erlang.open_port(
         {:spawn, spawnCmd},
         [
-          [:binary, :stderr_to_stdout, :stream, :in, :hide]
+          :binary,
+          :stderr_to_stdout,
+          :stream,
+          :in,
+          :hide
           | spawnOpts
         ]
       )

@@ -664,7 +664,16 @@ defmodule :m_public_key do
   end
 
   defp sshfp_full_string(hashAlg, encKey) do
-    :lists.concat([sshfp_alg_name(hashAlg), [?: | sshfp_string(hashAlg, encKey)]])
+    :lists.concat([
+      sshfp_alg_name(hashAlg),
+      [
+        ?:
+        | sshfp_string(
+            hashAlg,
+            encKey
+          )
+      ]
+    ])
   end
 
   defp sshfp_alg_name(:sha) do
@@ -720,15 +729,15 @@ defmodule :m_public_key do
     )
   end
 
-  def pkix_test_data(%{:client_chain => clientChain0, :server_chain => serverChain0}) do
-    default = %{:intermediates => []}
+  def pkix_test_data(%{client_chain: clientChain0, server_chain: serverChain0}) do
+    default = %{intermediates: []}
     clientChain = :maps.merge(default, clientChain0)
     serverChain = :maps.merge(default, serverChain0)
-    :pubkey_cert.gen_test_certs(%{:client_chain => clientChain, :server_chain => serverChain})
+    :pubkey_cert.gen_test_certs(%{client_chain: clientChain, server_chain: serverChain})
   end
 
   def pkix_test_data(%{} = chain) do
-    default = %{:intermediates => []}
+    default = %{intermediates: []}
     :pubkey_cert.gen_test_certs(:maps.merge(default, chain))
   end
 
@@ -1092,7 +1101,7 @@ defmodule :m_public_key do
         %{m | dP => [cRL | cRLs]}
 
       _ ->
-        %{m | dP => [cRL]}
+        Map.put(m, dP, [cRL])
     end
   end
 
@@ -1147,7 +1156,7 @@ defmodule :m_public_key do
       [delta] ->
         delta
 
-      [[_, _] | _] ->
+      [_, _ | _] ->
         fun = fn {_, r_CertificateList(tbsCertList: firstTBSCRL)} = cRL1,
                  {_, r_CertificateList(tbsCertList: secondTBSCRL)} = cRL2 ->
           time1 = :pubkey_cert.time_str_2_gregorian_sec(r_TBSCertList(firstTBSCRL, :thisUpdate))
@@ -1357,7 +1366,7 @@ defmodule :m_public_key do
   end
 
   defp verify_hostname_extract_fqdn_default({:uri_id, uRI}) do
-    %{:scheme => 'https', :host => host} =
+    %{scheme: 'https', host: host} =
       :uri_string.normalize(
         uRI,
         [:return_map]
@@ -1481,7 +1490,7 @@ defmodule :m_public_key do
     :erlang.list_to_tuple(l16_to_tup(l, []))
   end
 
-  defp l16_to_tup([[a, b] | t], acc) do
+  defp l16_to_tup([a, b | t], acc) do
     l16_to_tup(t, [a <<< 8 ||| b | acc])
   end
 

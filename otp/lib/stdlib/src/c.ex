@@ -23,7 +23,7 @@ defmodule :m_c do
     beam_language: :erlang,
     format: "application/erlang+html",
     module_doc: :undefined,
-    metadata: %{:otp_doc_vsn => {1, 0, 0}},
+    metadata: %{otp_doc_vsn: {1, 0, 0}},
     docs: :undefined
   )
 
@@ -391,7 +391,8 @@ defmodule :m_c do
 
   defp compile_and_load(file, opts0) when is_list(opts0) do
     opts = [
-      [:report_errors, :report_warnings]
+      :report_errors,
+      :report_warnings
       | ensure_from(
           :filename.extension(file),
           ensure_outdir('.', opts0)
@@ -554,7 +555,8 @@ defmodule :m_c do
 
       {opts, files} ->
         cOpts = [
-          [:report_errors, :report_warnings]
+          :report_errors,
+          :report_warnings
           | reverse(opts)
         ]
 
@@ -581,7 +583,8 @@ defmodule :m_c do
     else
       {opts, files} ->
         cOpts = [
-          [:report_errors, :report_warnings]
+          :report_errors,
+          :report_warnings
           | reverse(opts)
         ]
 
@@ -600,15 +603,15 @@ defmodule :m_c do
     end
   end
 
-  defp split([[:"@i", dir] | t], opts, files) do
+  defp split([:"@i", dir | t], opts, files) do
     split(t, [{:i, :erlang.atom_to_list(dir)} | opts], files)
   end
 
-  defp split([[:"@o", dir] | t], opts, files) do
+  defp split([:"@o", dir | t], opts, files) do
     split(t, [{:outdir, :erlang.atom_to_list(dir)} | opts], files)
   end
 
-  defp split([[:"@d", def__] | t], opts, files) do
+  defp split([:"@d", def__ | t], opts, files) do
     split(
       t,
       [split_def(:erlang.atom_to_list(def__), []) | opts],

@@ -16,7 +16,7 @@ defmodule :m_xmerl_b64Bin_scan do
     end
   end
 
-  defp scan_token([[?\s, h] | t]) do
+  defp scan_token([?\s, h | t]) do
     scan_token([h | t])
   end
 

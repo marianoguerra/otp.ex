@@ -29,7 +29,7 @@ defmodule :m_inet_parse do
   end
 
   def services(fname, file) do
-    fn__ = fn [[name, portProto] | aliases] ->
+    fn__ = fn [name, portProto | aliases] ->
       {proto, port} = port_proto(portProto, 0)
       {name, proto, port, aliases}
     end
@@ -42,7 +42,7 @@ defmodule :m_inet_parse do
   end
 
   def rpc(fname, file) do
-    fn__ = fn [[name, program] | aliases] ->
+    fn__ = fn [name, program | aliases] ->
       prog = :erlang.list_to_integer(program)
       {name, prog, aliases}
     end
@@ -55,7 +55,7 @@ defmodule :m_inet_parse do
   end
 
   def hosts(fname, file) do
-    fn__ = fn [[address, name] | aliases] ->
+    fn__ = fn [address, name | aliases] ->
       case :string.lexemes(address, '%') do
         [addr, _] ->
           {:ok, _} = address(addr)
@@ -331,7 +331,7 @@ defmodule :m_inet_parse do
     {reverse(acc), []}
   end
 
-  defp get_line([[?\r, ?\n] | cs], acc) do
+  defp get_line([?\r, ?\n | cs], acc) do
     {reverse([?\n | acc]), cs}
   end
 
@@ -367,7 +367,7 @@ defmodule :m_inet_parse do
     end
   end
 
-  defp collect_line(fd, n, [[?\r, ?\n] | _], cs) do
+  defp collect_line(fd, n, [?\r, ?\n | _], cs) do
     {:ok, _} = :file.position(fd, {:cur, -(n - 2)})
     reverse([?\n | cs])
   end
@@ -455,11 +455,11 @@ defmodule :m_inet_parse do
     is_dom_ldh(cs)
   end
 
-  defp is_dom_ldh([[?-, ?.] | _]) do
+  defp is_dom_ldh([?-, ?. | _]) do
     false
   end
 
-  defp is_dom_ldh([[?_, ?.] | _]) do
+  defp is_dom_ldh([?_, ?. | _]) do
     false
   end
 
@@ -828,8 +828,8 @@ defmodule :m_inet_parse do
 
   defp ipv6_addr_scope(scopeId, ar, br, n) do
     case :lists.reverse(br ++ dup(8 - n, 0, ar)) do
-      [[p, 0] | xs] when p === 65152 or p === 65282 ->
-        :erlang.list_to_tuple([[p, scopeId] | xs])
+      [p, 0 | xs] when p === 65152 or p === 65282 ->
+        :erlang.list_to_tuple([p, scopeId | xs])
 
       _ ->
         :erlang.error(:badarg)
@@ -837,7 +837,7 @@ defmodule :m_inet_parse do
   end
 
   defp ipv6_addr_done(ar, br, n, {d1, d2, d3, d4}) do
-    ipv6_addr_done(ar, [[d3 <<< 8 ||| d4, d1 <<< 8 ||| d2] | br], n + 2)
+    ipv6_addr_done(ar, [d3 <<< 8 ||| d4, d1 <<< 8 ||| d2 | br], n + 2)
   end
 
   defp ipv6_addr_done(ar, br, n) do
@@ -959,7 +959,7 @@ defmodule :m_inet_parse do
     ntoa_done(r)
   end
 
-  defp ntoa([[0, 0] | t], r) do
+  defp ntoa([0, 0 | t], r) do
     ntoa(t, r, 2)
   end
 
@@ -983,7 +983,7 @@ defmodule :m_inet_parse do
     ntoa_done(r1, r2)
   end
 
-  defp ntoa([[0, 0] | t], r1, n1, r2) do
+  defp ntoa([0, 0 | t], r1, n1, r2) do
     ntoa(t, r1, n1, r2, 2)
   end
 
@@ -1047,7 +1047,7 @@ defmodule :m_inet_parse do
   end
 
   defp separate(e, [h | [_ | _] = t], r) do
-    separate(e, t, [[e, h] | r])
+    separate(e, t, [e, h | r])
   end
 
   defp separate(_E, [h], r) do
@@ -1150,7 +1150,7 @@ defmodule :m_inet_parse do
     split_line(cs, [reverse(acc) | tokens])
   end
 
-  defp split_mid([[?\r, ?\n] | cs], acc, tokens) do
+  defp split_mid([?\r, ?\n | cs], acc, tokens) do
     split_line(cs, [reverse(acc) | tokens])
   end
 

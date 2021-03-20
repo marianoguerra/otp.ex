@@ -94,7 +94,10 @@ defmodule :m_pubkey_pem do
       '\n',
       pem_decrypt(),
       '\n',
-      pem_decrypt_info(cipher, salt),
+      pem_decrypt_info(
+        cipher,
+        salt
+      ),
       '\n\n',
       b64encode_and_split(decrypted),
       '\n',
@@ -147,7 +150,7 @@ defmodule :m_pubkey_pem do
     :binary.list_to_bin(:lists.reverse(list))
   end
 
-  defp decode_pem_entry(start, [[<<"Proc-Type: 4,ENCRYPTED", _::binary>>, line] | lines]) do
+  defp decode_pem_entry(start, [<<"Proc-Type: 4,ENCRYPTED", _::binary>>, line | lines]) do
     type = asn1_type(start)
     cs = :erlang.iolist_to_binary(lines)
     decoded = :base64.mime_decode(cs)
@@ -211,7 +214,7 @@ defmodule :m_pubkey_pem do
   end
 
   defp split_lines(<<text::size(64)-binary, rest::binary>>) do
-    [[text, ?\n] | split_lines(rest)]
+    [text, ?\n | split_lines(rest)]
   end
 
   defp split_lines(bin) do
@@ -238,7 +241,7 @@ defmodule :m_pubkey_pem do
     :erlang.list_to_binary(:lists.reverse(acc))
   end
 
-  defp unhex([[d1, d2] | rest], acc) do
+  defp unhex([d1, d2 | rest], acc) do
     unhex(
       rest,
       [:erlang.list_to_integer([d1, d2], 16) | acc]

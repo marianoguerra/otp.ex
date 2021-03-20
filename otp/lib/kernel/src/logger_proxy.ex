@@ -40,25 +40,24 @@ defmodule :m_logger_proxy do
     name = :logger_proxy
 
     %{
-      :id => name,
-      :start => {:logger_proxy, :start_link, []},
-      :restart => :temporary,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:logger_proxy]
+      id: name,
+      start: {:logger_proxy, :start_link, []},
+      restart: :temporary,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:logger_proxy]
     }
   end
 
   def get_default_config() do
     olpDefault = :logger_olp.get_default_opts()
 
-    %{
-      olpDefault
-      | :sync_mode_qlen => 500,
-        :drop_mode_qlen => 1000,
-        :flush_qlen => 5000,
-        :burst_limit_enable => false
-    }
+    Map.merge(olpDefault, %{
+      sync_mode_qlen: 500,
+      drop_mode_qlen: 1000,
+      flush_qlen: 5000,
+      burst_limit_enable: false
+    })
   end
 
   def init([]) do
@@ -132,9 +131,9 @@ defmodule :m_logger_proxy do
           :logger_server.do_internal_log(
             :notice,
             %{
-              :mfa => {:logger_proxy, :notify, 2},
-              :line => 154,
-              :file => 'otp/lib/kernel/src/logger_proxy.erl'
+              mfa: {:logger_proxy, :notify, 2},
+              line: 154,
+              file: 'otp/lib/kernel/src/logger_proxy.erl'
             },
             %{},
             ['~w switched from ~w to ~w mode', [:logger_proxy, mode0, mode1]]
@@ -156,9 +155,9 @@ defmodule :m_logger_proxy do
           :logger_server.do_internal_log(
             :notice,
             %{
-              :mfa => {:logger_proxy, :notify, 2},
-              :line => 157,
-              :file => 'otp/lib/kernel/src/logger_proxy.erl'
+              mfa: {:logger_proxy, :notify, 2},
+              line: 157,
+              file: 'otp/lib/kernel/src/logger_proxy.erl'
             },
             %{},
             ['~w flushed ~w log events', [:logger_proxy, flushed]]
@@ -180,9 +179,9 @@ defmodule :m_logger_proxy do
           :logger_server.do_internal_log(
             :notice,
             %{
-              :mfa => {:logger_proxy, :notify, 2},
-              :line => 160,
-              :file => 'otp/lib/kernel/src/logger_proxy.erl'
+              mfa: {:logger_proxy, :notify, 2},
+              line: 160,
+              file: 'otp/lib/kernel/src/logger_proxy.erl'
             },
             %{},
             ['~w restarted', [:logger_proxy]]
@@ -212,9 +211,9 @@ defmodule :m_logger_proxy do
               :logger_server.do_internal_log(
                 :debug,
                 %{
-                  :mfa => {:logger_proxy, :try_log, 1},
-                  :line => 170,
-                  :file => 'otp/lib/kernel/src/logger_proxy.erl'
+                  mfa: {:logger_proxy, :try_log, 1},
+                  line: 170,
+                  file: 'otp/lib/kernel/src/logger_proxy.erl'
                 },
                 %{},
                 [[{:logger_proxy, :log_failed}, {:log, args}, {:reason, {c, r, __STACKTRACE__}}]]

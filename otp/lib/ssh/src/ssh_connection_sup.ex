@@ -10,14 +10,10 @@ defmodule :m_ssh_connection_sup do
   end
 
   def init(_) do
-    supFlags = %{:strategy => :simple_one_for_one, :intensity => 0, :period => 3600}
+    supFlags = %{strategy: :simple_one_for_one, intensity: 0, period: 3600}
 
     childSpecs = [
-      %{
-        :id => :undefined,
-        :start => {:ssh_connection_handler, :start_link, []},
-        :restart => :temporary
-      }
+      %{id: :undefined, start: {:ssh_connection_handler, :start_link, []}, restart: :temporary}
     ]
 
     {:ok, {supFlags, childSpecs}}

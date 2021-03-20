@@ -514,7 +514,7 @@ defmodule :m_cdv_int_tab_cb do
 
     info =
       for {desc, r} <- info0 do
-        [[_, _] | data] = :crashdump_viewer.to_value_list(r)
+        [_, _ | data] = :crashdump_viewer.to_value_list(r)
         [desc | data]
       end
 

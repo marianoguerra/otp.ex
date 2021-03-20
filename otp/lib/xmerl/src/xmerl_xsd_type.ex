@@ -1634,7 +1634,7 @@ defmodule :m_xmerl_xsd_type do
     {:error, {:invalid_token, :carriage_return, v}}
   end
 
-  defp check_token([[32, 32] | _T], v) do
+  defp check_token([32, 32 | _T], v) do
     {:error, {:invalid_token, :double_space, v}}
   end
 
@@ -2023,7 +2023,7 @@ defmodule :m_xmerl_xsd_type do
     )
   end
 
-  defp collapse_ws([[32, 32] | t], acc) do
+  defp collapse_ws([32, 32 | t], acc) do
     collapse_ws([32 | t], acc)
   end
 

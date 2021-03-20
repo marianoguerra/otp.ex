@@ -172,7 +172,7 @@ defmodule :m_beam_ssa_opt do
         :erlang.raise(class, error, __STACKTRACE__)
     else
       {st, funcDb} ->
-        phase(ids, ps, %{stMap | funcId => st}, funcDb)
+        phase(ids, ps, Map.put(stMap, funcId, st), funcDb)
     end
   end
 
@@ -294,7 +294,7 @@ defmodule :m_beam_ssa_opt do
   defp build_st_map_1([f | fs], map) do
     r_b_function(anno: anno, args: args, cnt: counter, bs: bs) = f
     st = r_opt_st(anno: anno, args: args, cnt: counter, ssa: bs)
-    build_st_map_1(fs, %{map | get_func_id(f) => st})
+    build_st_map_1(fs, Map.put(map, get_func_id(f), st))
   end
 
   defp build_st_map_1([], map) do
@@ -447,7 +447,14 @@ defmodule :m_beam_ssa_opt do
           %{funcDb0 | id => r_func_info(info, exported: exported, arg_types: argTypes)}
 
         %{} ->
-          %{funcDb0 | id => r_func_info(exported: exported, arg_types: argTypes)}
+          Map.put(
+            funcDb0,
+            id,
+            r_func_info(
+              exported: exported,
+              arg_types: argTypes
+            )
+          )
       end
 
     funcDb =
@@ -518,11 +525,10 @@ defmodule :m_beam_ssa_opt do
         r_func_info(calleeVertex, :in)
       )
 
-    %{
-      funcDb
-      | caller => r_func_info(callerVertex, out: calls),
-        callee => r_func_info(calleeVertex, in: calledBy)
-    }
+    Map.merge(funcDb, %{
+      caller => r_func_info(callerVertex, out: calls),
+      callee => r_func_info(calleeVertex, in: calledBy)
+    })
   end
 
   defp get_call_order_po(stMap, funcDb) do
@@ -749,7 +755,7 @@ defmodule :m_beam_ssa_opt do
 
   defp opt_tail_phis([r_b_blk(is: is0, last: last) | bs], blocks0, count0) do
     case {is0, last} do
-      {[r_b_set(op: :phi, args: [[_, _] | _]) | _], r_b_ret(arg: r_b_var()) = ret} ->
+      {[r_b_set(op: :phi, args: [_, _ | _]) | _], r_b_ret(arg: r_b_var()) = ret} ->
         {phis, is} =
           splitwith(
             fn r_b_set(op: op) ->
@@ -830,7 +836,7 @@ defmodule :m_beam_ssa_opt do
 
   defp new_names([r_b_set(dst: dst) = i | is], sub0, count0, acc) do
     {newDst, count} = new_var(dst, count0)
-    sub = %{sub0 | dst => newDst}
+    sub = Map.put(sub0, dst, newDst)
     new_names(is, sub, count, [r_b_set(i, dst: newDst) | acc])
   end
 
@@ -945,7 +951,7 @@ defmodule :m_beam_ssa_opt do
     collect_chains(els, [el | chain])
   end
 
-  defp collect_chains([el | els], [[_, _] | _] = chain) do
+  defp collect_chains([el | els], [_, _ | _] = chain) do
     [chain | collect_chains(els, [el])]
   end
 
@@ -953,7 +959,7 @@ defmodule :m_beam_ssa_opt do
     collect_chains(els, [el])
   end
 
-  defp collect_chains([], [[_, _] | _] = chain) do
+  defp collect_chains([], [_, _ | _] = chain) do
     [chain]
   end
 
@@ -1174,15 +1180,7 @@ defmodule :m_beam_ssa_opt do
     []
   end
 
-  defp cse_successors(
-         [
-           [r_b_set(op: {:succeeded, _}, args: [src]), bif]
-           | _
-         ],
-         blk,
-         esSucc,
-         m0
-       ) do
+  defp cse_successors([r_b_set(op: {:succeeded, _}, args: [src]), bif | _], blk, esSucc, m0) do
     case cse_suitable(bif) do
       true ->
         r_b_blk(last: r_b_br(succ: succ, fail: fail)) = blk
@@ -1230,7 +1228,7 @@ defmodule :m_beam_ssa_opt do
         cse_successors_1(ls, es0, %{m | l => es})
 
       %{} ->
-        cse_successors_1(ls, es0, %{m | l => es0})
+        cse_successors_1(ls, es0, Map.put(m, l, es0))
     end
   end
 
@@ -1254,7 +1252,7 @@ defmodule :m_beam_ssa_opt do
         cse_is(is, es, sub0, [i | acc])
 
       r_b_set() ->
-        sub = %{sub0 | bool => r_b_literal(val: true)}
+        sub = Map.put(sub0, bool, r_b_literal(val: true))
         cse_is(is, es, sub, acc)
     end
   end
@@ -1274,11 +1272,11 @@ defmodule :m_beam_ssa_opt do
           {:ok, exprKey} ->
             case es0 do
               %{^exprKey => src} ->
-                sub = %{sub0 | dst => src}
+                sub = Map.put(sub0, dst, src)
                 cse_is(is, es0, sub, acc)
 
               %{} ->
-                es = %{es0 | exprKey => dst}
+                es = Map.put(es0, exprKey, dst)
                 cse_is(is, es, sub0, [i | acc])
             end
         end
@@ -1423,7 +1421,8 @@ defmodule :m_beam_ssa_opt do
 
       {[_ | _] = is1, [r_b_set(op: {:float, :convert}) = conv | is2]} ->
         [
-          [r_b_blk(is: is1, last: br), r_b_blk(is: [conv], last: br)]
+          r_b_blk(is: is1, last: br),
+          r_b_blk(is: [conv], last: br)
           | float_split_conv(is2, blk)
         ]
 
@@ -1479,7 +1478,7 @@ defmodule :m_beam_ssa_opt do
     canOptimizeSucc = float_can_optimize_blk(succBlk, fs0)
 
     case is do
-      [r_b_set(anno: %{:float_op => _}) | _] when canOptimizeSucc ->
+      [r_b_set(anno: %{float_op: _}) | _] when canOptimizeSucc ->
         {[], blk0, fs0, count0}
 
       _ ->
@@ -1523,7 +1522,7 @@ defmodule :m_beam_ssa_opt do
 
   defp float_opt_is([r_b_set(anno: anno0) = i0 | is0], fs0, count0, acc) do
     case anno0 do
-      %{:float_op => fTypes} ->
+      %{float_op: fTypes} ->
         anno = :maps.remove(:float_op, anno0)
         i1 = r_b_set(i0, anno: anno)
         {is, fs, count} = float_make_op(i1, fTypes, fs0, count0)
@@ -1551,7 +1550,7 @@ defmodule :m_beam_ssa_opt do
     frDst = r_b_var(name: fr)
     i = r_b_set(i0, op: {:float, op}, dst: frDst, args: as)
     vs = :cerl_sets.add_element(dst, vs0)
-    rs = %{rs1 | dst => frDst}
+    rs = Map.put(rs1, dst, frDst)
     is = append(is0) ++ [i]
 
     case s do
@@ -1584,7 +1583,7 @@ defmodule :m_beam_ssa_opt do
         dst = r_b_var(name: fr)
         i0 = float_load_reg(t, a, dst)
         i = r_b_set(i0, anno: anno)
-        {{dst, [i]}, %{rs | a => dst}, count}
+        {{dst, [i]}, Map.put(rs, a, dst), count}
     end
   end
 
@@ -1682,7 +1681,7 @@ defmodule :m_beam_ssa_opt do
   end
 
   defp live_opt_phis(is, l, live0, liveMap0) do
-    liveMap = %{liveMap0 | l => live0}
+    liveMap = Map.put(liveMap0, l, live0)
 
     phis =
       takewhile(
@@ -1746,11 +1745,8 @@ defmodule :m_beam_ssa_opt do
 
   defp live_opt_is(
          [
-           [
-             r_b_set(op: {:succeeded, :guard}, dst: succDst, args: [dst]) = succI,
-             r_b_set(op: op, dst: dst) = i0
-           ]
-           | is
+           r_b_set(op: {:succeeded, :guard}, dst: succDst, args: [dst]) = succI,
+           r_b_set(op: op, dst: dst) = i0 | is
          ],
          live0,
          acc
@@ -1955,7 +1951,7 @@ defmodule :m_beam_ssa_opt do
 
   defp bsm_skip_is([i0 | is], extracted) do
     case i0 do
-      r_b_set(op: :bs_match, dst: ctx, args: [[r_b_literal(val: t) = type, prevCtx] | args0])
+      r_b_set(op: :bs_match, dst: ctx, args: [r_b_literal(val: t) = type, prevCtx | args0])
       when t !== :float and t !== :string and t !== :skip ->
         i =
           case :cerl_sets.is_element(ctx, extracted) do
@@ -1963,7 +1959,7 @@ defmodule :m_beam_ssa_opt do
               i0
 
             false ->
-              args = [[r_b_literal(val: :skip), prevCtx, type] | args0]
+              args = [r_b_literal(val: :skip), prevCtx, type | args0]
               r_b_set(i0, args: args)
           end
 
@@ -2135,7 +2131,7 @@ defmodule :m_beam_ssa_opt do
       {[r_b_set(op: :bs_test_tail, dst: bool, args: [ctx, r_b_literal(val: bits0)])],
        r_b_br(bool: bool, fail: fail)} ->
         bits = bits0 + :erlang.map_get(ctx, posMap0)
-        bsm_positions(bs, %{posMap | l => {bits, fail}})
+        bsm_positions(bs, Map.put(posMap, l, {bits, fail}))
 
       {_, _} ->
         bsm_positions(bs, posMap)
@@ -2150,7 +2146,7 @@ defmodule :m_beam_ssa_opt do
          [r_b_set(op: :bs_start_match, dst: new) | is],
          posMap0
        ) do
-    posMap = %{posMap0 | new => 0}
+    posMap = Map.put(posMap0, new, 0)
     bsm_positions_is(is, posMap)
   end
 
@@ -2158,10 +2154,10 @@ defmodule :m_beam_ssa_opt do
          [r_b_set(op: :bs_match, dst: new, args: args) | is],
          posMap0
        ) do
-    [[_, old] | _] = args
+    [_, old | _] = args
     %{^old => bits0} = posMap0
     bits = bsm_update_bits(args, bits0)
-    posMap = %{posMap0 | new => bits}
+    posMap = Map.put(posMap0, new, bits)
     bsm_positions_is(is, posMap)
   end
 
@@ -2204,7 +2200,7 @@ defmodule :m_beam_ssa_opt do
        ) do
     case {is, last0} do
       {[
-         r_b_set(op: :bs_match, dst: new, args: [[_, old] | _]),
+         r_b_set(op: :bs_match, dst: new, args: [_, old | _]),
          r_b_set(op: {:succeeded, :guard}, dst: bool, args: [new])
        ], r_b_br(bool: bool, fail: fail)} ->
         case posMap do
@@ -2253,7 +2249,8 @@ defmodule :m_beam_ssa_opt do
   end
 
   defp opt_bs_puts_merge([
-         [{l1, r_b_blk(is: is) = blk0}, {l2, r_b_blk(is: accIs)} = bAcc]
+         {l1, r_b_blk(is: is) = blk0},
+         {l2, r_b_blk(is: accIs)} = bAcc
          | acc
        ]) do
     case {accIs, is} do
@@ -2287,7 +2284,7 @@ defmodule :m_beam_ssa_opt do
         [{l2, blk} | acc]
 
       {_, _} ->
-        [[{l1, blk0}, bAcc] | acc]
+        [{l1, blk0}, bAcc | acc]
     end
   end
 
@@ -2315,7 +2312,7 @@ defmodule :m_beam_ssa_opt do
 
         intI = r_b_set(i0, args: intArgs)
         intBlk = r_b_blk(blk0, is: [intI], last: r_b_br(br0, succ: binL))
-        {count, [[{binL, binBlk}, {l, intBlk}] | acc]}
+        {count, [{binL, binBlk}, {l, intBlk} | acc]}
 
       :not_possible ->
         :not_possible
@@ -2539,11 +2536,7 @@ defmodule :m_beam_ssa_opt do
     isTupleBlk = r_b_blk(is: isTupleIs, last: isTupleBr)
     tupleSizeBr = r_b_br(bool: true__, succ: eqL, fail: eqL)
     tupleSizeBlk = r_b_blk(is: tupleSizeIs, last: tupleSizeBr)
-
-    {[
-       [{tupleSizeL, tupleSizeBlk}, {isTupleL, isTupleBlk}, {preL, preBlk}]
-       | acc
-     ], count}
+    {[{tupleSizeL, tupleSizeBlk}, {isTupleL, isTupleBlk}, {preL, preBlk} | acc], count}
   end
 
   defp opt_tup_size_is(
@@ -2610,22 +2603,20 @@ defmodule :m_beam_ssa_opt do
   end
 
   defp recv_after_opt([
-         [
-           {l1,
-            r_b_blk(
-              is: is0,
-              last: r_b_br(bool: r_b_var(), succ: l2, fail: 1)
-            ) = blk1},
-           {l2,
-            r_b_blk(
-              is: [],
-              last:
-                r_b_br(
-                  bool: r_b_var() = waitBool,
-                  fail: fail
-                ) = br0
-            ) = blk2}
-         ]
+         {l1,
+          r_b_blk(
+            is: is0,
+            last: r_b_br(bool: r_b_var(), succ: l2, fail: 1)
+          ) = blk1},
+         {l2,
+          r_b_blk(
+            is: [],
+            last:
+              r_b_br(
+                bool: r_b_var() = waitBool,
+                fail: fail
+              ) = br0
+          ) = blk2}
          | bs
        ]) do
     case recv_after_opt_is(is0, waitBool, []) do
@@ -2634,7 +2625,7 @@ defmodule :m_beam_ssa_opt do
         [{l1, r_b_blk(blk1, is: is, last: br)} | recv_after_opt(bs)]
 
       :no ->
-        [[{l1, blk1}, {l2, blk2}] | recv_after_opt(bs)]
+        [{l1, blk1}, {l2, blk2} | recv_after_opt(bs)]
     end
   end
 
@@ -2948,7 +2939,7 @@ defmodule :m_beam_ssa_opt do
             end
         end
 
-      [[_, _] | _] ->
+      [_, _ | _] ->
         defLocGC
     end
   end
@@ -3053,7 +3044,7 @@ defmodule :m_beam_ssa_opt do
             acc
 
           %{} ->
-            %{acc | l => gC}
+            Map.put(acc, l, gC)
         end
       end,
       willGC,
@@ -3197,7 +3188,7 @@ defmodule :m_beam_ssa_opt do
 
     case :gb_sets.is_member(common, unsuitable) do
       true ->
-        [[^common, oneUp] | _] = :erlang.map_get(common, dom)
+        [^common, oneUp | _] = :erlang.map_get(common, dom)
         common_dominator([oneUp], dom, numbering, unsuitable)
 
       false ->
@@ -3564,7 +3555,7 @@ defmodule :m_beam_ssa_opt do
       r_b_set(op: :put_list, dst: putListDst, args: [r_b_literal(val: hd), r_b_literal(val: tl)])
 
     i = r_b_set(i0, args: [hd0, putListDst])
-    unfold_arg_list([[i, putList] | is0], list, litMap, count, x, acc)
+    unfold_arg_list([i, putList | is0], list, litMap, count, x, acc)
   end
 
   defp unfold_arg_list(

@@ -914,7 +914,7 @@ defmodule :m_dets_utils do
 
   def make_zeros(n) do
     p = make_zeros(div(n, 2))
-    [[0, p] | p]
+    [0, p | p]
   end
 
   defp my_buddy(addr, sz, base) do
@@ -1541,7 +1541,7 @@ defmodule :m_dets_utils do
       e
       | :lists.foldr(
           fn x, a ->
-            [[get_first_key(x), x] | a]
+            [get_first_key(x), x | a]
           end,
           [],
           es
@@ -1839,7 +1839,7 @@ defmodule :m_dets_utils do
         bplus_insert_in_leaf_2(leaf, key, n - 1, [k | accum])
 
       k < key ->
-        bplus_insert_in_leaf_3(leaf, n - 1, [[k, key] | accum])
+        bplus_insert_in_leaf_3(leaf, n - 1, [k, key | accum])
 
       k == key ->
         bplus_insert_in_leaf_3(leaf, n - 1, [key | accum])
@@ -2185,7 +2185,8 @@ defmodule :m_dets_utils do
 
   defp bplus_split_node_2(node, pos, n, accum) do
     bplus_split_node_2(node, pos - 1, n - 1, [
-      [bplus_get_lkey(node, pos), bplus_get_tree(node, pos)]
+      bplus_get_lkey(node, pos),
+      bplus_get_tree(node, pos)
       | accum
     ])
   end
@@ -2199,7 +2200,8 @@ defmodule :m_dets_utils do
       node,
       pos - 1,
       [
-        [bplus_get_lkey(node, pos), bplus_get_tree(node, pos)]
+        bplus_get_lkey(node, pos),
+        bplus_get_tree(node, pos)
         | leftAcc
       ],
       dKey,
@@ -2221,7 +2223,8 @@ defmodule :m_dets_utils do
 
   defp bplus_join_tree_2(tree, joinedTree, pos, n, accum) do
     bplus_join_tree_2(tree, joinedTree, pos, n - 1, [
-      [bplus_get_lkey(tree, n), bplus_get_tree(tree, n)]
+      bplus_get_lkey(tree, n),
+      bplus_get_tree(tree, n)
       | accum
     ])
   end
@@ -2232,7 +2235,8 @@ defmodule :m_dets_utils do
 
   defp bplus_join_tree_3(tree, pos, accum) do
     bplus_join_tree_3(tree, pos - 1, [
-      [bplus_get_tree(tree, pos), bplus_get_rkey(tree, pos)]
+      bplus_get_tree(tree, pos),
+      bplus_get_rkey(tree, pos)
       | accum
     ])
   end
@@ -2259,7 +2263,7 @@ defmodule :m_dets_utils do
     tree
   end
 
-  defp bplus_put_subtree(tree, [[newSubTree, pos] | rest]) do
+  defp bplus_put_subtree(tree, [newSubTree, pos | rest]) do
     bplus_put_subtree(
       :erlang.setelement(pos * 2, tree, newSubTree),
       rest
@@ -2271,12 +2275,13 @@ defmodule :m_dets_utils do
   end
 
   defp bplus_extend_tree_2(tree, {t1, dKey, t2}, pos, pos, accum) do
-    bplus_extend_tree_3(tree, pos - 1, [[t1, dKey, t2] | accum])
+    bplus_extend_tree_3(tree, pos - 1, [t1, dKey, t2 | accum])
   end
 
   defp bplus_extend_tree_2(tree, inserts, pos, n, accum) do
     bplus_extend_tree_2(tree, inserts, pos, n - 1, [
-      [bplus_get_lkey(tree, n), bplus_get_tree(tree, n)]
+      bplus_get_lkey(tree, n),
+      bplus_get_tree(tree, n)
       | accum
     ])
   end
@@ -2287,7 +2292,8 @@ defmodule :m_dets_utils do
 
   defp bplus_extend_tree_3(tree, n, accum) do
     bplus_extend_tree_3(tree, n - 1, [
-      [bplus_get_tree(tree, n), bplus_get_rkey(tree, n)]
+      bplus_get_tree(tree, n),
+      bplus_get_rkey(tree, n)
       | accum
     ])
   end

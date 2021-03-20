@@ -50,7 +50,7 @@ defmodule :m_xref_scanner do
     end
   end
 
-  defp a1([[{:-, n}, {:integer, n, 1}] | l]) do
+  defp a1([{:-, n}, {:integer, n, 1} | l]) do
     [{:integer, n, -1} | a1(l)]
   end
 
@@ -63,35 +63,61 @@ defmodule :m_xref_scanner do
   end
 
   defp lex([
-         [{:atom, n, v1}, {:->, _}, {:atom, _, v2}]
+         {:atom, n, v1},
+         {:->, _},
+         {:atom, _, v2}
          | l
        ]) do
     constant = {:constant, :unknown, :edge, {v1, v2}}
     [{:edge, n, constant} | lex(l)]
   end
 
-  defp lex([
-         [{:"{", n}, {:atom, _, v1}, {:",", _}, {:atom, _, v2}, {:"}", _}]
-         | l
-       ]) do
+  defp lex([{:"{", n}, {:atom, _, v1}, {:",", _}, {:atom, _, v2}, {:"}", _} | l]) do
     constant = {:constant, :unknown, :edge, {v1, v2}}
     [{:edge, n, constant} | lex(l)]
   end
 
   defp lex([
-         [
-           {:atom, n, m},
-           {:":", _},
-           {:atom, _, f},
-           {:/, _},
-           {:integer, _, a},
-           {:->, _},
-           {:atom, _, m2},
-           {:":", _},
-           {:atom, _, f2},
-           {:/, _},
-           {:integer, _, a2}
-         ]
+         {:atom, n, m},
+         {:":", _},
+         {:atom, _, f},
+         {:/, _},
+         {:integer, _, a},
+         {:->, _},
+         {:atom, _, m2},
+         {:":", _},
+         {:atom, _, f2},
+         {:/, _},
+         {:integer, _, a2}
+         | l
+       ]) do
+    constant = {:constant, :Fun, :edge, {{m, f, a}, {m2, f2, a2}}}
+    [{:edge, n, constant} | lex(l)]
+  end
+
+  defp lex([{:atom, n, m}, {:":", _}, {:atom, _, f}, {:/, _}, {:integer, _, a} | l]) do
+    constant = {:constant, :Fun, :vertex, {m, f, a}}
+    [{:vertex, n, constant} | lex(l)]
+  end
+
+  defp lex([
+         {:"{", n},
+         {:"{", _},
+         {:atom, _, m},
+         {:",", _},
+         {:atom, _, f},
+         {:",", _},
+         {:integer, _, a},
+         {:"}", _},
+         {:",", _},
+         {:"{", _},
+         {:atom, _, m2},
+         {:",", _},
+         {:atom, _, f2},
+         {:",", _},
+         {:integer, _, a2},
+         {:"}", _},
+         {:"}", _}
          | l
        ]) do
     constant = {:constant, :Fun, :edge, {{m, f, a}, {m2, f2, a2}}}
@@ -99,70 +125,34 @@ defmodule :m_xref_scanner do
   end
 
   defp lex([
-         [{:atom, n, m}, {:":", _}, {:atom, _, f}, {:/, _}, {:integer, _, a}]
+         {:"{", n},
+         {:atom, _, m},
+         {:",", _},
+         {:atom, _, f},
+         {:",", _},
+         {:integer, _, a},
+         {:"}", _}
          | l
        ]) do
     constant = {:constant, :Fun, :vertex, {m, f, a}}
     [{:vertex, n, constant} | lex(l)]
   end
 
-  defp lex([
-         [
-           {:"{", n},
-           {:"{", _},
-           {:atom, _, m},
-           {:",", _},
-           {:atom, _, f},
-           {:",", _},
-           {:integer, _, a},
-           {:"}", _},
-           {:",", _},
-           {:"{", _},
-           {:atom, _, m2},
-           {:",", _},
-           {:atom, _, f2},
-           {:",", _},
-           {:integer, _, a2},
-           {:"}", _},
-           {:"}", _}
-         ]
-         | l
-       ]) do
-    constant = {:constant, :Fun, :edge, {{m, f, a}, {m2, f2, a2}}}
-    [{:edge, n, constant} | lex(l)]
-  end
-
-  defp lex([
-         [
-           {:"{", n},
-           {:atom, _, m},
-           {:",", _},
-           {:atom, _, f},
-           {:",", _},
-           {:integer, _, a},
-           {:"}", _}
-         ]
-         | l
-       ]) do
-    constant = {:constant, :Fun, :vertex, {m, f, a}}
-    [{:vertex, n, constant} | lex(l)]
-  end
-
-  defp lex([[{:":", n1}, {:var, n2, decl}] | l]) do
+  defp lex([{:":", n1}, {:var, n2, decl} | l]) do
     case is_type(decl) do
       false ->
-        [[{:":", n1}, {:var, n2, decl}] | lex(l)]
+        [{:":", n1}, {:var, n2, decl} | lex(l)]
 
       true ->
         [{:decl, n1, decl} | lex(l)]
     end
   end
 
-  defp lex([[{:":", n}, {:=, _}] | l]) do
+  defp lex([{:":", n}, {:=, _} | l]) do
     [{:":=", n} | lex(l)]
   end
 
-  defp lex([[{:||, n}, {:|, _}] | l]) do
+  defp lex([{:||, n}, {:|, _} | l]) do
     [{:|||, n} | lex(l)]
   end
 

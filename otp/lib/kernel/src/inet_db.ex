@@ -1528,7 +1528,10 @@ defmodule :m_inet_db do
                   )
 
                 [
-                  [:del_ns, :clear_search, :clear_cache, {:search, search}]
+                  :del_ns,
+                  :clear_search,
+                  :clear_cache,
+                  {:search, search}
                   | for {:nameserver, _} = opt <- opts do
                       opt
                     end
@@ -1948,7 +1951,14 @@ defmodule :m_inet_db do
       %{} ->
         load_hosts_list_byaddr(
           hosts,
-          %{byaddrMap | addr => :lists.reverse(aliases, [name])},
+          Map.put(
+            byaddrMap,
+            addr,
+            :lists.reverse(
+              aliases,
+              [name]
+            )
+          ),
           [addr | addrs]
         )
     end
@@ -1986,7 +1996,7 @@ defmodule :m_inet_db do
         )
 
       %{} ->
-        load_hosts_list_byname(fam, iP, %{bynameMap | key => {[iP], names_0}}, names_0, names)
+        load_hosts_list_byname(fam, iP, Map.put(bynameMap, key, {[iP], names_0}), names_0, names)
     end
   end
 

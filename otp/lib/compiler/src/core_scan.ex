@@ -150,7 +150,7 @@ defmodule :m_core_scan do
         pre_string(cs, q, reent, sp, soFar, pos)
 
       :more ->
-        {:more, [[{reent, sp}, ?\\] | cs0], soFar0, pos}
+        {:more, [{reent, sp}, ?\\ | cs0], soFar0, pos}
 
       :error ->
         pre_string_error(q, sp, soFar0, pos)
@@ -197,7 +197,7 @@ defmodule :m_core_scan do
   defp pre_escape([?^ | cs0], soFar) do
     case cs0 do
       [c3 | cs] ->
-        {cs, [[c3, ?^, ?\\] | soFar]}
+        {cs, [c3, ?^, ?\\ | soFar]}
 
       [] ->
         :more
@@ -208,7 +208,7 @@ defmodule :m_core_scan do
   end
 
   defp pre_escape([c | cs], soFar) do
-    {cs, [[c, ?\\] | soFar]}
+    {cs, [c, ?\\ | soFar]}
   end
 
   defp pre_escape([], _) do
@@ -220,7 +220,7 @@ defmodule :m_core_scan do
   end
 
   defp pre_comment([?\n | cs], soFar, pos) do
-    pre_scan(cs, [[?\n, ?\s] | soFar], pos + 1)
+    pre_scan(cs, [?\n, ?\s | soFar], pos + 1)
   end
 
   defp pre_comment([_ | cs], soFar, pos) do
@@ -326,16 +326,15 @@ defmodule :m_core_scan do
     {c, cs, pos}
   end
 
-  defp scan_escape([[o1, o2, o3] | cs], pos)
+  defp scan_escape([o1, o2, o3 | cs], pos)
        when o1 >= ?0 and
-              o1 <= ?7 and o2 >= ?0 and
-              o2 <= ?7 and o3 >= ?0 and
-              o3 <= ?7 do
+              o1 <= ?7 and o2 >= ?0 and o2 <= ?7 and
+              o3 >= ?0 and o3 <= ?7 do
     val = (o1 * 8 + o2) * 8 + o3 - 73 * ?0
     {val, cs, pos}
   end
 
-  defp scan_escape([[o1, o2] | cs], pos)
+  defp scan_escape([o1, o2 | cs], pos)
        when o1 >= ?0 and
               o1 <= ?7 and o2 >= ?0 and o2 <= ?7 do
     val = o1 * 8 + o2 - 9 * ?0
@@ -346,7 +345,7 @@ defmodule :m_core_scan do
     {o1 - ?0, cs, pos}
   end
 
-  defp scan_escape([[?^, c] | cs], pos) do
+  defp scan_escape([?^, c | cs], pos) do
     val = c &&& 31
     {val, cs, pos}
   end
@@ -420,9 +419,9 @@ defmodule :m_core_scan do
     {stack, cs, pos}
   end
 
-  defp scan_after_int([[?., c] | cs0], ncs0, toks, sPos, cPos)
+  defp scan_after_int([?., c | cs0], ncs0, toks, sPos, cPos)
        when c >= ?0 and c <= ?9 do
-    {ncs, cs, cPos1} = scan_integer(cs0, [[c, ?.] | ncs0], cPos)
+    {ncs, cs, cPos1} = scan_integer(cs0, [c, ?. | ncs0], cPos)
     scan_after_fraction(cs, ncs, toks, sPos, cPos1)
   end
 

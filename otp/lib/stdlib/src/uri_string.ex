@@ -297,7 +297,7 @@ defmodule :m_uri_string do
   end
 
   defp parse_uri_reference(<<>>, _) do
-    %{:path => <<>>}
+    %{path: <<>>}
   end
 
   defp parse_uri_reference(uRIString, uRI) do
@@ -317,33 +317,33 @@ defmodule :m_uri_string do
         {t, uRI1} = parse_host(rest, uRI)
         host = calculate_parsed_host_port(rest, t)
         uRI2 = maybe_add_path(uRI1)
-        %{uRI2 | :host => remove_brackets(host)}
+        Map.put(uRI2, :host, remove_brackets(host))
     else
       {t, uRI1} ->
         userinfo = calculate_parsed_userinfo(rest, t)
         uRI2 = maybe_add_path(uRI1)
-        %{uRI2 | :userinfo => userinfo}
+        Map.put(uRI2, :userinfo, userinfo)
     end
   end
 
   defp parse_relative_part(<<?/::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_segment(rest, uRI)
     path = calculate_parsed_part(rest, t)
-    %{uRI1 | :path => <<?/::utf8, path::binary>>}
+    Map.put(uRI1, :path, <<?/::utf8, path::binary>>)
   end
 
   defp parse_relative_part(<<??::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
     uRI2 = maybe_add_path(uRI1)
-    %{uRI2 | :query => query}
+    Map.put(uRI2, :query, query)
   end
 
   defp parse_relative_part(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
     uRI2 = maybe_add_path(uRI1)
-    %{uRI2 | :fragment => fragment}
+    Map.put(uRI2, :fragment, fragment)
   end
 
   defp parse_relative_part(<<char::utf8, rest::binary>>, uRI) do
@@ -351,7 +351,7 @@ defmodule :m_uri_string do
       true ->
         {t, uRI1} = parse_segment_nz_nc(rest, uRI)
         path = calculate_parsed_part(rest, t)
-        %{uRI1 | :path => <<char::utf8, path::binary>>}
+        Map.put(uRI1, :path, <<char::utf8, path::binary>>)
 
       false ->
         throw({:error, :invalid_uri, [char]})
@@ -365,13 +365,13 @@ defmodule :m_uri_string do
   defp parse_segment(<<??::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :query => query}}
+    {rest, Map.put(uRI1, :query, query)}
   end
 
   defp parse_segment(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_segment(<<char::utf8, rest::binary>>, uRI) do
@@ -395,13 +395,13 @@ defmodule :m_uri_string do
   defp parse_segment_nz_nc(<<??::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :query => query}}
+    {rest, Map.put(uRI1, :query, query)}
   end
 
   defp parse_segment_nz_nc(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_segment_nz_nc(<<char::utf8, rest::binary>>, uRI) do
@@ -452,7 +452,7 @@ defmodule :m_uri_string do
         {t, uRI1} = parse_scheme(rest, uRI)
         scheme = calculate_parsed_scheme(rest, t)
         uRI2 = maybe_add_path(uRI1)
-        %{uRI2 | :scheme => <<char::utf8, scheme::binary>>}
+        Map.put(uRI2, :scheme, <<char::utf8, scheme::binary>>)
 
       false ->
         throw({:error, :invalid_uri, [char]})
@@ -462,7 +462,7 @@ defmodule :m_uri_string do
   defp maybe_add_path(map) do
     case :maps.is_key(:path, map) do
       false ->
-        %{map | :path => <<>>}
+        Map.put(map, :path, <<>>)
 
       _Else ->
         map
@@ -511,30 +511,30 @@ defmodule :m_uri_string do
       {_, _, _} ->
         {t, uRI1} = parse_host(rest, uRI)
         host = calculate_parsed_host_port(rest, t)
-        {rest, %{uRI1 | :host => remove_brackets(host)}}
+        {rest, Map.put(uRI1, :host, remove_brackets(host))}
     else
       {t, uRI1} ->
         userinfo = calculate_parsed_userinfo(rest, t)
-        {rest, %{uRI1 | :userinfo => userinfo}}
+        {rest, Map.put(uRI1, :userinfo, userinfo)}
     end
   end
 
   defp parse_hier(<<?/::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_segment(rest, uRI)
     path = calculate_parsed_part(rest, t)
-    {rest, %{uRI1 | :path => <<?/::utf8, path::binary>>}}
+    {rest, Map.put(uRI1, :path, <<?/::utf8, path::binary>>)}
   end
 
   defp parse_hier(<<??::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :query => query}}
+    {rest, Map.put(uRI1, :query, query)}
   end
 
   defp parse_hier(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_hier(<<char::utf8, rest::binary>>, uRI) do
@@ -542,7 +542,7 @@ defmodule :m_uri_string do
       true ->
         {t, uRI1} = parse_segment(rest, uRI)
         path = calculate_parsed_part(rest, t)
-        {rest, %{uRI1 | :path => <<char::utf8, path::binary>>}}
+        {rest, Map.put(uRI1, :path, <<char::utf8, path::binary>>)}
 
       false ->
         throw({:error, :invalid_uri, [char]})
@@ -554,13 +554,13 @@ defmodule :m_uri_string do
   end
 
   defp parse_userinfo(<<?@::utf8>>, uRI) do
-    {<<>>, %{uRI | :host => <<>>}}
+    {<<>>, Map.put(uRI, :host, <<>>)}
   end
 
   defp parse_userinfo(<<?@::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_host(rest, uRI)
     host = calculate_parsed_host_port(rest, t)
-    {rest, %{uRI1 | :host => remove_brackets(host)}}
+    {rest, Map.put(uRI1, :host, remove_brackets(host))}
   end
 
   defp parse_userinfo(<<char::utf8, rest::binary>>, uRI) do
@@ -593,19 +593,19 @@ defmodule :m_uri_string do
     {t, uRI1} = parse_port(rest, uRI)
     h = calculate_parsed_host_port(rest, t)
     port = get_port(h)
-    {rest, %{uRI1 | :port => port}}
+    {rest, Map.put(uRI1, :port, port)}
   end
 
   defp parse_host(<<?/::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_segment(rest, uRI)
     path = calculate_parsed_part(rest, t)
-    {rest, %{uRI1 | :path => <<?/::utf8, path::binary>>}}
+    {rest, Map.put(uRI1, :path, <<?/::utf8, path::binary>>)}
   end
 
   defp parse_host(<<??::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :query => query}}
+    {rest, Map.put(uRI1, :query, query)}
   end
 
   defp parse_host(<<?[::utf8, rest::binary>>, uRI) do
@@ -615,7 +615,7 @@ defmodule :m_uri_string do
   defp parse_host(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_host(<<char::utf8, rest::binary>>, uRI) do
@@ -641,25 +641,25 @@ defmodule :m_uri_string do
     {t, uRI1} = parse_port(rest, uRI)
     h = calculate_parsed_host_port(rest, t)
     port = get_port(h)
-    {rest, %{uRI1 | :port => port}}
+    {rest, Map.put(uRI1, :port, port)}
   end
 
   defp parse_reg_name(<<?/::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_segment(rest, uRI)
     path = calculate_parsed_part(rest, t)
-    {rest, %{uRI1 | :path => <<?/::utf8, path::binary>>}}
+    {rest, Map.put(uRI1, :path, <<?/::utf8, path::binary>>)}
   end
 
   defp parse_reg_name(<<??::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :query => query}}
+    {rest, Map.put(uRI1, :query, query)}
   end
 
   defp parse_reg_name(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_reg_name(<<char::utf8, rest::binary>>, uRI) do
@@ -689,28 +689,28 @@ defmodule :m_uri_string do
     {t, uRI1} = parse_port(rest, uRI)
     h = calculate_parsed_host_port(rest, t)
     port = get_port(h)
-    {rest, %{uRI1 | :port => port}}
+    {rest, Map.put(uRI1, :port, port)}
   end
 
   defp parse_ipv4_bin(<<?/::utf8, rest::binary>>, acc, uRI) do
     _ = validate_ipv4_address(:lists.reverse(acc))
     {t, uRI1} = parse_segment(rest, uRI)
     path = calculate_parsed_part(rest, t)
-    {rest, %{uRI1 | :path => <<?/::utf8, path::binary>>}}
+    {rest, Map.put(uRI1, :path, <<?/::utf8, path::binary>>)}
   end
 
   defp parse_ipv4_bin(<<??::utf8, rest::binary>>, acc, uRI) do
     _ = validate_ipv4_address(:lists.reverse(acc))
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :query => query}}
+    {rest, Map.put(uRI1, :query, query)}
   end
 
   defp parse_ipv4_bin(<<?#::utf8, rest::binary>>, acc, uRI) do
     _ = validate_ipv4_address(:lists.reverse(acc))
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_ipv4_bin(<<char::utf8, rest::binary>>, acc, uRI) do
@@ -781,25 +781,25 @@ defmodule :m_uri_string do
     {t, uRI1} = parse_port(rest, uRI)
     h = calculate_parsed_host_port(rest, t)
     port = get_port(h)
-    {rest, %{uRI1 | :port => port}}
+    {rest, Map.put(uRI1, :port, port)}
   end
 
   defp parse_ipv6_bin_end(<<?/::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_segment(rest, uRI)
     path = calculate_parsed_part(rest, t)
-    {rest, %{uRI1 | :path => <<?/::utf8, path::binary>>}}
+    {rest, Map.put(uRI1, :path, <<?/::utf8, path::binary>>)}
   end
 
   defp parse_ipv6_bin_end(<<??::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :query => query}}
+    {rest, Map.put(uRI1, :query, query)}
   end
 
   defp parse_ipv6_bin_end(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_ipv6_bin_end(<<char::utf8, rest::binary>>, uRI) do
@@ -829,19 +829,19 @@ defmodule :m_uri_string do
   defp parse_port(<<?/::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_segment(rest, uRI)
     path = calculate_parsed_part(rest, t)
-    {rest, %{uRI1 | :path => <<?/::utf8, path::binary>>}}
+    {rest, Map.put(uRI1, :path, <<?/::utf8, path::binary>>)}
   end
 
   defp parse_port(<<??::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_query(rest, uRI)
     query = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :query => query}}
+    {rest, Map.put(uRI1, :query, query)}
   end
 
   defp parse_port(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_port(<<char::utf8, rest::binary>>, uRI) do
@@ -861,7 +861,7 @@ defmodule :m_uri_string do
   defp parse_query(<<?#::utf8, rest::binary>>, uRI) do
     {t, uRI1} = parse_fragment(rest, uRI)
     fragment = calculate_parsed_query_fragment(rest, t)
-    {rest, %{uRI1 | :fragment => fragment}}
+    {rest, Map.put(uRI1, :fragment, fragment)}
   end
 
   defp parse_query(<<char::utf8, rest::binary>>, uRI) do
@@ -1615,7 +1615,7 @@ defmodule :m_uri_string do
     [?[ | addr] ++ ']'
   end
 
-  defp is_valid_map(%{:path => path} = map) do
+  defp is_valid_map(%{path: path} = map) do
     (starts_with_two_slash(path) and is_valid_map_host(map)) or
       (:maps.is_key(
          :userinfo,
@@ -1665,7 +1665,7 @@ defmodule :m_uri_string do
     :maps.fold(fun, true, map)
   end
 
-  defp starts_with_two_slash([[?/, ?/] | _]) do
+  defp starts_with_two_slash([?/, ?/ | _]) do
     true
   end
 
@@ -1677,7 +1677,7 @@ defmodule :m_uri_string do
     false
   end
 
-  defp update_scheme(%{:scheme => scheme}, _) do
+  defp update_scheme(%{scheme: scheme}, _) do
     add_colon_postfix(encode_scheme(scheme))
   end
 
@@ -1685,11 +1685,11 @@ defmodule :m_uri_string do
     :empty
   end
 
-  defp update_userinfo(%{:userinfo => userinfo}, :empty) do
+  defp update_userinfo(%{userinfo: userinfo}, :empty) do
     add_auth_prefix(encode_userinfo(userinfo))
   end
 
-  defp update_userinfo(%{:userinfo => userinfo}, uRI) do
+  defp update_userinfo(%{userinfo: userinfo}, uRI) do
     concat(uRI, add_auth_prefix(encode_userinfo(userinfo)))
   end
 
@@ -1701,11 +1701,11 @@ defmodule :m_uri_string do
     uRI
   end
 
-  defp update_host(%{:host => host}, :empty) do
+  defp update_host(%{host: host}, :empty) do
     add_auth_prefix(encode_host(host))
   end
 
-  defp update_host(%{:host => host} = map, uRI) do
+  defp update_host(%{host: host} = map, uRI) do
     concat(uRI, add_host_prefix(map, encode_host(host)))
   end
 
@@ -1717,11 +1717,11 @@ defmodule :m_uri_string do
     uRI
   end
 
-  defp update_port(%{:port => :undefined}, uRI) do
+  defp update_port(%{port: :undefined}, uRI) do
     concat(uRI, ":")
   end
 
-  defp update_port(%{:port => port}, uRI) do
+  defp update_port(%{port: port}, uRI) do
     concat(uRI, add_colon(encode_port(port)))
   end
 
@@ -1729,17 +1729,17 @@ defmodule :m_uri_string do
     uRI
   end
 
-  defp update_path(%{:path => path}, :empty) do
+  defp update_path(%{path: path}, :empty) do
     encode_path(path)
   end
 
-  defp update_path(%{:host => _, :path => path0}, uRI) do
+  defp update_path(%{host: _, path: path0}, uRI) do
     path1 = maybe_flatten_list(path0)
     path = make_path_absolute(path1)
     concat(uRI, encode_path(path))
   end
 
-  defp update_path(%{:path => path}, uRI) do
+  defp update_path(%{path: path}, uRI) do
     concat(uRI, encode_path(path))
   end
 
@@ -1751,11 +1751,11 @@ defmodule :m_uri_string do
     uRI
   end
 
-  defp update_query(%{:query => query}, :empty) do
+  defp update_query(%{query: query}, :empty) do
     encode_query(query)
   end
 
-  defp update_query(%{:query => query}, uRI) do
+  defp update_query(%{query: query}, uRI) do
     concat(uRI, add_question_mark(encode_query(query)))
   end
 
@@ -1767,11 +1767,11 @@ defmodule :m_uri_string do
     uRI
   end
 
-  defp update_fragment(%{:fragment => fragment}, :empty) do
+  defp update_fragment(%{fragment: fragment}, :empty) do
     add_hashmark(encode_fragment(fragment))
   end
 
-  defp update_fragment(%{:fragment => fragment}, uRI) do
+  defp update_fragment(%{fragment: fragment}, uRI) do
     concat(uRI, add_hashmark(encode_fragment(fragment)))
   end
 
@@ -1828,10 +1828,10 @@ defmodule :m_uri_string do
   end
 
   defp add_auth_prefix(comp) when is_list(comp) do
-    [[?/, ?/] | comp]
+    [?/, ?/ | comp]
   end
 
-  defp add_host_prefix(%{:userinfo => _}, host) when is_binary(host) do
+  defp add_host_prefix(%{userinfo: _}, host) when is_binary(host) do
     <<?@, host::binary>>
   end
 
@@ -1839,12 +1839,12 @@ defmodule :m_uri_string do
     <<"//", host::binary>>
   end
 
-  defp add_host_prefix(%{:userinfo => _}, host) when is_list(host) do
+  defp add_host_prefix(%{userinfo: _}, host) when is_list(host) do
     [?@ | host]
   end
 
   defp add_host_prefix(%{}, host) when is_list(host) do
-    [[?/, ?/] | host]
+    [?/, ?/ | host]
   end
 
   defp maybe_to_list(comp) when is_binary(comp) do
@@ -1891,11 +1891,11 @@ defmodule :m_uri_string do
     :unicode.characters_to_list(path)
   end
 
-  defp resolve_map(uRIMap = %{:scheme => _}, _) do
+  defp resolve_map(uRIMap = %{scheme: _}, _) do
     normalize_path_segment(uRIMap)
   end
 
-  defp resolve_map(uRIMap, %{:scheme => _} = baseURIMap) do
+  defp resolve_map(uRIMap, %{scheme: _} = baseURIMap) do
     resolve_map(uRIMap, baseURIMap, resolve_path_type(uRIMap))
   end
 
@@ -1905,7 +1905,7 @@ defmodule :m_uri_string do
 
   defp resolve_map(uRIMap, baseURIString) do
     case parse(baseURIString) do
-      baseURIMap = %{:scheme => _} ->
+      baseURIMap = %{scheme: _} ->
         resolve_map(uRIMap, baseURIMap, resolve_path_type(uRIMap))
 
       baseURIMap when is_map(baseURIMap) ->
@@ -1929,8 +1929,8 @@ defmodule :m_uri_string do
     end
   end
 
-  defp resolve_map(uRI = %{:host => _}, %{:scheme => scheme}, _) do
-    normalize_path_segment(%{uRI | :scheme => scheme})
+  defp resolve_map(uRI = %{host: _}, %{scheme: scheme}, _) do
+    normalize_path_segment(Map.put(uRI, :scheme, scheme))
   end
 
   defp resolve_map(uRI, baseURI, :empty_path) do
@@ -1958,10 +1958,17 @@ defmodule :m_uri_string do
     )
   end
 
-  defp resolve_map(uRI = %{:path => path}, baseURI, :relative_path) do
+  defp resolve_map(uRI = %{path: path}, baseURI, :relative_path) do
     normalize_path_segment(
       :maps.merge(
-        %{uRI | :path => merge_paths(path, baseURI)},
+        Map.put(
+          uRI,
+          :path,
+          merge_paths(
+            path,
+            baseURI
+          )
+        ),
         :maps.with(
           [:scheme, :userinfo, :host, :port],
           baseURI
@@ -1970,9 +1977,9 @@ defmodule :m_uri_string do
     )
   end
 
-  defp merge_paths(path, baseURI = %{:path => basePath0}) do
+  defp merge_paths(path, baseURI = %{path: basePath0}) do
     case {baseURI, :erlang.iolist_size(basePath0)} do
-      {%{:host => _}, 0} ->
+      {%{host: _}, 0} ->
         merge_paths_absolute(path)
 
       _ ->
@@ -1997,7 +2004,7 @@ defmodule :m_uri_string do
     :unicode.characters_to_list([?/, path])
   end
 
-  defp transcode([[?%, _C0, _C1] | _Rest] = l, acc, inEnc, outEnc) do
+  defp transcode([?%, _C0, _C1 | _Rest] = l, acc, inEnc, outEnc) do
     transcode_pct(l, acc, <<>>, inEnc, outEnc)
   end
 
@@ -2005,7 +2012,7 @@ defmodule :m_uri_string do
     transcode(l, acc, [], inEnc, outEnc)
   end
 
-  defp transcode([[?%, _C0, _C1] | _Rest] = l, acc, list, inEncoding, outEncoding) do
+  defp transcode([?%, _C0, _C1 | _Rest] = l, acc, list, inEncoding, outEncoding) do
     transcode_pct(l, list ++ acc, <<>>, inEncoding, outEncoding)
   end
 
@@ -2017,7 +2024,7 @@ defmodule :m_uri_string do
     :lists.reverse(list ++ acc)
   end
 
-  defp transcode_pct([[?%, c0, c1] | rest] = l, acc, b, inEncoding, outEncoding) do
+  defp transcode_pct([?%, c0, c1 | rest] = l, acc, b, inEncoding, outEncoding) do
     case is_hex_digit(c0) and is_hex_digit(c1) do
       true ->
         int =
@@ -2393,16 +2400,16 @@ defmodule :m_uri_string do
     )
   end
 
-  defp normalize_case(%{:scheme => scheme, :host => host} = map) do
-    %{map | :scheme => to_lower(scheme), :host => to_lower(host)}
+  defp normalize_case(%{scheme: scheme, host: host} = map) do
+    Map.merge(map, %{scheme: to_lower(scheme), host: to_lower(host)})
   end
 
-  defp normalize_case(%{:host => host} = map) do
-    %{map | :host => to_lower(host)}
+  defp normalize_case(%{host: host} = map) do
+    Map.put(map, :host, to_lower(host))
   end
 
-  defp normalize_case(%{:scheme => scheme} = map) do
-    %{map | :scheme => to_lower(scheme)}
+  defp normalize_case(%{scheme: scheme} = map) do
+    Map.put(map, :scheme, to_lower(scheme))
   end
 
   defp normalize_case(%{} = map) do
@@ -2448,7 +2455,7 @@ defmodule :m_uri_string do
 
   defp normalize_path_segment(map) do
     path = :maps.get(:path, map, :undefined)
-    %{map | :path => remove_dot_segments(path)}
+    Map.put(map, :path, remove_dot_segments(path))
   end
 
   defp remove_dot_segments(path) when is_binary(path) do
@@ -2640,10 +2647,10 @@ defmodule :m_uri_string do
   defp normalize_http_path(map, path) do
     case path do
       '' ->
-        %{map | :path => '/'}
+        Map.put(map, :path, '/')
 
       <<>> ->
-        %{map | :path => "/"}
+        Map.put(map, :path, "/")
 
       _Else ->
         map

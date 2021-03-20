@@ -191,10 +191,10 @@ defmodule :m_rec_env do
         concat(e1, env)
 
       {_, map1} ->
-        [[e1, {:rec, map1, map0}] | env]
+        [e1, {:rec, map1, map0} | env]
 
       :error ->
-        [[e1, e] | delete(key, env)]
+        [e1, e | delete(key, env)]
     end
   end
 

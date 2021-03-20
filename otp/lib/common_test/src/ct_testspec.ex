@@ -2116,7 +2116,8 @@ defmodule :m_ct_testspec do
   defp per_node([n | ns], tag, data, refs) do
     [
       :erlang.list_to_tuple([
-        [tag, ref2node(n, refs)]
+        tag,
+        ref2node(n, refs)
         | data
       ])
       | per_node(ns, tag, data, refs)

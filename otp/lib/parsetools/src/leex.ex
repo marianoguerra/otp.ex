@@ -1031,22 +1031,21 @@ defmodule :m_leex do
     end
   end
 
-  defp re_char(?\\, [[o1, o2, o3] | s])
+  defp re_char(?\\, [o1, o2, o3 | s])
        when o1 >= ?0 and
-              o1 <= ?7 and o2 >= ?0 and
-              o2 <= ?7 and o3 >= ?0 and
-              o3 <= ?7 do
+              o1 <= ?7 and o2 >= ?0 and o2 <= ?7 and
+              o3 >= ?0 and o3 <= ?7 do
     {(o1 * 8 + o2) * 8 + o3 - 73 * ?0, s}
   end
 
-  defp re_char(?\\, [[?x, h1, h2] | s])
+  defp re_char(?\\, [?x, h1, h2 | s])
        when (h1 >= ?0 and h1 <= ?9) or (h1 >= ?A and h1 <= ?F) or
               (h1 >= ?a and h1 <= ?f and
                  h2 >= ?0 and h2 <= ?9) or (h2 >= ?A and h2 <= ?F) or (h2 >= ?a and h2 <= ?f) do
     {:erlang.list_to_integer([h1, h2], 16), s}
   end
 
-  defp re_char(?\\, [[?x, ?{] | s0]) do
+  defp re_char(?\\, [?x, ?{ | s0]) do
     re_hex(s0, [])
   end
 
@@ -1079,7 +1078,7 @@ defmodule :m_leex do
         {c, s}
 
       _ ->
-        parse_error({:illegal_char, [[?\\, ?x, ?{] | l] ++ '}'})
+        parse_error({:illegal_char, [?\\, ?x, ?{ | l] ++ '}'})
     end
   end
 
@@ -1145,7 +1144,7 @@ defmodule :m_leex do
 
   defp re_char_class([c1 | cs0], cc, st) when c1 !== ?] do
     case re_char(c1, cs0) do
-      {cf, [[?-, c2] | cs1]} when c2 !== ?] ->
+      {cf, [?-, c2 | cs1]} when c2 !== ?] ->
         case re_char(c2, cs1) do
           {cl, cs2} when cf < cl ->
             re_char_class(cs2, [{:range, cf, cl} | cc], st)
@@ -1256,10 +1255,8 @@ defmodule :m_leex do
     e = n1
 
     {[
-       [
-         r_nfa_state(no: f, edges: [{:epsilon, n0}, {:epsilon, e}]),
-         r_nfa_state(no: e1, edges: [{:epsilon, n0}, {:epsilon, e}])
-       ]
+       r_nfa_state(no: f, edges: [{:epsilon, n0}, {:epsilon, e}]),
+       r_nfa_state(no: e1, edges: [{:epsilon, n0}, {:epsilon, e}])
        | nFA1
      ], n1 + 1, e}
   end
@@ -1269,10 +1266,11 @@ defmodule :m_leex do
     e = n1
 
     {[
-       [
-         r_nfa_state(no: f, edges: [{:epsilon, n0}]),
-         r_nfa_state(no: e1, edges: [{:epsilon, n0}, {:epsilon, e}])
-       ]
+       r_nfa_state(no: f, edges: [{:epsilon, n0}]),
+       r_nfa_state(
+         no: e1,
+         edges: [{:epsilon, n0}, {:epsilon, e}]
+       )
        | nFA1
      ], n1 + 1, e}
   end
@@ -1282,11 +1280,8 @@ defmodule :m_leex do
     e = n1
 
     {[
-       [
-         r_nfa_state(no: f, edges: [{:epsilon, n0}, {:epsilon, e}]),
-         r_nfa_state(no: e1, edges: [{:epsilon, e}])
-       ]
-       | nFA1
+       r_nfa_state(no: f, edges: [{:epsilon, n0}, {:epsilon, e}]),
+       r_nfa_state(no: e1, edges: [{:epsilon, e}]) | nFA1
      ], n1 + 1, e}
   end
 
@@ -1336,11 +1331,12 @@ defmodule :m_leex do
     e = n2
 
     {[
-       [
-         r_nfa_state(no: f, edges: [{:epsilon, n0}, {:epsilon, n1}]),
-         r_nfa_state(no: e1, edges: [{:epsilon, e}]),
-         r_nfa_state(no: e2, edges: [{:epsilon, e}])
-       ]
+       r_nfa_state(no: f, edges: [{:epsilon, n0}, {:epsilon, n1}]),
+       r_nfa_state(no: e1, edges: [{:epsilon, e}]),
+       r_nfa_state(
+         no: e2,
+         edges: [{:epsilon, e}]
+       )
        | nFA2
      ], n2 + 1, e}
   end
@@ -1362,18 +1358,18 @@ defmodule :m_leex do
     pack_crs(crs)
   end
 
-  defp pack_crs([[{c1, c2} = cr, {c3, c4}] | crs])
+  defp pack_crs([{c1, c2} = cr, {c3, c4} | crs])
        when c1 <= c3 and c2 >= c4 do
     pack_crs([cr | crs])
   end
 
-  defp pack_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp pack_crs([{c1, c2}, {c3, c4} | crs])
        when c2 >= c3 and
               c2 < c4 do
     pack_crs([{c1, c4} | crs])
   end
 
-  defp pack_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp pack_crs([{c1, c2}, {c3, c4} | crs])
        when c2 + 1 === c3 do
     pack_crs([{c1, c4} | crs])
   end
@@ -1433,12 +1429,12 @@ defmodule :m_leex do
     build_dfa(test, set, us, n, ts, ms, nFA)
   end
 
-  defp disjoint_crs([[{_C1, c2} = cr1, {c3, _C4} = cr2] | crs])
+  defp disjoint_crs([{_C1, c2} = cr1, {c3, _C4} = cr2 | crs])
        when c2 < c3 do
     [cr1 | disjoint_crs([cr2 | crs])]
   end
 
-  defp disjoint_crs([[{c1, c2}, {c3, c4}] | crs]) when c1 === c3 do
+  defp disjoint_crs([{c1, c2}, {c3, c4} | crs]) when c1 === c3 do
     [
       {c1, c2}
       | disjoint_crs(
@@ -1450,7 +1446,7 @@ defmodule :m_leex do
     ]
   end
 
-  defp disjoint_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp disjoint_crs([{c1, c2}, {c3, c4} | crs])
        when c1 < c3 and
               c2 >= c3 and c2 < c4 do
     [
@@ -1464,7 +1460,7 @@ defmodule :m_leex do
     ]
   end
 
-  defp disjoint_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp disjoint_crs([{c1, c2}, {c3, c4} | crs])
        when c1 < c3 and
               c2 === c4 do
     [
@@ -1478,7 +1474,7 @@ defmodule :m_leex do
     ]
   end
 
-  defp disjoint_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp disjoint_crs([{c1, c2}, {c3, c4} | crs])
        when c1 < c3 and
               c2 > c4 do
     [
@@ -1968,7 +1964,8 @@ defmodule :m_leex do
               cl > ?\n do
     pack_trans(
       [
-        [{{cf, ?\n - 1}, s}, {{?\n + 1, cl}, s}]
+        {{cf, ?\n - 1}, s},
+        {{?\n + 1, cl}, s}
         | trs
       ],
       [{?\n, s} | pt]
@@ -1976,7 +1973,7 @@ defmodule :m_leex do
   end
 
   defp pack_trans([{{cf, cl}, s} | trs], pt) when cl === cf + 1 do
-    pack_trans(trs, [[{cf, s}, {cl, s}] | pt])
+    pack_trans(trs, [{cf, s}, {cl, s} | pt])
   end
 
   defp pack_trans([tr | trs], pt) do
@@ -2019,7 +2016,10 @@ defmodule :m_leex do
             {tokenLen, 'TokenLen'},
             {tokenLine, 'TokenLine'},
             {tokenChars, 'YYtcs'},
-            {:erlang.or(tokenLen, tokenChars), 'TokenLen'}
+            {:erlang.or(
+               tokenLen,
+               tokenChars
+             ), 'TokenLen'}
           ]
 
           vars =
@@ -2094,7 +2094,8 @@ defmodule :m_leex do
     line = :erl_scan.line(t)
 
     [
-      [pp_sep(line, line0, prev, t), pp_symbol(t, file)]
+      pp_sep(line, line0, prev, t),
+      pp_symbol(t, file)
       | pp_tokens(ts, line, file, t)
     ]
   end
@@ -2388,7 +2389,7 @@ defmodule :m_leex do
       end
 
     case s do
-      [[?$, ?\\] | cs] ->
+      [?$, ?\\ | cs] ->
         '\\\\' ++ cs
 
       [?$ | cs] ->

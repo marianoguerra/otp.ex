@@ -27,21 +27,16 @@ defmodule :m_logger_disk_log_h do
 
   def init(
         name,
-        %{:file => file, :type => type, :max_no_bytes => mNB, :max_no_files => mNF}
+        %{file: file, type: type, max_no_bytes: mNB, max_no_files: mNF}
       ) do
     case open_disk_log(name, file, type, mNB, mNF) do
       :ok ->
         {:ok,
          %{
-           :log_opts => %{
-             :file => file,
-             :type => type,
-             :max_no_bytes => mNB,
-             :max_no_files => mNF
-           },
-           :prev_log_result => :ok,
-           :prev_sync_result => :ok,
-           :prev_disk_log_info => :undefined
+           log_opts: %{file: file, type: type, max_no_bytes: mNB, max_no_files: mNF},
+           prev_log_result: :ok,
+           prev_sync_result: :ok,
+           prev_disk_log_info: :undefined
          }}
 
       error ->
@@ -158,10 +153,10 @@ defmodule :m_logger_disk_log_h do
     {:ok, dir} = :file.get_cwd()
 
     defaults = %{
-      :file => :filename.join(dir, name),
-      :max_no_files => defaultNoFiles,
-      :max_no_bytes => defaultNoBytes,
-      :type => type
+      file: :filename.join(dir, name),
+      max_no_files: defaultNoFiles,
+      max_no_bytes: defaultNoBytes,
+      type: type
     }
 
     :maps.merge(defaults, hConfig)
@@ -178,12 +173,11 @@ defmodule :m_logger_disk_log_h do
   end
 
   def reset_state(_Name, state) do
-    %{
-      state
-      | :prev_log_result => :ok,
-        :prev_sync_result => :ok,
-        :prev_disk_log_info => :undefined
-    }
+    Map.merge(state, %{
+      prev_log_result: :ok,
+      prev_sync_result: :ok,
+      prev_disk_log_info: :undefined
+    })
   end
 
   def handle_info(
@@ -275,7 +269,7 @@ defmodule :m_logger_disk_log_h do
     :disk_log.balog(name, bin)
   end
 
-  defp maybe_notify_error(name, op, result, key, %{:log_opts => logOpts} = state) do
+  defp maybe_notify_error(name, op, result, key, %{log_opts: logOpts} = state) do
     {result, error_notify_new({name, op, logOpts, result}, result, key, state)}
   end
 
@@ -285,7 +279,7 @@ defmodule :m_logger_disk_log_h do
 
   defp error_notify_new(term, what, key, state) do
     error_notify_new(what, :maps.get(key, state), term)
-    %{state | key => what}
+    Map.put(state, key, what)
   end
 
   defp error_notify_new(:ok, _Prev, _Term) do

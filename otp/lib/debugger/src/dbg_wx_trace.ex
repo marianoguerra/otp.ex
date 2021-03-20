@@ -383,7 +383,15 @@ defmodule :m_dbg_wx_trace do
           str =
             :io_lib.format(
               '~p > ~w:~tw~ts\n',
-              [le, mod, func, format_args(args, p)]
+              [
+                le,
+                mod,
+                func,
+                format_args(
+                  args,
+                  p
+                )
+              ]
             )
 
           :dbg_wx_trace_win.trace_output(r_state(state, :win), str)
@@ -745,7 +753,7 @@ defmodule :m_dbg_wx_trace do
   end
 
   defp format_args1([a | as], p) do
-    [[:io_lib.format(p, [a]), ?,] | format_args1(as, p)]
+    [:io_lib.format(p, [a]), ?, | format_args1(as, p)]
   end
 
   defp format_args1([], _) do

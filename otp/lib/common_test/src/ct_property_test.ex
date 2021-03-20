@@ -451,7 +451,10 @@ defmodule :m_ct_property_test do
               npos_value,
               val,
               percent,
-              cond_prt_vals(distInfo, interv)
+              cond_prt_vals(
+                distInfo,
+                interv
+              )
             ]
           )
         end,
@@ -606,7 +609,7 @@ defmodule :m_ct_property_test do
         hd(:lists.nthtail(div(len, 2), l))
 
       false ->
-        [[m1, m2] | _] = :lists.nthtail(div(len, 2) - 1, l)
+        [m1, m2 | _] = :lists.nthtail(div(len, 2) - 1, l)
         (m1 + m2) / 2
     end
   end

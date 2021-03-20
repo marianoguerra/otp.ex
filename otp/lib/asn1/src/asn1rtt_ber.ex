@@ -423,7 +423,7 @@ defmodule :m_asn1rtt_ber do
   defp get_indefinite_value(binary, acc) do
     {:ok, {tag, restBinary}} = get_tag(binary)
     {:ok, {lenVal, restBinary2}} = get_length_and_value(restBinary)
-    get_indefinite_value(restBinary2, [[lenVal, tag] | acc])
+    get_indefinite_value(restBinary2, [lenVal, tag | acc])
   end
 
   defp get_tag(<<h::size(1)-binary, rest::binary>>) do
@@ -478,7 +478,7 @@ defmodule :m_asn1rtt_ber do
 
     get_indefinite_length_and_value(
       restBinary2,
-      [[lenVal, tag] | acc]
+      [lenVal, tag | acc]
     )
   end
 
@@ -601,7 +601,7 @@ defmodule :m_asn1rtt_ber do
 
   def encode_tags([tag | trest], bytesSoFar, lenSoFar) do
     {bytes2, l2} = encode_length(lenSoFar)
-    encode_tags(trest, [[tag, bytes2] | bytesSoFar], lenSoFar + byte_size(tag) + l2)
+    encode_tags(trest, [tag, bytes2 | bytesSoFar], lenSoFar + byte_size(tag) + l2)
   end
 
   def encode_tags([], bytesSoFar, lenSoFar) do
@@ -1029,7 +1029,7 @@ defmodule :m_asn1rtt_ber do
     :lists.append(bitListVal, tail)
   end
 
-  defp encode_bitstring([[b8, b7, b6, b5, b4, b3, b2, b1] | rest]) do
+  defp encode_bitstring([b8, b7, b6, b5, b4, b3, b2, b1 | rest]) do
     val =
       b8 <<< 7 ||| b7 <<< 6 ||| b6 <<< 5 ||| b5 <<< 4 ||| b4 <<< 3 ||| b3 <<< 2 ||| b2 <<< 1 |||
         b1
@@ -1042,7 +1042,7 @@ defmodule :m_asn1rtt_ber do
     {1, unused, [octet]}
   end
 
-  defp encode_bitstring([[b8, b7, b6, b5, b4, b3, b2, b1] | rest], ack, len) do
+  defp encode_bitstring([b8, b7, b6, b5, b4, b3, b2, b1 | rest], ack, len) do
     val =
       b8 <<< 7 ||| b7 <<< 6 ||| b6 <<< 5 ||| b5 <<< 4 ||| b4 <<< 3 ||| b3 <<< 2 ||| b2 <<< 1 |||
         b1
@@ -1123,7 +1123,14 @@ defmodule :m_asn1rtt_ber do
            b1::size(1), b0::size(1), buffer::binary>>
        ) do
     [
-      [b7, b6, b5, b4, b3, b2, b1, b0]
+      b7,
+      b6,
+      b5,
+      b4,
+      b3,
+      b2,
+      b1,
+      b0
       | decode_bitstring2(len - 1, unused, buffer)
     ]
   end
@@ -1188,7 +1195,7 @@ defmodule :m_asn1rtt_ber do
     e_object_identifier(:erlang.tuple_to_list(v))
   end
 
-  defp e_object_identifier([[e1, e2] | tail]) do
+  defp e_object_identifier([e1, e2 | tail]) do
     head = 40 * e1 + e2
     {h, lh} = mk_object_val(head)
     {r, lr} = :lists.mapfoldl(&enc_obj_id_tail/2, 0, tail)
@@ -1232,7 +1239,7 @@ defmodule :m_asn1rtt_ber do
           {2, addedObjVal - 80}
       end
 
-    :erlang.list_to_tuple([[val1, val2] | objVals])
+    :erlang.list_to_tuple([val1, val2 | objVals])
   end
 
   defp dec_subidentifiers(<<>>, _Av, al) do
@@ -1307,11 +1314,11 @@ defmodule :m_asn1rtt_ber do
   end
 
   defp mk_uni_list([{a, b, c, d} | t], list) do
-    mk_uni_list(t, [[d, c, b, a] | list])
+    mk_uni_list(t, [d, c, b, a | list])
   end
 
   defp mk_uni_list([h | t], list) do
-    mk_uni_list(t, [[h, 0, 0, 0] | list])
+    mk_uni_list(t, [h, 0, 0, 0 | list])
   end
 
   def decode_universal_string(buffer, tags) do
@@ -1327,11 +1334,11 @@ defmodule :m_asn1rtt_ber do
     :lists.reverse(acc)
   end
 
-  defp mk_universal_string([[0, 0, 0, d] | t], acc) do
+  defp mk_universal_string([0, 0, 0, d | t], acc) do
     mk_universal_string(t, [d | acc])
   end
 
-  defp mk_universal_string([[a, b, c, d] | t], acc) do
+  defp mk_universal_string([a, b, c, d | t], acc) do
     mk_universal_string(t, [{a, b, c, d} | acc])
   end
 
@@ -1369,11 +1376,11 @@ defmodule :m_asn1rtt_ber do
   end
 
   defp mk_BMP_list([{0, 0, c, d} | t], list) do
-    mk_BMP_list(t, [[d, c] | list])
+    mk_BMP_list(t, [d, c | list])
   end
 
   defp mk_BMP_list([h | t], list) do
-    mk_BMP_list(t, [[h, 0] | list])
+    mk_BMP_list(t, [h, 0 | list])
   end
 
   def decode_BMP_string(buffer, tags) do
@@ -1389,11 +1396,11 @@ defmodule :m_asn1rtt_ber do
     :lists.reverse(uS)
   end
 
-  defp mk_BMP_string([[0, b] | t], uS) do
+  defp mk_BMP_string([0, b | t], uS) do
     mk_BMP_string(t, [b | uS])
   end
 
-  defp mk_BMP_string([[c, d] | t], uS) do
+  defp mk_BMP_string([c, d | t], uS) do
     mk_BMP_string(t, [{0, 0, c, d} | uS])
   end
 

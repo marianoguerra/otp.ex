@@ -127,10 +127,16 @@ defmodule :m_ssh_info do
           underline('Client part', ?=),
           print_clients(),
           :io_lib.nl(),
-          underline('Server part', ?=),
+          underline(
+            'Server part',
+            ?=
+          ),
           print_servers(),
           :io_lib.nl(),
-          underline('Supervisors', ?=),
+          underline(
+            'Supervisors',
+            ?=
+          ),
           walk_sups(:ssh_sup),
           :io_lib.nl()
         ]
@@ -316,7 +322,10 @@ defmodule :m_ssh_info do
   defp walk_sups([h = {_, pid, _, _} | t], indent) do
     [
       indent(indent),
-      :io_lib.format(:"~200p  ~p is ~s~n", [h, pid, dead_or_alive(pid)]),
+      :io_lib.format(
+        :"~200p  ~p is ~s~n",
+        [h, pid, dead_or_alive(pid)]
+      ),
       case h do
         {_, _, :supervisor, [:ssh_connection_handler]} ->
           ''

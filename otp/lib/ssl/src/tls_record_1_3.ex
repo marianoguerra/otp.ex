@@ -1103,7 +1103,7 @@ defmodule :m_tls_record_1_3 do
 
   def encode_handshake(
         frag,
-        %{:current_write => %{:max_fragment_length => maxFragmentLength}} = connectionStates
+        %{current_write: %{max_fragment_length: maxFragmentLength}} = connectionStates
       ) do
     maxLength =
       cond do
@@ -1142,7 +1142,7 @@ defmodule :m_tls_record_1_3 do
 
   def encode_data(
         frag,
-        %{:current_write => %{:max_fragment_length => maxFragmentLength}} = connectionStates
+        %{current_write: %{max_fragment_length: maxFragmentLength}} = connectionStates
       ) do
     maxLength =
       cond do
@@ -1157,12 +1157,12 @@ defmodule :m_tls_record_1_3 do
     encode_iolist(23, data, connectionStates)
   end
 
-  def encode_plain_text(type, data0, %{:current_write => write0} = connectionStates) do
+  def encode_plain_text(type, data0, %{current_write: write0} = connectionStates) do
     padLen = 0
     data = inner_plaintext(type, data0, padLen)
     cipherFragment = encode_plain_text(data, write0)
     {cipherText, write} = encode_tls_cipher_text(cipherFragment, write0)
-    {cipherText, %{connectionStates | :current_write => write}}
+    {cipherText, Map.put(connectionStates, :current_write, write)}
   end
 
   defp encode_iolist(type, data, connectionStates0) do
@@ -1188,11 +1188,11 @@ defmodule :m_tls_record_1_3 do
   def decode_cipher_text(
         r_ssl_tls(type: 23, version: {3, 3}, fragment: cipherFragment),
         %{
-          :current_read =>
+          current_read:
             %{
-              :sequence_number => seq,
-              :cipher_state => r_cipher_state(key: key, iv: iV, tag_len: tagLen),
-              :security_parameters =>
+              sequence_number: seq,
+              cipher_state: r_cipher_state(key: key, iv: iV, tag_len: tagLen),
+              security_parameters:
                 r_security_parameters(
                   cipher_type: 2,
                   bulk_cipher_algorithm: bulkCipherAlgo
@@ -1205,10 +1205,12 @@ defmodule :m_tls_record_1_3 do
         alert
 
       plainFragment ->
-        connectionStates = %{
-          connectionStates0
-          | :current_read => %{readState0 | :sequence_number => seq + 1}
-        }
+        connectionStates =
+          Map.put(
+            connectionStates0,
+            :current_read,
+            Map.put(readState0, :sequence_number, seq + 1)
+          )
 
         {decode_inner_plaintext(plainFragment), connectionStates}
     end
@@ -1238,8 +1240,8 @@ defmodule :m_tls_record_1_3 do
   def decode_cipher_text(
         r_ssl_tls(type: type, version: {3, 3}, fragment: cipherFragment),
         %{
-          :current_read => %{
-            :security_parameters =>
+          current_read: %{
+            security_parameters:
               r_security_parameters(
                 cipher_suite: <<0::size(8)-unsigned-big-integer, 0::size(8)-unsigned-big-integer>>
               )
@@ -1254,9 +1256,9 @@ defmodule :m_tls_record_1_3 do
       level: 2,
       description: 20,
       where: %{
-        :mfa => {:tls_record_1_3, :decode_cipher_text, 2},
-        :line => 190,
-        :file => 'otp/lib/ssl/src/tls_record_1_3.erl'
+        mfa: {:tls_record_1_3, :decode_cipher_text, 2},
+        line: 190,
+        file: 'otp/lib/ssl/src/tls_record_1_3.erl'
       },
       reason: {:record_type_mismatch, type}
     )
@@ -1276,9 +1278,9 @@ defmodule :m_tls_record_1_3 do
   defp encode_plain_text(
          r_inner_plaintext(content: data, type: type, zeros: zeros),
          %{
-           :cipher_state => r_cipher_state(key: key, iv: iV, tag_len: tagLen),
-           :sequence_number => seq,
-           :security_parameters =>
+           cipher_state: r_cipher_state(key: key, iv: iV, tag_len: tagLen),
+           sequence_number: seq,
+           security_parameters:
              r_security_parameters(
                cipher_type: 2,
                bulk_cipher_algorithm: bulkCipherAlgo
@@ -1293,7 +1295,7 @@ defmodule :m_tls_record_1_3 do
   defp encode_plain_text(
          r_inner_plaintext(content: data, type: type),
          %{
-           :security_parameters =>
+           security_parameters:
              r_security_parameters(
                cipher_suite: <<0::size(8)-unsigned-big-integer, 0::size(8)-unsigned-big-integer>>
              )
@@ -1336,7 +1338,7 @@ defmodule :m_tls_record_1_3 do
            legacy_version: {majVer, minVer},
            encoded_record: encoded
          ),
-         %{:sequence_number => seq} = write
+         %{sequence_number: seq} = write
        ) do
     length = :erlang.iolist_size(encoded)
 
@@ -1344,7 +1346,7 @@ defmodule :m_tls_record_1_3 do
        <<type::size(8)-unsigned-big-integer, majVer::size(8)-unsigned-big-integer,
          minVer::size(8)-unsigned-big-integer, length::size(16)-unsigned-big-integer>>,
        encoded
-     ], %{write | :sequence_number => seq + 1}}
+     ], Map.put(write, :sequence_number, seq + 1)}
   end
 
   defp decipher_aead(cipherFragment, bulkCipherAlgo, key, seq, iV, tagLen) do
@@ -1367,9 +1369,9 @@ defmodule :m_tls_record_1_3 do
             level: 2,
             description: 20,
             where: %{
-              :mfa => {:tls_record_1_3, :decipher_aead, 6},
-              :line => 280,
-              :file => 'otp/lib/ssl/src/tls_record_1_3.erl'
+              mfa: {:tls_record_1_3, :decipher_aead, 6},
+              line: 280,
+              file: 'otp/lib/ssl/src/tls_record_1_3.erl'
             },
             reason: :decryption_failed
           )
@@ -1380,9 +1382,9 @@ defmodule :m_tls_record_1_3 do
           level: 2,
           description: 20,
           where: %{
-            :mfa => {:tls_record_1_3, :decipher_aead, 6},
-            :line => 284,
-            :file => 'otp/lib/ssl/src/tls_record_1_3.erl'
+            mfa: {:tls_record_1_3, :decipher_aead, 6},
+            line: 284,
+            file: 'otp/lib/ssl/src/tls_record_1_3.erl'
           },
           reason: :decryption_failed
         )
@@ -1419,9 +1421,9 @@ defmodule :m_tls_record_1_3 do
           level: 2,
           description: 10,
           where: %{
-            :mfa => {:tls_record_1_3, :decode_inner_plaintext, 1},
-            :line => 311,
-            :file => 'otp/lib/ssl/src/tls_record_1_3.erl'
+            mfa: {:tls_record_1_3, :decode_inner_plaintext, 1},
+            line: 311,
+            file: 'otp/lib/ssl/src/tls_record_1_3.erl'
           },
           reason: :empty_alert
         )

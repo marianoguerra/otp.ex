@@ -1388,7 +1388,9 @@ defmodule :m_ssl_manager do
         r_state(
           certificate_db:
             [
-              [certDb, fileRefDb, pemChace]
+              certDb,
+              fileRefDb,
+              pemChace
               | _
             ] = db
         ) = state
@@ -1398,12 +1400,12 @@ defmodule :m_ssl_manager do
     {:reply,
      {:ok,
       %{
-        :cert_db_ref => ref,
-        :cert_db_handle => certDb,
-        :fileref_db_handle => fileRefDb,
-        :pem_cache => pemChace,
-        :session_cache => session_cache(role, state),
-        :crl_db_info => {cRLCb, crl_db_info(db, userCRLDb)}
+        cert_db_ref: ref,
+        cert_db_handle: certDb,
+        fileref_db_handle: fileRefDb,
+        pem_cache: pemChace,
+        session_cache: session_cache(role, state),
+        crl_db_info: {cRLCb, crl_db_info(db, userCRLDb)}
       }}, state}
   end
 
@@ -1413,7 +1415,9 @@ defmodule :m_ssl_manager do
         r_state(
           certificate_db:
             [
-              [certDb, fileRefDb, pemChace]
+              certDb,
+              fileRefDb,
+              pemChace
               | _
             ] = db
         ) = state
@@ -1423,12 +1427,12 @@ defmodule :m_ssl_manager do
         {:reply,
          {:ok,
           %{
-            :cert_db_ref => ref,
-            :cert_db_handle => certDb,
-            :fileref_db_handle => fileRefDb,
-            :pem_cache => pemChace,
-            :session_cache => session_cache(role, state),
-            :crl_db_info => {cRLCb, crl_db_info(db, userCRLDb)}
+            cert_db_ref: ref,
+            cert_db_handle: certDb,
+            fileref_db_handle: fileRefDb,
+            pem_cache: pemChace,
+            session_cache: session_cache(role, state),
+            crl_db_info: {cRLCb, crl_db_info(db, userCRLDb)}
           }}, state}
 
       {:error, _} = error ->
@@ -1516,7 +1520,8 @@ defmodule :m_ssl_manager do
         {:clean_cert_db, ref, file},
         r_state(
           certificate_db: [
-            [certDb, {refDb, fileMapDb}]
+            certDb,
+            {refDb, fileMapDb}
             | _
           ]
         ) = state

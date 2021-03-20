@@ -282,17 +282,17 @@ defmodule :m_edoc_tags do
     scan_tag_lines(cs, s, ss, t, ss1, l, as)
   end
 
-  defp scan_tag_lines([[?@, c] | _Cs], s, ss, {ts, l1}, ss1, l, as)
+  defp scan_tag_lines([?@, c | _Cs], s, ss, {ts, l1}, ss1, l, as)
        when c >= ?a and c <= ?z do
     scan_lines(s, ss, l, [make_tag(ts, l1, ss1) | as])
   end
 
-  defp scan_tag_lines([[?@, c] | _Cs], s, ss, {ts, l1}, ss1, l, as)
+  defp scan_tag_lines([?@, c | _Cs], s, ss, {ts, l1}, ss1, l, as)
        when c >= ?A and c <= ?Z do
     scan_lines(s, ss, l, [make_tag(ts, l1, ss1) | as])
   end
 
-  defp scan_tag_lines([[?@, c] | _Cs], s, ss, {ts, l1}, ss1, l, as)
+  defp scan_tag_lines([?@, c | _Cs], s, ss, {ts, l1}, ss1, l, as)
        when c >= 192 and c <= 255 and c !== 215 and
               c !== 247 do
     scan_lines(s, ss, l, [make_tag(ts, l1, ss1) | as])

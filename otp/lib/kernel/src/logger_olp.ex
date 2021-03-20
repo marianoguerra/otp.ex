@@ -60,16 +60,16 @@ defmodule :m_logger_olp do
 
   def get_default_opts() do
     %{
-      :sync_mode_qlen => 10,
-      :drop_mode_qlen => 200,
-      :flush_qlen => 1000,
-      :burst_limit_enable => true,
-      :burst_limit_max_count => 500,
-      :burst_limit_window_time => 1000,
-      :overload_kill_enable => false,
-      :overload_kill_qlen => 20000,
-      :overload_kill_mem_size => 3_000_000,
-      :overload_kill_restart_after => 5000
+      sync_mode_qlen: 10,
+      drop_mode_qlen: 200,
+      flush_qlen: 1000,
+      burst_limit_enable: true,
+      burst_limit_max_count: 500,
+      burst_limit_window_time: 1000,
+      overload_kill_enable: false,
+      overload_kill_qlen: 20000,
+      overload_kill_mem_size: 3_000_000,
+      overload_kill_restart_after: 5000
     }
   end
 
@@ -88,9 +88,9 @@ defmodule :m_logger_olp do
           :logger_server.do_internal_log(
             :debug,
             %{
-              :mfa => {:logger_olp, :restart, 1},
-              :line => 144,
-              :file => 'otp/lib/kernel/src/logger_olp.erl'
+              mfa: {:logger_olp, :restart, 1},
+              line: 144,
+              file: 'otp/lib/kernel/src/logger_olp.erl'
             },
             %{},
             [[{:logger_olp, :restart}, {:result, result}]]
@@ -137,19 +137,19 @@ defmodule :m_logger_olp do
         t0 = :erlang.monotonic_time(:microsecond)
         :proc_lib.init_ack({:ok, self(), olpRef})
 
-        state0 = %{
-          options
-          | :id => name,
-            :idle => true,
-            :module => module,
-            :mode_ref => modeRef,
-            :mode => :async,
-            :last_qlen => 0,
-            :last_load_ts => t0,
-            :burst_win_ts => t0,
-            :burst_msg_count => 0,
-            :cb_state => cBState
-        }
+        state0 =
+          Map.merge(options, %{
+            id: name,
+            idle: true,
+            module: module,
+            mode_ref: modeRef,
+            mode: :async,
+            last_qlen: 0,
+            last_load_ts: t0,
+            burst_win_ts: t0,
+            burst_msg_count: 0,
+            cb_state: cBState
+          })
 
         state = reset_restart_flag(state0)
         :gen_server.enter_loop(:logger_olp, [], state)
@@ -161,11 +161,11 @@ defmodule :m_logger_olp do
   end
 
   def handle_call({:"$olp_load", msg}, _From, state) do
-    {result, state1} = do_load(msg, :call, %{state | :idle => false})
+    {result, state1} = do_load(msg, :call, Map.put(state, :idle, false))
     reply_return(result, state1)
   end
 
-  def handle_call(:get_ref, _From, %{:id => name, :mode_ref => modeRef} = state) do
+  def handle_call(:get_ref, _From, %{id: name, mode_ref: modeRef} = state) do
     reply_return({name, self(), modeRef}, state)
   end
 
@@ -224,19 +224,18 @@ defmodule :m_logger_olp do
     reply_return(state, state)
   end
 
-  def handle_call(:reset, _From, %{:module => module, :cb_state => cBState} = state) do
+  def handle_call(:reset, _From, %{module: module, cb_state: cBState} = state) do
     state1 = state
     cBState1 = try_callback_call(module, :reset_state, [cBState], cBState)
 
     reply_return(
       :ok,
-      %{
-        state1
-        | :idle => true,
-          :last_qlen => 0,
-          :last_load_ts => :erlang.monotonic_time(:microsecond),
-          :cb_state => cBState1
-      }
+      Map.merge(state1, %{
+        idle: true,
+        last_qlen: 0,
+        last_load_ts: :erlang.monotonic_time(:microsecond),
+        cb_state: cBState1
+      })
     )
   end
 
@@ -244,73 +243,69 @@ defmodule :m_logger_olp do
     {:stop, {:shutdown, :stopped}, :ok, state}
   end
 
-  def handle_call(msg, from, %{:module => module, :cb_state => cBState} = state) do
+  def handle_call(msg, from, %{module: module, cb_state: cBState} = state) do
     case try_callback_call(module, :handle_call, [msg, from, cBState]) do
       {:reply, reply, cBState1} ->
-        reply_return(reply, %{state | :cb_state => cBState1})
+        reply_return(reply, Map.put(state, :cb_state, cBState1))
 
       {:noreply, cBState1} ->
-        noreply_return(%{state | :cb_state => cBState1})
+        noreply_return(Map.put(state, :cb_state, cBState1))
 
       {:stop, reason, reply, cBState1} ->
-        {:stop, reason, reply, %{state | :cb_state => cBState1}}
+        {:stop, reason, reply, Map.put(state, :cb_state, cBState1)}
 
       {:stop, reason, cBState1} ->
-        {:stop, reason, %{state | :cb_state => cBState1}}
+        {:stop, reason, Map.put(state, :cb_state, cBState1)}
     end
   end
 
   def handle_cast({:"$olp_load", msg}, state) do
-    {_Result, state1} = do_load(msg, :cast, %{state | :idle => false})
+    {_Result, state1} = do_load(msg, :cast, Map.put(state, :idle, false))
     noreply_return(state1)
   end
 
   def handle_cast(
         msg,
-        %{:module => module, :cb_state => cBState} = state
+        %{module: module, cb_state: cBState} = state
       ) do
     case try_callback_call(module, :handle_cast, [msg, cBState]) do
       {:noreply, cBState1} ->
-        noreply_return(%{state | :cb_state => cBState1})
+        noreply_return(Map.put(state, :cb_state, cBState1))
 
       {:stop, reason, cBState1} ->
-        {:stop, reason, %{state | :cb_state => cBState1}}
+        {:stop, reason, Map.put(state, :cb_state, cBState1)}
     end
   end
 
-  def handle_info(:timeout, %{:mode_ref => modeRef} = state) do
+  def handle_info(:timeout, %{mode_ref: modeRef} = state) do
     state1 = notify(:idle, state)
     state2 = maybe_notify_mode_change(:async, state1)
 
     {:noreply,
-     %{state2 | :idle => true, :mode => set_mode(modeRef, :async), :burst_msg_count => 0}}
+     Map.merge(state2, %{idle: true, mode: set_mode(modeRef, :async), burst_msg_count: 0})}
   end
 
   def handle_info(
         msg,
-        %{:module => module, :cb_state => cBState} = state
+        %{module: module, cb_state: cBState} = state
       ) do
     case try_callback_call(module, :handle_info, [msg, cBState]) do
       {:noreply, cBState1} ->
-        noreply_return(%{state | :cb_state => cBState1})
+        noreply_return(Map.put(state, :cb_state, cBState1))
 
       {:stop, reason, cBState1} ->
-        {:stop, reason, %{state | :cb_state => cBState1}}
+        {:stop, reason, Map.put(state, :cb_state, cBState1)}
 
       {:load, cBState1} ->
-        {_, state1} = do_load(msg, :cast, %{state | :idle => false, :cb_state => cBState1})
+        {_, state1} = do_load(msg, :cast, Map.merge(state, %{idle: false, cb_state: cBState1}))
         noreply_return(state1)
     end
   end
 
   def terminate(
         {:shutdown, {:overloaded, _QLen, _Mem}},
-        %{
-          :id => name,
-          :module => module,
-          :cb_state => cBState,
-          :overload_kill_restart_after => restartAfter
-        } = state
+        %{id: name, module: module, cb_state: cBState, overload_kill_restart_after: restartAfter} =
+          state
       ) do
     :erlang.unregister(name)
 
@@ -329,7 +324,7 @@ defmodule :m_logger_olp do
 
   def terminate(
         reason,
-        %{:id => name, :module => module, :cb_state => cBState}
+        %{id: name, module: module, cb_state: cBState}
       ) do
     _ = try_callback_call(module, :terminate, [reason, cBState], :ok)
     :erlang.unregister(name)
@@ -374,7 +369,7 @@ defmodule :m_logger_olp do
 
   defp flush(
          t1,
-         state = %{:id => _Name, :last_load_ts => _T0, :mode_ref => modeRef}
+         state = %{id: _Name, last_load_ts: _T0, mode_ref: modeRef}
        ) do
     newFlushed = flush_load(5000)
     state1 = notify({:flushed, newFlushed}, state)
@@ -392,7 +387,7 @@ defmodule :m_logger_olp do
     state4 = maybe_notify_mode_change(:async, state3)
 
     {:dropped,
-     %{state4 | :mode => set_mode(modeRef, :async), :last_qlen => qLen1, :last_load_ts => t1}}
+     Map.merge(state4, %{mode: set_mode(modeRef, :async), last_qlen: qLen1, last_load_ts: t1})}
   end
 
   defp handle_load(
@@ -401,11 +396,11 @@ defmodule :m_logger_olp do
          msg,
          _CallOrCast,
          state = %{
-           :id => _Name,
-           :module => module,
-           :cb_state => cBState,
-           :last_qlen => lastQLen,
-           :last_load_ts => _T0
+           id: _Name,
+           module: module,
+           cb_state: cBState,
+           last_qlen: lastQLen,
+           last_load_ts: _T0
          }
        ) do
     {doWrite, state1} = limit_burst(state)
@@ -436,11 +431,11 @@ defmodule :m_logger_olp do
           {:dropped, lastQLen, cBState}
       end
 
-    state2 = %{state1 | :cb_state => cBState1}
-    state3 = %{state2 | :mode => mode}
+    state2 = Map.put(state1, :cb_state, cBState1)
+    state3 = Map.put(state2, :mode, mode)
     state4 = state3
     state5 = state4
-    state6 = %{state5 | :last_qlen => lastQLen1, :last_load_ts => t1}
+    state6 = Map.put(%{state5 | last_qlen: lastQLen1}, :last_load_ts, t1)
 
     state7 =
       case result do
@@ -538,7 +533,7 @@ defmodule :m_logger_olp do
     :ok
   end
 
-  defp set_restart_flag(%{:id => name, :module => module}) do
+  defp set_restart_flag(%{id: name, module: module}) do
     flag = :erlang.list_to_atom(:lists.concat([module, '_', name, '_restarting']))
 
     spawn(fn ->
@@ -549,7 +544,7 @@ defmodule :m_logger_olp do
     :ok
   end
 
-  defp reset_restart_flag(%{:id => name, :module => module} = state) do
+  defp reset_restart_flag(%{id: name, module: module} = state) do
     flag = :erlang.list_to_atom(:lists.concat([module, '_', name, '_restarting']))
 
     case :erlang.whereis(flag) do
@@ -564,12 +559,12 @@ defmodule :m_logger_olp do
 
   defp check_load(
          state = %{
-           :id => _Name,
-           :mode_ref => modeRef,
-           :mode => mode,
-           :sync_mode_qlen => syncModeQLen,
-           :drop_mode_qlen => dropModeQLen,
-           :flush_qlen => flushQLen
+           id: _Name,
+           mode_ref: modeRef,
+           mode: mode,
+           sync_mode_qlen: syncModeQLen,
+           drop_mode_qlen: dropModeQLen,
+           flush_qlen: flushQLen
          }
        ) do
     {_, mem} = :erlang.process_info(self(), :memory)
@@ -611,19 +606,19 @@ defmodule :m_logger_olp do
     state2 = state1
     state3 = state2
     state4 = maybe_notify_mode_change(mode1, state3)
-    {mode1, qLen, mem, %{state4 | :last_qlen => qLen}}
+    {mode1, qLen, mem, Map.put(state4, :last_qlen, qLen)}
   end
 
-  defp limit_burst(%{:burst_limit_enable => false} = state) do
+  defp limit_burst(%{burst_limit_enable: false} = state) do
     {true, state}
   end
 
   defp limit_burst(
          %{
-           :burst_win_ts => burstWinT0,
-           :burst_msg_count => burstMsgCount,
-           :burst_limit_window_time => burstLimitWinTime,
-           :burst_limit_max_count => burstLimitMaxCnt
+           burst_win_ts: burstWinT0,
+           burst_msg_count: burstMsgCount,
+           burst_limit_window_time: burstLimitWinTime,
+           burst_limit_max_count: burstLimitMaxCnt
          } = state
        ) do
     cond do
@@ -636,18 +631,18 @@ defmodule :m_logger_olp do
             {false, state}
 
           _BurstCheckTime ->
-            {true, %{state | :burst_win_ts => burstWinT1, :burst_msg_count => 0}}
+            {true, Map.merge(state, %{burst_win_ts: burstWinT1, burst_msg_count: 0})}
         end
 
       true ->
-        {true, %{state | :burst_win_ts => burstWinT0, :burst_msg_count => burstMsgCount + 1}}
+        {true, Map.merge(state, %{burst_win_ts: burstWinT0, burst_msg_count: burstMsgCount + 1})}
     end
   end
 
   defp kill_if_choked(qLen, mem, %{
-         :overload_kill_enable => killIfOL,
-         :overload_kill_qlen => oLKillQLen,
-         :overload_kill_mem_size => oLKillMem
+         overload_kill_enable: killIfOL,
+         overload_kill_qlen: oLKillQLen,
+         overload_kill_mem_size: oLKillMem
        }) do
     cond do
       killIfOL and (qLen > oLKillQLen or mem > oLKillMem) ->
@@ -706,12 +701,12 @@ defmodule :m_logger_olp do
     m
   end
 
-  defp maybe_notify_mode_change(:drop, %{:mode => mode0} = state)
+  defp maybe_notify_mode_change(:drop, %{mode: mode0} = state)
        when mode0 !== :drop do
     notify({:mode_change, mode0, :drop}, state)
   end
 
-  defp maybe_notify_mode_change(mode1, %{:mode => :drop} = state)
+  defp maybe_notify_mode_change(mode1, %{mode: :drop} = state)
        when mode1 == :async or mode1 == :sync do
     notify({:mode_change, :drop, mode1}, state)
   end
@@ -722,10 +717,10 @@ defmodule :m_logger_olp do
 
   defp notify(
          note,
-         %{:module => module, :cb_state => cBState} = state
+         %{module: module, cb_state: cBState} = state
        ) do
     cBState1 = try_callback_call(module, :notify, [note, cBState], cBState)
-    %{state | :cb_state => cBState1}
+    Map.put(state, :cb_state, cBState1)
   end
 
   defp try_callback_call(module, function, args) do
@@ -750,19 +745,19 @@ defmodule :m_logger_olp do
     end
   end
 
-  defp noreply_return(%{:idle => true} = state) do
+  defp noreply_return(%{idle: true} = state) do
     {:noreply, state}
   end
 
-  defp noreply_return(%{:idle => false} = state) do
+  defp noreply_return(%{idle: false} = state) do
     {:noreply, state, 100}
   end
 
-  defp reply_return(reply, %{:idle => true} = state) do
+  defp reply_return(reply, %{idle: true} = state) do
     {:reply, reply, state}
   end
 
-  defp reply_return(reply, %{:idle => false} = state) do
+  defp reply_return(reply, %{idle: false} = state) do
     {:reply, reply, state, 100}
   end
 end

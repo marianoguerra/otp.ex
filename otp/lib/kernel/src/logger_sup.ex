@@ -6,12 +6,12 @@ defmodule :m_logger_sup do
   end
 
   def init([]) do
-    supFlags = %{:strategy => :one_for_one, :intensity => 1, :period => 5}
+    supFlags = %{strategy: :one_for_one, intensity: 1, period: 5}
 
     watcher = %{
-      :id => :logger_handler_watcher,
-      :start => {:logger_handler_watcher, :start_link, []},
-      :shutdown => :brutal_kill
+      id: :logger_handler_watcher,
+      start: {:logger_handler_watcher, :start_link, []},
+      shutdown: :brutal_kill
     }
 
     proxy = :logger_proxy.child_spec()

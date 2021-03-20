@@ -134,7 +134,7 @@ defmodule :m_xmerl_sax_old_dom do
           {1, [1]}
 
         [n | cNs] ->
-          {n, [[1, n + 1] | cNs]}
+          {n, [1, n + 1 | cNs]}
       end
 
     nsInfo =
@@ -177,8 +177,8 @@ defmodule :m_xmerl_sax_old_dom do
            tags: [_ | t],
            cno: [_ | cN],
            dom: [
-             [r_xmlElement(name: cName, content: c) = current, r_xmlElement(content: pC) = parent]
-             | d
+             r_xmlElement(name: cName, content: c) = current,
+             r_xmlElement(content: pC) = parent | d
            ]
          ) = state
        ) do

@@ -128,7 +128,7 @@ defmodule :m_asn1ct_func do
   end
 
   defp call_args([a | as], sep) do
-    [[sep, a] | call_args(as, ', ')]
+    [sep, a | call_args(as, ', ')]
   end
 
   defp call_args([], _) do

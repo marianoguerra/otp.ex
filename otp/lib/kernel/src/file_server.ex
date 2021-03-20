@@ -152,14 +152,15 @@ defmodule :m_file_server do
     reply =
       case :prim_file.open(
              sourceName,
-             [[:read, :binary] | sourceOpts]
+             [:read, :binary | sourceOpts]
            ) do
         {:ok, source} ->
           sourceReply =
             case :prim_file.open(
                    destName,
                    [
-                     [:write, :binary]
+                     :write,
+                     :binary
                      | destOpts
                    ]
                  ) do

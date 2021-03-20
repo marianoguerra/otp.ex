@@ -120,10 +120,7 @@ defmodule :m_erl_tidy do
   defp dir_4(file, regexp, env) do
     case :re.run(file, regexp, [:unicode]) do
       {:match, _} ->
-        opts = [
-          [{:outfile, file}, {:dir, ''}]
-          | r_dir(env, :options)
-        ]
+        opts = [{:outfile, file}, {:dir, ''} | r_dir(env, :options)]
 
         case (try do
                 file(file, opts)
@@ -644,7 +641,7 @@ defmodule :m_erl_tidy do
     end
   end
 
-  defp check_imports_1([[{f, m1}, {f, m2}] | _Is]) when m1 !== m2 do
+  defp check_imports_1([{f, m1}, {f, m2} | _Is]) when m1 !== m2 do
     false
   end
 

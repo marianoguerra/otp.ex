@@ -721,7 +721,7 @@ defmodule :m_dialyzer_dep do
        ) do
     r_state(state,
       letrecs: map__store(var, fun, map),
-      rvals: %{rvals | var => numRvals}
+      rvals: Map.put(rvals, var, numRvals)
     )
   end
 

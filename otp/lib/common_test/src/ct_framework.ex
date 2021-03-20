@@ -762,7 +762,7 @@ defmodule :m_ct_framework do
     []
   end
 
-  defp keysmember([[key, pos] | next], list) do
+  defp keysmember([key, pos | next], list) do
     case (for elem <- list,
               key == :erlang.element(pos, elem) do
             elem
@@ -781,7 +781,14 @@ defmodule :m_ct_framework do
 
   defp add_defaults2(_Mod, :init_per_suite, iPSInfo, suiteInfo, suiteReqs) do
     info = :lists.flatten([iPSInfo, suiteReqs])
-    :lists.flatten([info, remove_info_in_prev(info, [suiteInfo])])
+
+    :lists.flatten([
+      info,
+      remove_info_in_prev(
+        info,
+        [suiteInfo]
+      )
+    ])
   end
 
   defp add_defaults2(_Mod, :init_per_group, iPGAndGroupInfo, suiteInfo, suiteReqs) do
@@ -795,7 +802,7 @@ defmodule :m_ct_framework do
       [iPGInfo] ->
         :lists.flatten([iPGInfo, suiteInfo1])
 
-      [[iPGInfo, currGroupInfo] | prevGroupInfo] ->
+      [iPGInfo, currGroupInfo | prevGroupInfo] ->
         prevGroupInfo1 = delete_require_terms(prevGroupInfo)
         :lists.flatten([iPGInfo, currGroupInfo, prevGroupInfo1, suiteInfo1])
     end
@@ -812,7 +819,7 @@ defmodule :m_ct_framework do
       [tCInfo] ->
         :lists.flatten([tCInfo, suiteInfo1])
 
-      [[tCInfo, currGroupInfo] | prevGroupInfo] ->
+      [tCInfo, currGroupInfo | prevGroupInfo] ->
         prevGroupInfo1 = delete_require_terms(prevGroupInfo)
         :lists.flatten([tCInfo, currGroupInfo, prevGroupInfo1, suiteInfo1])
     end
@@ -1201,7 +1208,7 @@ defmodule :m_ct_framework do
     :ct_util.reset_silent_connections()
 
     clearCurrTC = fn
-      running = [[_, _] | _] ->
+      running = [_, _ | _] ->
         :lists.keydelete(func, 2, running)
 
       {_, {:suite0_failed, _}} ->

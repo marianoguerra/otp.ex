@@ -990,14 +990,14 @@ defmodule :m_ct_run do
             ts = tests(dirMods, gsAndCs)
             script_start4(r_opts(opts1, tests: ts), args)
 
-          [[_, _] | _] ->
+          [_, _ | _] ->
             {:error, :multiple_suites_and_cases}
 
           _ ->
             {:error, :incorrect_start_options}
         end
 
-      {[[_, _] | _], suite, []} when is_list(suite) ->
+      {[_, _ | _], suite, []} when is_list(suite) ->
         {:error, :multiple_dirs_and_suites}
 
       {[dir], suite, gsAndCs}
@@ -1014,7 +1014,7 @@ defmodule :m_ct_run do
             ts = tests(dirMods, gsAndCs)
             script_start4(r_opts(opts1, tests: ts), args)
 
-          [[_, _] | _] when gsAndCs != [] ->
+          [_, _ | _] when gsAndCs != [] ->
             {:error, :multiple_suites_and_cases}
 
           _ ->
@@ -1860,7 +1860,7 @@ defmodule :m_ct_run do
           end
         )
 
-      {:undefined, [[hd, _] | _], _GsAndCs} when not is_integer(hd) ->
+      {:undefined, [hd, _ | _], _GsAndCs} when not is_integer(hd) ->
         exit({:error, :multiple_suites_and_cases})
 
       {:undefined, suite = [hd | tl], gsAndCs}
@@ -1878,7 +1878,7 @@ defmodule :m_ct_run do
           end
         )
 
-      {[[hd, _] | _], _Suites, []}
+      {[hd, _ | _], _Suites, []}
       when is_list(hd) or
              not is_integer(hd) ->
         exit({:error, :multiple_dirs_and_suites})
@@ -1938,7 +1938,7 @@ defmodule :m_ct_run do
             case (for s <- suite do
                     suite_to_test(dir1, s)
                   end) do
-              [[_, _] | _] when gsAndCs != [] ->
+              [_, _ | _] when gsAndCs != [] ->
                 exit({:error, :multiple_suites_and_cases})
 
               [{dir2, mod}] when gsAndCs != [] ->
@@ -4323,7 +4323,7 @@ defmodule :m_ct_run do
     )
   end
 
-  defp ct_hooks_args2opts([[cTH, arg, prio, 'and'] | rest], acc)
+  defp ct_hooks_args2opts([cTH, arg, prio, 'and' | rest], acc)
        when arg != 'and' do
     ct_hooks_args2opts(
       rest,
@@ -4334,7 +4334,7 @@ defmodule :m_ct_run do
     )
   end
 
-  defp ct_hooks_args2opts([[cTH, arg, 'and'] | rest], acc) do
+  defp ct_hooks_args2opts([cTH, arg, 'and' | rest], acc) do
     ct_hooks_args2opts(
       rest,
       [
@@ -4348,7 +4348,7 @@ defmodule :m_ct_run do
     ct_hooks_args2opts([cTH, 'and'], acc)
   end
 
-  defp ct_hooks_args2opts([[cTH, 'and'] | rest], acc) do
+  defp ct_hooks_args2opts([cTH, 'and' | rest], acc) do
     ct_hooks_args2opts(
       rest,
       [:erlang.list_to_atom(cTH) | acc]
@@ -4407,7 +4407,7 @@ defmodule :m_ct_run do
     end
   end
 
-  defp event_handler_init_args2opts([[eH, arg, 'and'] | eHs]) do
+  defp event_handler_init_args2opts([eH, arg, 'and' | eHs]) do
     [
       {:erlang.list_to_atom(eH), :lists.flatten(:io_lib.format('~ts', [arg]))}
       | event_handler_init_args2opts(eHs)
@@ -4871,7 +4871,7 @@ defmodule :m_ct_run do
              '.erl'
            )
          ) do
-      [[?E, ?T, ?I, ?U, ?S, ?_] | _] ->
+      [?E, ?T, ?I, ?U, ?S, ?_ | _] ->
         true
 
       _ ->
@@ -4881,7 +4881,7 @@ defmodule :m_ct_run do
                  '.beam'
                )
              ) do
-          [[?E, ?T, ?I, ?U, ?S, ?_] | _] ->
+          [?E, ?T, ?I, ?U, ?S, ?_ | _] ->
             true
 
           _ ->

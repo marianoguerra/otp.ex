@@ -19,7 +19,8 @@ defmodule :m_crypto do
 
   def supports() do
     [
-      [{:hashs, supports(:hashs)}, {:ciphers, prepend_old_aliases(supports(:ciphers))}]
+      {:hashs, supports(:hashs)},
+      {:ciphers, prepend_old_aliases(supports(:ciphers))}
       | for t <- [:public_keys, :macs, :curves, :rsa_opts] do
           {t, supports(t)}
         end
@@ -292,53 +293,23 @@ defmodule :m_crypto do
   end
 
   def cipher_info(:aes_ctr) do
-    %{
-      :block_size => 1,
-      :iv_length => 16,
-      :key_length => 32,
-      :mode => :ctr_mode,
-      :type => :undefined
-    }
+    %{block_size: 1, iv_length: 16, key_length: 32, mode: :ctr_mode, type: :undefined}
   end
 
   def cipher_info(:aes_128_ctr) do
-    %{
-      :block_size => 1,
-      :iv_length => 16,
-      :key_length => 16,
-      :mode => :ctr_mode,
-      :type => :undefined
-    }
+    %{block_size: 1, iv_length: 16, key_length: 16, mode: :ctr_mode, type: :undefined}
   end
 
   def cipher_info(:aes_192_ctr) do
-    %{
-      :block_size => 1,
-      :iv_length => 16,
-      :key_length => 24,
-      :mode => :ctr_mode,
-      :type => :undefined
-    }
+    %{block_size: 1, iv_length: 16, key_length: 24, mode: :ctr_mode, type: :undefined}
   end
 
   def cipher_info(:aes_256_ctr) do
-    %{
-      :block_size => 1,
-      :iv_length => 16,
-      :key_length => 32,
-      :mode => :ctr_mode,
-      :type => :undefined
-    }
+    %{block_size: 1, iv_length: 16, key_length: 32, mode: :ctr_mode, type: :undefined}
   end
 
   def cipher_info(:aes_ige256) do
-    %{
-      :block_size => 16,
-      :iv_length => 32,
-      :key_length => 16,
-      :mode => :ige_mode,
-      :type => :undefined
-    }
+    %{block_size: 16, iv_length: 32, key_length: 16, mode: :ige_mode, type: :undefined}
   end
 
   def cipher_info(type) do
@@ -604,11 +575,11 @@ defmodule :m_crypto do
   end
 
   defp get_crypto_opts(options) when is_list(options) do
-    :lists.foldl(&chk_opt/2, %{:encrypt => true, :padding => :undefined}, options)
+    :lists.foldl(&chk_opt/2, %{encrypt: true, padding: :undefined}, options)
   end
 
   defp get_crypto_opts(flag) when is_boolean(flag) do
-    %{:encrypt => flag, :padding => :undefined}
+    %{encrypt: flag, padding: :undefined}
   end
 
   defp get_crypto_opts(x) do
@@ -618,7 +589,7 @@ defmodule :m_crypto do
   defp chk_opt({tag, val}, a) do
     case ok_opt(tag, val) do
       true ->
-        %{a | tag => val}
+        Map.put(a, tag, val)
 
       false ->
         :erlang.error({:badarg, {:bad_option, {tag, val}}})
@@ -744,7 +715,7 @@ defmodule :m_crypto do
     :erlang.error({:badarg, 'Not an AEAD cipher'})
   end
 
-  defp ng_crypto_init_nif(cipher, key, iVec, %{:encrypt => encryptFlag, :padding => padding}) do
+  defp ng_crypto_init_nif(cipher, key, iVec, %{encrypt: encryptFlag, padding: padding}) do
     ng_crypto_init_nif(cipher, key, iVec, encryptFlag, padding)
   end
 
@@ -768,10 +739,7 @@ defmodule :m_crypto do
     nif_stub_error(1472)
   end
 
-  defp ng_crypto_one_time_nif(cipher, key, iVec, data, %{
-         :encrypt => encryptFlag,
-         :padding => padding
-       }) do
+  defp ng_crypto_one_time_nif(cipher, key, iVec, data, %{encrypt: encryptFlag, padding: padding}) do
     ng_crypto_one_time_nif(cipher, key, iVec, data, encryptFlag, padding)
   end
 
@@ -783,10 +751,7 @@ defmodule :m_crypto do
     l1 =
       case :lists.member(:des_ede3_cbc, l0) do
         true ->
-          [
-            [:des3_cbc, :des_ede3, :des_ede3_cbf, :des3_cbf, :des3_cfb]
-            | l0
-          ]
+          [:des3_cbc, :des_ede3, :des_ede3_cbf, :des3_cbf, :des3_cfb | l0]
 
         false ->
           l0
@@ -795,7 +760,7 @@ defmodule :m_crypto do
     l2 =
       case :lists.member(:aes_128_cbc, l1) do
         true ->
-          [[:aes_cbc, :aes_cbc128, :aes_cbc256] | l1]
+          [:aes_cbc, :aes_cbc128, :aes_cbc256 | l1]
 
         false ->
           l1
@@ -1034,24 +999,24 @@ defmodule :m_crypto do
 
   defp mk_alg_handler(:crypto = alg) do
     %{
-      :type => alg,
-      :bits => 64,
-      :next => &:crypto.rand_plugin_next/1,
-      :uniform => &:crypto.rand_plugin_uniform/1,
-      :uniform_n => &:crypto.rand_plugin_uniform/2
+      type: alg,
+      bits: 64,
+      next: &:crypto.rand_plugin_next/1,
+      uniform: &:crypto.rand_plugin_uniform/1,
+      uniform_n: &:crypto.rand_plugin_uniform/2
     }
   end
 
   defp mk_alg_handler(:crypto_cache = alg) do
-    %{:type => alg, :bits => 56, :next => &:crypto.rand_cache_plugin_next/1}
+    %{type: alg, bits: 56, next: &:crypto.rand_cache_plugin_next/1}
   end
 
   defp mk_alg_handler(:crypto_aes = alg) do
     %{
-      :type => alg,
-      :bits => 58,
-      :next => &:crypto.rand_plugin_aes_next/1,
-      :jump => &:crypto.rand_plugin_aes_jump/1
+      type: alg,
+      bits: 58,
+      next: &:crypto.rand_plugin_aes_next/1,
+      jump: &:crypto.rand_plugin_aes_jump/1
     }
   end
 
@@ -1132,7 +1097,7 @@ defmodule :m_crypto do
     {v, cache}
   end
 
-  def rand_plugin_aes_jump({%{:type => :crypto_aes} = alg, cache}) do
+  def rand_plugin_aes_jump({%{type: :crypto_aes} = alg, cache}) do
     {alg, rand_plugin_aes_jump(&longcount_jump/1, 0, cache)}
   end
 
@@ -1161,14 +1126,7 @@ defmodule :m_crypto do
     <<x::size(64), _::size(6), f::size(12), s2::size(58), s1::size(58), s0::size(58)>> =
       :crypto.hash(:sha256, [seed, "Xoroshiro928"])
 
-    {f,
-     :rand.exro928_seed([
-       [s0, s1, s2]
-       | :rand.seed58(
-           13,
-           x
-         )
-     ])}
+    {f, :rand.exro928_seed([s0, s1, s2 | :rand.seed58(13, x)])}
   end
 
   defp longcount_next_count(0, count) do
@@ -1517,11 +1475,7 @@ defmodule :m_crypto do
         :srp,
         hostPublic,
         {userPublic, userPrivate},
-        {:user,
-         [
-           [derivedKey, prime, generator, version]
-           | scramblerArg
-         ]}
+        {:user, [derivedKey, prime, generator, version | scramblerArg]}
       )
       when is_binary(prime) and is_binary(generator) and
              is_atom(version) do
@@ -1554,7 +1508,7 @@ defmodule :m_crypto do
         :srp,
         userPublic,
         {hostPublic, hostPrivate},
-        {:host, [[verifier, prime, version] | scramblerArg]}
+        {:host, [verifier, prime, version | scramblerArg]}
       )
       when is_binary(verifier) and is_binary(prime) and
              is_atom(version) do
@@ -2362,17 +2316,17 @@ defmodule :m_crypto do
     e
   end
 
-  defp format_pkey(_Alg, %{:engine => _, :key_id => t} = m)
+  defp format_pkey(_Alg, %{engine: _, key_id: t} = m)
        when is_binary(t) do
     format_pwd(m)
   end
 
-  defp format_pkey(_Alg, %{:engine => _, :key_id => t} = m)
+  defp format_pkey(_Alg, %{engine: _, key_id: t} = m)
        when is_list(t) do
-    format_pwd(%{m | :key_id => :erlang.list_to_binary(t)})
+    format_pwd(%{m | key_id: :erlang.list_to_binary(t)})
   end
 
-  defp format_pkey(_Alg, %{:engine => _} = m) do
+  defp format_pkey(_Alg, %{engine: _} = m) do
     :erlang.error({:bad_key_id, m})
   end
 
@@ -2396,8 +2350,8 @@ defmodule :m_crypto do
     key
   end
 
-  defp format_pwd(%{:password => pwd} = m) when is_list(pwd) do
-    %{m | :password => :erlang.list_to_binary(pwd)}
+  defp format_pwd(%{password: pwd} = m) when is_list(pwd) do
+    %{m | password: :erlang.list_to_binary(pwd)}
   end
 
   defp format_pwd(m) do

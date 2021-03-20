@@ -407,10 +407,7 @@ defmodule :m_observer_procinfo do
          pid: pid,
          frame: frame,
          notebook: notebook,
-         pages: [
-           [processPage, messagePage, dictPage, stackPage, statePage]
-           | ps
-         ],
+         pages: [processPage, messagePage, dictPage, stackPage, statePage | ps],
          expand_table: table
        )}
     catch
@@ -777,7 +774,18 @@ defmodule :m_observer_procinfo do
 
     case :rpc.call(node(pid), :sys, :get_status, [pid, 200]) do
       {:status, _, {:module, _},
-       [_PDict, _SysState, _Parent, _Dbg, [[header, {:data, first}, {:data, second}] | _]]} ->
+       [
+         _PDict,
+         _SysState,
+         _Parent,
+         _Dbg,
+         [
+           header,
+           {:data, first},
+           {:data, second}
+           | _
+         ]
+       ]} ->
         [{'Behaviour', b}, header] ++ first ++ second
 
       {:status, _, {:module, _},

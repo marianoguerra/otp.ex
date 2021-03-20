@@ -812,14 +812,14 @@ defmodule :m_xmerl_xpath_pred do
   end
 
   defp strip_zs([h | t], 0, acc) do
-    :lists.reverse(t) ++ [[?., h] | acc]
+    :lists.reverse(t) ++ [?., h | acc]
   end
 
   defp strip_zs([h | t], n, acc) do
     strip_zs(t, n - 1, [h | acc])
   end
 
-  def concat(c, args = [[_, _] | _]) do
+  def concat(c, args = [_, _ | _]) do
     strings =
       for a <- args do
         mk_string(c, a)

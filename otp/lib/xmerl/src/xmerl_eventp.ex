@@ -417,7 +417,7 @@ defmodule :m_xmerl_eventp do
 
     fullname =
       case split do
-        [['/', _] | _] ->
+        ['/', _ | _] ->
           uRI
 
         ['file:', name] ->

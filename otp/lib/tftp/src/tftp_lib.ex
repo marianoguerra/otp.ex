@@ -394,7 +394,7 @@ defmodule :m_tftp_lib do
                tail,
                [:keep_case, :lower_case]
              ) do
-          [[filename, mode] | strings] ->
+          [filename, mode | strings] ->
             options = decode_options(strings)
 
             r_tftp_msg_req(
@@ -416,7 +416,7 @@ defmodule :m_tftp_lib do
                tail,
                [:keep_case, :lower_case]
              ) do
-          [[filename, mode] | strings] ->
+          [filename, mode | strings] ->
             options = decode_options(strings)
 
             r_tftp_msg_req(
@@ -507,7 +507,7 @@ defmodule :m_tftp_lib do
     exit(r_tftp_msg_error(code: :undef, text: 'Trailing null missing'))
   end
 
-  defp decode_options([[key, value] | strings]) do
+  defp decode_options([key, value | strings]) do
     [{to_lower(key), value} | decode_options(strings)]
   end
 

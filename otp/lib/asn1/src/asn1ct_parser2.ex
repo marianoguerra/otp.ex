@@ -333,15 +333,15 @@ defmodule :m_asn1ct_parser2 do
 
     {tagDefault, rest2} =
       case rest do
-        [[{:EXPLICIT, _L3}, {:TAGS, _L4}] | rest1] ->
+        [{:EXPLICIT, _L3}, {:TAGS, _L4} | rest1] ->
           :erlang.put(:tagdefault, :EXPLICIT)
           {:EXPLICIT, rest1}
 
-        [[{:IMPLICIT, _L3}, {:TAGS, _L4}] | rest1] ->
+        [{:IMPLICIT, _L3}, {:TAGS, _L4} | rest1] ->
           :erlang.put(:tagdefault, :IMPLICIT)
           {:IMPLICIT, rest1}
 
-        [[{:AUTOMATIC, _L3}, {:TAGS, _L4}] | rest1] ->
+        [{:AUTOMATIC, _L3}, {:TAGS, _L4} | rest1] ->
           :erlang.put(:tagdefault, :AUTOMATIC)
           {:AUTOMATIC, rest1}
 
@@ -353,7 +353,8 @@ defmodule :m_asn1ct_parser2 do
     {extensionDefault, rest3} =
       case rest2 do
         [
-          [{:EXTENSIBILITY, _L5}, {:IMPLIED, _L6}]
+          {:EXTENSIBILITY, _L5},
+          {:IMPLIED, _L6}
           | rest21
         ] ->
           :erlang.put(:extensiondefault, :IMPLIED)
@@ -365,7 +366,7 @@ defmodule :m_asn1ct_parser2 do
       end
 
     case rest3 do
-      [[{:"::=", _L7}, {:BEGIN, _L8}] | rest4] ->
+      [{:"::=", _L7}, {:BEGIN, _L8} | rest4] ->
         {exports, rest5} = parse_Exports(rest4)
         {{:imports, imports}, rest6} = parse_Imports(rest5)
 
@@ -393,11 +394,11 @@ defmodule :m_asn1ct_parser2 do
     parse_error(tokens)
   end
 
-  defp parse_Exports([[{:EXPORTS, _L1}, {:";", _L2}] | rest]) do
+  defp parse_Exports([{:EXPORTS, _L1}, {:";", _L2} | rest]) do
     {{:exports, []}, rest}
   end
 
-  defp parse_Exports([[{:EXPORTS, _}, {:ALL, _}, {:";", _}] | rest]) do
+  defp parse_Exports([{:EXPORTS, _}, {:ALL, _}, {:";", _} | rest]) do
     {{:exports, :all}, rest}
   end
 
@@ -438,20 +439,20 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_Reference([
-         [{:typereference, l1, trefName}, {:"{", _L2}, {:"}", _L3}]
+         {:typereference, l1, trefName},
+         {:"{", _L2},
+         {:"}", _L3}
          | rest
        ]) do
     {tref2Exttref(l1, trefName), rest}
   end
 
   defp parse_Reference([
-         [
-           tref1 = {:typereference, _, _},
-           {:., _},
-           tref2 = {:typereference, _, _},
-           {:"{", _L2},
-           {:"}", _L3}
-         ]
+         tref1 = {:typereference, _, _},
+         {:., _},
+         tref2 = {:typereference, _, _},
+         {:"{", _L2},
+         {:"}", _L3}
          | rest
        ]) do
     {{tref2Exttref(tref1), tref2Exttref(tref2)}, rest}
@@ -464,7 +465,7 @@ defmodule :m_asn1ct_parser2 do
     {tref2Exttref(tref), rest}
   end
 
-  defp parse_Reference([[r_identifier() = vref, {:"{", _L2}, {:"}", _L3}] | rest]) do
+  defp parse_Reference([r_identifier() = vref, {:"{", _L2}, {:"}", _L3} | rest]) do
     {identifier2Extvalueref(vref), rest}
   end
 
@@ -476,7 +477,7 @@ defmodule :m_asn1ct_parser2 do
     parse_error(tokens)
   end
 
-  defp parse_Imports([[{:IMPORTS, _L1}, {:";", _L2}] | rest]) do
+  defp parse_Imports([{:IMPORTS, _L1}, {:";", _L2} | rest]) do
     {{:imports, []}, rest}
   end
 
@@ -532,8 +533,13 @@ defmodule :m_asn1ct_parser2 do
 
     case rest do
       [
-        [{:FROM, _L1}, {:typereference, _, name} = tref]
-        | [[r_identifier(), {:",", _}] | _] = rest2
+        {:FROM, _L1},
+        {:typereference, _, name} = tref
+        | [
+            r_identifier(),
+            {:",", _}
+            | _
+          ] = rest2
       ] ->
         newSymbolList =
           :lists.map(
@@ -544,8 +550,13 @@ defmodule :m_asn1ct_parser2 do
         {r_SymbolsFromModule(symbols: newSymbolList, module: tref2Exttref(tref)), rest2}
 
       [
-        [{:FROM, _L1}, {:typereference, _, name} = tref]
-        | [[r_identifier(), {:FROM, _}] | _] = rest2
+        {:FROM, _L1},
+        {:typereference, _, name} = tref
+        | [
+            r_identifier(),
+            {:FROM, _}
+            | _
+          ] = rest2
       ] ->
         newSymbolList =
           :lists.map(
@@ -556,7 +567,9 @@ defmodule :m_asn1ct_parser2 do
         {r_SymbolsFromModule(symbols: newSymbolList, module: tref2Exttref(tref)), rest2}
 
       [
-        [{:FROM, _L1}, {:typereference, _, name} = tref, r_identifier()]
+        {:FROM, _L1},
+        {:typereference, _, name} = tref,
+        r_identifier()
         | rest2
       ] ->
         newSymbolList =
@@ -568,8 +581,12 @@ defmodule :m_asn1ct_parser2 do
         {r_SymbolsFromModule(symbols: newSymbolList, module: tref2Exttref(tref)), rest2}
 
       [
-        [{:FROM, _L1}, {:typereference, _, name} = tref]
-        | [{:"{", _} | _] = rest2
+        {:FROM, _L1},
+        {:typereference, _, name} = tref
+        | [
+            {:"{", _}
+            | _
+          ] = rest2
       ] ->
         {_ObjIdVal, rest3} = parse_ObjectIdentifierValue(rest2)
 
@@ -582,7 +599,8 @@ defmodule :m_asn1ct_parser2 do
         {r_SymbolsFromModule(symbols: newSymbolList, module: tref2Exttref(tref)), rest3}
 
       [
-        [{:FROM, _L1}, {:typereference, _, name} = tref]
+        {:FROM, _L1},
+        {:typereference, _, name} = tref
         | rest2
       ] ->
         newSymbolList =
@@ -608,7 +626,10 @@ defmodule :m_asn1ct_parser2 do
 
   defp parse_ObjectIdentifierValue(
          [
-           [r_identifier(val: id), {:"(", _}, {:number, _, num}, {:")", _}]
+           r_identifier(val: id),
+           {:"(", _},
+           {:number, _, num},
+           {:")", _}
            | rest
          ],
          acc
@@ -621,7 +642,10 @@ defmodule :m_asn1ct_parser2 do
 
   defp parse_ObjectIdentifierValue(
          [
-           [r_identifier(val: id), {:"(", _}, r_identifier(val: id2), {:")", _}]
+           r_identifier(val: id),
+           {:"(", _},
+           r_identifier(val: id2),
+           {:")", _}
            | rest
          ],
          acc
@@ -634,15 +658,12 @@ defmodule :m_asn1ct_parser2 do
 
   defp parse_ObjectIdentifierValue(
          [
-           [
-             r_identifier(val: id),
-             {:"(", _},
-             {:typereference, _, tref},
-             {:., _},
-             r_identifier(val: id2),
-             {:")", _}
-           ]
-           | rest
+           r_identifier(val: id),
+           {:"(", _},
+           {:typereference, _, tref},
+           {:., _},
+           r_identifier(val: id2),
+           {:")", _} | rest
          ],
          acc
        ) do
@@ -688,7 +709,8 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_Assignment([
-         [{:typereference, l1, name}, {:"::=", _}]
+         {:typereference, l1, name},
+         {:"::=", _}
          | tokens0
        ]) do
     flist = [{:type, &parse_Type/1}, {:class, &parse_ObjectClass/1}]
@@ -704,7 +726,8 @@ defmodule :m_asn1ct_parser2 do
 
   defp parse_Assignment(
          [
-           [{:typereference, _, _}, {:"{", _}]
+           {:typereference, _, _},
+           {:"{", _}
            | _
          ] = tokens
        ) do
@@ -722,7 +745,7 @@ defmodule :m_asn1ct_parser2 do
     parse_or(tokens, flist)
   end
 
-  defp parse_Assignment([[r_identifier(), {:"{", _}] | _] = tokens) do
+  defp parse_Assignment([r_identifier(), {:"{", _} | _] = tokens) do
     flist = [&parse_ParameterizedValueAssignment/1, &parse_ParameterizedObjectAssignment/1]
     parse_or(tokens, flist)
   end
@@ -860,7 +883,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_BuiltinType([[{:BIT, _}, {:STRING, _}] | rest]) do
+  defp parse_BuiltinType([{:BIT, _}, {:STRING, _} | rest]) do
     case rest do
       [{:"{", _} | rest2] ->
         {namedNumberList, rest3} = parse_NamedNumberList(rest2)
@@ -889,11 +912,11 @@ defmodule :m_asn1ct_parser2 do
     {r_type(def: stringName), rest}
   end
 
-  defp parse_BuiltinType([[{:CHARACTER, _}, {:STRING, _}] | rest]) do
+  defp parse_BuiltinType([{:CHARACTER, _}, {:STRING, _} | rest]) do
     {r_type(def: :"CHARACTER STRING"), rest}
   end
 
-  defp parse_BuiltinType([[{:CHOICE, _}, {:"{", _}] | rest]) do
+  defp parse_BuiltinType([{:CHOICE, _}, {:"{", _} | rest]) do
     {l0, rest2} = parse_AlternativeTypeLists(rest)
 
     case rest2 do
@@ -918,11 +941,11 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_BuiltinType([[{:EMBEDDED, _}, {:PDV, _}] | rest]) do
+  defp parse_BuiltinType([{:EMBEDDED, _}, {:PDV, _} | rest]) do
     {r_type(def: :"EMBEDDED PDV"), rest}
   end
 
-  defp parse_BuiltinType([[{:ENUMERATED, _}, {:"{", _}] | rest]) do
+  defp parse_BuiltinType([{:ENUMERATED, _}, {:"{", _} | rest]) do
     {enumerations, rest2} = parse_Enumerations(rest)
 
     case rest2 do
@@ -938,7 +961,7 @@ defmodule :m_asn1ct_parser2 do
     {r_type(def: :EXTERNAL), rest}
   end
 
-  defp parse_BuiltinType([[{:INSTANCE, _}, {:OF, _}] | rest]) do
+  defp parse_BuiltinType([{:INSTANCE, _}, {:OF, _} | rest]) do
     {definedObjectClass, rest2} = parse_DefinedObjectClass(rest)
 
     case rest2 do
@@ -974,11 +997,11 @@ defmodule :m_asn1ct_parser2 do
     {r_type(def: :NULL), rest}
   end
 
-  defp parse_BuiltinType([[{:OBJECT, _}, {:IDENTIFIER, _}] | rest]) do
+  defp parse_BuiltinType([{:OBJECT, _}, {:IDENTIFIER, _} | rest]) do
     {r_type(def: :"OBJECT IDENTIFIER"), rest}
   end
 
-  defp parse_BuiltinType([[{:OCTET, _}, {:STRING, _}] | rest]) do
+  defp parse_BuiltinType([{:OCTET, _}, {:STRING, _} | rest]) do
     {r_type(def: :"OCTET STRING"), rest}
   end
 
@@ -990,19 +1013,25 @@ defmodule :m_asn1ct_parser2 do
     {r_type(def: :"RELATIVE-OID"), rest}
   end
 
-  defp parse_BuiltinType([[{:SEQUENCE, _}, {:"{", _}, {:"}", _}] | rest]) do
+  defp parse_BuiltinType([{:SEQUENCE, _}, {:"{", _}, {:"}", _} | rest]) do
     {r_type(def: r_SEQUENCE(components: [])), rest}
   end
 
   defp parse_BuiltinType([
-         [{:SEQUENCE, _}, {:"{", _}, {:..., line}, {:"}", _}]
+         {:SEQUENCE, _},
+         {:"{", _},
+         {:..., line},
+         {:"}", _}
          | rest
        ]) do
     {r_type(def: r_SEQUENCE(components: [r_EXTENSIONMARK(pos: line)])), rest}
   end
 
   defp parse_BuiltinType([
-         [{:SEQUENCE, _}, {:"{", _}, {:..., line}, {:!, _}]
+         {:SEQUENCE, _},
+         {:"{", _},
+         {:..., line},
+         {:!, _}
          | rest
        ]) do
     {exceptionIdentification, rest2} = parse_ExceptionIdentification(rest)
@@ -1038,7 +1067,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_BuiltinType([[{:SEQUENCE, _}, {:"{", _}] | rest]) do
+  defp parse_BuiltinType([{:SEQUENCE, _}, {:"{", _} | rest]) do
     {componentTypeLists, rest2} = parse_ComponentTypeLists(rest)
 
     case rest2 do
@@ -1062,9 +1091,11 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_BuiltinType([
-         [{:SEQUENCE, _}, {:OF, _}]
+         {:SEQUENCE, _},
+         {:OF, _}
          | [
-             [r_identifier(), {:<, _}]
+             r_identifier(),
+             {:<, _}
              | _
            ] = tokens0
        ]) do
@@ -1072,25 +1103,31 @@ defmodule :m_asn1ct_parser2 do
     {r_type(def: {:"SEQUENCE OF", type}), tokens}
   end
 
-  defp parse_BuiltinType([[{:SEQUENCE, _}, {:OF, _}, r_identifier()] | rest]) do
+  defp parse_BuiltinType([{:SEQUENCE, _}, {:OF, _}, r_identifier() | rest]) do
     {type, rest2} = parse_Type(rest)
     {r_type(def: {:"SEQUENCE OF", type}), rest2}
   end
 
-  defp parse_BuiltinType([[{:SEQUENCE, _}, {:OF, _}] | rest]) do
+  defp parse_BuiltinType([{:SEQUENCE, _}, {:OF, _} | rest]) do
     {type, rest2} = parse_Type(rest)
     {r_type(def: {:"SEQUENCE OF", type}), rest2}
   end
 
   defp parse_BuiltinType([
-         [{:SET, _}, {:"{", _}, {:..., line}, {:"}", _}]
+         {:SET, _},
+         {:"{", _},
+         {:..., line},
+         {:"}", _}
          | rest
        ]) do
     {r_type(def: r_SET(components: [r_EXTENSIONMARK(pos: line)])), rest}
   end
 
   defp parse_BuiltinType([
-         [{:SET, _}, {:"{", _}, {:..., line}, {:!, _}]
+         {:SET, _},
+         {:"{", _},
+         {:..., line},
+         {:!, _}
          | rest
        ]) do
     {exceptionIdentification, rest2} = parse_ExceptionIdentification(rest)
@@ -1126,7 +1163,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_BuiltinType([[{:SET, _}, {:"{", _}] | rest]) do
+  defp parse_BuiltinType([{:SET, _}, {:"{", _} | rest]) do
     {componentTypeLists, rest2} = parse_ComponentTypeLists(rest)
 
     case rest2 do
@@ -1150,9 +1187,11 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_BuiltinType([
-         [{:SET, _}, {:OF, _}]
+         {:SET, _},
+         {:OF, _}
          | [
-             [r_identifier(), {:<, _}]
+             r_identifier(),
+             {:<, _}
              | _
            ] = tokens0
        ]) do
@@ -1160,12 +1199,12 @@ defmodule :m_asn1ct_parser2 do
     {r_type(def: {:"SET OF", type}), tokens}
   end
 
-  defp parse_BuiltinType([[{:SET, _}, {:OF, _}, r_identifier()] | rest]) do
+  defp parse_BuiltinType([{:SET, _}, {:OF, _}, r_identifier() | rest]) do
     {type, rest2} = parse_Type(rest)
     {r_type(def: {:"SET OF", type}), rest2}
   end
 
-  defp parse_BuiltinType([[{:SET, _}, {:OF, _}] | rest]) do
+  defp parse_BuiltinType([{:SET, _}, {:OF, _} | rest]) do
     {type, rest2} = parse_Type(rest)
     {r_type(def: {:"SET OF", type}), rest2}
   end
@@ -1182,10 +1221,7 @@ defmodule :m_asn1ct_parser2 do
     {r_type(def: :ObjectDescriptor), rest}
   end
 
-  defp parse_BuiltinType([
-         [{:ANY, _}, {:DEFINED, _}, {:BY, _}, r_identifier(val: id)]
-         | rest
-       ]) do
+  defp parse_BuiltinType([{:ANY, _}, {:DEFINED, _}, {:BY, _}, r_identifier(val: id) | rest]) do
     {r_type(def: {:ANY_DEFINED_BY, id}), rest}
   end
 
@@ -1202,7 +1238,7 @@ defmodule :m_asn1ct_parser2 do
 
     rest4 =
       case rest2 do
-        [[{:OF, _}, r_identifier()] | rest3] ->
+        [{:OF, _}, r_identifier() | rest3] ->
           rest3
 
         [{:OF, _} | rest3] ->
@@ -1221,7 +1257,8 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_TypeWithConstraint([
-         [{:SEQUENCE, _}, {:SIZE, _}]
+         {:SEQUENCE, _},
+         {:SIZE, _}
          | [
              {:"(", _}
              | _
@@ -1233,7 +1270,7 @@ defmodule :m_asn1ct_parser2 do
 
     rest4 =
       case rest2 do
-        [[{:OF, _}, r_identifier()] | rest3] ->
+        [{:OF, _}, r_identifier() | rest3] ->
           rest3
 
         [{:OF, _} | rest3] ->
@@ -1256,7 +1293,7 @@ defmodule :m_asn1ct_parser2 do
 
     rest4 =
       case rest2 do
-        [[{:OF, _}, r_identifier()] | rest3] ->
+        [{:OF, _}, r_identifier() | rest3] ->
           rest3
 
         [{:OF, _} | rest3] ->
@@ -1275,7 +1312,8 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_TypeWithConstraint([
-         [{:SET, _}, {:SIZE, _}]
+         {:SET, _},
+         {:SIZE, _}
          | [
              {:"(", _}
              | _
@@ -1287,7 +1325,7 @@ defmodule :m_asn1ct_parser2 do
 
     rest4 =
       case rest2 do
-        [[{:OF, _}, r_identifier()] | rest3] ->
+        [{:OF, _}, r_identifier() | rest3] ->
           rest3
 
         [{:OF, _} | rest3] ->
@@ -1321,7 +1359,9 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_DefinedType([
-         [{:typereference, l1, module}, {:., _}, {:typereference, _, typeName}]
+         {:typereference, l1, module},
+         {:., _},
+         {:typereference, _, typeName}
          | tokens
        ]) do
     {r_type(def: r_Externaltypereference(pos: l1, module: module, type: typeName)), tokens}
@@ -1335,7 +1375,7 @@ defmodule :m_asn1ct_parser2 do
     parse_error(tokens)
   end
 
-  defp parse_SelectionType([[r_identifier(val: name), {:<, _}] | rest]) do
+  defp parse_SelectionType([r_identifier(val: name), {:<, _} | rest]) do
     {type, rest2} = parse_Type(rest)
     {r_type(def: {:SelectionType, name, type}), rest2}
   end
@@ -1440,11 +1480,11 @@ defmodule :m_asn1ct_parser2 do
     {rootElems, rest} = parse_ElementSetSpec(tokens)
 
     case rest do
-      [[{:",", _}, {:..., _}, {:",", _}] | rest2] ->
+      [{:",", _}, {:..., _}, {:",", _} | rest2] ->
         {additionalElems, rest3} = parse_ElementSetSpec(rest2)
         {{:element_set, rootElems, additionalElems}, rest3}
 
-      [[{:",", _}, {:..., _}] | rest2] ->
+      [{:",", _}, {:..., _} | rest2] ->
         {{:element_set, rootElems, :empty}, rest2}
 
       _ ->
@@ -1452,7 +1492,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_ElementSetSpec([[{:ALL, _}, {:EXCEPT, _}] | rest]) do
+  defp parse_ElementSetSpec([{:ALL, _}, {:EXCEPT, _} | rest]) do
     {exclusions, rest2} = parse_Elements(rest)
     {{:"ALL-EXCEPT", exclusions}, rest2}
   end
@@ -1566,7 +1606,9 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_DefinedObjectClass([
-         [{:typereference, _, modName}, {:., _}, {:typereference, pos, name}]
+         {:typereference, _, modName},
+         {:., _},
+         {:typereference, pos, name}
          | tokens
        ]) do
     ext = r_Externaltypereference(pos: pos, module: modName, type: name)
@@ -1589,7 +1631,7 @@ defmodule :m_asn1ct_parser2 do
     parse_or(tokens, flist)
   end
 
-  defp parse_ObjectClassDefn([[{:CLASS, _}, {:"{", _}] | rest]) do
+  defp parse_ObjectClassDefn([{:CLASS, _}, {:"{", _} | rest]) do
     {type, rest2} = parse_FieldSpec(rest)
     {withSyntaxSpec, rest3} = parse_WithSyntaxSpec(rest2)
     {r_objectclass(fields: type, syntax: withSyntaxSpec), rest3}
@@ -1803,7 +1845,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_WithSyntaxSpec([[{:WITH, _}, {:SYNTAX, _}] | rest]) do
+  defp parse_WithSyntaxSpec([{:WITH, _}, {:SYNTAX, _} | rest]) do
     {syntaxList, rest2} = parse_SyntaxList(rest)
     {{:"WITH SYNTAX", syntaxList}, rest2}
   end
@@ -1894,8 +1936,9 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_DefinedObject([
-         [{:typereference, l1, modName}, {:., _}, r_identifier(val: objName)]
-         | rest
+         {:typereference, l1, modName},
+         {:., _},
+         r_identifier(val: objName) | rest
        ]) do
     {{:object, r_Externaltypereference(pos: l1, module: modName, type: objName)}, rest}
   end
@@ -1983,7 +2026,8 @@ defmodule :m_asn1ct_parser2 do
 
   defp parse_DefinedSyntaxToken(
          [
-           [{:typereference, _, _Name}, {t, _}]
+           {:typereference, _, _Name},
+           {t, _}
            | _
          ] = tokens
        )
@@ -2074,7 +2118,9 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_DefinedObjectSet([
-         [{:typereference, l1, moduleName}, {:., _}, {:typereference, l2, objSetName}]
+         {:typereference, l1, moduleName},
+         {:., _},
+         {:typereference, l2, objSetName}
          | rest
        ]) do
     {{:objectset, l1, r_Externaltypereference(pos: l2, module: moduleName, type: objSetName)},
@@ -2125,7 +2171,7 @@ defmodule :m_asn1ct_parser2 do
     parse_error(tokens)
   end
 
-  defp parse_ObjectSetSpec([[{:..., _}, {:",", _}] | tokens0]) do
+  defp parse_ObjectSetSpec([{:..., _}, {:",", _} | tokens0]) do
     {elements, tokens} = parse_ElementSetSpec(tokens0)
     {{:element_set, :empty, elements}, tokens}
   end
@@ -2250,14 +2296,19 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_UserDefinedConstraint([
-         [{:CONSTRAINED, _}, {:BY, _}, {:"{", _}, {:"}", _}]
+         {:CONSTRAINED, _},
+         {:BY, _},
+         {:"{", _},
+         {:"}", _}
          | rest
        ]) do
     {{:constrained_by, []}, rest}
   end
 
   defp parse_UserDefinedConstraint([
-         [{:CONSTRAINED, _}, {:BY, _}, {:"{", _}]
+         {:CONSTRAINED, _},
+         {:BY, _},
+         {:"{", _}
          | rest
        ]) do
     {param, rest2} = parse_UserDefinedConstraintParameter(rest)
@@ -2321,7 +2372,7 @@ defmodule :m_asn1ct_parser2 do
     {objectSet, rest2} = parse_DefinedObjectSet(rest)
 
     case rest2 do
-      [[{:"}", _}, {:"{", _}] | rest3] ->
+      [{:"}", _}, {:"{", _} | rest3] ->
         {atNot, rest4} = parse_AtNotationList(rest3, [])
 
         case rest4 do
@@ -2354,7 +2405,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_AtNotation([[{:@, _}, {:., _}] | rest]) do
+  defp parse_AtNotation([{:@, _}, {:., _} | rest]) do
     {cIdList, rest2} = parse_ComponentIdList(rest)
     {{:innermost, cIdList}, rest2}
   end
@@ -2372,7 +2423,7 @@ defmodule :m_asn1ct_parser2 do
     parse_ComponentIdList(tokens, [])
   end
 
-  defp parse_ComponentIdList([[r_identifier() = id, {:., _}] | rest], acc) do
+  defp parse_ComponentIdList([r_identifier() = id, {:., _} | rest], acc) do
     parse_ComponentIdList(
       rest,
       [identifier2Extvalueref(id) | acc]
@@ -2391,7 +2442,7 @@ defmodule :m_asn1ct_parser2 do
     {type, rest2} = parse_Type(rest)
 
     case rest2 do
-      [[{:ENCODED, _}, {:BY, _}] | rest3] ->
+      [{:ENCODED, _}, {:BY, _} | rest3] ->
         {value, rest4} = parse_Value(rest3)
         {{:contentsconstraint, type, value}, rest4}
 
@@ -2400,7 +2451,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_ContentsConstraint([[{:ENCODED, _}, {:BY, _}] | rest]) do
+  defp parse_ContentsConstraint([{:ENCODED, _}, {:BY, _} | rest]) do
     {value, rest2} = parse_Value(rest)
     {{:contentsconstraint, [], value}, rest2}
   end
@@ -2540,7 +2591,9 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_SimpleDefinedType([
-         [{:typereference, l1, moduleName}, {:., _}, {:typereference, _, typeName}]
+         {:typereference, l1, moduleName},
+         {:., _},
+         {:typereference, _, typeName}
          | rest
        ]) do
     {r_Externaltypereference(pos: l1, module: moduleName, type: typeName), rest}
@@ -2555,8 +2608,9 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_SimpleDefinedValue([
-         [{:typereference, l1, moduleName}, {:., _}, r_identifier(val: value)]
-         | rest
+         {:typereference, l1, moduleName},
+         {:., _},
+         r_identifier(val: value) | rest
        ]) do
     {{:simpledefinedvalue, r_Externalvaluereference(pos: l1, module: moduleName, value: value)},
      rest}
@@ -2752,10 +2806,10 @@ defmodule :m_asn1ct_parser2 do
     {[namedType], tokens}
   end
 
-  defp parse_ExtensionAdditionAlternative([[{:"[", _}, {:"[", _}] | tokens0]) do
+  defp parse_ExtensionAdditionAlternative([{:"[", _}, {:"[", _} | tokens0]) do
     tokens2 =
       case tokens0 do
-        [[{:number, _, _}, {:":", _}] | tokens1] ->
+        [{:number, _, _}, {:":", _} | tokens1] ->
           tokens1
 
         _ ->
@@ -2765,7 +2819,7 @@ defmodule :m_asn1ct_parser2 do
     {groupList, tokens3} = parse_AlternativeTypeList(tokens2)
 
     case tokens3 do
-      [[{:"]", _}, {:"]", _}] | tokens] ->
+      [{:"]", _}, {:"]", _} | tokens] ->
         {groupList, tokens}
 
       _ ->
@@ -2796,14 +2850,14 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_ComponentTypeLists(
-         [[{:COMPONENTS, _}, {:OF, _}] | _] = tokens,
+         [{:COMPONENTS, _}, {:OF, _} | _] = tokens,
          clist
        ) do
     {compList, rest1} = parse_ComponentTypeList(tokens, [])
     parse_ComponentTypeLists(rest1, clist ++ compList)
   end
 
-  defp parse_ComponentTypeLists([[{:",", l1}, {:..., _}, {:!, _}] | rest02], clist0)
+  defp parse_ComponentTypeLists([{:",", l1}, {:..., _}, {:!, _} | rest02], clist0)
        when clist0 !== [] do
     {_, rest03} = parse_ExceptionIdentification(rest02)
 
@@ -2813,7 +2867,7 @@ defmodule :m_asn1ct_parser2 do
     )
   end
 
-  defp parse_ComponentTypeLists([[{:",", _}, {:..., l1}] | rest02], clist0)
+  defp parse_ComponentTypeLists([{:",", _}, {:..., l1} | rest02], clist0)
        when clist0 !== [] do
     parse_ComponentTypeLists2(
       rest02,
@@ -2855,7 +2909,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_OptionalExtensionMarker([[{:",", _}, {:..., l1}] | rest], clist) do
+  defp parse_OptionalExtensionMarker([{:",", _}, {:..., l1} | rest], clist) do
     {clist ++ [r_EXTENSIONMARK(pos: l1)], rest}
   end
 
@@ -2873,7 +2927,8 @@ defmodule :m_asn1ct_parser2 do
          [
            {:",", _}
            | [
-               [{:COMPONENTS, _}, {:OF, _}]
+               {:COMPONENTS, _},
+               {:OF, _}
                | _
              ] = tokens0
          ],
@@ -2888,11 +2943,11 @@ defmodule :m_asn1ct_parser2 do
     {:lists.reverse(acc), tokens}
   end
 
-  defp parse_ComponentTypeList(tokens = [[{:"]", _}, {:"]", _}] | _], acc) do
+  defp parse_ComponentTypeList(tokens = [{:"]", _}, {:"]", _} | _], acc) do
     {:lists.reverse(acc), tokens}
   end
 
-  defp parse_ComponentTypeList(tokens = [[{:",", _}, {:..., _}] | _], acc) do
+  defp parse_ComponentTypeList(tokens = [{:",", _}, {:..., _} | _], acc) do
     {:lists.reverse(acc), tokens}
   end
 
@@ -2927,7 +2982,8 @@ defmodule :m_asn1ct_parser2 do
          [
            {:",", _}
            | [
-               [{:COMPONENTS, _}, {:OF, _}]
+               {:COMPONENTS, _},
+               {:OF, _}
                | _
              ] = tokens0
          ],
@@ -2941,7 +2997,7 @@ defmodule :m_asn1ct_parser2 do
     )
   end
 
-  defp parse_ExtensionAdditionList([[{:",", _}, {:"[", _}, {:"[", _}] | tokens], acc) do
+  defp parse_ExtensionAdditionList([{:",", _}, {:"[", _}, {:"[", _} | tokens], acc) do
     {extAddGroup, rest2} = parse_ExtensionAdditionGroup(tokens)
     parse_ExtensionAdditionList(rest2, [extAddGroup | acc])
   end
@@ -2950,7 +3006,7 @@ defmodule :m_asn1ct_parser2 do
     {:lists.reverse(acc), tokens}
   end
 
-  defp parse_ExtensionAdditionList([[{:",", _}, {:..., _}] | _] = tokens, acc) do
+  defp parse_ExtensionAdditionList([{:",", _}, {:..., _} | _] = tokens, acc) do
     {:lists.reverse(acc), tokens}
   end
 
@@ -2958,7 +3014,7 @@ defmodule :m_asn1ct_parser2 do
     parse_error(tokens)
   end
 
-  defp parse_ExtensionAdditionGroup([[{:number, _, num}, {:":", _}] | tokens]) do
+  defp parse_ExtensionAdditionGroup([{:number, _, num}, {:":", _} | tokens]) do
     parse_ExtensionAdditionGroup2(tokens, num)
   end
 
@@ -2974,7 +3030,7 @@ defmodule :m_asn1ct_parser2 do
       )
 
     case rest do
-      [[{:"]", _}, {:"]", _}] | rest2] ->
+      [{:"]", _}, {:"]", _} | rest2] ->
         {[
            {:ExtensionAdditionGroup, num}
            | compTypeList
@@ -2985,7 +3041,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_ComponentType([[{:COMPONENTS, _}, {:OF, _}] | rest]) do
+  defp parse_ComponentType([{:COMPONENTS, _}, {:OF, _} | rest]) do
     {type, rest2} = parse_Type(rest)
     {{:"COMPONENTS OF", type}, rest2}
   end
@@ -3010,11 +3066,11 @@ defmodule :m_asn1ct_parser2 do
     {root, tokens1} = parse_Enumeration(tokens0)
 
     case tokens1 do
-      [[{:",", _}, {:..., _}, {:",", _}] | tokens2] ->
+      [{:",", _}, {:..., _}, {:",", _} | tokens2] ->
         {ext, tokens} = parse_Enumeration(tokens2)
         {root ++ [:EXTENSIONMARK | ext], tokens}
 
-      [[{:",", _}, {:..., _}] | tokens] ->
+      [{:",", _}, {:..., _} | tokens] ->
         {root ++ [:EXTENSIONMARK], tokens}
 
       _ ->
@@ -3049,7 +3105,7 @@ defmodule :m_asn1ct_parser2 do
     {:lists.reverse(acc), tokens}
   end
 
-  defp parse_EnumerationItem([[r_identifier(), {:"(", _}] | _] = tokens) do
+  defp parse_EnumerationItem([r_identifier(), {:"(", _} | _] = tokens) do
     parse_NamedNumber(tokens)
   end
 
@@ -3077,7 +3133,7 @@ defmodule :m_asn1ct_parser2 do
     end
   end
 
-  defp parse_NamedNumber([[r_identifier(val: name), {:"(", _}] | rest]) do
+  defp parse_NamedNumber([r_identifier(val: name), {:"(", _} | rest]) do
     flist = [&parse_SignedNumber/1, &parse_DefinedValue/1]
 
     case parse_or(rest, flist) do
@@ -3151,7 +3207,7 @@ defmodule :m_asn1ct_parser2 do
     {{:hstring, hstr}, rest}
   end
 
-  defp parse_BuiltinValue([[{:"{", _}, {:"}", _}] | rest]) do
+  defp parse_BuiltinValue([{:"{", _}, {:"}", _} | rest]) do
     {[], rest}
   end
 
@@ -3160,12 +3216,12 @@ defmodule :m_asn1ct_parser2 do
     parse_or(tokens, flist)
   end
 
-  defp parse_BuiltinValue([[r_identifier(val: idName), {:":", _}] | rest]) do
+  defp parse_BuiltinValue([r_identifier(val: idName), {:":", _} | rest]) do
     {value, rest2} = parse_Value(rest)
     {{:CHOICE, {idName, value}}, rest2}
   end
 
-  defp parse_BuiltinValue([[{:NULL, _}, {:":", _}] | _] = tokens) do
+  defp parse_BuiltinValue([{:NULL, _}, {:":", _} | _] = tokens) do
     parse_ObjectClassFieldValue(tokens)
   end
 
@@ -3207,8 +3263,9 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_DefinedValue2([
-         [{:typereference, l1, tname}, {:., _}, r_identifier(val: idname)]
-         | rest
+         {:typereference, l1, tname},
+         {:., _},
+         r_identifier(val: idname) | rest
        ]) do
     {r_Externalvaluereference(pos: l1, module: tname, value: idname), rest}
   end
@@ -3330,14 +3387,17 @@ defmodule :m_asn1ct_parser2 do
     {{:PermittedAlphabet, r_constraint(constraint, :c)}, rest}
   end
 
-  defp parse_SubtypeElements([[{:WITH, _}, {:COMPONENT, _}] | tokens]) do
+  defp parse_SubtypeElements([{:WITH, _}, {:COMPONENT, _} | tokens]) do
     {constraint, rest} = parse_Constraint(tokens)
     {{:"WITH COMPONENT", constraint}, rest}
   end
 
   defp parse_SubtypeElements([
-         [{:WITH, _}, {:COMPONENTS, _}, {:"{", _}, {:..., _}, {:",", _}]
-         | tokens
+         {:WITH, _},
+         {:COMPONENTS, _},
+         {:"{", _},
+         {:..., _},
+         {:",", _} | tokens
        ]) do
     {constraint, rest} = parse_TypeConstraints(tokens)
 
@@ -3351,7 +3411,9 @@ defmodule :m_asn1ct_parser2 do
   end
 
   defp parse_SubtypeElements([
-         [{:WITH, _}, {:COMPONENTS, _}, {:"{", _}]
+         {:WITH, _},
+         {:COMPONENTS, _},
+         {:"{", _}
          | tokens
        ]) do
     {constraint, rest} = parse_TypeConstraints(tokens)
@@ -3381,7 +3443,7 @@ defmodule :m_asn1ct_parser2 do
         {upper, rest2} = parse_UpperEndpoint(rest)
         {{:ValueRange, {lower, upper}}, rest2}
 
-      {lower, [[{:<, _}, {:.., _}] | rest]} ->
+      {lower, [{:<, _}, {:.., _} | rest]} ->
         {upper, rest2} = parse_UpperEndpoint(rest)
         {{:ValueRange, {{:gt, lower}, upper}}, rest2}
 

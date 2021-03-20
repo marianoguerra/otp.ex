@@ -162,7 +162,10 @@ defmodule :m_etop_txt do
       reds,
       mem,
       mQ,
-      to_string(mFA, modifier)
+      to_string(
+        mFA,
+        modifier
+      )
     ])
 
     writepinfo(fd, t, modifier)

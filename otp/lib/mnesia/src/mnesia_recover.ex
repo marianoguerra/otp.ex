@@ -170,7 +170,7 @@ defmodule :m_mnesia_recover do
 
   defp do_garb_decisions() do
     case val(:previous_transient_decisions) do
-      [[first, second] | rest] ->
+      [first, second | rest] ->
         set(:previous_transient_decisions, [first, second])
 
         for tab <- rest do
@@ -1240,7 +1240,7 @@ defmodule :m_mnesia_recover do
   defp tabs() do
     curr = val(:latest_transient_decision)
     prev = val(:previous_transient_decisions)
-    [[curr, :mnesia_decision] | prev]
+    [curr, :mnesia_decision | prev]
   end
 
   defp decision(tid) do

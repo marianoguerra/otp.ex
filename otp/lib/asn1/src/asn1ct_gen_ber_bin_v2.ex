@@ -1974,18 +1974,16 @@ defmodule :m_asn1ct_gen_ber_bin_v2 do
     indent = indent(i)
 
     s = [
-      [
-        indent,
-        'case Val of',
-        :nl,
-        indent,
-        indent(2),
-        '{asn1_OPENTYPE,Bin} when is_binary(Bin) ->',
-        :nl,
-        indent,
-        indent(4),
-        '{Bin,byte_size(Bin)}'
-      ]
+      indent,
+      'case Val of',
+      :nl,
+      indent,
+      indent(2),
+      '{asn1_OPENTYPE,Bin} when is_binary(Bin) ->',
+      :nl,
+      indent,
+      indent(4),
+      '{Bin,byte_size(Bin)}'
       | case :asn1ct.use_legacy_types() do
           false ->
             [:nl, indent, 'end']

@@ -685,10 +685,22 @@ defmodule :m_observer_trace_wx do
        [
          r_create_menu(id: 311, text: 'Output'),
          r_create_menu(id: 312, text: 'Default Match Specifications for Functions'),
-         r_create_menu(id: 313, text: 'Default Match Specifications for \'send\''),
-         r_create_menu(id: 314, text: 'Default Match Specifications for \'receive\''),
-         r_create_menu(id: 315, text: 'Default Process Options'),
-         r_create_menu(id: 316, text: 'Default Port Options')
+         r_create_menu(
+           id: 313,
+           text: 'Default Match Specifications for \'send\''
+         ),
+         r_create_menu(
+           id: 314,
+           text: 'Default Match Specifications for \'receive\''
+         ),
+         r_create_menu(
+           id: 315,
+           text: 'Default Process Options'
+         ),
+         r_create_menu(
+           id: 316,
+           text: 'Default Port Options'
+         )
        ]}
     ]
 
@@ -2216,23 +2228,50 @@ defmodule :m_observer_trace_wx do
               :match_specs,
               config
             ) do
-        :io_lib.format('~tp.~n', [mSTerm])
+        :io_lib.format(
+          '~tp.~n',
+          [mSTerm]
+        )
       end,
       :io_lib.format(
         '~p.~n',
-        [:lists.keyfind(:procflags, 1, config)]
+        [
+          :lists.keyfind(
+            :procflags,
+            1,
+            config
+          )
+        ]
       ),
       :io_lib.format(
         '~p.~n',
-        [:lists.keyfind(:portflags, 1, config)]
+        [
+          :lists.keyfind(
+            :portflags,
+            1,
+            config
+          )
+        ]
       ),
-      :io_lib.format('~tp.~n', [:lists.keyfind(:output, 1, config)]),
+      :io_lib.format(
+        '~tp.~n',
+        [
+          :lists.keyfind(
+            :output,
+            1,
+            config
+          )
+        ]
+      ),
       for moduleTerm <-
             :proplists.get_value(
               :trace_p,
               config
             ) do
-        :io_lib.format('~tp.~n', [moduleTerm])
+        :io_lib.format(
+          '~tp.~n',
+          [moduleTerm]
+        )
       end
     ]
 

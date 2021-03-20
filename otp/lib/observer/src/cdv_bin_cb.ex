@@ -27,8 +27,18 @@ defmodule :m_cdv_bin_cb do
         {'Format ~tw', :cdv_html_wx, {type, format_bin_fun('~tw', bin, cs)}},
         {'Format ~s', :cdv_html_wx, {type, format_bin_fun('~s', bin, cs)}},
         {'Format ~ts', :cdv_html_wx, {type, format_bin_fun('~ts', bin, cs)}},
-        {'Hex', :cdv_html_wx, {type, hex_binary_fun(bin, cs)}},
-        {'Term', :cdv_html_wx, {type, binary_to_term_fun(bin, cs)}}
+        {'Hex', :cdv_html_wx,
+         {type,
+          hex_binary_fun(
+            bin,
+            cs
+          )}},
+        {'Term', :cdv_html_wx,
+         {type,
+          binary_to_term_fun(
+            bin,
+            cs
+          )}}
       ]
     )
   end
@@ -83,7 +93,12 @@ defmodule :m_cdv_bin_cb do
          0
        ) do
     [
-      [:erlang.integer_to_list(b1, 16), :erlang.integer_to_list(b2, 16), ?,, ?\n, ?\s, ?\s]
+      :erlang.integer_to_list(b1, 16),
+      :erlang.integer_to_list(b2, 16),
+      ?,,
+      ?\n,
+      ?\s,
+      ?\s
       | format_hex(bin, 25)
     ]
   end
@@ -93,8 +108,13 @@ defmodule :m_cdv_bin_cb do
          n
        ) do
     [
-      [:erlang.integer_to_list(b1, 16), :erlang.integer_to_list(b2, 16), ?,]
-      | format_hex(bin, n - 1)
+      :erlang.integer_to_list(b1, 16),
+      :erlang.integer_to_list(b2, 16),
+      ?,
+      | format_hex(
+          bin,
+          n - 1
+        )
     ]
   end
 

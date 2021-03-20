@@ -19,17 +19,17 @@ defmodule :m_sshc_sup do
   end
 
   def init(_) do
-    supFlags = %{:strategy => :one_for_one, :intensity => 0, :period => 3600}
+    supFlags = %{strategy: :one_for_one, intensity: 0, period: 3600}
     childSpecs = []
     {:ok, {supFlags, childSpecs}}
   end
 
   defp child_spec(address, port, profile, options) do
     %{
-      :id => id(address, port, profile),
-      :start => {:ssh_system_sup, :start_link, [:client, address, port, profile, options]},
-      :restart => :temporary,
-      :type => :supervisor
+      id: id(address, port, profile),
+      start: {:ssh_system_sup, :start_link, [:client, address, port, profile, options]},
+      restart: :temporary,
+      type: :supervisor
     }
   end
 

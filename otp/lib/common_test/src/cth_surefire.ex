@@ -392,7 +392,8 @@ defmodule :m_cth_surefire do
       '" timestamp="',
       tS,
       '" ',
-      for _ <- [:EFE_DUMMY_GEN], u != :undefined do
+      for _ <- [:EFE_DUMMY_GEN],
+          u != :undefined do
         ['url="', u, '" ']
       end,
       'log="',
@@ -466,7 +467,8 @@ defmodule :m_cth_surefire do
       '" tests="',
       :erlang.integer_to_list(t),
       '" ',
-      for _ <- [:EFE_DUMMY_GEN], url != :undefined do
+      for _ <- [:EFE_DUMMY_GEN],
+          url != :undefined do
         ['url="', url, '" ']
       end,
       'log="',

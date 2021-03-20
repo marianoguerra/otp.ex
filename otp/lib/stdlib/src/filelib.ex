@@ -587,7 +587,7 @@ defmodule :m_filelib do
     compile_part([], upto, [:double_star | result])
   end
 
-  defp compile_part([[?*, ?*] | rest], upto, result) do
+  defp compile_part([?*, ?* | rest], upto, result) do
     compile_part(rest, upto, [:star | result])
   end
 
@@ -643,7 +643,7 @@ defmodule :m_filelib do
     compile_charset1(list, ordset)
   end
 
-  defp compile_charset1([[lower, ?-, upper] | rest], ordset)
+  defp compile_charset1([lower, ?-, upper | rest], ordset)
        when lower <= upper do
     compile_charset1(
       rest,
@@ -755,7 +755,7 @@ defmodule :m_filelib do
     end
   end
 
-  defp do_exists([[p, '..'] | ps], mod, acc) do
+  defp do_exists([p, '..' | ps], mod, acc) do
     path =
       case acc do
         [] ->

@@ -906,11 +906,17 @@ defmodule :m_wx_object do
       end
 
     [
-      [
-        {:header, header},
-        {:data,
-         [{'Status', sysState}, {'Parent', parent}, {'Logged events', format_log_state(mod, log)}]}
-      ]
+      {:header, header},
+      {:data,
+       [
+         {'Status', sysState},
+         {'Parent', parent},
+         {'Logged events',
+          format_log_state(
+            mod,
+            log
+          )}
+       ]}
       | specific
     ]
   end

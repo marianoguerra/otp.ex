@@ -760,7 +760,9 @@ defmodule :m_erl_syntax_lib do
     as0 = :erl_syntax.get_ann(tree)
 
     as1 = [
-      [{:env, env}, {:bound, bound}, {:free, free}]
+      {:env, env},
+      {:bound, bound},
+      {:free, free}
       | delete_binding_anns(as0)
     ]
 
@@ -1773,7 +1775,7 @@ defmodule :m_erl_syntax_lib do
     :lists.reverse(split_lines(cs, n, [], [], prefix))
   end
 
-  defp split_lines([[?\r, ?\n] | cs], _N, cs1, ls, prefix) do
+  defp split_lines([?\r, ?\n | cs], _N, cs1, ls, prefix) do
     split_lines_1(cs, cs1, ls, prefix)
   end
 

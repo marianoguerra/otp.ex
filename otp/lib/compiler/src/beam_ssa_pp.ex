@@ -40,7 +40,7 @@ defmodule :m_beam_ssa_pp do
   )
 
   def format_function(r_b_function(anno: anno0, args: args, bs: blocks, cnt: counter)) do
-    %{:func_info => {m, f, _}} = anno0
+    %{func_info: {m, f, _}} = anno0
 
     anno =
       :maps.without(
@@ -50,8 +50,8 @@ defmodule :m_beam_ssa_pp do
 
     funcAnno =
       case anno0 do
-        %{:live_intervals => intervals} ->
-          %{anno0 | :live_intervals => :maps.from_list(intervals)}
+        %{live_intervals: intervals} ->
+          %{anno0 | live_intervals: :maps.from_list(intervals)}
 
         %{} ->
           anno0
@@ -68,7 +68,7 @@ defmodule :m_beam_ssa_pp do
 
     [
       case anno0 do
-        %{:location => {filename, line}} ->
+        %{location: {filename, line}} ->
           :io_lib.format('%% ~ts:~p\n', [filename, line])
 
         %{} ->
@@ -78,17 +78,41 @@ defmodule :m_beam_ssa_pp do
       for {key, value} <- :lists.sort(:maps.to_list(anno)) do
         format_anno(key, value)
       end,
-      :io_lib.format('function `~p`:`~p`(~ts) {\n', [m, f, format_args(args, funcAnno)]),
+      :io_lib.format(
+        'function `~p`:`~p`(~ts) {\n',
+        [
+          m,
+          f,
+          format_args(
+            args,
+            funcAnno
+          )
+        ]
+      ),
       for var <- args do
-        format_live_interval(var, funcAnno)
+        format_live_interval(
+          var,
+          funcAnno
+        )
       end,
-      format_blocks(reachableBlocks, blocks, funcAnno),
+      format_blocks(
+        reachableBlocks,
+        blocks,
+        funcAnno
+      ),
       case unreachable do
         [] ->
           []
 
         [_ | _] ->
-          ['\n%% Unreachable blocks\n\n', format_blocks(unreachable, blocks, funcAnno)]
+          [
+            '\n%% Unreachable blocks\n\n',
+            format_blocks(
+              unreachable,
+              blocks,
+              funcAnno
+            )
+          ]
       end,
       '}\n'
     ]
@@ -124,7 +148,14 @@ defmodule :m_beam_ssa_pp do
           for {v, i} <- params do
             :io_lib.format(
               '%%    ~s =>~s~s\n',
-              [format_var(v), break, format_param_info(i, break)]
+              [
+                format_var(v),
+                break,
+                format_param_info(
+                  i,
+                  break
+                )
+              ]
             )
           end
         ]
@@ -226,19 +257,34 @@ defmodule :m_beam_ssa_pp do
       liveIntervalStr,
       :io_lib.format(
         '  ~s~ts = ~ts',
-        [format_i_number(anno), format_var(dst, funcAnno), format_op(op)]
+        [
+          format_i_number(anno),
+          format_var(
+            dst,
+            funcAnno
+          ),
+          format_op(op)
+        ]
       ),
       case args do
         [] ->
           []
 
         [_ | _] ->
-          :io_lib.format(' ~ts', [format_args(args, funcAnno)])
+          :io_lib.format(
+            ' ~ts',
+            [
+              format_args(
+                args,
+                funcAnno
+              )
+            ]
+          )
       end
     ]
   end
 
-  defp format_i_number(%{:n => n}) do
+  defp format_i_number(%{n: n}) do
     :io_lib.format('[~p] ', [n])
   end
 
@@ -276,7 +322,10 @@ defmodule :m_beam_ssa_pp do
         format_i_number(a),
         format_arg(arg, funcAnno),
         format_label(fail),
-        format_switch_list(list, funcAnno)
+        format_switch_list(
+          list,
+          funcAnno
+        )
       ]
     )
   end
@@ -296,7 +345,7 @@ defmodule :m_beam_ssa_pp do
     :io_lib.format('~p', [name])
   end
 
-  defp format_register(r_b_var() = v, %{:registers => regs}) do
+  defp format_register(r_b_var() = v, %{registers: regs}) do
     {tag, n} = :maps.get(v, regs)
     :io_lib.format('~p~p', [tag, n])
   end
@@ -394,16 +443,16 @@ defmodule :m_beam_ssa_pp do
     :io_lib.format('^~w', [l])
   end
 
-  defp format_anno(%{:n => _} = anno) do
+  defp format_anno(%{n: _} = anno) do
     format_anno(:maps.remove(:n, anno))
   end
 
-  defp format_anno(%{:location => {file, line}} = anno0) do
+  defp format_anno(%{location: {file, line}} = anno0) do
     anno = :maps.remove(:location, anno0)
     [:io_lib.format('  %% ~ts:~p\n', [file, line]) | format_anno(anno)]
   end
 
-  defp format_anno(%{:result_type => t} = anno0) do
+  defp format_anno(%{result_type: t} = anno0) do
     anno = :maps.remove(:result_type, anno0)
     break = '\n  %%    '
 
@@ -427,7 +476,7 @@ defmodule :m_beam_ssa_pp do
     end
   end
 
-  defp format_live_interval(r_b_var() = dst, %{:live_intervals => intervals}) do
+  defp format_live_interval(r_b_var() = dst, %{live_intervals: intervals}) do
     case intervals do
       %{^dst => rs0} ->
         rs1 =

@@ -40,7 +40,7 @@ defmodule :m_cerl_sets do
   end
 
   def add_element(e, s) do
-    %{s | e => :ok}
+    Map.put(s, e, :ok)
   end
 
   def del_element(e, s) do
@@ -51,7 +51,7 @@ defmodule :m_cerl_sets do
     :maps.merge(s1, s2)
   end
 
-  def union([[s1, s2] | ss]) do
+  def union([s1, s2 | ss]) do
     union1(union(s1, s2), ss)
   end
 
@@ -84,7 +84,7 @@ defmodule :m_cerl_sets do
     intersection(s2, s1)
   end
 
-  def intersection([[s1, s2] | ss]) do
+  def intersection([s1, s2 | ss]) do
     intersection1(intersection(s1, s2), ss)
   end
 

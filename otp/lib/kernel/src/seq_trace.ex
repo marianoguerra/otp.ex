@@ -9,7 +9,8 @@ defmodule :m_seq_trace do
     f = decode_flags(flags)
 
     set_token2([
-      [{:label, label}, {:serial, {lastcnt, serial}}]
+      {:label, label},
+      {:serial, {lastcnt, serial}}
       | f
     ])
   end

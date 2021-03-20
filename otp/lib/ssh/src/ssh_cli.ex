@@ -668,8 +668,8 @@ defmodule :m_ssh_cli do
     {accBuf, accBufTail, :lists.reverse(accWrite), col}
   end
 
-  defp conv_buf([[13, 10] | rest], _AccBuf, accBufTail, accWrite, _Col) do
-    conv_buf(rest, [], tl2(accBufTail), [[10, 13] | accWrite], 0)
+  defp conv_buf([13, 10 | rest], _AccBuf, accBufTail, accWrite, _Col) do
+    conv_buf(rest, [], tl2(accBufTail), [10, 13 | accWrite], 0)
   end
 
   defp conv_buf([13 | rest], _AccBuf, accBufTail, accWrite, _Col) do
@@ -677,7 +677,7 @@ defmodule :m_ssh_cli do
   end
 
   defp conv_buf([10 | rest], _AccBuf, accBufTail, accWrite, _Col) do
-    conv_buf(rest, [], tl1(accBufTail), [[10, 13] | accWrite], 0)
+    conv_buf(rest, [], tl1(accBufTail), [10, 13 | accWrite], 0)
   end
 
   defp conv_buf([c | rest], accBuf, accBufTail, accWrite, col) do
@@ -706,7 +706,7 @@ defmodule :m_ssh_cli do
         tty
       )
 
-    {[[writeBuf, bufTail] | m], {newBuf, bufTail, newCol}}
+    {[writeBuf, bufTail | m], {newBuf, bufTail, newCol}}
   end
 
   defp delete_chars(0, {buf, bufTail, col}, _Tty) do
@@ -716,7 +716,7 @@ defmodule :m_ssh_cli do
   defp delete_chars(n, {buf, bufTail, col}, tty) when n > 0 do
     newBufTail = nthtail(n, bufTail)
     m = move_cursor(col + length(newBufTail) + n, col, tty)
-    {[[newBufTail, :lists.duplicate(n, ?\s)] | m], {buf, newBufTail, col}}
+    {[newBufTail, :lists.duplicate(n, ?\s) | m], {buf, newBufTail, col}}
   end
 
   defp delete_chars(n, {buf, bufTail, col}, tty) do
@@ -743,7 +743,7 @@ defmodule :m_ssh_cli do
         tty
       )
 
-    {[[m1, bufTail, :lists.duplicate(-n, ?\s)] | m2], {newBuf, bufTail, newCol}}
+    {[m1, bufTail, :lists.duplicate(-n, ?\s) | m2], {newBuf, bufTail, newCol}}
   end
 
   defp window_change(tty, oldTty, buf)
@@ -882,7 +882,7 @@ defmodule :m_ssh_cli do
     []
   end
 
-  defp tl2([[_, _] | a]) do
+  defp tl2([_, _ | a]) do
     a
   end
 

@@ -45,7 +45,7 @@ defmodule :m_maps do
     :erlang.error({:badmap, map}, [map])
   end
 
-  defp to_list_internal([[iter, map] | acc]) when is_integer(iter) do
+  defp to_list_internal([iter, map | acc]) when is_integer(iter) do
     to_list_internal(:erts_internal.map_next(iter, map, acc))
   end
 
@@ -92,7 +92,7 @@ defmodule :m_maps do
         %{map | key => fun.(value)}
 
       %{} ->
-        %{map | key => init}
+        Map.put(map, key, init)
     end
   end
 

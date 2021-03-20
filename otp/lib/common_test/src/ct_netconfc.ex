@@ -365,15 +365,16 @@ defmodule :m_ct_netconfc do
     try do
       [_, r_options() = rec] = [t, make_options(opts, initRec)]
 
-      [[_, {:ok, client} = ok] | true] = [
-        [t, start(rec, nameOpt, true)]
+      [_, {:ok, client} = ok | true] = [
+        t,
+        start(rec, nameOpt, true)
         | hello
       ]
 
       [_, :ok] = [t, hello(client, caps(opts), r_options(rec, :timeout))]
       ok
     catch
-      :error, {:badmatch, [[^t, res] | _]} ->
+      :error, {:badmatch, [^t, res | _]} ->
         res
     end
   end
@@ -392,7 +393,9 @@ defmodule :m_ct_netconfc do
 
   defp start(ep, opts, nameOpt, fwd) do
     :ct_gen_conn.start(ep, opts, :ct_netconfc, [
-      [{:reconnect, false}, {:use_existing_connection, false}, {:forward_messages, fwd}]
+      {:reconnect, false},
+      {:use_existing_connection, false},
+      {:forward_messages, fwd}
       | nameOpt
     ])
   end
@@ -552,7 +555,7 @@ defmodule :m_ct_netconfc do
 
   def create_subscription(client, stream)
       when is_list(stream) and is_integer(hd(stream)) do
-    create_subscription(client, %{:stream => stream})
+    create_subscription(client, %{stream: stream})
   end
 
   def create_subscription(client, filter)
@@ -573,7 +576,7 @@ defmodule :m_ct_netconfc do
                           hd(filter)
                         )
                       )))) do
-    create_subscription(client, %{:filter => filter})
+    create_subscription(client, %{filter: filter})
   end
 
   def create_subscription(client, %{} = values, timeout) do
@@ -596,7 +599,7 @@ defmodule :m_ct_netconfc do
   def create_subscription(client, stream, timeout)
       when (is_list(stream) and is_integer(hd(stream)) and
               is_integer(timeout)) or timeout == :infinity do
-    create_subscription(client, %{:stream => stream}, timeout)
+    create_subscription(client, %{stream: stream}, timeout)
   end
 
   def create_subscription(client, startTime, stopTime)
@@ -604,7 +607,7 @@ defmodule :m_ct_netconfc do
              is_list(stopTime) and is_integer(hd(stopTime)) do
     create_subscription(
       client,
-      %{:start => startTime, :stop => stopTime}
+      %{start: startTime, stop: stopTime}
     )
   end
 
@@ -627,7 +630,7 @@ defmodule :m_ct_netconfc do
                         )
                       ))) and
                 is_integer(timeout)) or timeout == :infinity do
-    create_subscription(client, %{:filter => filter}, timeout)
+    create_subscription(client, %{filter: filter}, timeout)
   end
 
   def create_subscription(client, stream, filter)
@@ -651,7 +654,7 @@ defmodule :m_ct_netconfc do
                       )))) do
     create_subscription(
       client,
-      %{:stream => stream, :filter => filter}
+      %{stream: stream, filter: filter}
     )
   end
 
@@ -663,7 +666,7 @@ defmodule :m_ct_netconfc do
       when (is_list(startTime) and is_integer(hd(startTime)) and
               is_list(stopTime) and is_integer(hd(stopTime)) and
               is_integer(timeout)) or timeout == :infinity do
-    values = %{:start => startTime, :stop => stopTime}
+    values = %{start: startTime, stop: stopTime}
     create_subscription(client, values, timeout)
   end
 
@@ -673,7 +676,7 @@ defmodule :m_ct_netconfc do
              is_list(stopTime) and is_integer(hd(stopTime)) do
     create_subscription(
       client,
-      %{:stream => stream, :start => startTime, :stop => stopTime}
+      %{stream: stream, start: startTime, stop: stopTime}
     )
   end
 
@@ -699,7 +702,7 @@ defmodule :m_ct_netconfc do
                 is_list(stopTime) and is_integer(hd(stopTime))) do
     create_subscription(
       client,
-      %{:filter => filter, :start => startTime, :stop => stopTime}
+      %{filter: filter, start: startTime, stop: stopTime}
     )
   end
 
@@ -723,7 +726,7 @@ defmodule :m_ct_netconfc do
                         )
                       ))) and
                 is_integer(timeout)) or timeout == :infinity do
-    values = %{:stream => stream, :filter => filter}
+    values = %{stream: stream, filter: filter}
     create_subscription(client, values, timeout)
   end
 
@@ -732,7 +735,7 @@ defmodule :m_ct_netconfc do
               is_list(startTime) and is_integer(hd(startTime)) and
               is_list(stopTime) and is_integer(hd(stopTime)) and
               is_integer(timeout)) or timeout == :infinity do
-    values = %{:stream => stream, :start => startTime, :stop => stopTime}
+    values = %{stream: stream, start: startTime, stop: stopTime}
     create_subscription(client, values, timeout)
   end
 
@@ -759,12 +762,12 @@ defmodule :m_ct_netconfc do
                 is_list(stopTime) and is_integer(hd(stopTime))) do
     create_subscription(
       client,
-      %{:stream => stream, :filter => filter, :start => startTime, :stop => stopTime}
+      %{stream: stream, filter: filter, start: startTime, stop: stopTime}
     )
   end
 
   def create_subscription(client, stream, filter, startTime, stopTime, timeout) do
-    values = %{:stream => stream, :filter => filter, :start => startTime, :stop => stopTime}
+    values = %{stream: stream, filter: filter, start: startTime, stop: stopTime}
     create_subscription(client, values, timeout)
   end
 
@@ -1383,7 +1386,7 @@ defmodule :m_ct_netconfc do
   defp chunk(bin) do
     sz = min(:rand.uniform(1024), :erlang.size(bin))
     <<b::size(sz)-binary, rest::binary>> = bin
-    [['\n#', :erlang.integer_to_list(sz), ?\n, b] | chunk(rest)]
+    ['\n#', :erlang.integer_to_list(sz), ?\n, b | chunk(rest)]
   end
 
   defp handle_data(bin, r_state(buf: head) = s) do
@@ -1504,7 +1507,7 @@ defmodule :m_ct_netconfc do
 
   defp sax_event(
          {:endElement, _Uri, _Name, _QN},
-         [[{name, attrs, cont}, {parent, pA, pC}] | acc]
+         [{name, attrs, cont}, {parent, pA, pC} | acc]
        ) do
     [
       {parent, pA, [{name, attrs, :lists.reverse(cont)} | pC]}
@@ -1908,46 +1911,41 @@ defmodule :m_ct_netconfc do
     u = make_ref()
 
     try do
-      [[{:"session-id", _, [sessionId]}, _] | _] = [
-        [find(:"session-id", hello), :no_session_id_found]
-        | u
+      [{:"session-id", _, [sessionId]}, _ | _] = [
+        find(:"session-id", hello),
+        :no_session_id_found | u
       ]
 
-      [[{:ok, id}, _] | _] = [
-        [
-          try do
-            {:ok, :erlang.list_to_integer(sessionId)}
-          catch
-            :error, e -> {:EXIT, {e, __STACKTRACE__}}
-            :exit, e -> {:EXIT, e}
-            e -> e
-          end,
-          :invalid_session_id
-        ]
-        | u
+      [{:ok, id}, _ | _] = [
+        try do
+          {:ok, :erlang.list_to_integer(sessionId)}
+        catch
+          :error, e -> {:EXIT, {e, __STACKTRACE__}}
+          :exit, e -> {:EXIT, e}
+          e -> e
+        end,
+        :invalid_session_id | u
       ]
 
-      [[true, _] | _] = [[0 < id, :invalid_session_id] | u]
+      [true, _ | _] = [0 < id, :invalid_session_id | u]
 
       [
-        [{:capabilities, _, capabilities}, _]
+        {:capabilities, _, capabilities},
+        _
         | _
       ] = [
-        [find(:capabilities, hello), :capabilities_not_found]
+        find(:capabilities, hello),
+        :capabilities_not_found
         | u
       ]
 
-      [[{:ok, caps}, _] | _] = [
-        [decode_caps(capabilities, [], false), false]
-        | u
-      ]
-
+      [{:ok, caps}, _ | _] = [decode_caps(capabilities, [], false), false | u]
       {:ok, id, caps}
     catch
-      :error, {:badmatch, [[error, false] | ^u]} ->
+      :error, {:badmatch, [error, false | ^u]} ->
         error
 
-      :error, {:badmatch, [[_, reason] | ^u]} ->
+      :error, {:badmatch, [_, reason | ^u]} ->
         {:error, {:incorrect_hello, reason}}
     end
   end
@@ -2144,7 +2142,7 @@ defmodule :m_ct_netconfc do
 
     case get_tag(rest) do
       ^lastTag ->
-        indent_line1(rest, indent, [[?/, ?<, ?>] | line])
+        indent_line1(rest, indent, [?/, ?<, ?> | line])
 
       _ ->
         {indent ++ :lists.reverse(line) ++ '>', '</' ++ rest, indent -- '  '}
@@ -2156,7 +2154,7 @@ defmodule :m_ct_netconfc do
   end
 
   defp indent_line('</' ++ rest, indent, line) do
-    indent_line1(rest, indent, [[?/, ?<] | line])
+    indent_line1(rest, indent, [?/, ?< | line])
   end
 
   defp indent_line([h | t], indent, line) do
@@ -2210,7 +2208,8 @@ defmodule :m_ct_netconfc do
            host,
            port,
            [
-             [{:user_interaction, false}, {:silently_accept_hosts, true}]
+             {:user_interaction, false},
+             {:silently_accept_hosts, true}
              | sshOpts
            ],
            timeout
@@ -2314,7 +2313,7 @@ defmodule :m_ct_netconfc do
     recv(bin, <<>>)
   end
 
-  defp recv(bin, [[head, len] | chunks]) do
+  defp recv(bin, [head, len | chunks]) do
     chunk(<<head::binary, bin::binary>>, chunks, len)
   end
 
@@ -2369,12 +2368,12 @@ defmodule :m_ct_netconfc do
         chunk(rest, acc(chunk, chunks), 3)
 
       _ ->
-        [[bin, 0] | l]
+        [bin, 0 | l]
     end
   end
 
   defp chunk(bin, chunks, len) when :erlang.size(bin) < 4 do
-    [[bin, 3 = len] | chunks]
+    [bin, 3 = len | chunks]
   end
 
   defp chunk(<<"\n##\n", rest::binary>>, chunks, _) do
@@ -2432,13 +2431,13 @@ defmodule :m_ct_netconfc do
   end
 
   defp chunk(<<"\n#", _::binary>> = bin, chunks, _) do
-    [[bin, :erlang.size(bin)] | chunks]
+    [bin, :erlang.size(bin) | chunks]
   end
 
   defp chunk(bin, chunks, 3 = len) do
     case drop(bin) do
       <<>> ->
-        [[bin, len] | chunks]
+        [bin, len | chunks]
 
       <<"\n#", _::binary>> = b ->
         chunk(b, chunks, len)

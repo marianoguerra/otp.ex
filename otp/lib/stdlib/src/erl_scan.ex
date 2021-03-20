@@ -189,7 +189,7 @@ defmodule :m_erl_scan do
   end
 
   defp expand_opt(:return, os) do
-    [[:return_comments, :return_white_spaces] | os]
+    [:return_comments, :return_white_spaces | os]
   end
 
   defp expand_opt(o, os) do
@@ -797,11 +797,10 @@ defmodule :m_erl_scan do
     {:error, line, col, :lists.reverse(wcs), :eof}
   end
 
-  defp scan_escape([[o1, o2, o3] | cs], col)
+  defp scan_escape([o1, o2, o3 | cs], col)
        when o1 >= ?0 and
-              o1 <= ?7 and o2 >= ?0 and
-              o2 <= ?7 and o3 >= ?0 and
-              o3 <= ?7 do
+              o1 <= ?7 and o2 >= ?0 and o2 <= ?7 and
+              o3 >= ?0 and o3 <= ?7 do
     val = (o1 * 8 + o2) * 8 + o3 - 73 * ?0
     {val, [o1, o2, o3], cs, incr_column(col, 3)}
   end
@@ -812,7 +811,7 @@ defmodule :m_erl_scan do
     :more
   end
 
-  defp scan_escape([[o1, o2] | cs], col)
+  defp scan_escape([o1, o2 | cs], col)
        when o1 >= ?0 and
               o1 <= ?7 and o2 >= ?0 and o2 <= ?7 do
     val = o1 * 8 + o2 - 9 * ?0
@@ -827,7 +826,7 @@ defmodule :m_erl_scan do
     {o1 - ?0, [o1], cs, incr_column(col, 1)}
   end
 
-  defp scan_escape([[?x, ?{] | cs], col) do
+  defp scan_escape([?x, ?{ | cs], col) do
     scan_hex(cs, incr_column(col, 2), [])
   end
 
@@ -839,7 +838,7 @@ defmodule :m_erl_scan do
     {:eof, incr_column(col, 1)}
   end
 
-  defp scan_escape([[?x, h1, h2] | cs], col)
+  defp scan_escape([?x, h1, h2 | cs], col)
        when (h1 >= ?0 and h1 <= ?9) or (h1 >= ?A and h1 <= ?F) or
               (h1 >= ?a and h1 <= ?f and
                  h2 >= ?0 and h2 <= ?9) or (h2 >= ?A and h2 <= ?F) or (h2 >= ?a and h2 <= ?f) do
@@ -856,12 +855,13 @@ defmodule :m_erl_scan do
     {:error, cs, {:illegal, :character}, incr_column(col, 1)}
   end
 
-  defp scan_escape([[?^ = c0, ?\n = c] | cs], col) do
+  defp scan_escape([?^ = c0, ?\n = c | cs], col) do
     {:nl, c, [c0, c], cs, new_column(col, 1)}
   end
 
-  defp scan_escape([[?^ = c0, c] | cs], col)
-       when is_integer(c) and c >= 0 do
+  defp scan_escape([?^ = c0, c | cs], col)
+       when is_integer(c) and
+              c >= 0 do
     val = c &&& 31
     {val, [c0, c], cs, incr_column(col, 2)}
   end
@@ -996,18 +996,18 @@ defmodule :m_erl_scan do
     scan_number(cs, st, line, col, toks, [c | ncs], us)
   end
 
-  defp scan_number([[?_, next] | cs], st, line, col, toks, [prev | _] = ncs, _Us)
+  defp scan_number([?_, next | cs], st, line, col, toks, [prev | _] = ncs, _Us)
        when next >= ?0 and next <= ?9 and prev >= ?0 and prev <= ?9 do
-    scan_number(cs, st, line, col, toks, [[next, ?_] | ncs], :with_underscore)
+    scan_number(cs, st, line, col, toks, [next, ?_ | ncs], :with_underscore)
   end
 
   defp scan_number([?_] = cs, _St, line, col, toks, ncs, us) do
     {:more, {cs, col, toks, line, {ncs, us}, &scan_number/6}}
   end
 
-  defp scan_number([[?., c] | cs], st, line, col, toks, ncs, us)
+  defp scan_number([?., c | cs], st, line, col, toks, ncs, us)
        when c >= ?0 and c <= ?9 do
-    scan_fraction(cs, st, line, col, toks, [[c, ?.] | ncs], us)
+    scan_fraction(cs, st, line, col, toks, [c, ?. | ncs], us)
   end
 
   defp scan_number([?.] = cs, _St, line, col, toks, ncs, us) do
@@ -1087,14 +1087,14 @@ defmodule :m_erl_scan do
     scan_based_int(cs, st, line, col, toks, b, [c | ncs], bcs, us)
   end
 
-  defp scan_based_int([[?_, next] | cs], st, line, col, toks, b, [prev | _] = ncs, bcs, _Us)
+  defp scan_based_int([?_, next | cs], st, line, col, toks, b, [prev | _] = ncs, bcs, _Us)
        when ((next >= ?0 and next <= ?9 and next < ?0 + b) or
                (next >= ?A and b > 10 and next < ?A + b - 10) or
                (next >= ?a and b > 10 and next < ?a + b - 10)) and
               ((prev >= ?0 and prev <= ?9 and prev < ?0 + b) or
                  (prev >= ?A and b > 10 and prev < ?A + b - 10) or
                  (prev >= ?a and b > 10 and prev < ?a + b - 10)) do
-    scan_based_int(cs, st, line, col, toks, b, [[next, ?_] | ncs], bcs, :with_underscore)
+    scan_based_int(cs, st, line, col, toks, b, [next, ?_ | ncs], bcs, :with_underscore)
   end
 
   defp scan_based_int([?_] = cs, _St, line, col, toks, b, nCs, bCs, us) do
@@ -1140,9 +1140,9 @@ defmodule :m_erl_scan do
     scan_fraction(cs, st, line, col, toks, [c | ncs], us)
   end
 
-  defp scan_fraction([[?_, next] | cs], st, line, col, toks, [prev | _] = ncs, _Us)
+  defp scan_fraction([?_, next | cs], st, line, col, toks, [prev | _] = ncs, _Us)
        when next >= ?0 and next <= ?9 and prev >= ?0 and prev <= ?9 do
-    scan_fraction(cs, st, line, col, toks, [[next, ?_] | ncs], :with_underscore)
+    scan_fraction(cs, st, line, col, toks, [next, ?_ | ncs], :with_underscore)
   end
 
   defp scan_fraction([?_] = cs, _St, line, col, toks, ncs, us) do
@@ -1188,9 +1188,9 @@ defmodule :m_erl_scan do
     scan_exponent(cs, st, line, col, toks, [c | ncs], us)
   end
 
-  defp scan_exponent([[?_, next] | cs], st, line, col, toks, [prev | _] = ncs, _)
+  defp scan_exponent([?_, next | cs], st, line, col, toks, [prev | _] = ncs, _)
        when next >= ?0 and next <= ?9 and prev >= ?0 and prev <= ?9 do
-    scan_exponent(cs, st, line, col, toks, [[next, ?_] | ncs], :with_underscore)
+    scan_exponent(cs, st, line, col, toks, [next, ?_ | ncs], :with_underscore)
   end
 
   defp scan_exponent([?_] = cs, _St, line, col, toks, ncs, us) do

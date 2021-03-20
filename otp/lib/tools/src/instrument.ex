@@ -9,10 +9,10 @@ defmodule :m_instrument do
     ref = make_ref()
 
     defaults = %{
-      :scheduler_ids => :lists.seq(0, :erlang.system_info(:schedulers)),
-      :allocator_types => :erlang.system_info(:alloc_util_allocators),
-      :histogram_start => 128,
-      :histogram_width => 18
+      scheduler_ids: :lists.seq(0, :erlang.system_info(:schedulers)),
+      allocator_types: :erlang.system_info(:alloc_util_allocators),
+      histogram_start: 128,
+      histogram_width: 18
     }
 
     {histStart, msgCount} =
@@ -61,8 +61,8 @@ defmodule :m_instrument do
           blockHist
       end
 
-    idAllocs = %{idAllocs0 | type => mergedHists}
-    %{result0 | id => idAllocs}
+    idAllocs = Map.put(idAllocs0, type, mergedHists)
+    Map.put(result0, id, idAllocs)
   end
 
   defp alloc_hist_merge_hist(0, a, _B) do
@@ -95,10 +95,10 @@ defmodule :m_instrument do
     ref = make_ref()
 
     defaults = %{
-      :scheduler_ids => :lists.seq(0, :erlang.system_info(:schedulers)),
-      :allocator_types => :erlang.system_info(:alloc_util_allocators),
-      :histogram_start => 512,
-      :histogram_width => 14
+      scheduler_ids: :lists.seq(0, :erlang.system_info(:schedulers)),
+      allocator_types: :erlang.system_info(:alloc_util_allocators),
+      histogram_start: 512,
+      histogram_width: 14
     }
 
     {histStart, msgCount} =
@@ -135,10 +135,10 @@ defmodule :m_instrument do
 
   defp dispatch_gather(
          %{
-           :allocator_types => allocatorTypes,
-           :scheduler_ids => schedulerIds,
-           :histogram_start => histStart,
-           :histogram_width => histWidth
+           allocator_types: allocatorTypes,
+           scheduler_ids: schedulerIds,
+           histogram_start: histStart,
+           histogram_width: histWidth
          },
          ref,
          gather

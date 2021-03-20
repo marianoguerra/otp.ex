@@ -47,7 +47,7 @@ defmodule :m_erl_expand_records do
     ctype =
       foldl(
         fn fA, acc ->
-          %{acc | fA => {:imported, mod}}
+          Map.put(acc, fA, {:imported, mod})
         end,
         ctype0,
         fs
@@ -643,7 +643,7 @@ defmodule :m_erl_expand_records do
   end
 
   defp expr({:call, line, {:remote, lr, m, f}, as0}, st0) do
-    {[[m1, f1] | as1], st1} = expr_list([[m, f] | as0], st0)
+    {[m1, f1 | as1], st1} = expr_list([m, f | as0], st0)
     {{:call, line, {:remote, lr, m1, f1}, as1}, st1}
   end
 

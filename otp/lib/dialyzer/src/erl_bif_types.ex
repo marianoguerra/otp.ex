@@ -1379,7 +1379,7 @@ defmodule :m_erl_bif_types do
                   t_atom(false)
               end
 
-            [[_, _] | _] ->
+            [_, _ | _] ->
               t_boolean()
           end
 
@@ -5519,7 +5519,7 @@ defmodule :m_erl_bif_types do
   def opaque_args(m, f, a, xs, opaques) do
     case kind_of_check(m, f, a) do
       :record ->
-        [[x, y] | _] = xs
+        [x, y | _] = xs
 
         for _ <- [:EFE_DUMMY_GEN],
             (case t_is_tuple(x, opaques) do

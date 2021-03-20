@@ -397,7 +397,7 @@ defmodule :m_erl_epmd do
     receive do
       {:tcp, ^socket, data0} ->
         case soFar ++ data0 do
-          [[?w, result] | rest] ->
+          [?w, result | rest] ->
             case result do
               0 ->
                 wait_for_port_reply_cont(socket, rest)
@@ -457,11 +457,7 @@ defmodule :m_erl_epmd do
   end
 
   defp wait_for_port_reply_cont2(socket, data) do
-    [
-      [a, b, _Type, _Proto, highA, highB, lowA, lowB, nLenA, nLenB]
-      | rest
-    ] = data
-
+    [a, b, _Type, _Proto, highA, highB, lowA, lowB, nLenA, nLenB | rest] = data
     wait_for_port_reply_name(socket, nLenA <<< 8 ||| nLenB, rest)
     low = lowA <<< 8 ||| lowB
     high = highA <<< 8 ||| highB
@@ -533,7 +529,7 @@ defmodule :m_erl_epmd do
          ) do
       :ok ->
         receive do
-          {:tcp, ^socket, [[p0, p1, p2, p3] | t]} ->
+          {:tcp, ^socket, [p0, p1, p2, p3 | t]} ->
             epmdPort = p0 <<< 24 ||| p1 <<< 16 ||| p2 <<< 8 ||| p3
 
             case get_epmd_port() do

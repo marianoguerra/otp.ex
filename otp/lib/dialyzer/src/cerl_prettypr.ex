@@ -399,13 +399,13 @@ defmodule :m_cerl_prettypr do
   defp split_string_1([?\t | xs], n, l, as)
        when n <= 0 and
               l >= 5 do
-    {:lists.reverse([[?t, ?\\] | as]), xs}
+    {:lists.reverse([?t, ?\\ | as]), xs}
   end
 
   defp split_string_1([?\n | xs], n, l, as)
        when n <= 0 and
               l >= 5 do
-    {:lists.reverse([[?n, ?\\] | as]), xs}
+    {:lists.reverse([?n, ?\\ | as]), xs}
   end
 
   defp split_string_1([?\\ | xs], n, l, as) do
@@ -424,21 +424,23 @@ defmodule :m_cerl_prettypr do
     {:lists.reverse(as), ''}
   end
 
-  defp split_string_2([[?^, x] | xs], n, l, as) do
-    split_string_1(xs, n - 2, l - 2, [[x, ?^] | as])
+  defp split_string_2([?^, x | xs], n, l, as) do
+    split_string_1(xs, n - 2, l - 2, [x, ?^ | as])
   end
 
-  defp split_string_2([[x1, x2, x3] | xs], n, l, as)
-       when x1 >= ?0 and x1 <= ?7 and x2 >= ?0 and
-              x2 <= ?7 and x3 >= ?0 and x3 <= ?7 do
-    split_string_1(xs, n - 3, l - 3, [[x3, x2, x1] | as])
+  defp split_string_2([x1, x2, x3 | xs], n, l, as)
+       when x1 >= ?0 and
+              x1 <= ?7 and x2 >= ?0 and
+              x2 <= ?7 and x3 >= ?0 and
+              x3 <= ?7 do
+    split_string_1(xs, n - 3, l - 3, [x3, x2, x1 | as])
   end
 
-  defp split_string_2([[x1, x2] | xs], n, l, as)
+  defp split_string_2([x1, x2 | xs], n, l, as)
        when x1 >= ?0 and
               x1 <= ?7 and x2 >= ?0 and
               x2 <= ?7 do
-    split_string_1(xs, n - 2, l - 2, [[x2, x1] | as])
+    split_string_1(xs, n - 2, l - 2, [x2, x1 | as])
   end
 
   defp split_string_2([x | xs], n, l, as) do
@@ -706,7 +708,10 @@ defmodule :m_cerl_prettypr do
         r_ctxt(ctxt, :sub_indent),
         follow(
           text('attributes'),
-          beside(beside(text('['), par(as)), floating(text(']'))),
+          beside(
+            beside(text('['), par(as)),
+            floating(text(']'))
+          ),
           r_ctxt(ctxt, :sub_indent)
         )
       ),
@@ -778,7 +783,13 @@ defmodule :m_cerl_prettypr do
 
   defp lay_fdef({n, f}, ctxt) do
     par(
-      [beside(lay(n, ctxt), floating(text(' ='))), lay(f, ctxt)],
+      [
+        beside(lay(n, ctxt), floating(text(' ='))),
+        lay(
+          f,
+          ctxt
+        )
+      ],
       r_ctxt(ctxt, :body_indent)
     )
   end
@@ -852,8 +863,8 @@ defmodule :m_cerl_prettypr do
     []
   end
 
-  defp tidy_float([[?., c] | cs]) do
-    [[?., c] | tidy_float_1(cs)]
+  defp tidy_float([?., c | cs]) do
+    [?., c | tidy_float_1(cs)]
   end
 
   defp tidy_float([?e | _] = cs) do
@@ -868,7 +879,7 @@ defmodule :m_cerl_prettypr do
     []
   end
 
-  defp tidy_float_1([[?0, ?0, ?0] | cs]) do
+  defp tidy_float_1([?0, ?0, ?0 | cs]) do
     tidy_float_2(cs)
   end
 
@@ -888,11 +899,11 @@ defmodule :m_cerl_prettypr do
     []
   end
 
-  defp tidy_float_2([[?e, ?+, ?0] | cs]) do
-    tidy_float_2([[?e, ?+] | cs])
+  defp tidy_float_2([?e, ?+, ?0 | cs]) do
+    tidy_float_2([?e, ?+ | cs])
   end
 
-  defp tidy_float_2([[?e, ?+] | _] = cs) do
+  defp tidy_float_2([?e, ?+ | _] = cs) do
     cs
   end
 
@@ -900,16 +911,16 @@ defmodule :m_cerl_prettypr do
     []
   end
 
-  defp tidy_float_2([[?e, ?-, ?0] | cs]) do
-    tidy_float_2([[?e, ?-] | cs])
+  defp tidy_float_2([?e, ?-, ?0 | cs]) do
+    tidy_float_2([?e, ?- | cs])
   end
 
-  defp tidy_float_2([[?e, ?-] | _] = cs) do
+  defp tidy_float_2([?e, ?- | _] = cs) do
     cs
   end
 
   defp tidy_float_2([?e | cs]) do
-    tidy_float_2([[?e, ?+] | cs])
+    tidy_float_2([?e, ?+ | cs])
   end
 
   defp tidy_float_2([_ | cs]) do

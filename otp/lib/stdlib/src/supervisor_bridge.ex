@@ -100,26 +100,26 @@ defmodule :m_supervisor_bridge do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:supervisor_bridge, :report_progress, 4},
-            :line => 136,
-            :file => 'otp/lib/stdlib/src/supervisor_bridge.erl'
+            mfa: {:supervisor_bridge, :report_progress, 4},
+            line: 136,
+            file: 'otp/lib/stdlib/src/supervisor_bridge.erl'
           },
           :info,
           %{
-            :label => {:supervisor, :progress},
-            :report => [
+            label: {:supervisor, :progress},
+            report: [
               {:supervisor, supName},
               {:started, [{:pid, pid}, {:mfa, {mod, :init, [startArgs]}}]}
             ]
           },
           %{
-            :domain => [:otp, :sasl],
-            :report_cb => &:supervisor_bridge.format_log/2,
-            :logger_formatter => %{:title => 'PROGRESS REPORT'},
-            :error_logger => %{
-              :tag => :info_report,
-              :type => :progress,
-              :report_cb => &:supervisor_bridge.format_log/1
+            domain: [:otp, :sasl],
+            report_cb: &:supervisor_bridge.format_log/2,
+            logger_formatter: %{title: 'PROGRESS REPORT'},
+            error_logger: %{
+              tag: :info_report,
+              type: :progress,
+              report_cb: &:supervisor_bridge.format_log/1
             }
           }
         ])
@@ -134,14 +134,14 @@ defmodule :m_supervisor_bridge do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:supervisor_bridge, :report_error, 3},
-            :line => 149,
-            :file => 'otp/lib/stdlib/src/supervisor_bridge.erl'
+            mfa: {:supervisor_bridge, :report_error, 3},
+            line: 149,
+            file: 'otp/lib/stdlib/src/supervisor_bridge.erl'
           },
           :error,
           %{
-            :label => {:supervisor, :error},
-            :report => [
+            label: {:supervisor, :error},
+            report: [
               {:supervisor, name},
               {:errorContext, error},
               {:reason, reason},
@@ -149,13 +149,13 @@ defmodule :m_supervisor_bridge do
             ]
           },
           %{
-            :domain => [:otp, :sasl],
-            :report_cb => &:supervisor_bridge.format_log/2,
-            :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-            :error_logger => %{
-              :tag => :error_report,
-              :type => :supervisor_report,
-              :report_cb => &:supervisor_bridge.format_log/1
+            domain: [:otp, :sasl],
+            report_cb: &:supervisor_bridge.format_log/2,
+            logger_formatter: %{title: 'SUPERVISOR REPORT'},
+            error_logger: %{
+              tag: :error_report,
+              type: :supervisor_report,
+              report_cb: &:supervisor_bridge.format_log/1
             }
           }
         ])
@@ -167,13 +167,7 @@ defmodule :m_supervisor_bridge do
 
   def format_log(logReport) do
     depth = :error_logger.get_format_depth()
-
-    formatOpts = %{
-      :chars_limit => :unlimited,
-      :depth => depth,
-      :single_line => false,
-      :encoding => :utf8
-    }
+    formatOpts = %{chars_limit: :unlimited, depth: depth, single_line: false, encoding: :utf8}
 
     format_log_multi(
       limit_report(logReport, depth),
@@ -187,18 +181,18 @@ defmodule :m_supervisor_bridge do
 
   defp limit_report(
          %{
-           :label => {:supervisor, :progress},
-           :report => [{:supervisor, _} = supervisor, {:started, child}]
+           label: {:supervisor, :progress},
+           report: [{:supervisor, _} = supervisor, {:started, child}]
          } = logReport,
          depth
        ) do
-    %{logReport | :report => [supervisor, {:started, limit_child_report(child, depth)}]}
+    Map.put(logReport, :report, [supervisor, {:started, limit_child_report(child, depth)}])
   end
 
   defp limit_report(
          %{
-           :label => {:supervisor, :error},
-           :report => [
+           label: {:supervisor, :error},
+           report: [
              {:supervisor, _} = supervisor,
              {:errorContext, ctxt},
              {:reason, reason},
@@ -207,15 +201,16 @@ defmodule :m_supervisor_bridge do
          } = logReport,
          depth
        ) do
-    %{
-      logReport
-      | :report => [
-          supervisor,
-          {:errorContext, :io_lib.limit_term(ctxt, depth)},
-          {:reason, :io_lib.limit_term(reason, depth)},
-          {:offender, :io_lib.limit_term(child, depth)}
-        ]
-    }
+    Map.put(logReport, :report, [
+      supervisor,
+      {:errorContext, :io_lib.limit_term(ctxt, depth)},
+      {:reason, :io_lib.limit_term(reason, depth)},
+      {:offender,
+       :io_lib.limit_term(
+         child,
+         depth
+       )}
+    ])
   end
 
   defp limit_child_report(childReport, depth) do
@@ -225,21 +220,15 @@ defmodule :m_supervisor_bridge do
   end
 
   def format_log(report, formatOpts0) do
-    default = %{
-      :chars_limit => :unlimited,
-      :depth => :unlimited,
-      :single_line => false,
-      :encoding => :utf8
-    }
-
+    default = %{chars_limit: :unlimited, depth: :unlimited, single_line: false, encoding: :utf8}
     formatOpts = :maps.merge(default, formatOpts0)
 
     ioOpts =
       case formatOpts do
-        %{:chars_limit => :unlimited} ->
+        %{chars_limit: :unlimited} ->
           []
 
-        %{:chars_limit => limit} ->
+        %{chars_limit: limit} ->
           [{:chars_limit, limit}]
       end
 
@@ -248,11 +237,8 @@ defmodule :m_supervisor_bridge do
   end
 
   defp format_log_single(
-         %{
-           :label => {:supervisor, :progress},
-           :report => [{:supervisor, supName}, {:started, child}]
-         },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{label: {:supervisor, :progress}, report: [{:supervisor, supName}, {:started, child}]},
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     {childFormat, childArgs} = format_child_log_progress_single(child, 'Started:', formatOpts)
@@ -272,15 +258,15 @@ defmodule :m_supervisor_bridge do
 
   defp format_log_single(
          %{
-           :label => {:supervisor, _Error},
-           :report => [
+           label: {:supervisor, _Error},
+           report: [
              {:supervisor, supName},
              {:errorContext, ctxt},
              {:reason, reason},
              {:offender, child}
            ]
          },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = :lists.append(['Supervisor: ', p, '. Context: ', p, '. Reason: ', p, '.'])
@@ -303,11 +289,8 @@ defmodule :m_supervisor_bridge do
   end
 
   defp format_log_multi(
-         %{
-           :label => {:supervisor, :progress},
-           :report => [{:supervisor, supName}, {:started, child}]
-         },
-         %{:depth => depth} = formatOpts
+         %{label: {:supervisor, :progress}, report: [{:supervisor, supName}, {:started, child}]},
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = :lists.append(['    supervisor: ', p, '~n', '    started: ', p, '~n'])
@@ -326,15 +309,15 @@ defmodule :m_supervisor_bridge do
 
   defp format_log_multi(
          %{
-           :label => {:supervisor, _Error},
-           :report => [
+           label: {:supervisor, _Error},
+           report: [
              {:supervisor, supName},
              {:errorContext, ctxt},
              {:reason, reason},
              {:offender, child}
            ]
          },
-         %{:depth => depth} = formatOpts
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
 
@@ -388,7 +371,7 @@ defmodule :m_supervisor_bridge do
     {' ~s pid=~w,mod=~w.', [tag, pid, mod]}
   end
 
-  defp p(%{:single_line => single, :depth => depth, :encoding => enc}) do
+  defp p(%{single_line: single, depth: depth, encoding: enc}) do
     '~' ++ single(single) ++ mod(enc) ++ p(depth)
   end
 

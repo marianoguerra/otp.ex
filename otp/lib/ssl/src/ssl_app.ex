@@ -12,7 +12,7 @@ defmodule :m_ssl_app do
   end
 
   defp start_logger() do
-    config = %{:level => :debug, :filter_default => :stop, :formatter => {:ssl_logger, %{}}}
+    config = %{level: :debug, filter_default: :stop, formatter: {:ssl_logger, %{}}}
     filter = {&:logger_filters.domain/2, {:log, :sub, [:otp, :ssl]}}
     :logger.add_handler(:ssl_handler, :logger_std_h, config)
     :logger.add_handler_filter(:ssl_handler, :filter_non_ssl, filter)

@@ -7,12 +7,12 @@ defmodule :m_erl_distribution do
 
   def start(args) do
     c = %{
-      :id => :net_sup_dynamic,
-      :start => {:erl_distribution, :start_link, [args, false, :net_sup_dynamic]},
-      :restart => :permanent,
-      :shutdown => 1000,
-      :type => :supervisor,
-      :modules => [:erl_distribution]
+      id: :net_sup_dynamic,
+      start: {:erl_distribution, :start_link, [args, false, :net_sup_dynamic]},
+      restart: :permanent,
+      shutdown: 1000,
+      type: :supervisor,
+      modules: [:erl_distribution]
     }
 
     :supervisor.start_child(:kernel_sup, c)
@@ -52,36 +52,36 @@ defmodule :m_erl_distribution do
 
           [
             %{
-              :id => epmdMod,
-              :start => {epmdMod, :start_link, []},
-              :restart => :permanent,
-              :shutdown => 2000,
-              :type => :worker,
-              :modules => [epmdMod]
+              id: epmdMod,
+              start: {epmdMod, :start_link, []},
+              restart: :permanent,
+              shutdown: 2000,
+              type: :worker,
+              modules: [epmdMod]
             }
           ]
       end
 
     auth = %{
-      :id => :auth,
-      :start => {:auth, :start_link, []},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:auth]
+      id: :auth,
+      start: {:auth, :start_link, []},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:auth]
     }
 
     kernel = %{
-      :id => :net_kernel,
-      :start => {:net_kernel, :start_link, netArgs},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:net_kernel]
+      id: :net_kernel,
+      start: {:net_kernel, :start_link, netArgs},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:net_kernel]
     }
 
     earlySpecs = :net_kernel.protocol_childspecs()
-    supFlags = %{:strategy => :one_for_all, :intensity => 0, :period => 1}
+    supFlags = %{strategy: :one_for_all, intensity: 0, period: 1}
     {:ok, {supFlags, earlySpecs ++ epmd ++ [auth, kernel]}}
   end
 
@@ -90,7 +90,8 @@ defmodule :m_erl_distribution do
       {:ok, [[name]]} ->
         start_link(
           [
-            [:erlang.list_to_atom(name), flag]
+            :erlang.list_to_atom(name),
+            flag
             | ticktime()
           ],
           true,
@@ -102,9 +103,9 @@ defmodule :m_erl_distribution do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:erl_distribution, :do_start_link, 1},
-                :line => 109,
-                :file => 'otp/lib/kernel/src/erl_distribution.erl'
+                mfa: {:erl_distribution, :do_start_link, 1},
+                line: 109,
+                file: 'otp/lib/kernel/src/erl_distribution.erl'
               },
               :warning,
               'Multiple -~p given to erl, using the first, ~p',
@@ -117,7 +118,8 @@ defmodule :m_erl_distribution do
 
         start_link(
           [
-            [:erlang.list_to_atom(name), flag]
+            :erlang.list_to_atom(name),
+            flag
             | ticktime()
           ],
           true,

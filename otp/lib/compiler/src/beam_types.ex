@@ -35,7 +35,7 @@ defmodule :m_beam_types do
     other: :none
   )
 
-  def meet([[t1, t2] | ts]) do
+  def meet([t1, t2 | ts]) do
     meet([meet(t1, t2) | ts])
   end
 
@@ -208,7 +208,7 @@ defmodule :m_beam_types do
     :none
   end
 
-  def join([[t1, t2] | ts]) do
+  def join([t1, t2 | ts]) do
     join([join(t1, t2) | ts])
   end
 
@@ -702,7 +702,7 @@ defmodule :m_beam_types do
   end
 
   def set_tuple_element(index, type, es) do
-    %{es | index => type}
+    Map.put(es, index, type)
   end
 
   def get_tuple_element(index, es) do
@@ -1265,14 +1265,14 @@ defmodule :m_beam_types do
             :none
 
           type ->
-            glb_elements_1(keys, es1, es2, %{acc | key => type})
+            glb_elements_1(keys, es1, es2, Map.put(acc, key, type))
         end
 
       {%{^key => type1}, _} ->
-        glb_elements_1(keys, es1, es2, %{acc | key => type1})
+        glb_elements_1(keys, es1, es2, Map.put(acc, key, type1))
 
       {_, %{^key => type2}} ->
-        glb_elements_1(keys, es1, es2, %{acc | key => type2})
+        glb_elements_1(keys, es1, es2, Map.put(acc, key, type2))
     end
   end
 

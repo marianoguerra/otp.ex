@@ -240,7 +240,11 @@ defmodule :m_edoc_layout do
     body =
       navigation('top') ++
         ['\n', :hr, '\n', '\n', {:h1, title}, '\n'] ++
-        doc_index(fullDesc, functions, types) ++
+        doc_index(
+          fullDesc,
+          functions,
+          types
+        ) ++
         shortDesc ++
         ['\n'] ++
         copyright(es) ++
@@ -266,7 +270,8 @@ defmodule :m_edoc_layout do
 
           true ->
             [
-              ['\n', {:h2, [{:a, [{:name, 'description'}], ['Description']}]}]
+              '\n',
+              {:h2, [{:a, [{:name, 'description'}], ['Description']}]}
               | fullDesc
             ]
         end ++
@@ -502,7 +507,7 @@ defmodule :m_edoc_layout do
         []
 
       true ->
-        [['\n', {:h2, [{:a, [{:name, 'functions'}], ['Function Details']}]}, '\n'] | es]
+        ['\n', {:h2, [{:a, [{:name, 'functions'}], ['Function Details']}]}, '\n' | es]
     end
   end
 
@@ -519,7 +524,10 @@ defmodule :m_edoc_layout do
                {:p,
                 signature(
                   get_content(:args, es),
-                  atom(get_attrval(:name, e), opts)
+                  atom(
+                    get_attrval(:name, e),
+                    opts
+                  )
                 )},
                '\n'
              ]
@@ -710,7 +718,7 @@ defmodule :m_edoc_layout do
         ts
       )
 
-    [['\n', {:h2, [{:a, [{:name, 'types'}], ['Data Types']}]}, '\n'] | es]
+    ['\n', {:h2, [{:a, [{:name, 'types'}], ['Data Types']}]}, '\n' | es]
   end
 
   defp typedecl(name, e = r_xmlElement(content: es), opts) do
@@ -1069,7 +1077,7 @@ defmodule :m_edoc_layout do
         []
 
       es1 ->
-        [{:p, [[{:b, ['Version:']}, ' '] | es1]}, '\n']
+        [{:p, [{:b, ['Version:']}, ' ' | es1]}, '\n']
     end
   end
 
@@ -1079,7 +1087,7 @@ defmodule :m_edoc_layout do
         []
 
       es1 ->
-        [{:p, [[{:b, ['Introduced in:']}, ' '] | es1]}, '\n']
+        [{:p, [{:b, ['Introduced in:']}, ' ' | es1]}, '\n']
     end
   end
 
@@ -1095,7 +1103,7 @@ defmodule :m_edoc_layout do
         []
 
       es2 ->
-        [{:p, [[{:b, ['This ' ++ s ++ ' is deprecated:']}, ' '] | es2]}, '\n']
+        [{:p, [{:b, ['This ' ++ s ++ ' is deprecated:']}, ' ' | es2]}, '\n']
     end
   end
 
@@ -1833,7 +1841,16 @@ defmodule :m_edoc_layout do
   end
 
   defp ot_field(r_xmlElement(content: es)) do
-    {:type, 0, :field_type, [ot_type(get_elem(:atom, es)), ot_utype(get_elem(:type, es))]}
+    {:type, 0, :field_type,
+     [
+       ot_type(get_elem(:atom, es)),
+       ot_utype(
+         get_elem(
+           :type,
+           es
+         )
+       )
+     ]}
   end
 
   defp ot_abstype(es) do

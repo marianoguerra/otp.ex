@@ -1004,7 +1004,7 @@ defmodule :m_erl_prettypr do
 
             as ->
               d2 = sep(seq(as, floating(text(',')), ctxt1, &lay/2))
-              [[text('after'), nest(r_ctxt(ctxt1, :break_indent), d2)] | es0]
+              [text('after'), nest(r_ctxt(ctxt1, :break_indent), d2) | es0]
           end
 
         es2 =
@@ -1014,7 +1014,7 @@ defmodule :m_erl_prettypr do
 
             hs ->
               d3 = lay_clauses(hs, :try_expr, ctxt1)
-              [[text('catch'), nest(r_ctxt(ctxt1, :break_indent), d3)] | es1]
+              [text('catch'), nest(r_ctxt(ctxt1, :break_indent), d3) | es1]
           end
 
         es3 =
@@ -1024,7 +1024,7 @@ defmodule :m_erl_prettypr do
 
             cs ->
               d4 = lay_clauses(cs, :try_expr, ctxt1)
-              [[text('of'), nest(r_ctxt(ctxt1, :break_indent), d4)] | es2]
+              [text('of'), nest(r_ctxt(ctxt1, :break_indent), d4) | es2]
           end
 
         sep([
@@ -1437,13 +1437,13 @@ defmodule :m_erl_prettypr do
   defp split_string_1([?\t | xs], n, l, as)
        when n <= 0 and
               l >= 5 do
-    {:lists.reverse([[?t, ?\\] | as]), xs}
+    {:lists.reverse([?t, ?\\ | as]), xs}
   end
 
   defp split_string_1([?\n | xs], n, l, as)
        when n <= 0 and
               l >= 5 do
-    {:lists.reverse([[?n, ?\\] | as]), xs}
+    {:lists.reverse([?n, ?\\ | as]), xs}
   end
 
   defp split_string_1([?\\ | xs], n, l, as) do
@@ -1462,25 +1462,27 @@ defmodule :m_erl_prettypr do
     {:lists.reverse(as), ''}
   end
 
-  defp split_string_2([[?^, x] | xs], n, l, as) do
-    split_string_1(xs, n - 2, l - 2, [[x, ?^] | as])
+  defp split_string_2([?^, x | xs], n, l, as) do
+    split_string_1(xs, n - 2, l - 2, [x, ?^ | as])
   end
 
-  defp split_string_2([[?x, ?{] | xs], n, l, as) do
-    split_string_3(xs, n - 2, l - 2, [[?{, ?x] | as])
+  defp split_string_2([?x, ?{ | xs], n, l, as) do
+    split_string_3(xs, n - 2, l - 2, [?{, ?x | as])
   end
 
-  defp split_string_2([[x1, x2, x3] | xs], n, l, as)
-       when x1 >= ?0 and x1 <= ?7 and x2 >= ?0 and
-              x2 <= ?7 and x3 >= ?0 and x3 <= ?7 do
-    split_string_1(xs, n - 3, l - 3, [[x3, x2, x1] | as])
+  defp split_string_2([x1, x2, x3 | xs], n, l, as)
+       when x1 >= ?0 and
+              x1 <= ?7 and x2 >= ?0 and
+              x2 <= ?7 and x3 >= ?0 and
+              x3 <= ?7 do
+    split_string_1(xs, n - 3, l - 3, [x3, x2, x1 | as])
   end
 
-  defp split_string_2([[x1, x2] | xs], n, l, as)
+  defp split_string_2([x1, x2 | xs], n, l, as)
        when x1 >= ?0 and
               x1 <= ?7 and x2 >= ?0 and
               x2 <= ?7 do
-    split_string_1(xs, n - 2, l - 2, [[x2, x1] | as])
+    split_string_1(xs, n - 2, l - 2, [x2, x1 | as])
   end
 
   defp split_string_2([x | xs], n, l, as) do
@@ -1688,8 +1690,8 @@ defmodule :m_erl_prettypr do
     []
   end
 
-  defp tidy_float([[?., c] | cs]) do
-    [[?., c] | tidy_float_1(cs)]
+  defp tidy_float([?., c | cs]) do
+    [?., c | tidy_float_1(cs)]
   end
 
   defp tidy_float([?e | _] = cs) do
@@ -1704,7 +1706,7 @@ defmodule :m_erl_prettypr do
     []
   end
 
-  defp tidy_float_1([[?0, ?0, ?0] | cs]) do
+  defp tidy_float_1([?0, ?0, ?0 | cs]) do
     tidy_float_2(cs)
   end
 
@@ -1724,11 +1726,11 @@ defmodule :m_erl_prettypr do
     []
   end
 
-  defp tidy_float_2([[?e, ?+, ?0] | cs]) do
-    tidy_float_2([[?e, ?+] | cs])
+  defp tidy_float_2([?e, ?+, ?0 | cs]) do
+    tidy_float_2([?e, ?+ | cs])
   end
 
-  defp tidy_float_2([[?e, ?+] | _] = cs) do
+  defp tidy_float_2([?e, ?+ | _] = cs) do
     cs
   end
 
@@ -1736,16 +1738,16 @@ defmodule :m_erl_prettypr do
     []
   end
 
-  defp tidy_float_2([[?e, ?-, ?0] | cs]) do
-    tidy_float_2([[?e, ?-] | cs])
+  defp tidy_float_2([?e, ?-, ?0 | cs]) do
+    tidy_float_2([?e, ?- | cs])
   end
 
-  defp tidy_float_2([[?e, ?-] | _] = cs) do
+  defp tidy_float_2([?e, ?- | _] = cs) do
     cs
   end
 
   defp tidy_float_2([?e | cs]) do
-    tidy_float_2([[?e, ?+] | cs])
+    tidy_float_2([?e, ?+ | cs])
   end
 
   defp tidy_float_2([_C | cs]) do

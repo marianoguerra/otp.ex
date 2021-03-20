@@ -1384,7 +1384,7 @@ defmodule :m_tls_handshake do
         _Host,
         _Port,
         connectionStates,
-        %{:versions => versions, :ciphers => userSuites, :fallback => fallback} = sslOpts,
+        %{versions: versions, ciphers: userSuites, fallback: fallback} = sslOpts,
         id,
         renegotiation,
         _OwnCert,
@@ -1406,7 +1406,7 @@ defmodule :m_tls_handshake do
           version
       end
 
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -1447,7 +1447,7 @@ defmodule :m_tls_handshake do
           server_version: {major, minor},
           random: <<_::size(24)-binary, down::size(8)-binary>>
         ),
-        %{:versions => [{m, n} | _]},
+        %{versions: [{m, n} | _]},
         _,
         _,
         _
@@ -1460,9 +1460,9 @@ defmodule :m_tls_handshake do
       level: 2,
       description: 47,
       where: %{
-        :mfa => {:tls_handshake, :hello, 5},
-        :line => 130,
-        :file => 'otp/lib/ssl/src/tls_handshake.erl'
+        mfa: {:tls_handshake, :hello, 5},
+        line: 130,
+        file: 'otp/lib/ssl/src/tls_handshake.erl'
       }
     )
   end
@@ -1472,7 +1472,7 @@ defmodule :m_tls_handshake do
           server_version: {major, minor},
           random: <<_::size(24)-binary, down::size(8)-binary>>
         ),
-        %{:versions => [{m, n} | _]},
+        %{versions: [{m, n} | _]},
         _,
         _,
         _
@@ -1483,9 +1483,9 @@ defmodule :m_tls_handshake do
       level: 2,
       description: 47,
       where: %{
-        :mfa => {:tls_handshake, :hello, 5},
-        :line => 140,
-        :file => 'otp/lib/ssl/src/tls_handshake.erl'
+        mfa: {:tls_handshake, :hello, 5},
+        line: 140,
+        file: 'otp/lib/ssl/src/tls_handshake.erl'
       }
     )
   end
@@ -1498,11 +1498,11 @@ defmodule :m_tls_handshake do
           compression_method: compression,
           session_id: sessionId,
           extensions: %{
-            :server_hello_selected_version =>
+            server_hello_selected_version:
               r_server_hello_selected_version(selected_version: version) = helloExt
           }
         ),
-        %{:versions => supportedVersions, :ocsp_stapling => stapling} = sslOpt,
+        %{versions: supportedVersions, ocsp_stapling: stapling} = sslOpt,
         connectionStates0,
         renegotiation,
         oldId
@@ -1513,9 +1513,9 @@ defmodule :m_tls_handshake do
           level: 2,
           description: 47,
           where: %{
-            :mfa => {:tls_handshake, :hello, 5},
-            :line => 171,
-            :file => 'otp/lib/ssl/src/tls_handshake.erl'
+            mfa: {:tls_handshake, :hello, 5},
+            line: 171,
+            file: 'otp/lib/ssl/src/tls_handshake.erl'
           }
         )
 
@@ -1544,7 +1544,7 @@ defmodule :m_tls_handshake do
 
               selectedVersion ->
                 {:next_state, :wait_sh, selectedVersion,
-                 %{:ocsp_stapling => stapling, :ocsp_expect => ocsp_expect(stapling)}}
+                 %{ocsp_stapling: stapling, ocsp_expect: ocsp_expect(stapling)}}
             end
 
           false ->
@@ -1552,9 +1552,9 @@ defmodule :m_tls_handshake do
               level: 2,
               description: 47,
               where: %{
-                :mfa => {:tls_handshake, :hello, 5},
-                :line => 188,
-                :file => 'otp/lib/ssl/src/tls_handshake.erl'
+                mfa: {:tls_handshake, :hello, 5},
+                line: 188,
+                file: 'otp/lib/ssl/src/tls_handshake.erl'
               }
             )
         end
@@ -1570,7 +1570,7 @@ defmodule :m_tls_handshake do
           session_id: sessionId,
           extensions: helloExt
         ),
-        %{:versions => supportedVersions} = sslOpt,
+        %{versions: supportedVersions} = sslOpt,
         connectionStates0,
         renegotiation,
         oldId
@@ -1600,9 +1600,9 @@ defmodule :m_tls_handshake do
           level: 2,
           description: 70,
           where: %{
-            :mfa => {:tls_handshake, :hello, 5},
-            :line => 207,
-            :file => 'otp/lib/ssl/src/tls_handshake.erl'
+            mfa: {:tls_handshake, :hello, 5},
+            line: 207,
+            file: 'otp/lib/ssl/src/tls_handshake.erl'
           }
         )
     end
@@ -1612,11 +1612,9 @@ defmodule :m_tls_handshake do
         r_client_hello(
           client_version: _ClientVersion,
           cipher_suites: cipherSuites,
-          extensions: %{
-            :client_hello_versions => r_client_hello_versions(versions: clientVersions)
-          }
+          extensions: %{client_hello_versions: r_client_hello_versions(versions: clientVersions)}
         ) = hello,
-        %{:versions => versions} = sslOpts,
+        %{versions: versions} = sslOpts,
         info,
         renegotiation
       ) do
@@ -1634,9 +1632,9 @@ defmodule :m_tls_handshake do
           level: 2,
           description: 40,
           where: %{
-            :mfa => {:tls_handshake, :hello, 4},
-            :line => 248,
-            :file => 'otp/lib/ssl/src/tls_handshake.erl'
+            mfa: {:tls_handshake, :hello, 4},
+            line: 248,
+            file: 'otp/lib/ssl/src/tls_handshake.erl'
           },
           reason: :malformed_handshake_data
         )
@@ -1648,7 +1646,7 @@ defmodule :m_tls_handshake do
           client_version: clientVersion,
           cipher_suites: cipherSuites
         ) = hello,
-        %{:versions => versions} = sslOpts,
+        %{versions: versions} = sslOpts,
         info,
         renegotiation
       ) do
@@ -1661,9 +1659,9 @@ defmodule :m_tls_handshake do
           level: 2,
           description: 80,
           where: %{
-            :mfa => {:tls_handshake, :hello, 4},
-            :line => 261,
-            :file => 'otp/lib/ssl/src/tls_handshake.erl'
+            mfa: {:tls_handshake, :hello, 4},
+            line: 261,
+            file: 'otp/lib/ssl/src/tls_handshake.erl'
           },
           reason: {:failed_to_decode_own_certificate, asn1Reason}
         )
@@ -1673,9 +1671,9 @@ defmodule :m_tls_handshake do
           level: 2,
           description: 40,
           where: %{
-            :mfa => {:tls_handshake, :hello, 4},
-            :line => 263,
-            :file => 'otp/lib/ssl/src/tls_handshake.erl'
+            mfa: {:tls_handshake, :hello, 4},
+            line: 263,
+            file: 'otp/lib/ssl/src/tls_handshake.erl'
           },
           reason: :malformed_handshake_data
         )
@@ -1717,10 +1715,10 @@ defmodule :m_tls_handshake do
            extensions: helloExt
          ),
          %{
-           :versions => versions,
-           :signature_algs => supportedHashSigns,
-           :eccs => supportedECCs,
-           :honor_ecc_order => eCCOrder
+           versions: versions,
+           signature_algs: supportedHashSigns,
+           eccs: supportedECCs,
+           honor_ecc_order: eCCOrder
          } = sslOpts,
          {sessIdTracker, session0, connectionStates0, cert, _},
          renegotiation
@@ -1763,15 +1761,15 @@ defmodule :m_tls_handshake do
               level: 2,
               description: 71,
               where: %{
-                :mfa => {:tls_handshake, :handle_client_hello, 5},
-                :line => 345,
-                :file => 'otp/lib/ssl/src/tls_handshake.erl'
+                mfa: {:tls_handshake, :handle_client_hello, 5},
+                line: 345,
+                file: 'otp/lib/ssl/src/tls_handshake.erl'
               },
               reason: :no_suitable_ciphers
             )
 
           _ ->
-            %{:key_exchange => keyExAlg} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+            %{key_exchange: keyExAlg} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
 
             case :ssl_handshake.select_hashsign(
                    {clientHashSigns, clientSignatureSchemes},
@@ -1804,9 +1802,9 @@ defmodule :m_tls_handshake do
           level: 2,
           description: 70,
           where: %{
-            :mfa => {:tls_handshake, :handle_client_hello, 5},
-            :line => 363,
-            :file => 'otp/lib/ssl/src/tls_handshake.erl'
+            mfa: {:tls_handshake, :handle_client_hello, 5},
+            line: 363,
+            file: 'otp/lib/ssl/src/tls_handshake.erl'
           }
         )
     end
@@ -1885,9 +1883,9 @@ defmodule :m_tls_handshake do
       level: 2,
       description: 70,
       where: %{
-        :mfa => {:tls_handshake, :do_hello, 7},
-        :line => 396,
-        :file => 'otp/lib/ssl/src/tls_handshake.erl'
+        mfa: {:tls_handshake, :do_hello, 7},
+        line: 396,
+        file: 'otp/lib/ssl/src/tls_handshake.erl'
       }
     )
   end
@@ -1903,9 +1901,9 @@ defmodule :m_tls_handshake do
               level: 2,
               description: 86,
               where: %{
-                :mfa => {:tls_handshake, :do_hello, 7},
-                :line => 403,
-                :file => 'otp/lib/ssl/src/tls_handshake.erl'
+                mfa: {:tls_handshake, :do_hello, 7},
+                line: 403,
+                file: 'otp/lib/ssl/src/tls_handshake.erl'
               }
             )
 
@@ -1964,7 +1962,7 @@ defmodule :m_tls_handshake do
          version,
          <<type::size(8)-unsigned-big-integer, length::size(24)-unsigned-big-integer,
            body::size(length)-binary, rest::binary>>,
-         %{:log_level => logLevel} = opts,
+         %{log_level: logLevel} = opts,
          acc
        ) do
     raw =
@@ -1982,9 +1980,9 @@ defmodule :m_tls_handshake do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_handshake, :get_tls_handshake_aux, 4},
-              :line => 449,
-              :file => 'otp/lib/ssl/src/tls_handshake.erl'
+              mfa: {:tls_handshake, :get_tls_handshake_aux, 4},
+              line: 449,
+              file: 'otp/lib/ssl/src/tls_handshake.erl'
             },
             reason: :handshake_decode_error
           )

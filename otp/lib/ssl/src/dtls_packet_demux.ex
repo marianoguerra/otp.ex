@@ -1272,9 +1272,9 @@ defmodule :m_dtls_packet_demux do
       true ->
         apply(:logger, :macro_log, [
           %{
-            :mfa => {:dtls_packet_demux, :handle_info, 2},
-            :line => 190,
-            :file => 'otp/lib/ssl/src/dtls_packet_demux.erl'
+            mfa: {:dtls_packet_demux, :handle_info, 2},
+            line: 190,
+            file: 'otp/lib/ssl/src/dtls_packet_demux.erl'
           },
           :notice,
           report
@@ -1300,9 +1300,9 @@ defmodule :m_dtls_packet_demux do
       true ->
         apply(:logger, :macro_log, [
           %{
-            :mfa => {:dtls_packet_demux, :handle_info, 2},
-            :line => 194,
-            :file => 'otp/lib/ssl/src/dtls_packet_demux.erl'
+            mfa: {:dtls_packet_demux, :handle_info, 2},
+            line: 194,
+            file: 'otp/lib/ssl/src/dtls_packet_demux.erl'
           },
           :notice,
           report

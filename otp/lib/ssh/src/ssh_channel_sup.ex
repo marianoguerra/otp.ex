@@ -119,11 +119,11 @@ defmodule :m_ssh_channel_sup do
 
   defp start_the_child(chanMod, channelSup, connRef, callback, id, args, exec) do
     childSpec = %{
-      :id => make_ref(),
-      :start => {chanMod, :start_link, [connRef, id, callback, args, exec]},
-      :restart => :temporary,
-      :type => :worker,
-      :modules => [chanMod]
+      id: make_ref(),
+      start: {chanMod, :start_link, [connRef, id, callback, args, exec]},
+      restart: :temporary,
+      type: :worker,
+      modules: [chanMod]
     }
 
     case :supervisor.start_child(channelSup, childSpec) do

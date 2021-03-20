@@ -722,7 +722,7 @@ defmodule :m_ct_groups do
         [{:name, grName} | ps]
 
       grName, suite, ps ->
-        [[{:name, grName}, {:suite, suite}] | ps]
+        [{:name, grName}, {:suite, suite} | ps]
     end
 
     name = :proplists.get_value(:name, props)
@@ -795,7 +795,7 @@ defmodule :m_ct_groups do
               [{:name, name} | oRProps]
 
             oRProps ->
-              [[{:name, name}, {:suite, suite}] | oRProps]
+              [{:name, name}, {:suite, suite} | oRProps]
           end
 
         case (try do

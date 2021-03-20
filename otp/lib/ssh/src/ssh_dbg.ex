@@ -678,10 +678,10 @@ defmodule :m_ssh_dbg do
 
   defp trace_info(t) do
     case :erlang.tuple_to_list(t) do
-      [[:trace, _Pid] | info] ->
+      [:trace, _Pid | info] ->
         :erlang.list_to_tuple(info)
 
-      [[:trace_ts, _Pid] | infoTS] ->
+      [:trace_ts, _Pid | infoTS] ->
         :erlang.list_to_tuple(:lists.droplast(infoTS))
     end
   end
@@ -985,9 +985,15 @@ defmodule :m_ssh_dbg do
         '~*.s | ~*s | ~s~n~*.c-+-~*c-+-~*c~n',
         [
           r_h(opts, :address_len),
-          :lists.sublist('Address', r_h(opts, :address_len)),
+          :lists.sublist(
+            'Address',
+            r_h(opts, :address_len)
+          ),
           -3 * r_h(opts, :bytes_per_line),
-          :lists.sublist('Hexdump', 3 * r_h(opts, :bytes_per_line)),
+          :lists.sublist(
+            'Hexdump',
+            3 * r_h(opts, :bytes_per_line)
+          ),
           'ASCII',
           r_h(opts, :address_len),
           ?-,

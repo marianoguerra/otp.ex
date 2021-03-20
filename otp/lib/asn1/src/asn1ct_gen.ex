@@ -1798,7 +1798,7 @@ defmodule :m_asn1ct_gen do
   defp do_emit({:call, m, f, a}) do
     mFA = {m, f, length(a)}
     :asn1ct_func.need(mFA)
-    [[:erlang.atom_to_list(f), '(', call_args(a, '')] | ')']
+    [:erlang.atom_to_list(f), '(', call_args(a, '') | ')']
   end
 
   defp do_emit(:nl) do
@@ -1832,7 +1832,7 @@ defmodule :m_asn1ct_gen do
   end
 
   defp call_args([a | as], sep) do
-    [[sep, do_emit(a)] | call_args(as, ', ')]
+    [sep, do_emit(a) | call_args(as, ', ')]
   end
 
   defp call_args([], _) do
@@ -2097,11 +2097,11 @@ defmodule :m_asn1ct_gen do
           []
       end
 
-    [[:nl, '  ', {:asis, name}, val, com] | do_gen_record_1(t)]
+    [:nl, '  ', {:asis, name}, val, com | do_gen_record_1(t)]
   end
 
   defp do_gen_record_1([{:comment, text} | t]) do
-    [[:nl, '  %% ', text] | do_gen_record_1(t)]
+    [:nl, '  %% ', text | do_gen_record_1(t)]
   end
 
   defp do_gen_record_1([]) do
@@ -2177,7 +2177,10 @@ defmodule :m_asn1ct_gen do
       '\'},',
       :nl,
       '            {options,',
-      :io_lib.format('~p', [options]),
+      :io_lib.format(
+        '~p',
+        [options]
+      ),
       '}]).',
       :nl,
       :nl
@@ -2536,11 +2539,11 @@ defmodule :m_asn1ct_gen do
     :lists.concat(:lists.reverse(newL))
   end
 
-  defp list2name1([[{:ptype, h1}, h2] | t]) do
+  defp list2name1([{:ptype, h1}, h2 | t]) do
     [h1, '_', list2name([h2 | t])]
   end
 
-  defp list2name1([[h1, h2] | t]) do
+  defp list2name1([h1, h2 | t]) do
     [h1, '_', list2name([h2 | t])]
   end
 
@@ -2561,11 +2564,11 @@ defmodule :m_asn1ct_gen do
     :lists.concat(:lists.reverse(newL))
   end
 
-  defp list2rname1([[{:ptype, h1}, _H2] | _T]) do
+  defp list2rname1([{:ptype, h1}, _H2 | _T]) do
     [h1]
   end
 
-  defp list2rname1([[h1, h2] | t]) do
+  defp list2rname1([h1, h2 | t]) do
     [h1, '_', list2name([h2 | t])]
   end
 

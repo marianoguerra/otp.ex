@@ -475,11 +475,11 @@ defmodule :m_epp do
     com_encoding(ps)
   end
 
-  defp com_encoding([['latin', '1'] | _]) do
+  defp com_encoding(['latin', '1' | _]) do
     :latin1
   end
 
-  defp com_encoding([['utf', '8'] | _]) do
+  defp com_encoding(['utf', '8' | _]) do
     :utf8
   end
 
@@ -522,10 +522,8 @@ defmodule :m_epp do
   end
 
   def restore_typed_record_fields([
-        [
-          {:attribute, la, :record, {record, _NewFields}},
-          {:attribute, la, :type, {{:record, record}, fields, []}}
-        ]
+        {:attribute, la, :record, {record, _NewFields}},
+        {:attribute, la, :type, {{:record, record}, fields, []}}
         | forms
       ]) do
     [
@@ -628,7 +626,7 @@ defmodule :m_epp do
   defp user_predef([{m, val, :redefine} | pdm], ms)
        when is_atom(m) do
     exp = :erl_parse.tokens(:erl_parse.abstract(val))
-    user_predef(pdm, %{ms | m => {:none, exp}})
+    user_predef(pdm, Map.put(ms, m, {:none, exp}))
   end
 
   defp user_predef([{m, val} | pdm], ms) when is_atom(m) do
@@ -641,7 +639,11 @@ defmodule :m_epp do
 
       _ ->
         exp = :erl_parse.tokens(:erl_parse.abstract(val))
-        user_predef(pdm, %{ms | m => [{:none, {:none, exp}}]})
+
+        user_predef(
+          pdm,
+          Map.put(ms, m, [{:none, {:none, exp}}])
+        )
     end
   end
 
@@ -729,7 +731,7 @@ defmodule :m_epp do
     anno = :erl_anno.new(atLocation)
     enter_file_reply(from, pname, anno, atLocation, :code)
     ms0 = r_epp(st0, :macs)
-    ms = %{ms0 | :FILE => {:none, [{:string, anno, pname}]}}
+    ms = %{ms0 | FILE: {:none, [{:string, anno, pname}]}}
     path = [:filename.dirname(pname) | tl(r_epp(st0, :path))]
     defEncoding = r_epp(st0, :default_encoding)
     _ = set_encoding(newF, defEncoding)
@@ -809,7 +811,7 @@ defmodule :m_epp do
             currLoc = add_line(oldLoc, delta)
             anno = :erl_anno.new(currLoc)
             ms0 = r_epp(st, :macs)
-            ms = %{ms0 | :FILE => {:none, [{:string, anno, oldName2}]}}
+            ms = %{ms0 | FILE: {:none, [{:string, anno, oldName2}]}}
             nextSt = r_epp(oldSt, sstk: sts, macs: ms, uses: r_epp(st, :uses))
             enter_file_reply(from, oldName, anno, currLoc, :code)
 
@@ -856,7 +858,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Ld, :define} = define]
+           {:-, _Lh},
+           {:atom, _Ld, :define} = define
            | toks
          ],
          from,
@@ -867,7 +870,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Ld, :undef} = undef]
+           {:-, _Lh},
+           {:atom, _Ld, :undef} = undef
            | toks
          ],
          from,
@@ -878,7 +882,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Ld, :error} = error]
+           {:-, _Lh},
+           {:atom, _Ld, :error} = error
            | toks
          ],
          from,
@@ -889,7 +894,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Ld, :warning} = warn]
+           {:-, _Lh},
+           {:atom, _Ld, :warning} = warn
            | toks
          ],
          from,
@@ -900,7 +906,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Li, :include} = inc]
+           {:-, _Lh},
+           {:atom, _Li, :include} = inc
            | toks
          ],
          from,
@@ -911,7 +918,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Li, :include_lib} = incLib]
+           {:-, _Lh},
+           {:atom, _Li, :include_lib} = incLib
            | toks
          ],
          from,
@@ -922,7 +930,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Li, :ifdef} = ifDef]
+           {:-, _Lh},
+           {:atom, _Li, :ifdef} = ifDef
            | toks
          ],
          from,
@@ -933,7 +942,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Li, :ifndef} = ifnDef]
+           {:-, _Lh},
+           {:atom, _Li, :ifndef} = ifnDef
            | toks
          ],
          from,
@@ -944,7 +954,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Le, :else} = else__]
+           {:-, _Lh},
+           {:atom, _Le, :else} = else__
            | toks
          ],
          from,
@@ -953,24 +964,18 @@ defmodule :m_epp do
     scan_else(toks, else__, from, st)
   end
 
-  defp scan_toks([[{:-, _Lh}, {:if, _Le} = if__] | toks], from, st) do
+  defp scan_toks([{:-, _Lh}, {:if, _Le} = if__ | toks], from, st) do
     scan_if(toks, if__, from, st)
   end
 
-  defp scan_toks(
-         [
-           [{:-, _Lh}, {:atom, _Le, :elif} = elif]
-           | toks
-         ],
-         from,
-         st
-       ) do
+  defp scan_toks([{:-, _Lh}, {:atom, _Le, :elif} = elif | toks], from, st) do
     scan_elif(toks, elif, from, st)
   end
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Le, :endif} = endif]
+           {:-, _Lh},
+           {:atom, _Le, :endif} = endif
            | toks
          ],
          from,
@@ -981,7 +986,8 @@ defmodule :m_epp do
 
   defp scan_toks(
          [
-           [{:-, _Lh}, {:atom, _Lf, :file} = fileToken]
+           {:-, _Lh},
+           {:atom, _Lf, :file} = fileToken
            | toks0
          ],
          from,
@@ -1032,7 +1038,9 @@ defmodule :m_epp do
 
   defp scan_module(
          [
-           [{:-, _Lh}, {:atom, _Lm, :module}, {:"(", _Ll}]
+           {:-, _Lh},
+           {:atom, _Lm, :module},
+           {:"(", _Ll}
            | ts
          ],
          ms
@@ -1042,7 +1050,9 @@ defmodule :m_epp do
 
   defp scan_module(
          [
-           [{:-, _Lh}, {:atom, _Lm, :extends}, {:"(", _Ll}]
+           {:-, _Lh},
+           {:atom, _Lm, :extends},
+           {:"(", _Ll}
            | ts
          ],
          ms
@@ -1054,17 +1064,17 @@ defmodule :m_epp do
     ms
   end
 
-  defp scan_module_1([[{:atom, _, _} = a, {:",", l}] | ts], ms) do
-    scan_module_1([[a, {:")", l}] | ts], ms)
+  defp scan_module_1([{:atom, _, _} = a, {:",", l} | ts], ms) do
+    scan_module_1([a, {:")", l} | ts], ms)
   end
 
   defp scan_module_1(
-         [[{:atom, ln, a} = modAtom, {:")", _Lr}] | _Ts],
+         [{:atom, ln, a} = modAtom, {:")", _Lr} | _Ts],
          ms0
        ) do
     modString = :erlang.atom_to_list(a)
-    ms = %{ms0 | :MODULE => {:none, [modAtom]}}
-    %{ms | :MODULE_STRING => {:none, [{:string, ln, modString}]}}
+    ms = %{ms0 | MODULE: {:none, [modAtom]}}
+    %{ms | MODULE_STRING: {:none, [{:string, ln, modString}]}}
   end
 
   defp scan_module_1(_Ts, ms) do
@@ -1072,12 +1082,12 @@ defmodule :m_epp do
   end
 
   defp scan_extends(
-         [[{:atom, ln, a} = modAtom, {:")", _Lr}] | _Ts],
+         [{:atom, ln, a} = modAtom, {:")", _Lr} | _Ts],
          ms0
        ) do
     modString = :erlang.atom_to_list(a)
-    ms = %{ms0 | :BASE_MODULE => {:none, [modAtom]}}
-    %{ms | :BASE_MODULE_STRING => {:none, [{:string, ln, modString}]}}
+    ms = %{ms0 | BASE_MODULE: {:none, [modAtom]}}
+    %{ms | BASE_MODULE_STRING: {:none, [{:string, ln, modString}]}}
   end
 
   defp scan_extends(_Ts, ms) do
@@ -1119,7 +1129,7 @@ defmodule :m_epp do
     wait_req_scan(st)
   end
 
-  defp scan_define([[{:"(", _Lp}, {type, _Lm, _} = mac] | toks], def__, from, st)
+  defp scan_define([{:"(", _Lp}, {type, _Lm, _} = mac | toks], def__, from, st)
        when type === :atom or type === :var do
     scan_define_1(toks, mac, def__, from, st)
   end
@@ -1215,7 +1225,7 @@ defmodule :m_epp do
   end
 
   defp scan_define_cont(f, r_epp(macs: ms0) = st, m, defs, arity, def__) do
-    ms = %{ms0 | m => [{arity, def__} | defs]}
+    ms = Map.put(ms0, m, [{arity, def__} | defs])
 
     try do
       macro_uses(def__)
@@ -1238,7 +1248,7 @@ defmodule :m_epp do
             end
         ]
 
-        uses = %{uses0 | m => val}
+        uses = Map.put(uses0, m, val)
         scan_toks(f, r_epp(st, uses: uses, macs: ms))
     end
   end
@@ -1252,17 +1262,17 @@ defmodule :m_epp do
     []
   end
 
-  defp macro_ref([[{:"?", _}, {:"?", _}] | rest]) do
+  defp macro_ref([{:"?", _}, {:"?", _} | rest]) do
     macro_ref(rest)
   end
 
-  defp macro_ref([[{:"?", _}, {:atom, _, a} = atom] | rest]) do
+  defp macro_ref([{:"?", _}, {:atom, _, a} = atom | rest]) do
     lm = loc(atom)
     arity = count_args(rest, lm, a)
     [{a, arity} | macro_ref(rest)]
   end
 
-  defp macro_ref([[{:"?", _}, {:var, _, a} = var] | rest]) do
+  defp macro_ref([{:"?", _}, {:var, _, a} = var | rest]) do
     lm = loc(var)
     arity = count_args(rest, lm, a)
     [{a, arity} | macro_ref(rest)]
@@ -1696,7 +1706,7 @@ defmodule :m_epp do
     anno = :erl_anno.new(ln)
     enter_file_reply(from, name, anno, loc(tf), :generated)
     ms0 = r_epp(st, :macs)
-    ms = %{ms0 | :FILE => {:none, [{:string, line1(), name}]}}
+    ms = %{ms0 | FILE: {:none, [{:string, line1(), name}]}}
     locf = loc(tf)
     newLoc = new_location(ln, r_epp(st, :location), locf)
 
@@ -1730,22 +1740,22 @@ defmodule :m_epp do
 
   defp skip_toks(from, st, [i | sis]) do
     case :io.scan_erl_form(r_epp(st, :file), :"", r_epp(st, :location)) do
-      {:ok, [[{:-, _Lh}, {:atom, _Li, :ifdef}] | _Toks], cl} ->
-        skip_toks(from, r_epp(st, location: cl), [[:ifdef, i] | sis])
+      {:ok, [{:-, _Lh}, {:atom, _Li, :ifdef} | _Toks], cl} ->
+        skip_toks(from, r_epp(st, location: cl), [:ifdef, i | sis])
 
-      {:ok, [[{:-, _Lh}, {:atom, _Li, :ifndef}] | _Toks], cl} ->
-        skip_toks(from, r_epp(st, location: cl), [[:ifndef, i] | sis])
+      {:ok, [{:-, _Lh}, {:atom, _Li, :ifndef} | _Toks], cl} ->
+        skip_toks(from, r_epp(st, location: cl), [:ifndef, i | sis])
 
-      {:ok, [[{:-, _Lh}, {:if, _Li}] | _Toks], cl} ->
-        skip_toks(from, r_epp(st, location: cl), [[:if, i] | sis])
+      {:ok, [{:-, _Lh}, {:if, _Li} | _Toks], cl} ->
+        skip_toks(from, r_epp(st, location: cl), [:if, i | sis])
 
-      {:ok, [[{:-, _Lh}, {:atom, _Le, :else} = else__] | _Toks], cl} ->
+      {:ok, [{:-, _Lh}, {:atom, _Le, :else} = else__ | _Toks], cl} ->
         skip_else(else__, from, r_epp(st, location: cl), [i | sis])
 
-      {:ok, [[{:-, _Lh}, {:atom, _Le, :elif} = elif] | toks], cl} ->
+      {:ok, [{:-, _Lh}, {:atom, _Le, :elif} = elif | toks], cl} ->
         skip_elif(toks, elif, from, r_epp(st, location: cl), [i | sis])
 
-      {:ok, [[{:-, _Lh}, {:atom, _Le, :endif}] | _Toks], cl} ->
+      {:ok, [{:-, _Lh}, {:atom, _Le, :endif} | _Toks], cl} ->
         skip_toks(from, r_epp(st, location: cl), sis)
 
       {:ok, _Toks, cl} ->
@@ -1816,13 +1826,15 @@ defmodule :m_epp do
     skip_toks(from, st, sis)
   end
 
-  defp macro_pars([[{:")", _Lp}, {:",", _Ld} = comma] | ex], args) do
+  defp macro_pars([{:")", _Lp}, {:",", _Ld} = comma | ex], args) do
     {:ok, {:lists.reverse(args), macro_expansion(ex, comma)}}
   end
 
   defp macro_pars(
          [
-           [{:var, _, name}, {:")", _Lp}, {:",", _Ld} = comma]
+           {:var, _, name},
+           {:")", _Lp},
+           {:",", _Ld} = comma
            | ex
          ],
          args
@@ -1831,7 +1843,7 @@ defmodule :m_epp do
     {:ok, {:lists.reverse([name | args]), macro_expansion(ex, comma)}}
   end
 
-  defp macro_pars([[{:var, _L, name}, {:",", _}] | ts], args) do
+  defp macro_pars([{:var, _L, name}, {:",", _} | ts], args) do
     false = :lists.member(name, args)
     macro_pars(ts, [name | args])
   end
@@ -1931,7 +1943,7 @@ defmodule :m_epp do
   end
 
   defp expand_macros(
-         [[{:"?", _Lq}, {:atom, _Lm, m} = macT] | toks],
+         [{:"?", _Lq}, {:atom, _Lm, m} = macT | toks],
          st
        ) do
     expand_macros(macT, m, toks, st)
@@ -1939,7 +1951,8 @@ defmodule :m_epp do
 
   defp expand_macros(
          [
-           [{:"?", _Lq}, {:var, lm, :FUNCTION_NAME} = token]
+           {:"?", _Lq},
+           {:var, lm, :FUNCTION_NAME} = token
            | toks
          ],
          st0
@@ -1957,7 +1970,8 @@ defmodule :m_epp do
 
   defp expand_macros(
          [
-           [{:"?", _Lq}, {:var, lm, :FUNCTION_ARITY} = token]
+           {:"?", _Lq},
+           {:var, lm, :FUNCTION_ARITY} = token
            | toks
          ],
          st0
@@ -1974,7 +1988,7 @@ defmodule :m_epp do
   end
 
   defp expand_macros(
-         [[{:"?", _Lq}, {:var, lm, :LINE} = tok] | toks],
+         [{:"?", _Lq}, {:var, lm, :LINE} = tok | toks],
          st
        ) do
     line = :erl_scan.line(tok)
@@ -1982,13 +1996,13 @@ defmodule :m_epp do
   end
 
   defp expand_macros(
-         [[{:"?", _Lq}, {:var, _Lm, m} = macT] | toks],
+         [{:"?", _Lq}, {:var, _Lm, m} = macT | toks],
          st
        ) do
     expand_macros(macT, m, toks, st)
   end
 
-  defp expand_macros([[{:"?", _Lq}, token] | _Toks], _St) do
+  defp expand_macros([{:"?", _Lq}, token | _Toks], _St) do
     t =
       case :erl_scan.text(token) do
         text when is_list(text) ->
@@ -2010,7 +2024,7 @@ defmodule :m_epp do
     []
   end
 
-  defp bind_args([[{:"(", _Llp}, {:")", _Lrp}] | toks], _Lm, _M, [], bs) do
+  defp bind_args([{:"(", _Llp}, {:")", _Lrp} | toks], _Lm, _M, [], bs) do
     {bs, toks}
   end
 
@@ -2045,14 +2059,14 @@ defmodule :m_epp do
   end
 
   defp store_arg(_L, _M, a, arg, bs) do
-    %{bs | a => arg}
+    Map.put(bs, a, arg)
   end
 
-  defp count_args([[{:"(", _Llp}, {:")", _Lrp}] | _Toks], _Lm, _M) do
+  defp count_args([{:"(", _Llp}, {:")", _Lrp} | _Toks], _Lm, _M) do
     0
   end
 
-  defp count_args([[{:"(", _Llp}, {:",", _Lc}] | _Toks], lm, m) do
+  defp count_args([{:"(", _Llp}, {:",", _Lc} | _Toks], lm, m) do
     throw({:error, lm, {:arg_error, m}})
   end
 
@@ -2069,7 +2083,7 @@ defmodule :m_epp do
     nbArgs
   end
 
-  defp count_args([[{:",", _Lc}, {:")", _Lrp}] | _Toks], lm, m, _NbArgs) do
+  defp count_args([{:",", _Lc}, {:")", _Lrp} | _Toks], lm, m, _NbArgs) do
     throw({:error, lm, {:arg_error, m}})
   end
 
@@ -2128,7 +2142,8 @@ defmodule :m_epp do
 
   defp macro_arg(
          [
-           [{:fun, _} = fun, {:var, _, _} = name]
+           {:fun, _} = fun,
+           {:var, _, _} = name
            | [
                {:"(", _}
                | _
@@ -2137,7 +2152,7 @@ defmodule :m_epp do
          e,
          arg
        ) do
-    macro_arg(toks, [:end | e], [[name, fun] | arg])
+    macro_arg(toks, [:end | e], [name, fun | arg])
   end
 
   defp macro_arg([{:receive, lr} | toks], e, arg) do
@@ -2174,7 +2189,7 @@ defmodule :m_epp do
     end
   end
 
-  defp expand_macro([[{:"?", _}, {:"?", _}, {:var, _Lv, v}] | ts], l, rest, bs) do
+  defp expand_macro([{:"?", _}, {:"?", _}, {:var, _Lv, v} | ts], l, rest, bs) do
     case bs do
       %{^v => val} ->
         expand_arg(stringify(val, l), ts, l, rest, bs)
@@ -2213,7 +2228,7 @@ defmodule :m_epp do
       end
 
     case toks1 do
-      [[{:atom, _, name}, {:"(", _}] | toks] ->
+      [{:atom, _, name}, {:"(", _} | toks] ->
         fA = update_fun_name_1(toks, 1, {name, 0}, st)
         r_epp(st, fname: fA)
 
@@ -2501,7 +2516,7 @@ defmodule :m_epp do
 
       not generated ->
         case fs do
-          [[_, ^file] | fs1] ->
+          [_, ^file | fs1] ->
             [form | interpret_file_attr(forms, 0, [file | fs1])]
 
           _ ->

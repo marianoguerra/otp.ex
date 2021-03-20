@@ -2579,7 +2579,7 @@ defmodule :m_sofs do
     rel2fam(s, x0, [y | yL], l)
   end
 
-  defp rel2fam([{x, y} | s], x0, [[a, b] | yL], l) do
+  defp rel2fam([{x, y} | s], x0, [a, b | yL], l) do
     rel2fam(s, x, [y], [{x0, reverse(yL, [b, a])} | l])
   end
 
@@ -2825,7 +2825,7 @@ defmodule :m_sofs do
   end
 
   defp weak([e = {x, _Y} | es], ys, l) do
-    weak2(es, ys, [[e, {x, x}] | l], x)
+    weak2(es, ys, [e, {x, x} | l], x)
   end
 
   defp weak([], [y | ys], l) do
@@ -2849,7 +2849,7 @@ defmodule :m_sofs do
   end
 
   defp weak1([e = {x, _Y} | es], ys, l, x0) when x == x0 do
-    weak2(es, ys, [[e, {x, x}] | l], x)
+    weak2(es, ys, [e, {x, x} | l], x)
   end
 
   defp weak1(es, ys, l, x) do

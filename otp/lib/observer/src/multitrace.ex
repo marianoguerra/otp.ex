@@ -160,7 +160,27 @@ defmodule :m_multitrace do
         :io.format(
           out,
           'start\t~w\t~w\t~w\t~w\t~w\t~w\t~w\t~w~nend\t~w\t~w\t~w\t~w\t~w\t~w\t~w\t~w~n~n',
-          [sM, sR, sS, sO, sH, sOB, sB, p, eM, eR, eS, eO, eH, eOB, eB, diff(startTime, ts)]
+          [
+            sM,
+            sR,
+            sS,
+            sO,
+            sH,
+            sOB,
+            sB,
+            p,
+            eM,
+            eR,
+            eS,
+            eO,
+            eH,
+            eOB,
+            eB,
+            diff(
+              startTime,
+              ts
+            )
+          ]
         )
 
         :dict.erase(p, s)
@@ -282,7 +302,7 @@ defmodule :m_multitrace do
     proc_summary(rest, acc)
   end
 
-  defp proc_summary([[{:out, end__}, {:in, start}] | rest], acc) do
+  defp proc_summary([{:out, end__}, {:in, start} | rest], acc) do
     diff = diff(start, end__)
     proc_summary(rest, acc + diff)
   end

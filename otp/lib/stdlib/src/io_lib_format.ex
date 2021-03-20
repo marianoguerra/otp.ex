@@ -44,7 +44,7 @@ defmodule :m_io_lib_format do
     {print(cs), args(cs)}
   end
 
-  defp args([%{:args => as} | cs]) do
+  defp args([%{args: as} | cs]) do
     as ++ args(cs)
   end
 
@@ -58,13 +58,13 @@ defmodule :m_io_lib_format do
 
   defp print([
          %{
-           :control_char => c,
-           :width => f,
-           :adjust => ad,
-           :precision => p,
-           :pad_char => pad,
-           :encoding => encoding,
-           :strings => strings
+           control_char: c,
+           width: f,
+           adjust: ad,
+           precision: p,
+           pad_char: pad,
+           encoding: encoding,
+           strings: strings
          }
          | cs
        ]) do
@@ -153,28 +153,19 @@ defmodule :m_io_lib_format do
     {f, ad, fmt1, args1} = field_width(fmt0, args0)
     {p, fmt2, args2} = precision(fmt1, args1)
     {pad, fmt3, args3} = pad_char(fmt2, args2)
-
-    spec0 = %{
-      :width => f,
-      :adjust => ad,
-      :precision => p,
-      :pad_char => pad,
-      :encoding => :latin1,
-      :strings => true
-    }
-
+    spec0 = %{width: f, adjust: ad, precision: p, pad_char: pad, encoding: :latin1, strings: true}
     {spec1, fmt4} = modifiers(fmt3, spec0)
     {c, as, fmt5, args4} = collect_cc(fmt4, args3)
-    spec2 = %{spec1 | :control_char => c, :args => as}
+    spec2 = Map.merge(spec1, %{control_char: c, args: as})
     {spec2, fmt5, args4}
   end
 
   defp modifiers([?t | fmt], spec) do
-    modifiers(fmt, %{spec | :encoding => :unicode})
+    modifiers(fmt, Map.put(spec, :encoding, :unicode))
   end
 
   defp modifiers([?l | fmt], spec) do
-    modifiers(fmt, %{spec | :strings => false})
+    modifiers(fmt, Map.put(spec, :strings, false))
   end
 
   defp modifiers(fmt, spec) do
@@ -231,11 +222,11 @@ defmodule :m_io_lib_format do
     {f, fmt, args}
   end
 
-  defp pad_char([[?., ?*] | fmt], [pad | args]) do
+  defp pad_char([?., ?* | fmt], [pad | args]) do
     {pad, fmt, args}
   end
 
-  defp pad_char([[?., pad] | fmt], args) do
+  defp pad_char([?., pad | fmt], args) do
     {pad, fmt, args}
   end
 
@@ -251,11 +242,11 @@ defmodule :m_io_lib_format do
     {?p, [a], fmt, args}
   end
 
-  defp collect_cc([?W | fmt], [[a, depth] | args]) do
+  defp collect_cc([?W | fmt], [a, depth | args]) do
     {?W, [a, depth], fmt, args}
   end
 
-  defp collect_cc([?P | fmt], [[a, depth] | args]) do
+  defp collect_cc([?P | fmt], [a, depth | args]) do
     {?P, [a, depth], fmt, args}
   end
 
@@ -283,11 +274,11 @@ defmodule :m_io_lib_format do
     {?B, [a], fmt, args}
   end
 
-  defp collect_cc([?x | fmt], [[a, prefix] | args]) do
+  defp collect_cc([?x | fmt], [a, prefix | args]) do
     {?x, [a, prefix], fmt, args}
   end
 
-  defp collect_cc([?X | fmt], [[a, prefix] | args]) do
+  defp collect_cc([?X | fmt], [a, prefix | args]) do
     {?X, [a, prefix], fmt, args}
   end
 
@@ -316,76 +307,55 @@ defmodule :m_io_lib_format do
   end
 
   defp count_small(cs) do
-    count_small(
-      cs,
-      %{:p => 0, :s => 0, :w => 0, :other => 0}
-    )
+    count_small(cs, %{p: 0, s: 0, w: 0, other: 0})
   end
 
-  defp count_small(
-         [%{:control_char => ?p} | cs],
-         %{:p => p} = cnts
-       ) do
-    count_small(cs, %{cnts | :p => p + 1})
+  defp count_small([%{control_char: ?p} | cs], %{p: p} = cnts) do
+    count_small(cs, %{cnts | p: p + 1})
   end
 
-  defp count_small(
-         [%{:control_char => ?P} | cs],
-         %{:p => p} = cnts
-       ) do
-    count_small(cs, %{cnts | :p => p + 1})
+  defp count_small([%{control_char: ?P} | cs], %{p: p} = cnts) do
+    count_small(cs, %{cnts | p: p + 1})
   end
 
-  defp count_small(
-         [%{:control_char => ?w} | cs],
-         %{:w => w} = cnts
-       ) do
-    count_small(cs, %{cnts | :w => w + 1})
+  defp count_small([%{control_char: ?w} | cs], %{w: w} = cnts) do
+    count_small(cs, %{cnts | w: w + 1})
   end
 
-  defp count_small(
-         [%{:control_char => ?W} | cs],
-         %{:w => w} = cnts
-       ) do
-    count_small(cs, %{cnts | :w => w + 1})
+  defp count_small([%{control_char: ?W} | cs], %{w: w} = cnts) do
+    count_small(cs, %{cnts | w: w + 1})
   end
 
-  defp count_small(
-         [%{:control_char => ?s} | cs],
-         %{:w => w} = cnts
-       ) do
-    count_small(cs, %{cnts | :w => w + 1})
+  defp count_small([%{control_char: ?s} | cs], %{w: w} = cnts) do
+    count_small(cs, %{cnts | w: w + 1})
   end
 
-  defp count_small([s | cs], %{:other => other} = cnts)
+  defp count_small([s | cs], %{other: other} = cnts)
        when is_list(s) or is_binary(s) do
     count_small(
       cs,
-      %{cnts | :other => other + :io_lib.chars_length(s)}
+      %{cnts | other: other + :io_lib.chars_length(s)}
     )
   end
 
-  defp count_small([c | cs], %{:other => other} = cnts)
+  defp count_small([c | cs], %{other: other} = cnts)
        when is_integer(c) do
-    count_small(cs, %{cnts | :other => other + 1})
+    count_small(cs, %{cnts | other: other + 1})
   end
 
-  defp count_small(
-         [],
-         %{:p => p, :s => s, :w => w, :other => other}
-       ) do
+  defp count_small([], %{p: p, s: s, w: w, other: other}) do
     {p, s, w, other}
   end
 
   defp build_small([
          %{
-           :control_char => c,
-           :args => as,
-           :width => f,
-           :adjust => ad,
-           :precision => p,
-           :pad_char => pad,
-           :encoding => enc
+           control_char: c,
+           args: as,
+           width: f,
+           adjust: ad,
+           precision: p,
+           pad_char: pad,
+           encoding: enc
          } = cC
          | cs
        ]) do
@@ -409,14 +379,14 @@ defmodule :m_io_lib_format do
   defp build_limited(
          [
            %{
-             :control_char => c,
-             :args => as,
-             :width => f,
-             :adjust => ad,
-             :precision => p,
-             :pad_char => pad,
-             :encoding => enc,
-             :strings => str
+             control_char: c,
+             args: as,
+             width: f,
+             adjust: ad,
+             precision: p,
+             pad_char: pad,
+             encoding: enc,
+             strings: str
            }
            | cs
          ],
@@ -793,7 +763,7 @@ defmodule :m_io_lib_format do
   end
 
   defp float_exp(e) when e >= 0 do
-    [[?e, ?+] | :erlang.integer_to_list(e)]
+    [?e, ?+ | :erlang.integer_to_list(e)]
   end
 
   defp float_exp(e) do
@@ -1367,7 +1337,7 @@ defmodule :m_io_lib_format do
             lowercase
           )
 
-        term([[?-, prefix] | s], f, adj, :none, pad)
+        term([?-, prefix | s], f, adj, :none, pad)
 
       true ->
         s =
@@ -1452,7 +1422,7 @@ defmodule :m_io_lib_format do
 
   defp chars(c, n) when is_integer(n) do
     s = chars(c, n >>> 1)
-    [[c, s] | s]
+    [c, s | s]
   end
 
   defp cond_lowercase(string, true) do

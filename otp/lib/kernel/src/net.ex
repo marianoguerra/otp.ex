@@ -140,60 +140,60 @@ defmodule :m_net do
   end
 
   defp getifaddrs_filter_map_all() do
-    %{:family => :all, :flags => :any}
+    %{family: :all, flags: :any}
   end
 
   defp getifaddrs_filter_map_default() do
-    %{:family => :default, :flags => :any}
+    %{family: :default, flags: :any}
   end
 
   defp getifaddrs_filter_map_inet() do
-    %{:family => :inet, :flags => :any}
+    %{family: :inet, flags: :any}
   end
 
   defp getifaddrs_filter_map_inet6() do
-    %{:family => :inet6, :flags => :any}
+    %{family: :inet6, flags: :any}
   end
 
   defp getifaddrs_filter_map_packet() do
-    %{:family => :packet, :flags => :any}
+    %{family: :packet, flags: :any}
   end
 
   defp getifaddrs_filter(
-         %{:family => fFamily, :flags => fFlags},
-         %{:addr => %{:family => family}, :flags => flags} = _Entry
+         %{family: fFamily, flags: fFlags},
+         %{addr: %{family: family}, flags: flags} = _Entry
        )
        when fFamily === :default and (family === :inet or family === :inet6) do
     getifaddrs_filter_flags(fFlags, flags)
   end
 
   defp getifaddrs_filter(
-         %{:family => fFamily, :flags => fFlags},
-         %{:addr => %{:family => family}, :flags => flags} = _Entry
+         %{family: fFamily, flags: fFlags},
+         %{addr: %{family: family}, flags: flags} = _Entry
        )
        when fFamily === :inet and family === :inet do
     getifaddrs_filter_flags(fFlags, flags)
   end
 
   defp getifaddrs_filter(
-         %{:family => fFamily, :flags => fFlags},
-         %{:addr => %{:family => family}, :flags => flags} = _Entry
+         %{family: fFamily, flags: fFlags},
+         %{addr: %{family: family}, flags: flags} = _Entry
        )
        when fFamily === :inet6 and family === :inet6 do
     getifaddrs_filter_flags(fFlags, flags)
   end
 
   defp getifaddrs_filter(
-         %{:family => fFamily, :flags => fFlags},
-         %{:addr => %{:family => family}, :flags => flags} = _Entry
+         %{family: fFamily, flags: fFlags},
+         %{addr: %{family: family}, flags: flags} = _Entry
        )
        when fFamily === :packet and family === :packet do
     getifaddrs_filter_flags(fFlags, flags)
   end
 
   defp getifaddrs_filter(
-         %{:family => fFamily, :flags => fFlags},
-         %{:flags => flags} = _Entry
+         %{family: fFamily, flags: fFlags},
+         %{flags: flags} = _Entry
        )
        when fFamily === :all do
     getifaddrs_filter_flags(fFlags, flags)

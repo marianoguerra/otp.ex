@@ -1321,7 +1321,7 @@ defmodule :m_tls_connection do
     premaster_secret: :undefined,
     server_psk_identity: :undefined,
     cookie_iv_shard: :undefined,
-    ocsp_stapling_state: %{:ocsp_stapling => false, :ocsp_expect => :no_staple}
+    ocsp_stapling_state: %{ocsp_stapling: false, ocsp_expect: :no_staple}
   )
 
   Record.defrecord(:r_connection_env, :connection_env,
@@ -1477,7 +1477,7 @@ defmodule :m_tls_connection do
         host,
         port,
         socket,
-        {%{:erl_dist => false}, _, trackers} = opts,
+        {%{erl_dist: false}, _, trackers} = opts,
         user,
         {cbModule, _, _, _, _} = cbInfo,
         timeout
@@ -1503,7 +1503,7 @@ defmodule :m_tls_connection do
         host,
         port,
         socket,
-        {%{:erl_dist => true}, _, trackers} = opts,
+        {%{erl_dist: true}, _, trackers} = opts,
         user,
         {cbModule, _, _, _, _} = cbInfo,
         timeout
@@ -1546,7 +1546,7 @@ defmodule :m_tls_connection do
         host,
         port,
         socket,
-        {%{:erl_dist => erlDist}, _, _} = options,
+        {%{erl_dist: erlDist}, _, _} = options,
         user,
         cbInfo
       ]) do
@@ -1571,12 +1571,12 @@ defmodule :m_tls_connection do
       :gen_statem.enter_loop(:tls_connection, [], :init, state)
     catch
       error ->
-        eState = r_state(state0, protocol_specific: %{map | :error => error})
+        eState = r_state(state0, protocol_specific: Map.put(map, :error, error))
         :gen_statem.enter_loop(:tls_connection, [], :error, eState)
     end
   end
 
-  def pids(r_state(protocol_specific: %{:sender => sender})) do
+  def pids(r_state(protocol_specific: %{sender: sender})) do
     [self(), sender]
   end
 
@@ -1601,7 +1601,7 @@ defmodule :m_tls_connection do
                  ] = cipherTexts
              ),
            connection_states: connectionStates,
-           ssl_options: %{:padding_check => check}
+           ssl_options: %{padding_check: check}
          ) = state
        ) do
     next_record(state, cipherTexts, connectionStates, check)
@@ -1611,7 +1611,7 @@ defmodule :m_tls_connection do
          :connection,
          r_state(
            protocol_buffers: r_protocol_buffers(tls_cipher_texts: []),
-           protocol_specific: %{:active_n_toggle => true}
+           protocol_specific: %{active_n_toggle: true}
          ) = state
        ) do
     flow_ctrl(state)
@@ -1621,7 +1621,7 @@ defmodule :m_tls_connection do
          _,
          r_state(
            protocol_buffers: r_protocol_buffers(tls_cipher_texts: []),
-           protocol_specific: %{:active_n_toggle => true}
+           protocol_specific: %{active_n_toggle: true}
          ) = state
        ) do
     activate_socket(state)
@@ -1700,14 +1700,14 @@ defmodule :m_tls_connection do
 
   defp activate_socket(
          r_state(
-           protocol_specific: %{:active_n_toggle => true, :active_n => n} = protocolSpec,
+           protocol_specific: %{active_n_toggle: true, active_n: n} = protocolSpec,
            static_env: r_static_env(socket: socket, close_tag: closeTag, transport_cb: transport)
          ) = state
        ) do
     case :tls_socket.setopts(transport, socket, [{:active, n}]) do
       :ok ->
         {:no_record,
-         r_state(state, protocol_specific: %{protocolSpec | :active_n_toggle => false})}
+         r_state(state, protocol_specific: Map.put(protocolSpec, :active_n_toggle, false))}
 
       _ ->
         send(self(), {closeTag, socket})
@@ -1987,9 +1987,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :handle_protocol_record, 3},
-              :line => 402,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :handle_protocol_record, 3},
+              line: 402,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :alert_decode_error
           ),
@@ -2007,9 +2007,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :handle_protocol_record, 3},
-              :line => 396,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :handle_protocol_record, 3},
+              line: 396,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :empty_alert
           ),
@@ -2092,7 +2092,7 @@ defmodule :m_tls_connection do
           handshake_env: r_handshake_env(tls_handshake_history: hist0) = hsEnv,
           connection_env: r_connection_env(negotiated_version: version),
           flight_buffer: flight0,
-          ssl_options: %{:log_level => logLevel},
+          ssl_options: %{log_level: logLevel},
           connection_states: connectionStates0
         ) = state0
       ) do
@@ -2128,7 +2128,7 @@ defmodule :m_tls_connection do
         r_state(
           connection_env: r_connection_env(negotiated_version: version),
           flight_buffer: flight0,
-          ssl_options: %{:log_level => logLevel},
+          ssl_options: %{log_level: logLevel},
           connection_states: connectionStates0
         ) = state0
       ) do
@@ -2143,9 +2143,9 @@ defmodule :m_tls_connection do
 
   def reinit(
         r_state(
-          protocol_specific: %{:sender => sender},
+          protocol_specific: %{sender: sender},
           connection_env: r_connection_env(negotiated_version: version),
-          connection_states: %{:current_write => write}
+          connection_states: %{current_write: write}
         ) = state
       ) do
     :tls_sender.update_connection_state(sender, write, version)
@@ -2163,7 +2163,7 @@ defmodule :m_tls_connection do
     )
   end
 
-  def select_sni_extension(r_client_hello(extensions: %{:sni => sNI})) do
+  def select_sni_extension(r_client_hello(extensions: %{sni: sNI})) do
     sNI
   end
 
@@ -2191,7 +2191,7 @@ defmodule :m_tls_connection do
               transport_cb: transport
             ),
           connection_env: r_connection_env(negotiated_version: version),
-          ssl_options: %{:log_level => logLevel},
+          ssl_options: %{log_level: logLevel},
           connection_states: connectionStates0
         ) = stateData0
       ) do
@@ -2211,14 +2211,14 @@ defmodule :m_tls_connection do
 
   def send_alert_in_connection(
         alert,
-        r_state(protocol_specific: %{:sender => sender})
+        r_state(protocol_specific: %{sender: sender})
       ) do
     :tls_sender.send_alert(sender, alert)
   end
 
   def send_sync_alert(
         alert,
-        r_state(protocol_specific: %{:sender => sender}) = state
+        r_state(protocol_specific: %{sender: sender}) = state
       ) do
     try do
       :tls_sender.send_and_ack_alert(sender, alert)
@@ -2289,11 +2289,11 @@ defmodule :m_tls_connection do
           connection_env: cEnv,
           ssl_options:
             %{
-              :log_level => logLevel,
-              :versions => [helloVersion | _] = versions,
-              :session_tickets => sessionTickets,
-              :ocsp_stapling => ocspStaplingOpt,
-              :ocsp_nonce => ocspNonceOpt
+              log_level: logLevel,
+              versions: [helloVersion | _] = versions,
+              session_tickets: sessionTickets,
+              ocsp_stapling: ocspStaplingOpt,
+              ocsp_nonce: ocspNonceOpt
             } = sslOpts,
           session: newSession,
           connection_states: connectionStates0
@@ -2353,7 +2353,7 @@ defmodule :m_tls_connection do
         handshake_env:
           r_handshake_env(hsEnv,
             tls_handshake_history: handshake,
-            ocsp_stapling_state: %{ocspState0 | :ocsp_nonce => ocspNonce}
+            ocsp_stapling_state: Map.put(ocspState0, :ocsp_nonce, ocspNonce)
           ),
         start_or_recv_from: from,
         key_share: keyShare
@@ -2369,7 +2369,7 @@ defmodule :m_tls_connection do
   def error(
         {:call, from},
         {:start, _Timeout},
-        r_state(protocol_specific: %{:error => error}) = state
+        r_state(protocol_specific: %{error: error}) = state
       ) do
     {:stop_and_reply, {:shutdown, :normal}, [{:reply, from, {:error, error}}], state}
   end
@@ -2386,7 +2386,7 @@ defmodule :m_tls_connection do
         :internal,
         r_client_hello(extensions: extensions) = hello,
         r_state(
-          ssl_options: %{:handshake => :hello},
+          ssl_options: %{handshake: :hello},
           handshake_env: hsEnv,
           start_or_recv_from: from
         ) = state
@@ -2402,7 +2402,7 @@ defmodule :m_tls_connection do
         :internal,
         r_server_hello(extensions: extensions) = hello,
         r_state(
-          ssl_options: %{:handshake => :hello},
+          ssl_options: %{handshake: :hello},
           handshake_env: hsEnv,
           start_or_recv_from: from
         ) = state
@@ -2477,7 +2477,7 @@ defmodule :m_tls_connection do
                 serverHelloExt =
                   case sNICertSelection do
                     true ->
-                      %{serverHelloExt0 | :sni => r_sni(hostname: '')}
+                      Map.put(serverHelloExt0, :sni, r_sni(hostname: ''))
 
                     false ->
                       serverHelloExt0
@@ -2622,7 +2622,7 @@ defmodule :m_tls_connection do
         r_state(connection_states: connectionStates) = state
       ) do
     {:next_state, :connection,
-     r_state(state, connection_states: %{connectionStates | :current_write => writeState}),
+     r_state(state, connection_states: Map.put(connectionStates, :current_write, writeState)),
      [{:next_event, {:call, from}, :renegotiate}]}
   end
 
@@ -2641,7 +2641,7 @@ defmodule :m_tls_connection do
            terminated: true,
            downgrade: {pid, from}
          ),
-       protocol_specific: %{pS | :active_n_toggle => true, :active_n => 1}
+       protocol_specific: Map.merge(pS, %{active_n_toggle: true, active_n: 1})
      ),
      [
        {:next_event, :internal,
@@ -2649,9 +2649,9 @@ defmodule :m_tls_connection do
           level: 1,
           description: 0,
           where: %{
-            :mfa => {:tls_connection, :connection, 3},
-            :line => 857,
-            :file => 'otp/lib/ssl/src/tls_connection.erl'
+            mfa: {:tls_connection, :connection, 3},
+            line: 857,
+            file: 'otp/lib/ssl/src/tls_connection.erl'
           }
         )}
      ]}
@@ -2662,7 +2662,7 @@ defmodule :m_tls_connection do
         {:close, {pid, timeout}},
         r_state(
           connection_states: connectionStates,
-          protocol_specific: %{:sender => sender} = pS,
+          protocol_specific: %{sender: sender} = pS,
           connection_env: cEnv
         ) = state0
       ) do
@@ -2674,12 +2674,12 @@ defmodule :m_tls_connection do
               level: 1,
               description: 0,
               where: %{
-                :mfa => {:tls_connection, :connection, 3},
-                :line => 870,
-                :file => 'otp/lib/ssl/src/tls_connection.erl'
+                mfa: {:tls_connection, :connection, 3},
+                line: 870,
+                file: 'otp/lib/ssl/src/tls_connection.erl'
               }
             ),
-            r_state(state0, connection_states: %{connectionStates | :current_write => write})
+            r_state(state0, connection_states: Map.put(connectionStates, :current_write, write))
           )
 
         {:next_state, :downgrade,
@@ -2689,7 +2689,7 @@ defmodule :m_tls_connection do
                downgrade: {pid, from},
                terminated: true
              ),
-           protocol_specific: %{pS | :active_n_toggle => true, :active_n => 1}
+           protocol_specific: Map.merge(pS, %{active_n_toggle: true, active_n: 1})
          ), [{:timeout, timeout, :downgrade}]}
 
       {:error, :timeout} ->
@@ -2716,7 +2716,7 @@ defmodule :m_tls_connection do
             ),
           session: r_session(own_certificate: cert) = session0,
           ssl_options: sslOpts,
-          protocol_specific: %{:sender => pid},
+          protocol_specific: %{sender: pid},
           connection_states: connectionStates
         ) = state0
       ) do
@@ -2748,7 +2748,7 @@ defmodule :m_tls_connection do
           send_handshake(
             hello,
             r_state(state0,
-              connection_states: %{connectionStates | :current_write => write},
+              connection_states: Map.put(connectionStates, :current_write, write),
               session: session
             )
           )
@@ -2797,7 +2797,7 @@ defmodule :m_tls_connection do
           static_env: r_static_env(role: :server),
           handshake_env: r_handshake_env(allow_renegotiate: true) = hsEnv,
           connection_states: cS,
-          protocol_specific: %{:sender => sender}
+          protocol_specific: %{sender: sender}
         ) = state
       ) do
     :erlang.send_after(12000, self(), :allow_renegotiate)
@@ -2807,7 +2807,7 @@ defmodule :m_tls_connection do
       :hello,
       :no_record,
       r_state(state,
-        connection_states: %{cS | :current_write => write},
+        connection_states: Map.put(cS, :current_write, write),
         handshake_env:
           r_handshake_env(hsEnv,
             renegotiation: {true, :peer},
@@ -2831,9 +2831,9 @@ defmodule :m_tls_connection do
         level: 1,
         description: 100,
         where: %{
-          :mfa => {:tls_connection, :connection, 3},
-          :line => 947,
-          :file => 'otp/lib/ssl/src/tls_connection.erl'
+          mfa: {:tls_connection, :connection, 3},
+          line: 947,
+          file: 'otp/lib/ssl/src/tls_connection.erl'
         }
       )
 
@@ -3052,9 +3052,9 @@ defmodule :m_tls_connection do
          {cbModule, dataTag, closeTag, errorTag, passiveTag}
        ) do
     %{
-      :beast_mitigation => beastMitigation,
-      :erl_dist => isErlDist,
-      :client_renegotiation => clientRenegotiation
+      beast_mitigation: beastMitigation,
+      erl_dist: isErlDist,
+      client_renegotiation: clientRenegotiation
     } = sSLOptions
 
     connectionStates =
@@ -3122,11 +3122,7 @@ defmodule :m_tls_connection do
       user_data_buffer: {[], 0, []},
       start_or_recv_from: :undefined,
       flight_buffer: [],
-      protocol_specific: %{
-        :sender => sender,
-        :active_n => internalActiveN,
-        :active_n_toggle => true
-      }
+      protocol_specific: %{sender: sender, active_n: internalActiveN, active_n_toggle: true}
     )
   end
 
@@ -3137,25 +3133,25 @@ defmodule :m_tls_connection do
            connection_env: r_connection_env(negotiated_version: version),
            socket_options: sockOpts,
            ssl_options: %{
-             :renegotiate_at => renegotiateAt,
-             :key_update_at => keyUpdateAt,
-             :log_level => logLevel
+             renegotiate_at: renegotiateAt,
+             key_update_at: keyUpdateAt,
+             log_level: logLevel
            },
-           connection_states: %{:current_write => connectionWriteState},
-           protocol_specific: %{:sender => sender}
+           connection_states: %{current_write: connectionWriteState},
+           protocol_specific: %{sender: sender}
          )
        ) do
     init = %{
-      :current_write => connectionWriteState,
-      :role => role,
-      :socket => socket,
-      :socket_options => sockOpts,
-      :trackers => trackers,
-      :transport_cb => transport,
-      :negotiated_version => version,
-      :renegotiate_at => renegotiateAt,
-      :key_update_at => keyUpdateAt,
-      :log_level => logLevel
+      current_write: connectionWriteState,
+      role: role,
+      socket: socket,
+      socket_options: sockOpts,
+      trackers: trackers,
+      transport_cb: transport,
+      negotiated_version: version,
+      renegotiate_at: renegotiateAt,
+      key_update_at: keyUpdateAt,
+      log_level: logLevel
     }
 
     :tls_sender.initialize(sender, init)
@@ -3184,8 +3180,7 @@ defmodule :m_tls_connection do
           r_connection_env(r_state(state0, :connection_env), :negotiated_version)
       end
 
-    %{:current_write => %{:max_fragment_length => maxFragLen}} =
-      r_state(state0, :connection_states)
+    %{current_write: %{max_fragment_length: maxFragLen}} = r_state(state0, :connection_states)
 
     case :tls_record.get_tls_records(data, versions, buf0, maxFragLen, sslOpts) do
       {records, buf1} ->
@@ -3254,7 +3249,7 @@ defmodule :m_tls_connection do
     case from !== :undefined and cTs == [] do
       true ->
         {record, state} =
-          activate_socket(r_state(state0, protocol_specific: %{pS | :active_n_toggle => true}))
+          activate_socket(r_state(state0, protocol_specific: Map.put(pS, :active_n_toggle, true)))
 
         next_event(stateName, record, state)
 
@@ -3262,7 +3257,7 @@ defmodule :m_tls_connection do
         next_event(
           stateName,
           :no_record,
-          r_state(state0, protocol_specific: %{pS | :active_n_toggle => true})
+          r_state(state0, protocol_specific: Map.put(pS, :active_n_toggle, true))
         )
     end
   end
@@ -3286,9 +3281,9 @@ defmodule :m_tls_connection do
         level: 2,
         description: 0,
         where: %{
-          :mfa => {:tls_connection, :handle_info, 3},
-          :line => 1289,
-          :file => 'otp/lib/ssl/src/tls_connection.erl'
+          mfa: {:tls_connection, :handle_info, 3},
+          line: 1289,
+          file: 'otp/lib/ssl/src/tls_connection.erl'
         },
         reason: :transport_closed
       )
@@ -3319,9 +3314,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 0,
             where: %{
-              :mfa => {:tls_connection, :handle_info, 3},
-              :line => 1319,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :handle_info, 3},
+              line: 1319,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :transport_closed
           )
@@ -3333,7 +3328,7 @@ defmodule :m_tls_connection do
         next_event(
           stateName,
           :no_record,
-          r_state(state, protocol_specific: %{pS | :active_n_toggle => true})
+          r_state(state, protocol_specific: Map.put(pS, :active_n_toggle, true))
         )
     end
   end
@@ -3341,7 +3336,7 @@ defmodule :m_tls_connection do
   defp handle_info(
          {:EXIT, sender, reason},
          _,
-         r_state(protocol_specific: %{:sender => sender}) = state
+         r_state(protocol_specific: %{sender: sender}) = state
        ) do
     {:stop, {:shutdown, {:sender_died, reason}}, state}
   end
@@ -3442,9 +3437,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :gen_handshake, 4},
-              :line => 1372,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :gen_handshake, 4},
+              line: 1372,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :malformed_handshake_data
           ),
@@ -3473,9 +3468,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :gen_handshake_1_3, 4},
-              :line => 1385,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :gen_handshake_1_3, 4},
+              line: 1385,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :malformed_handshake_data
           ),
@@ -3503,9 +3498,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 80,
             where: %{
-              :mfa => {:tls_connection, :gen_info, 3},
-              :line => 1397,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :gen_info, 3},
+              line: 1397,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :malformed_data
           ),
@@ -3533,9 +3528,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :gen_info, 3},
-              :line => 1408,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :gen_info, 3},
+              line: 1408,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :malformed_handshake_data
           ),
@@ -3563,9 +3558,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 80,
             where: %{
-              :mfa => {:tls_connection, :gen_info_1_3, 3},
-              :line => 1419,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :gen_info_1_3, 3},
+              line: 1419,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :malformed_data
           ),
@@ -3593,9 +3588,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :gen_info_1_3, 3},
-              :line => 1430,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :gen_info_1_3, 3},
+              line: 1430,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :malformed_handshake_data
           ),
@@ -3616,7 +3611,7 @@ defmodule :m_tls_connection do
   defp assert_buffer_sanity(
          <<_Type::size(8)-unsigned-big-integer, length::size(24)-unsigned-big-integer,
            rest::binary>>,
-         %{:max_handshake_size => max}
+         %{max_handshake_size: max}
        )
        when length <= max do
     case :erlang.size(rest) do
@@ -3629,9 +3624,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :assert_buffer_sanity, 2},
-              :line => 1452,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :assert_buffer_sanity, 2},
+              line: 1452,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :too_big_handshake_data
           )
@@ -3643,9 +3638,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :assert_buffer_sanity, 2},
-              :line => 1455,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :assert_buffer_sanity, 2},
+              line: 1455,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :malformed_handshake_data
           )
@@ -3664,9 +3659,9 @@ defmodule :m_tls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_connection, :assert_buffer_sanity, 2},
-              :line => 1463,
-              :file => 'otp/lib/ssl/src/tls_connection.erl'
+              mfa: {:tls_connection, :assert_buffer_sanity, 2},
+              line: 1463,
+              file: 'otp/lib/ssl/src/tls_connection.erl'
             },
             reason: :malformed_handshake_data
           )
@@ -3678,10 +3673,7 @@ defmodule :m_tls_connection do
     :ok
   end
 
-  defp ensure_sender_terminate(
-         _,
-         r_state(protocol_specific: %{:sender => sender})
-       ) do
+  defp ensure_sender_terminate(_, r_state(protocol_specific: %{sender: sender})) do
     kill = fn ->
       receive do
       after
@@ -3700,8 +3692,8 @@ defmodule :m_tls_connection do
   end
 
   defp maybe_generate_client_shares(%{
-         :versions => [version | _],
-         :supported_groups => r_supported_groups(supported_groups: [group | _])
+         versions: [version | _],
+         supported_groups: r_supported_groups(supported_groups: [group | _])
        })
        when version === {3, 4} do
     :ssl_cipher.generate_client_shares([group])
@@ -3712,11 +3704,9 @@ defmodule :m_tls_connection do
   end
 
   defp choose_tls_version(
-         %{:versions => versions},
+         %{versions: versions},
          r_client_hello(
-           extensions: %{
-             :client_hello_versions => r_client_hello_versions(versions: clientVersions)
-           }
+           extensions: %{client_hello_versions: r_client_hello_versions(versions: clientVersions)}
          )
        ) do
     case :ssl_handshake.select_supported_version(
@@ -3735,12 +3725,12 @@ defmodule :m_tls_connection do
     :"tls_v1.2"
   end
 
-  defp effective_version({3, 3}, %{:versions => [version | _]}, :client)
+  defp effective_version({3, 3}, %{versions: [version | _]}, :client)
        when version >= {3, 4} do
     version
   end
 
-  defp effective_version(:undefined, %{:versions => [version | _]}, _) do
+  defp effective_version(:undefined, %{versions: [version | _]}, _) do
     version
   end
 
@@ -3750,7 +3740,7 @@ defmodule :m_tls_connection do
 
   defp handle_new_session_ticket(
          _,
-         r_state(ssl_options: %{:session_tickets => :disabled})
+         r_state(ssl_options: %{session_tickets: :disabled})
        ) do
     :ok
   end
@@ -3759,12 +3749,12 @@ defmodule :m_tls_connection do
          r_new_session_ticket(ticket_nonce: nonce) = newSessionTicket,
          r_state(
            connection_states: connectionStates,
-           ssl_options: %{:session_tickets => sessionTickets, :server_name_indication => sNI},
+           ssl_options: %{session_tickets: sessionTickets, server_name_indication: sNI},
            connection_env: r_connection_env(user_application: {_, user})
          )
        )
        when sessionTickets === :manual do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.current_connection_state(
         connectionStates,
         :read
@@ -3780,11 +3770,11 @@ defmodule :m_tls_connection do
          r_new_session_ticket(ticket_nonce: nonce) = newSessionTicket,
          r_state(
            connection_states: connectionStates,
-           ssl_options: %{:session_tickets => sessionTickets, :server_name_indication => sNI}
+           ssl_options: %{session_tickets: sessionTickets, server_name_indication: sNI}
          )
        )
        when sessionTickets === :auto do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.current_connection_state(
         connectionStates,
         :read
@@ -3805,7 +3795,7 @@ defmodule :m_tls_connection do
 
   defp handle_key_update(
          r_key_update(request_update: :update_requested),
-         r_state(protocol_specific: %{:sender => sender}) = state0
+         r_state(protocol_specific: %{sender: sender}) = state0
        ) do
     state1 = update_cipher_key(:current_read, state0)
 
@@ -3819,9 +3809,9 @@ defmodule :m_tls_connection do
            level: 2,
            description: 80,
            where: %{
-             :mfa => {:tls_connection, :handle_key_update, 2},
-             :line => 1561,
-             :file => 'otp/lib/ssl/src/tls_connection.erl'
+             mfa: {:tls_connection, :handle_key_update, 2},
+             line: 1561,
+             file: 'otp/lib/ssl/src/tls_connection.erl'
            },
            reason: reason
          )}
@@ -3837,7 +3827,7 @@ defmodule :m_tls_connection do
   end
 
   def update_cipher_key(connStateName, cS0) do
-    %{:security_parameters => secParams0, :cipher_state => cipherState0} =
+    %{security_parameters: secParams0, cipher_state: cipherState0} =
       connState0 =
       :maps.get(
         connStateName,
@@ -3854,7 +3844,7 @@ defmodule :m_tls_connection do
         applicationTrafficSecret0
       )
 
-    %{:cipher => cipher} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+    %{cipher: cipher} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
     {key, iV} = :tls_v1.calculate_traffic_keys(hKDF, cipher, applicationTrafficSecret)
 
     secParams =
@@ -3862,14 +3852,14 @@ defmodule :m_tls_connection do
 
     cipherState = r_cipher_state(cipherState0, key: key, iv: iV)
 
-    connState = %{
-      connState0
-      | :security_parameters => secParams,
-        :cipher_state => cipherState,
-        :sequence_number => 0
-    }
+    connState =
+      Map.merge(connState0, %{
+        security_parameters: secParams,
+        cipher_state: cipherState,
+        sequence_number: 0
+      })
 
-    %{cS0 | connStateName => connState}
+    Map.put(cS0, connStateName, connState)
   end
 
   def send_key_update(sender, type) do
@@ -3879,15 +3869,7 @@ defmodule :m_tls_connection do
 
   defp send_ticket_data(user, newSessionTicket, hKDF, sNI, pSK) do
     timestamp = :erlang.system_time(:seconds)
-
-    ticketData = %{
-      :hkdf => hKDF,
-      :sni => sNI,
-      :psk => pSK,
-      :timestamp => timestamp,
-      :ticket => newSessionTicket
-    }
-
+    ticketData = %{hkdf: hKDF, sni: sNI, psk: pSK, timestamp: timestamp, ticket: newSessionTicket}
     send(user, {:ssl, :session_ticket, {sNI, :erlang.term_to_binary(ticketData)}})
   end
 end

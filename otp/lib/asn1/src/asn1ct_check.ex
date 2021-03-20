@@ -3044,13 +3044,13 @@ defmodule :m_asn1ct_check do
     :ok
   end
 
-  defp validate_oid_path(_, :o_id, [[0, i] | _])
+  defp validate_oid_path(_, :o_id, [0, i | _])
        when 0 <= i and
               i <= 9 do
     :ok
   end
 
-  defp validate_oid_path(_, :o_id, [[1, i] | _])
+  defp validate_oid_path(_, :o_id, [1, i | _])
        when 0 <= i and
               i <= 3 do
     :ok
@@ -5451,7 +5451,7 @@ defmodule :m_asn1ct_check do
     end
   end
 
-  defp convert_back([[h1, h2] | t]) do
+  defp convert_back([h1, h2 | t]) do
     {:intersection, h1, convert_back([h2 | t])}
   end
 
@@ -5668,11 +5668,11 @@ defmodule :m_asn1ct_check do
     range_union_1(:lists.merge(a, b))
   end
 
-  defp range_union_1([[{:a_range, ub0}, {:a_range, ub1}] | t]) do
+  defp range_union_1([{:a_range, ub0}, {:a_range, ub1} | t]) do
     range_union_1([{:a_range, max(ub0, ub1)} | t])
   end
 
-  defp range_union_1([[{:a_range, ub0}, {:range, lb1, ub1}] | t])
+  defp range_union_1([{:a_range, ub0}, {:range, lb1, ub1} | t])
        when lb1 - 1 <= ub0 do
     range_union_1([{:a_range, max(ub0, ub1)} | t])
   end
@@ -5681,7 +5681,7 @@ defmodule :m_asn1ct_check do
     [h | range_union_1(t)]
   end
 
-  defp range_union_1([[{:range, lb0, ub0}, {:range, lb1, ub1}] | t])
+  defp range_union_1([{:range, lb0, ub0}, {:range, lb1, ub1} | t])
        when lb1 - 1 <= ub0 do
     range_union_1([{:range, lb0, max(ub0, ub1)} | t])
   end
@@ -5735,7 +5735,7 @@ defmodule :m_asn1ct_check do
        ) do
     a = {:element_set, a0, :none}
     b = {:element_set, b0, :none}
-    finish_constraints_1([[a, b] | t], collapse)
+    finish_constraints_1([a, b | t], collapse)
   end
 
   defp finish_constraints_1([{:element_set, root, ext} | t], collapse) do
@@ -7568,7 +7568,7 @@ defmodule :m_asn1ct_check do
     r2 = :sofs.to_external(r1)
 
     dup =
-      for {_, [[_, _] | _] = els} <- r2 do
+      for {_, [_, _ | _] = els} <- r2 do
         els
       end
 
@@ -7586,8 +7586,11 @@ defmodule :m_asn1ct_check do
     check_unique2(slist, pos, [])
   end
 
-  defp check_unique2([[a, b] | t], pos, acc)
-       when :erlang.element(pos, a) ==
+  defp check_unique2([a, b | t], pos, acc)
+       when :erlang.element(
+              pos,
+              a
+            ) ==
               :erlang.element(
                 pos,
                 b
@@ -8609,7 +8612,7 @@ defmodule :m_asn1ct_check do
     merge_tags2(t1 ++ [t2], [])
   end
 
-  defp merge_tags2([[t1 = r_tag(type: :IMPLICIT), t2] | rest], acc) do
+  defp merge_tags2([t1 = r_tag(type: :IMPLICIT), t2 | rest], acc) do
     merge_tags2(
       [
         r_tag(t1,
@@ -8624,7 +8627,8 @@ defmodule :m_asn1ct_check do
 
   defp merge_tags2(
          [
-           [t1 = r_tag(type: {:default, :IMPLICIT}), t2]
+           t1 = r_tag(type: {:default, :IMPLICIT}),
+           t2
            | rest
          ],
          acc
@@ -8643,7 +8647,8 @@ defmodule :m_asn1ct_check do
 
   defp merge_tags2(
          [
-           [t1 = r_tag(type: {:default, :AUTOMATIC}), t2]
+           t1 = r_tag(type: {:default, :AUTOMATIC}),
+           t2
            | rest
          ],
          acc
@@ -8701,7 +8706,7 @@ defmodule :m_asn1ct_check do
     set1 = :sofs.relation_to_family(set0)
     set = :sofs.to_external(set1)
 
-    case (for {n, [[_, _] | _] = dup} <- set do
+    case (for {n, [_, _ | _] = dup} <- set do
             duplicate_def(s, n, dup)
           end) do
       [] ->
@@ -9046,7 +9051,7 @@ defmodule :m_asn1ct_check do
     ]
   end
 
-  defp format_elements([[h1, h2] | t]) do
+  defp format_elements([h1, h2 | t]) do
     [:io_lib.format('~p, ', [h1]) | format_elements([h2 | t])]
   end
 

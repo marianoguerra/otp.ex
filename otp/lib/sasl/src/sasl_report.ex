@@ -141,7 +141,7 @@ defmodule :m_sasl_report do
   defp format_key_val1([{tag, data} | rep], p, tl) do
     :io_lib.format(
       '    ~16w: ~' ++ p ++ '\n',
-      [[tag, data] | tl]
+      [tag, data | tl]
     ) ++ format_key_val1(rep, p, tl)
   end
 

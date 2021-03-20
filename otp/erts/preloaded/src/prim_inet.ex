@@ -659,7 +659,7 @@ defmodule :m_prim_inet do
               end
           end
 
-        getifaddrs_ifget(s, iFs, iF, flagsVals, [[:addr, :netmask] | getOpts])
+        getifaddrs_ifget(s, iFs, iF, flagsVals, [:addr, :netmask | getOpts])
 
       _ ->
         getifaddrs_ifget(s, iFs, iF, [], [:addr, :netmask, :hwaddr])
@@ -1049,7 +1049,7 @@ defmodule :m_prim_inet do
       true ->
         enc_opt_val(
           opts,
-          [[enc_opt(opt), enc_value(:set, type, val)] | acc]
+          [enc_opt(opt), enc_value(:set, type, val) | acc]
         )
 
       false ->
@@ -1094,7 +1094,7 @@ defmodule :m_prim_inet do
 
     case type_value(:get, type) do
       true ->
-        [[enc_opt(opt), enc_value(:get, type)] | enc_opts(opts)]
+        [enc_opt(opt), enc_value(:get, type) | enc_opts(opts)]
 
       false ->
         throw(:einval)
@@ -1111,7 +1111,8 @@ defmodule :m_prim_inet do
     case type_value(:get, type, val) do
       true ->
         [
-          [enc_opt(opt), enc_value(:get, type, val)]
+          enc_opt(opt),
+          enc_value(:get, type, val)
           | enc_opts(opts)
         ]
 
@@ -1158,7 +1159,7 @@ defmodule :m_prim_inet do
 
   defp dec_opt_val(buf, :active, type) do
     case dec_value(type, buf) do
-      {:multi, [[m0, m1] | t]} ->
+      {:multi, [m0, m1 | t]} ->
         <<n::size(16)>> = :erlang.list_to_binary([m0, m1])
         [{:active, n} | dec_opt_val(t)]
 
@@ -1428,7 +1429,7 @@ defmodule :m_prim_inet do
         build_iflist(l, [], [h | t])
 
       n ->
-        build_iflist(l, [], [[n, h] | t])
+        build_iflist(l, [], [n, h | t])
     end
   end
 
@@ -1625,7 +1626,7 @@ defmodule :m_prim_inet do
     [addr | get_addrs(rest)]
   end
 
-  defp get_ip4([[a, b, c, d] | t]) do
+  defp get_ip4([a, b, c, d | t]) do
     {{a, b, c, d}, t}
   end
 end

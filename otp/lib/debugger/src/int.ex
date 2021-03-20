@@ -637,7 +637,7 @@ defmodule :m_int do
 
   defp check_application(src) do
     case :lists.reverse(:filename.split(:filename.absname(src))) do
-      [[_Mod, 'src', appS] | _] ->
+      [_Mod, 'src', appS | _] ->
         check_application2(appS)
 
       _ ->
@@ -831,7 +831,9 @@ defmodule :m_int do
 
   defp scan_module_name_3(
          [
-           [{:-, _}, {:atom, _, :module}, {:"(", _}]
+           {:-, _},
+           {:atom, _, :module},
+           {:"(", _}
            | _
          ] = ts,
          _Chars,
@@ -842,7 +844,7 @@ defmodule :m_int do
     scan_module_name_4(ts)
   end
 
-  defp scan_module_name_3([[{:-, _}, {:atom, _, _}] | _], chars, b1, bin, enc) do
+  defp scan_module_name_3([{:-, _}, {:atom, _, _} | _], chars, b1, bin, enc) do
     scan_module_name_2('', chars, b1, bin, enc)
   end
 

@@ -161,7 +161,7 @@ defmodule :m_string do
           []
       end
 
-    [[pre, cD, pre] | post]
+    [pre, cD, pre | post]
   end
 
   def trim(str) do
@@ -2328,7 +2328,7 @@ defmodule :m_string do
 
       _ ->
         case :unicode_util.gc([bin0 | cont]) do
-          [[^sep, bin] | ^cont] when is_binary(bin) ->
+          [^sep, bin | ^cont] when is_binary(bin) ->
             bin_search_inv_1(bin, cont, sep)
 
           [^sep | cs] ->

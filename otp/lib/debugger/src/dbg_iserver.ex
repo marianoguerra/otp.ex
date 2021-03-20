@@ -675,7 +675,7 @@ defmodule :m_dbg_iserver do
             n,
             tuple2
           ) ->
-        [[tuple1, tuple2] | tuples]
+        [tuple1, tuple2 | tuples]
 
       true ->
         [tuple2 | keyinsert(tuple1, n, tuples)]

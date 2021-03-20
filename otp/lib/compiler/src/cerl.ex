@@ -2300,14 +2300,14 @@ defmodule :m_cerl do
   end
 
   defp unfold_tuples([{x, y} | ps]) do
-    [[x, y] | unfold_tuples(ps)]
+    [x, y | unfold_tuples(ps)]
   end
 
   defp unfold_tuples([]) do
     []
   end
 
-  defp fold_tuples([[x, y] | es]) do
+  defp fold_tuples([x, y | es]) do
     [{x, y} | fold_tuples(es)]
   end
 

@@ -247,13 +247,13 @@ defmodule :m_pubkey_cert do
 
   def match_name(:uniformResourceIdentifier, uRI, [permittedName | rest]) do
     case :uri_string.normalize(uRI, [:return_map]) do
-      %{:host => host} ->
+      %{host: host} ->
         pN =
           case :uri_string.normalize(
                  permittedName,
                  [:return_map]
                ) do
-            %{:host => pNhost} ->
+            %{host: pNhost} ->
               pNhost
 
             _X ->
@@ -379,10 +379,10 @@ defmodule :m_pubkey_cert do
   end
 
   def gen_test_certs(%{
-        :client_chain => %{:root => clientRoot, :intermediates => clientCAs, :peer => clientPeer},
-        :server_chain => %{:root => serverRoot, :intermediates => serverCAs, :peer => serverPeer}
+        client_chain: %{root: clientRoot, intermediates: clientCAs, peer: clientPeer},
+        server_chain: %{root: serverRoot, intermediates: serverCAs, peer: serverPeer}
       }) do
-    %{:cert => serverRootCert, :key => serverRootKey} =
+    %{cert: serverRootCert, key: serverRootKey} =
       case serverRoot do
         %{} ->
           serverRoot
@@ -391,7 +391,7 @@ defmodule :m_pubkey_cert do
           root_cert('SERVER ROOT CA', serverRootConf)
       end
 
-    %{:cert => clientRootCert, :key => clientRootKey} =
+    %{cert: clientRootCert, key: clientRootKey} =
       case clientRoot do
         %{} ->
           clientRoot
@@ -432,13 +432,13 @@ defmodule :m_pubkey_cert do
     clientDERCA = ca_config(serverRootCert, clientCAsKeys)
 
     %{
-      :server_config => [{:cert, serverDERCert}, {:key, serverDERKey}, {:cacerts, serverDERCA}],
-      :client_config => [{:cert, clientDERCert}, {:key, clientDERKey}, {:cacerts, clientDERCA}]
+      server_config: [{:cert, serverDERCert}, {:key, serverDERKey}, {:cacerts, serverDERCA}],
+      client_config: [{:cert, clientDERCert}, {:key, clientDERKey}, {:cacerts, clientDERCA}]
     }
   end
 
-  def gen_test_certs(%{:root => root, :intermediates => cAs, :peer => peer}) do
-    %{:cert => rootCert, :key => rootKey} =
+  def gen_test_certs(%{root: root, intermediates: cAs, peer: peer}) do
+    %{cert: rootCert, key: rootKey} =
       case root do
         %{} ->
           root
@@ -479,7 +479,7 @@ defmodule :m_pubkey_cert do
         extensions: extensions(:undefined, :ca, opts)
       )
 
-    %{:cert => :public_key.pkix_sign(oTPTBS, privKey), :key => privKey}
+    %{cert: :public_key.pkix_sign(oTPTBS, privKey), key: privKey}
   end
 
   defp do_normalize_general_name(issuer) do
@@ -751,7 +751,7 @@ defmodule :m_pubkey_cert do
 
   defp is_valid_uri(absURI) do
     case :uri_string.normalize(absURI, [:return_map]) do
-      %{:scheme => _} ->
+      %{scheme: _} ->
         true
 
       _ ->
@@ -996,7 +996,7 @@ defmodule :m_pubkey_cert do
 
   defp is_double_quoted('%22' ++ tail) do
     case :lists.reverse(tail) do
-      [[a, b, c] | _] ->
+      [a, b, c | _] ->
         is_double_quote([c, b, a])
 
       _ ->
@@ -1181,7 +1181,8 @@ defmodule :m_pubkey_cert do
       )
 
     [
-      [{cert, encode_key(key)}, {issuerCert, encode_key(issuerKey)}]
+      {cert, encode_key(key)},
+      {issuerCert, encode_key(issuerKey)}
       | acc
     ]
   end

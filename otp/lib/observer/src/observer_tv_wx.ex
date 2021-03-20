@@ -406,7 +406,7 @@ defmodule :m_observer_tv_wx do
     grid =
       :wxListCtrl.new(
         panel,
-        [[{:winid, 500}, {:style, style}] | cBs]
+        [{:winid, 500}, {:style, style} | cBs]
       )
 
     :wxSizer.add(sizer, grid, [
@@ -635,7 +635,7 @@ defmodule :m_observer_tv_wx do
   def handle_call(:get_config, _, r_state(timer: timer, opts: opt) = state) do
     r_opts(type: type, sys_hidden: sys, unread_hidden: unread) = opt
     conf0 = :observer_lib.timer_config(timer)
-    conf = %{conf0 | :type => type, :sys_hidden => sys, :unread_hidden => unread}
+    conf = Map.merge(conf0, %{type: type, sys_hidden: sys, unread_hidden: unread})
     {:reply, conf, state}
   end
 
@@ -767,11 +767,27 @@ defmodule :m_observer_tv_wx do
          r_create_menu(id: 403, text: '&Ets Tables', type: :radio, check: type == :ets),
          r_create_menu(id: 404, text: '&Mnesia Tables', type: :radio, check: type == :mnesia),
          :separator,
-         r_create_menu(id: 405, text: 'View &Unreadable Tables', type: :check, check: not unR),
-         r_create_menu(id: 406, text: 'View &System Tables', type: :check, check: not sys),
+         r_create_menu(
+           id: 405,
+           text: 'View &Unreadable Tables',
+           type: :check,
+           check: not unR
+         ),
+         r_create_menu(
+           id: 406,
+           text: 'View &System Tables',
+           type: :check,
+           check: not sys
+         ),
          :separator,
-         r_create_menu(id: 401, text: 'Refresh\tCtrl-R'),
-         r_create_menu(id: 402, text: 'Refresh Interval...')
+         r_create_menu(
+           id: 401,
+           text: 'Refresh\tCtrl-R'
+         ),
+         r_create_menu(
+           id: 402,
+           text: 'Refresh Interval...'
+         )
        ]}
     ]
 
@@ -905,13 +921,11 @@ defmodule :m_observer_tv_wx do
     settings =
       {'Settings',
        [
-         [
-           {'Source', source},
-           {'Key Position', r_tab(table, :keypos)},
-           {'Table Type', r_tab(table, :type)},
-           {'Protection Mode', r_tab(table, :protection)},
-           {'Fixed', r_tab(table, :fixed)}
-         ]
+         {'Source', source},
+         {'Key Position', r_tab(table, :keypos)},
+         {'Table Type', r_tab(table, :type)},
+         {'Protection Mode', r_tab(table, :protection)},
+         {'Fixed', r_tab(table, :fixed)}
          | mnesiaSettings
        ]}
 

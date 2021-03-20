@@ -873,10 +873,10 @@ defmodule :m_mnesia_tm do
 
     rest =
       case stores do
-        [[^obsolete, ^current] | tail] ->
+        [^obsolete, ^current | tail] ->
           tail
 
-        [[^current, ^obsolete] | tail] ->
+        [^current, ^obsolete | tail] ->
           tail
       end
 

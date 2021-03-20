@@ -21,7 +21,7 @@ defmodule :m_rpc do
 
   def init([]) do
     :erlang.process_flag(:trap_exit, true)
-    {:ok, %{:nodes_observer => start_nodes_observer()}}
+    {:ok, %{nodes_observer: start_nodes_observer()}}
   end
 
   def handle_call({:call, mod, fun, args, gleader}, to, s) do
@@ -77,9 +77,9 @@ defmodule :m_rpc do
 
   def handle_info(
         {:DOWN, m, :process, p, _},
-        %{:nodes_observer => {p, m}} = s
+        %{nodes_observer: {p, m}} = s
       ) do
-    {:noreply, %{s | :nodes_observer => start_nodes_observer()}}
+    {:noreply, Map.put(s, :nodes_observer, start_nodes_observer())}
   end
 
   def handle_info({:DOWN, m, :process, _, :normal}, s) do
@@ -669,7 +669,7 @@ defmodule :m_rpc do
       end
 
     nR = {n, reqId}
-    mc_requests(res, ns, m, f, a, [nR | nRs], %{reqMap | reqId => :spawn_request})
+    mc_requests(res, ns, m, f, a, [nR | nRs], Map.put(reqMap, reqId, :spawn_request))
   end
 
   defp mc_requests(res, _Error, _M, _F, _A, nRs, _ReqMap) do
@@ -736,7 +736,7 @@ defmodule :m_rpc do
          _MFA,
          _Deadline
        ) do
-    %{reqMap | reqId => {:spawn, pid}}
+    Map.put(reqMap, reqId, {:spawn, pid})
   end
 
   defp mc_handle_spawn_reply(
@@ -753,7 +753,7 @@ defmodule :m_rpc do
         {:call, m, f, a, :erlang.group_leader()}
       )
 
-    %{reqMap | reqId => {:server, srvReqId}}
+    Map.put(reqMap, reqId, {:server, srvReqId})
   end
 
   defp mc_handle_spawn_reply(
@@ -781,10 +781,10 @@ defmodule :m_rpc do
           exit({res, result})
         end)
 
-      %{reqMap | reqId => {:spawn_server, mon, pid}}
+      Map.put(reqMap, reqId, {:spawn_server, mon, pid})
     catch
       :error, :system_limit ->
-        %{reqMap | reqId => {:error, {:badrpc, {:EXIT, :system_limit}}}}
+        Map.put(reqMap, reqId, {:error, {:badrpc, {:EXIT, :system_limit}}})
     end
   end
 
@@ -794,7 +794,7 @@ defmodule :m_rpc do
          _MFA,
          _Deadline
        ) do
-    %{reqMap | reqId => {:error, :badnode}}
+    Map.put(reqMap, reqId, {:error, :badnode})
   end
 
   defp mc_handle_spawn_reply(
@@ -803,7 +803,7 @@ defmodule :m_rpc do
          _MFA,
          _Deadline
        ) do
-    %{reqMap | reqId => {:error, {:badrpc, {:EXIT, reason}}}}
+    Map.put(reqMap, reqId, {:error, {:badrpc, {:EXIT, reason}}})
   end
 
   defp mc_results(_Res, [], okAcc, errAcc, _ReqMap, _MFA, _Deadline) do

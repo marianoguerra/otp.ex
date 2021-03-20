@@ -86,7 +86,7 @@ defmodule :m_edoc_extract do
     name = r_module(module, :name)
     env1 = r_env(env, module: name, root: '')
     env2 = add_macro_defs(module_macros(env1), opts, env1)
-    entries1 = get_tags([[header, footer] | entries], env2, file, typeDocs)
+    entries1 = get_tags([header, footer | entries], env2, file, typeDocs)
     entries2 = :edoc_specs.add_data(entries1, opts, file, module)
     :edoc_tags.check_types(entries2, opts, file)
     data = :edoc_data.module(module, entries2, env2, opts)
@@ -501,7 +501,7 @@ defmodule :m_edoc_extract do
       :match_expr ->
         p1 = :erl_syntax.match_expr_pattern(p)
         p2 = :erl_syntax.match_expr_body(p)
-        find_names([[p1, p2] | ps], ns)
+        find_names([p1, p2 | ps], ns)
 
       :list ->
         p1 = :erl_syntax.list_tail(p)

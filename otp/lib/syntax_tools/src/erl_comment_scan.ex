@@ -91,7 +91,7 @@ defmodule :m_erl_comment_scan do
     scan_lines(cs, l + 1, 0, 0, ack)
   end
 
-  defp scan_lines([[?\r, ?\n] | cs], l, _Col, _M, ack) do
+  defp scan_lines([?\r, ?\n | cs], l, _Col, _M, ack) do
     scan_lines(cs, l + 1, 0, 0, ack)
   end
 
@@ -132,7 +132,7 @@ defmodule :m_erl_comment_scan do
     seen_comment(cs, cs1, l, col, m, ack)
   end
 
-  defp scan_comment([[?\r, ?\n] | cs], cs1, l, col, m, ack) do
+  defp scan_comment([?\r, ?\n | cs], cs1, l, col, m, ack) do
     seen_comment(cs, cs1, l, col, m, ack)
   end
 
@@ -168,7 +168,7 @@ defmodule :m_erl_comment_scan do
     scan_string(cs, quote, l + 1, 0, ack)
   end
 
-  defp scan_string([[?\r, ?\n] | cs], quote, l, _Col, ack) do
+  defp scan_string([?\r, ?\n | cs], quote, l, _Col, ack) do
     scan_string(cs, quote, l + 1, 0, ack)
   end
 
@@ -176,7 +176,7 @@ defmodule :m_erl_comment_scan do
     scan_string(cs, quote, l + 1, 0, ack)
   end
 
-  defp scan_string([[?\\, _C] | cs], quote, l, col, ack) do
+  defp scan_string([?\\, _C | cs], quote, l, col, ack) do
     scan_string(cs, quote, l, col + 2, ack)
   end
 
@@ -197,7 +197,7 @@ defmodule :m_erl_comment_scan do
     scan_lines(cs, l + 1, 0, 0, ack)
   end
 
-  defp scan_char([[?\r, ?\n] | cs], l, _Col, ack) do
+  defp scan_char([?\r, ?\n | cs], l, _Col, ack) do
     scan_lines(cs, l + 1, 0, 0, ack)
   end
 
@@ -205,7 +205,7 @@ defmodule :m_erl_comment_scan do
     scan_lines(cs, l + 1, 0, 0, ack)
   end
 
-  defp scan_char([[?\\, _C] | cs], l, col, ack) do
+  defp scan_char([?\\, _C | cs], l, col, ack) do
     n = col + 2
     scan_lines(cs, l, n, n, ack)
   end

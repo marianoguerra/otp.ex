@@ -1204,11 +1204,11 @@ defmodule :m_inet_res do
   end
 
   defp dnib(0, [c | cs], acc) do
-    dnib(0, cs, [[c, ?.] | acc])
+    dnib(0, cs, [c, ?. | acc])
   end
 
   defp dnib(n, cs, acc) do
-    dnib(n - 1, cs, [[?0, ?.] | acc])
+    dnib(n - 1, cs, [?0, ?. | acc])
   end
 
   def dns_msg([]) do

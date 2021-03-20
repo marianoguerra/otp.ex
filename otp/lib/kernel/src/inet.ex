@@ -1015,11 +1015,7 @@ defmodule :m_inet do
   end
 
   defp tcp_module_1(opts, address) do
-    mod(opts, :tcp_module, address, %{
-      :inet => :inet_tcp,
-      :inet6 => :inet6_tcp,
-      :local => :local_tcp
-    })
+    mod(opts, :tcp_module, address, %{inet: :inet_tcp, inet6: :inet6_tcp, local: :local_tcp})
   end
 
   def gen_tcp_module([{:inet_backend, flag} | opts]) do
@@ -1152,11 +1148,7 @@ defmodule :m_inet do
   end
 
   def udp_module(opts) do
-    mod(opts, :udp_module, :undefined, %{
-      :inet => :inet_udp,
-      :inet6 => :inet6_udp,
-      :local => :local_udp
-    })
+    mod(opts, :udp_module, :undefined, %{inet: :inet_udp, inet6: :inet6_udp, local: :local_udp})
   end
 
   defp sctp_options() do
@@ -1314,7 +1306,7 @@ defmodule :m_inet do
   end
 
   def sctp_module(opts) do
-    mod(opts, :sctp_module, :undefined, %{:inet => :inet_sctp, :inet6 => :inet6_sctp})
+    mod(opts, :sctp_module, :undefined, %{inet: :inet_sctp, inet6: :inet6_sctp})
   end
 
   defp add_opt(name, val, opts, as) do
@@ -1422,7 +1414,7 @@ defmodule :m_inet do
     {case address do
        {_, {:local, _}} ->
          case map do
-           %{:local => mod} ->
+           %{local: mod} ->
              mod
 
            %{} ->
@@ -1430,11 +1422,11 @@ defmodule :m_inet do
          end
 
        {_, iP} when tuple_size(iP) === 8 ->
-         %{:inet => iPv4Mod} = map
+         %{inet: iPv4Mod} = map
 
          case apply(:inet_db, tag, []) do
            ^iPv4Mod ->
-             %{:inet6 => iPv6Mod} = map
+             %{inet6: iPv6Mod} = map
              iPv6Mod
 
            mod ->
@@ -1993,8 +1985,8 @@ defmodule :m_inet do
     [upper(c) | hh_field(cs)]
   end
 
-  defp hh_field([[?_, c] | cs]) do
-    [[?\s, upper(c)] | hh_field(cs)]
+  defp hh_field([?_, c | cs]) do
+    [?\s, upper(c) | hh_field(cs)]
   end
 
   defp hh_field([c | cs]) do
@@ -2118,19 +2110,19 @@ defmodule :m_inet do
       [:accepting | _] ->
         'ACCEPTING'
 
-      [[:bound, :busy, :connected] | _] ->
+      [:bound, :busy, :connected | _] ->
         'CONNECTED(BB)'
 
-      [[:bound, :connected] | _] ->
+      [:bound, :connected | _] ->
         'CONNECTED(B)'
 
-      [[:bound, :listen, :listening] | _] ->
+      [:bound, :listen, :listening | _] ->
         'LISTENING'
 
-      [[:bound, :listen] | _] ->
+      [:bound, :listen | _] ->
         'LISTEN'
 
-      [[:bound, :connecting] | _] ->
+      [:bound, :connecting | _] ->
         'CONNECTING'
 
       [:bound, :open] ->

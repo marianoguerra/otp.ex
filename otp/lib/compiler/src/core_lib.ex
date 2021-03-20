@@ -202,7 +202,7 @@ defmodule :m_core_lib do
   end
 
   defp vu_expr(v, r_c_call(module: m, name: n, args: as)) do
-    vu_expr_list(v, [[m, n] | as])
+    vu_expr_list(v, [m, n | as])
   end
 
   defp vu_expr(v, r_c_primop(args: as)) do

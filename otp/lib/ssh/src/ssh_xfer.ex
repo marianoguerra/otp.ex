@@ -1458,13 +1458,11 @@ defmodule :m_ssh_xfer do
     who = r_ssh_xfer_ace(aCE, :who)
 
     [
-      [
-        <<type::size(32)-unsigned-big-integer>>,
-        <<flag::size(32)-unsigned-big-integer>>,
-        <<mask::size(32)-unsigned-big-integer>>,
-        <<:erlang.size(:unicode.characters_to_binary(who))::size(32)-unsigned-big-integer,
-          :unicode.characters_to_binary(who)::binary>>
-      ]
+      <<type::size(32)-unsigned-big-integer>>,
+      <<flag::size(32)-unsigned-big-integer>>,
+      <<mask::size(32)-unsigned-big-integer>>,
+      <<:erlang.size(:unicode.characters_to_binary(who))::size(32)-unsigned-big-integer,
+        :unicode.characters_to_binary(who)::binary>>
       | encode_acl_items(as)
     ]
   end
@@ -1510,12 +1508,10 @@ defmodule :m_ssh_xfer do
 
   defp encode_ext([{type, data} | exts]) do
     [
-      [
-        <<:erlang.size(:unicode.characters_to_binary(type))::size(32)-unsigned-big-integer,
-          :unicode.characters_to_binary(type)::binary>>,
-        <<:erlang.size(:unicode.characters_to_binary(data))::size(32)-unsigned-big-integer,
-          :unicode.characters_to_binary(data)::binary>>
-      ]
+      <<:erlang.size(:unicode.characters_to_binary(type))::size(32)-unsigned-big-integer,
+        :unicode.characters_to_binary(type)::binary>>,
+      <<:erlang.size(:unicode.characters_to_binary(data))::size(32)-unsigned-big-integer,
+        :unicode.characters_to_binary(data)::binary>>
       | encode_ext(exts)
     ]
   end

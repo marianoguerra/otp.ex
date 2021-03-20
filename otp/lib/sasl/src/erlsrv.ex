@@ -284,7 +284,7 @@ defmodule :m_erlsrv do
   defp build_commands2([{:env, [{var, val} | et]} | t], a) do
     build_commands2(
       [{:env, et} | t],
-      [[var ++ '=' ++ val, '-env'] | a]
+      [var ++ '=' ++ val, '-env' | a]
     )
   end
 
@@ -300,13 +300,13 @@ defmodule :m_erlsrv do
   end
 
   defp build_commands2([{:args, l} | t], a) do
-    build_commands2(t, [[concat_args(l), '-args'] | a])
+    build_commands2(t, [concat_args(l), '-args' | a])
   end
 
   defp build_commands2([{atom, value} | t], a) do
     build_commands2(
       t,
-      [[value, '-' ++ :erlang.atom_to_list(atom)] | a]
+      [value, '-' ++ :erlang.atom_to_list(atom) | a]
     )
   end
 
@@ -384,7 +384,7 @@ defmodule :m_erlsrv do
           otherFlags
 
         _ ->
-          [['-data', data] | otherFlags]
+          ['-data', data | otherFlags]
       end
 
     case found do
@@ -452,7 +452,7 @@ defmodule :m_erlsrv do
     {otherFlags, dataDir}
   end
 
-  defp check_tail([['-data', theDataDir] | t], otherFlags, _DataDir) do
+  defp check_tail(['-data', theDataDir | t], otherFlags, _DataDir) do
     check_tail(t, otherFlags, theDataDir)
   end
 

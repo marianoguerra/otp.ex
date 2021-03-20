@@ -2280,7 +2280,7 @@ defmodule :m_cerl_inline do
   end
 
   defp ren__add(x, y, ren) do
-    %{ren | x => y}
+    Map.put(ren, x, y)
   end
 
   defp ren__map(x, ren) do

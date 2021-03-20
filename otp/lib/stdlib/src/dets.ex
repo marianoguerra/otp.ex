@@ -2451,7 +2451,11 @@ defmodule :m_dets do
               {:type, r_head(h2, :type)},
               {:keypos, r_head(h2, :keypos)},
               {:size, r_head(h2, :no_objects)},
-              {:file_size, file_size(r_head(h2, :fptr), r_head(h2, :filename))},
+              {:file_size,
+               file_size(
+                 r_head(h2, :fptr),
+                 r_head(h2, :filename)
+               )},
               {:filename, r_head(h2, :filename)}
             ]
           catch

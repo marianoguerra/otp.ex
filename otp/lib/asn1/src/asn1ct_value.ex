@@ -573,7 +573,8 @@ defmodule :m_asn1ct_value do
           end
 
         :erlang.list_to_tuple([
-          [random(3) - 1, random(40) - 1]
+          random(3) - 1,
+          random(40) - 1
           | olist
         ])
 

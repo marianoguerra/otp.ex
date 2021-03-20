@@ -474,12 +474,7 @@ defmodule :m_reltool_sys_win do
     :proc_lib.start_link(
       :reltool_sys_win,
       :init,
-      [
-        [
-          [{:safe_config, false}, {:parent, self()}]
-          | opts
-        ]
-      ],
+      [[{:safe_config, false}, {:parent, self()} | opts]],
       :infinity,
       []
     )
@@ -508,7 +503,8 @@ defmodule :m_reltool_sys_win do
   end
 
   defp do_init([
-         [{:safe_config, safe}, {:parent, parent}]
+         {:safe_config, safe},
+         {:parent, parent}
          | options
        ]) do
     case :reltool_server.start_link(options) do
@@ -1221,7 +1217,8 @@ defmodule :m_reltool_sys_win do
     sizer = :wxBoxSizer.new(4)
 
     appNames = [
-      [:kernel, :stdlib]
+      :kernel,
+      :stdlib
       | for rA <- relApps do
           r_rel_app(rA, :name)
         end -- [:kernel, :stdlib]

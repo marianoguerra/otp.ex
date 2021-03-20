@@ -168,7 +168,7 @@ defmodule :m_filename do
     name
   end
 
-  defp skip_prefix([[l, drvSep] | name], drvSep)
+  defp skip_prefix([l, drvSep | name], drvSep)
        when (l >= ?A and l <= ?Z) or (l >= ?a and l <= ?z) do
     name
   end
@@ -313,7 +313,7 @@ defmodule :m_filename do
     dirname(rest, file ++ dir, [?/], seps)
   end
 
-  defp dirname([[dl, drvSep] | rest], [], [], {_, drvSep} = seps)
+  defp dirname([dl, drvSep | rest], [], [], {_, drvSep} = seps)
        when (is_integer(drvSep) and
                ?a <= dl and dl <= ?z) or (?A <= dl and dl <= ?Z) do
     dirname(rest, [drvSep, dl], [], seps)
@@ -352,7 +352,7 @@ defmodule :m_filename do
     :lists.reverse(dir)
   end
 
-  defp fstrip([[<<>>, x] | y]) do
+  defp fstrip([<<>>, x | y]) do
     fstrip([x | y])
   end
 
@@ -425,11 +425,11 @@ defmodule :m_filename do
     extension(rest, result, osType)
   end
 
-  defp extension([[?/, ?.] | rest], _Result, osType) do
+  defp extension([?/, ?. | rest], _Result, osType) do
     extension(rest, [], osType)
   end
 
-  defp extension([[?\\, ?.] | rest], _Result, :win32) do
+  defp extension([?\\, ?. | rest], _Result, :win32) do
     extension(rest, [], :win32)
   end
 
@@ -455,7 +455,7 @@ defmodule :m_filename do
     result
   end
 
-  def join([[name1, name2] | rest]) do
+  def join([name1, name2 | rest]) do
     join([join(name1, name2) | rest])
   end
 
@@ -519,17 +519,17 @@ defmodule :m_filename do
     join(name1, :erlang.atom_to_list(name2))
   end
 
-  defp join1([[ucLetter, ?:] | rest], relativeName, [], :win32)
+  defp join1([ucLetter, ?: | rest], relativeName, [], :win32)
        when is_integer(ucLetter) and ucLetter >= ?A and
               ucLetter <= ?Z do
     join1(rest, relativeName, [?:, ucLetter + ?a - ?A], :win32)
   end
 
-  defp join1([[?\\, ?\\] | rest], relativeName, [], :win32) do
-    join1([[?/, ?/] | rest], relativeName, [], :win32)
+  defp join1([?\\, ?\\ | rest], relativeName, [], :win32) do
+    join1([?/, ?/ | rest], relativeName, [], :win32)
   end
 
-  defp join1([[?/, ?/] | rest], relativeName, [], :win32) do
+  defp join1([?/, ?/ | rest], relativeName, [], :win32) do
     join1(rest, relativeName, [?/, ?/], :win32)
   end
 
@@ -537,7 +537,7 @@ defmodule :m_filename do
     join1([?/ | rest], relativeName, result, :win32)
   end
 
-  defp join1([?/ | rest], relativeName, [[?., ?/] | result], osType) do
+  defp join1([?/ | rest], relativeName, [?., ?/ | result], osType) do
     join1(rest, relativeName, [?/ | result], osType)
   end
 
@@ -557,7 +557,7 @@ defmodule :m_filename do
     join1(relativeName, [], [?/ | result], osType)
   end
 
-  defp join1([], relativeName, [[?., ?/] | result], osType) do
+  defp join1([], relativeName, [?., ?/ | result], osType) do
     join1(relativeName, [], [?/ | result], osType)
   end
 
@@ -601,7 +601,7 @@ defmodule :m_filename do
     join1b(<<?/, rest::binary>>, relativeName, result, :win32)
   end
 
-  defp join1b(<<?/, rest::binary>>, relativeName, [[?., ?/] | result], osType) do
+  defp join1b(<<?/, rest::binary>>, relativeName, [?., ?/ | result], osType) do
     join1b(rest, relativeName, [?/ | result], osType)
   end
 
@@ -622,15 +622,15 @@ defmodule :m_filename do
     join1b(relativeName, <<>>, [?: | rest], :win32)
   end
 
-  defp join1b(<<>>, relativeName, [[?/, ?/] | result], :win32) do
-    join1b(relativeName, <<>>, [[?/, ?/] | result], :win32)
+  defp join1b(<<>>, relativeName, [?/, ?/ | result], :win32) do
+    join1b(relativeName, <<>>, [?/, ?/ | result], :win32)
   end
 
   defp join1b(<<>>, relativeName, [?/ | result], osType) do
     join1b(relativeName, <<>>, [?/ | result], osType)
   end
 
-  defp join1b(<<>>, relativeName, [[?., ?/] | result], osType) do
+  defp join1b(<<>>, relativeName, [?., ?/ | result], osType) do
     join1b(relativeName, <<>>, [?/ | result], osType)
   end
 
@@ -723,7 +723,7 @@ defmodule :m_filename do
     win32_pathtype(:erlang.atom_to_list(atom) ++ rest)
   end
 
-  defp win32_pathtype([[char, list] | rest]) when is_list(list) do
+  defp win32_pathtype([char, list | rest]) when is_list(list) do
     win32_pathtype([char | list ++ rest])
   end
 
@@ -763,19 +763,19 @@ defmodule :m_filename do
     :volumerelative
   end
 
-  defp win32_pathtype([[?/, ?/] | _]) do
+  defp win32_pathtype([?/, ?/ | _]) do
     :absolute
   end
 
-  defp win32_pathtype([[?\\, ?/] | _]) do
+  defp win32_pathtype([?\\, ?/ | _]) do
     :absolute
   end
 
-  defp win32_pathtype([[?/, ?\\] | _]) do
+  defp win32_pathtype([?/, ?\\ | _]) do
     :absolute
   end
 
-  defp win32_pathtype([[?\\, ?\\] | _]) do
+  defp win32_pathtype([?\\, ?\\ | _]) do
     :absolute
   end
 
@@ -787,19 +787,19 @@ defmodule :m_filename do
     :volumerelative
   end
 
-  defp win32_pathtype([[c1, c2, list] | rest]) when is_list(list) do
-    pathtype([[c1, c2] | list ++ rest])
+  defp win32_pathtype([c1, c2, list | rest]) when is_list(list) do
+    pathtype([c1, c2 | list ++ rest])
   end
 
-  defp win32_pathtype([[_Letter, ?:, ?/] | _]) do
+  defp win32_pathtype([_Letter, ?:, ?/ | _]) do
     :absolute
   end
 
-  defp win32_pathtype([[_Letter, ?:, ?\\] | _]) do
+  defp win32_pathtype([_Letter, ?:, ?\\ | _]) do
     :absolute
   end
 
-  defp win32_pathtype([[_Letter, ?:] | _]) do
+  defp win32_pathtype([_Letter, ?: | _]) do
     :volumerelative
   end
 
@@ -1004,7 +1004,7 @@ defmodule :m_filename do
     split(name, [], :unix)
   end
 
-  defp win32_split([[slash, slash] | rest])
+  defp win32_split([slash, slash | rest])
        when slash === ?\\ or slash === ?/ do
     split(rest, [[?/, ?/]], :win32)
   end
@@ -1013,26 +1013,27 @@ defmodule :m_filename do
     win32_split([?/ | rest])
   end
 
-  defp win32_split([[x, ?\\] | rest]) when is_integer(x) do
-    win32_split([[x, ?/] | rest])
+  defp win32_split([x, ?\\ | rest]) when is_integer(x) do
+    win32_split([x, ?/ | rest])
   end
 
-  defp win32_split([[x, y, ?\\] | rest])
+  defp win32_split([x, y, ?\\ | rest])
        when is_integer(x) and
               is_integer(y) do
-    win32_split([[x, y, ?/] | rest])
+    win32_split([x, y, ?/ | rest])
   end
 
-  defp win32_split([[ucLetter, ?:] | rest])
-       when ucLetter >= ?A and ucLetter <= ?Z do
-    win32_split([[ucLetter + ?a - ?A, ?:] | rest])
+  defp win32_split([ucLetter, ?: | rest])
+       when ucLetter >= ?A and
+              ucLetter <= ?Z do
+    win32_split([ucLetter + ?a - ?A, ?: | rest])
   end
 
-  defp win32_split([[letter, ?:, ?/] | rest]) do
+  defp win32_split([letter, ?:, ?/ | rest]) do
     split(rest, [], [[letter, ?:, ?/]], :win32)
   end
 
-  defp win32_split([[letter, ?:] | rest]) do
+  defp win32_split([letter, ?: | rest]) do
     split(rest, [], [[letter, ?:]], :win32)
   end
 
@@ -1354,15 +1355,15 @@ defmodule :m_filename do
     end
   end
 
-  defp basedir_os_from_opts(%{:os => :linux}) do
+  defp basedir_os_from_opts(%{os: :linux}) do
     :linux
   end
 
-  defp basedir_os_from_opts(%{:os => :windows}) do
+  defp basedir_os_from_opts(%{os: :windows}) do
     :windows
   end
 
-  defp basedir_os_from_opts(%{:os => :darwin}) do
+  defp basedir_os_from_opts(%{os: :darwin}) do
     :darwin
   end
 
@@ -1370,15 +1371,15 @@ defmodule :m_filename do
     basedir_os_type()
   end
 
-  defp basedir_name_from_opts(:windows, app, %{:author => author, :version => vsn}) do
+  defp basedir_name_from_opts(:windows, app, %{author: author, version: vsn}) do
     :filename.join([author, app, vsn])
   end
 
-  defp basedir_name_from_opts(:windows, app, %{:author => author}) do
+  defp basedir_name_from_opts(:windows, app, %{author: author}) do
     :filename.join([author, app])
   end
 
-  defp basedir_name_from_opts(_, app, %{:version => vsn}) do
+  defp basedir_name_from_opts(_, app, %{version: vsn}) do
     :filename.join([app, vsn])
   end
 

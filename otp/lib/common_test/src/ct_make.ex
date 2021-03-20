@@ -364,7 +364,7 @@ defmodule :m_ct_make do
 
     case :compile.file(
            file,
-           [[:report_errors, :report_warnings] | opts]
+           [:report_errors, :report_warnings | opts]
          ) do
       ok when is_tuple(ok) and :erlang.element(1, ok) == :ok ->
         maybe_load(:erlang.element(2, ok), load, opts)

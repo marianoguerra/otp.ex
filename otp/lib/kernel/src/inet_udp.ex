@@ -55,7 +55,8 @@ defmodule :m_inet_udp do
   def open(port, opts) do
     case :inet.udp_options(
            [
-             [{:port, port}, {:recbuf, 8 * 1024}]
+             {:port, port},
+             {:recbuf, 8 * 1024}
              | opts
            ],
            :inet_udp

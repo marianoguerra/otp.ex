@@ -97,13 +97,13 @@ defmodule :m_cth_log_redirect do
     case :erlang.whereis(:cth_log_redirect) do
       :undefined ->
         childSpec = %{
-          :id => :cth_log_redirect,
-          :start =>
+          id: :cth_log_redirect,
+          start:
             {:gen_server, :start_link, [{:local, :cth_log_redirect}, :cth_log_redirect, [], []]},
-          :restart => :transient,
-          :shutdown => 2000,
-          :type => :worker,
-          :modules => [:cth_log_redirect]
+          restart: :transient,
+          shutdown: 2000,
+          type: :worker,
+          modules: [:cth_log_redirect]
         }
 
         {:ok, _} =
@@ -124,14 +124,14 @@ defmodule :m_cth_log_redirect do
           {:maps.get(:formatter, default), :maps.get(:level, default)}
 
         _Else ->
-          {{:logger_formatter, %{:legacy_header => true, :single_line => false}}, :info}
+          {{:logger_formatter, %{legacy_header: true, single_line: false}}, :info}
       end
 
     :ok =
       :logger.add_handler(
         :cth_log_redirect,
         :cth_log_redirect,
-        %{:level => defaultLevel, :formatter => defaultFormatter}
+        %{level: defaultLevel, formatter: defaultFormatter}
       )
   end
 
@@ -140,7 +140,7 @@ defmodule :m_cth_log_redirect do
   end
 
   def log(
-        %{:msg => {:report, msg}, :meta => %{:domain => [:otp, :sasl]}} = log,
+        %{msg: {:report, msg}, meta: %{domain: [:otp, :sasl]}} = log,
         config
       ) do
     case :erlang.whereis(:sasl_sup) do
@@ -166,7 +166,7 @@ defmodule :m_cth_log_redirect do
         case level do
           :error ->
             case msg do
-              %{:label => {_, :progress}} ->
+              %{label: {_, :progress}} ->
                 :ok
 
               _ ->
@@ -179,14 +179,11 @@ defmodule :m_cth_log_redirect do
     end
   end
 
-  def log(
-        %{:meta => %{:domain => [:otp]}} = log,
-        config
-      ) do
+  def log(%{meta: %{domain: [:otp]}} = log, config) do
     do_log(add_log_category(log, :error_logger), config)
   end
 
-  def log(%{:meta => %{:domain => _}}, _) do
+  def log(%{meta: %{domain: _}}, _) do
     :ok
   end
 
@@ -194,8 +191,8 @@ defmodule :m_cth_log_redirect do
     do_log(add_log_category(log, :error_logger), config)
   end
 
-  defp add_log_category(%{:meta => meta} = log, category) do
-    %{log | :meta => %{meta | :cth_log_redirect => %{:category => category}}}
+  defp add_log_category(%{meta: meta} = log, category) do
+    Map.put(log, :meta, Map.put(meta, :cth_log_redirect, %{category: category}))
   end
 
   defp do_log(log, config) do
@@ -207,7 +204,7 @@ defmodule :m_cth_log_redirect do
   end
 
   def handle_call(
-        {:log, %{:meta => %{:gl => gL}}, _},
+        {:log, %{meta: %{gl: gL}}, _},
         _From,
         r_eh_state(handle_remote_events: false) = state
       )
@@ -216,8 +213,8 @@ defmodule :m_cth_log_redirect do
   end
 
   def handle_call(
-        {:log, %{:meta => %{:cth_log_redirect => %{:category => category}}} = log,
-         %{:formatter => {formatter, fConfig}}},
+        {:log, %{meta: %{cth_log_redirect: %{category: category}}} = log,
+         %{formatter: {formatter, fConfig}}},
         _From,
         r_eh_state(log_func: logFunc) = state
       ) do

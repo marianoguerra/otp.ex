@@ -722,7 +722,7 @@ defmodule :m_unicode do
       n when n >= missing ->
         <<fillIn::size(missing)-binary, trailing::binary>> = part
         newPart = <<incomplete::binary, fillIn::binary>>
-        ml_map([[newPart, trailing] | t], fun, accum)
+        ml_map([newPart, trailing | t], fun, accum)
 
       m ->
         newIncomplete = <<incomplete::binary, part::binary>>
@@ -734,7 +734,7 @@ defmodule :m_unicode do
   defp ml_map([part | t], fun, accum)
        when is_binary(part) and byte_size(part) > 8192 do
     <<part1::size(8192)-binary, part2::binary>> = part
-    ml_map([[part1, part2] | t], fun, accum)
+    ml_map([part1, part2 | t], fun, accum)
   end
 
   defp ml_map([part | t], fun, accum) when is_binary(part) do

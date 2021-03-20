@@ -190,10 +190,7 @@ defmodule :m_dialyzer do
 
   def run(opts) do
     try do
-      :dialyzer_options.build([
-        [{:report_mode, :quiet}, {:erlang_mode, true}]
-        | opts
-      ])
+      :dialyzer_options.build([{:report_mode, :quiet}, {:erlang_mode, true} | opts])
     catch
       {:dialyzer_error, errorMsg} ->
         :erlang.error({:dialyzer_error, :lists.flatten(errorMsg)})
@@ -598,7 +595,16 @@ defmodule :m_dialyzer do
        ) do
     :io_lib.format(
       'The contract ~ts cannot be right because the inferred return for ~tw~ts on line ~w is ~ts\n',
-      [con(m, f, contract, i), f, a(argStrings, i), line, t(cRet, i)]
+      [
+        con(m, f, contract, i),
+        f,
+        a(argStrings, i),
+        line,
+        t(
+          cRet,
+          i
+        )
+      ]
     )
   end
 
@@ -666,7 +672,15 @@ defmodule :m_dialyzer do
        ) do
     :io_lib.format(
       'The call ~w:~tw~ts does not have ~ts\n',
-      [m, f, a(args, i), form_expected_without_opaque(expectedTriples, i)]
+      [
+        m,
+        f,
+        a(args, i),
+        form_expected_without_opaque(
+          expectedTriples,
+          i
+        )
+      ]
     )
   end
 
@@ -850,7 +864,7 @@ defmodule :m_dialyzer do
       [_] ->
         'an opaque term as '
 
-      [[_, _] | _] ->
+      [_, _ | _] ->
         'opaque terms as '
     end ++
       form_position_string(argNs) ++
@@ -858,7 +872,7 @@ defmodule :m_dialyzer do
         [_] ->
           ' argument'
 
-        [[_, _] | _] ->
+        [_, _ | _] ->
           ' arguments'
       end
   end
@@ -891,7 +905,7 @@ defmodule :m_dialyzer do
             :io_lib.format('a structured term of type ~ts is expected', [t(tS, i)])
         end
 
-      [[_, _] | _] ->
+      [_, _ | _] ->
         'terms of different types are expected in these positions'
     end
   end
@@ -904,7 +918,7 @@ defmodule :m_dialyzer do
       [n1] ->
         ordinal(n1)
 
-      [[_, _] | _] ->
+      [_, _ | _] ->
         [last | prevs] = :lists.reverse(argNs)
 
         ', ' ++ head =

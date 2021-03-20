@@ -1691,385 +1691,440 @@ defmodule :m_ssh_connection do
 
   defp encode_pty_opts2([{:vintr, value} | opts]) do
     [
-      [1, <<value::size(32)-unsigned-big-integer>>]
+      1,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vquit, value} | opts]) do
     [
-      [2, <<value::size(32)-unsigned-big-integer>>]
+      2,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:verase, value} | opts]) do
     [
-      [3, <<value::size(32)-unsigned-big-integer>>]
+      3,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vkill, value} | opts]) do
     [
-      [4, <<value::size(32)-unsigned-big-integer>>]
+      4,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:veof, value} | opts]) do
     [
-      [5, <<value::size(32)-unsigned-big-integer>>]
+      5,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:veol, value} | opts]) do
     [
-      [6, <<value::size(32)-unsigned-big-integer>>]
+      6,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:veol2, value} | opts]) do
     [
-      [7, <<value::size(32)-unsigned-big-integer>>]
+      7,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vstart, value} | opts]) do
     [
-      [8, <<value::size(32)-unsigned-big-integer>>]
+      8,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vstop, value} | opts]) do
     [
-      [9, <<value::size(32)-unsigned-big-integer>>]
+      9,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vsusp, value} | opts]) do
     [
-      [10, <<value::size(32)-unsigned-big-integer>>]
+      10,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vdsusp, value} | opts]) do
     [
-      [11, <<value::size(32)-unsigned-big-integer>>]
+      11,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vreprint, value} | opts]) do
     [
-      [12, <<value::size(32)-unsigned-big-integer>>]
+      12,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vwerase, value} | opts]) do
     [
-      [13, <<value::size(32)-unsigned-big-integer>>]
+      13,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vlnext, value} | opts]) do
     [
-      [14, <<value::size(32)-unsigned-big-integer>>]
+      14,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vflush, value} | opts]) do
     [
-      [15, <<value::size(32)-unsigned-big-integer>>]
+      15,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vswtch, value} | opts]) do
     [
-      [16, <<value::size(32)-unsigned-big-integer>>]
+      16,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vstatus, value} | opts]) do
     [
-      [17, <<value::size(32)-unsigned-big-integer>>]
+      17,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:vdiscard, value} | opts]) do
     [
-      [18, <<value::size(32)-unsigned-big-integer>>]
+      18,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:ignpar, value} | opts]) do
     [
-      [30, <<value::size(32)-unsigned-big-integer>>]
+      30,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:parmrk, value} | opts]) do
     [
-      [31, <<value::size(32)-unsigned-big-integer>>]
+      31,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:inpck, value} | opts]) do
     [
-      [32, <<value::size(32)-unsigned-big-integer>>]
+      32,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:istrip, value} | opts]) do
     [
-      [33, <<value::size(32)-unsigned-big-integer>>]
+      33,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:inlcr, value} | opts]) do
     [
-      [34, <<value::size(32)-unsigned-big-integer>>]
+      34,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:igncr, value} | opts]) do
     [
-      [35, <<value::size(32)-unsigned-big-integer>>]
+      35,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:icrnl, value} | opts]) do
     [
-      [36, <<value::size(32)-unsigned-big-integer>>]
+      36,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:iuclc, value} | opts]) do
     [
-      [37, <<value::size(32)-unsigned-big-integer>>]
+      37,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:ixon, value} | opts]) do
     [
-      [38, <<value::size(32)-unsigned-big-integer>>]
+      38,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:ixany, value} | opts]) do
     [
-      [39, <<value::size(32)-unsigned-big-integer>>]
+      39,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:ixoff, value} | opts]) do
     [
-      [40, <<value::size(32)-unsigned-big-integer>>]
+      40,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:imaxbel, value} | opts]) do
     [
-      [41, <<value::size(32)-unsigned-big-integer>>]
+      41,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:isig, value} | opts]) do
     [
-      [50, <<value::size(32)-unsigned-big-integer>>]
+      50,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:icanon, value} | opts]) do
     [
-      [51, <<value::size(32)-unsigned-big-integer>>]
+      51,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:xcase, value} | opts]) do
     [
-      [52, <<value::size(32)-unsigned-big-integer>>]
+      52,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:echo, value} | opts]) do
     [
-      [53, <<value::size(32)-unsigned-big-integer>>]
+      53,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:echoe, value} | opts]) do
     [
-      [54, <<value::size(32)-unsigned-big-integer>>]
+      54,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:echok, value} | opts]) do
     [
-      [55, <<value::size(32)-unsigned-big-integer>>]
+      55,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:echonl, value} | opts]) do
     [
-      [56, <<value::size(32)-unsigned-big-integer>>]
+      56,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:noflsh, value} | opts]) do
     [
-      [57, <<value::size(32)-unsigned-big-integer>>]
+      57,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:tostop, value} | opts]) do
     [
-      [58, <<value::size(32)-unsigned-big-integer>>]
+      58,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:iexten, value} | opts]) do
     [
-      [59, <<value::size(32)-unsigned-big-integer>>]
+      59,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:echoctl, value} | opts]) do
     [
-      [60, <<value::size(32)-unsigned-big-integer>>]
+      60,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:echoke, value} | opts]) do
     [
-      [61, <<value::size(32)-unsigned-big-integer>>]
+      61,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:pendin, value} | opts]) do
     [
-      [62, <<value::size(32)-unsigned-big-integer>>]
+      62,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:opost, value} | opts]) do
     [
-      [70, <<value::size(32)-unsigned-big-integer>>]
+      70,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:olcuc, value} | opts]) do
     [
-      [71, <<value::size(32)-unsigned-big-integer>>]
+      71,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:onlcr, value} | opts]) do
     [
-      [72, <<value::size(32)-unsigned-big-integer>>]
+      72,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:ocrnl, value} | opts]) do
     [
-      [73, <<value::size(32)-unsigned-big-integer>>]
+      73,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:onocr, value} | opts]) do
     [
-      [74, <<value::size(32)-unsigned-big-integer>>]
+      74,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:onlret, value} | opts]) do
     [
-      [75, <<value::size(32)-unsigned-big-integer>>]
+      75,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:cs7, value} | opts]) do
     [
-      [90, <<value::size(32)-unsigned-big-integer>>]
+      90,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:cs8, value} | opts]) do
     [
-      [91, <<value::size(32)-unsigned-big-integer>>]
+      91,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:parenb, value} | opts]) do
     [
-      [92, <<value::size(32)-unsigned-big-integer>>]
+      92,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:parodd, value} | opts]) do
     [
-      [93, <<value::size(32)-unsigned-big-integer>>]
+      93,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:tty_op_ispeed, value} | opts]) do
     [
-      [128, <<value::size(32)-unsigned-big-integer>>]
+      128,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end
 
   defp encode_pty_opts2([{:tty_op_ospeed, value} | opts]) do
     [
-      [129, <<value::size(32)-unsigned-big-integer>>]
+      129,
+      <<value::size(32)-unsigned-big-integer>>
       | encode_pty_opts2(opts)
     ]
   end

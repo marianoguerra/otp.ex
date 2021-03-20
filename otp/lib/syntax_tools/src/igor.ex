@@ -44,14 +44,12 @@ defmodule :m_igor do
     files = :proplists.append_values(:files, opts)
 
     opts1 = [
-      [
-        {:comments, false},
-        {:notes, :no},
-        {:no_imports, true},
-        {:file_attributes, :yes},
-        {:preprocess, true},
-        {:export, [name]}
-      ]
+      {:comments, false},
+      {:notes, :no},
+      {:no_imports, true},
+      {:file_attributes, :yes},
+      {:preprocess, true},
+      {:export, [name]}
       | opts
     ]
 
@@ -2708,7 +2706,7 @@ defmodule :m_igor do
     :lists.reverse(ls1)
   end
 
-  defp split_lines([[?\r, ?\n] | cs], cs1, ls) do
+  defp split_lines([?\r, ?\n | cs], cs1, ls) do
     split_lines_1(cs, cs1, ls)
   end
 

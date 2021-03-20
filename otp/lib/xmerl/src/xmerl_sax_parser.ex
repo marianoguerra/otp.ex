@@ -41,12 +41,10 @@ defmodule :m_xmerl_sax_parser do
           stream(
             <<>>,
             [
-              [
-                {:continuation_fun, continuationFun},
-                {:continuation_state, fD},
-                {:current_location, cL},
-                {:entity, file}
-              ]
+              {:continuation_fun, continuationFun},
+              {:continuation_state, fD},
+              {:current_location, cL},
+              {:entity, file}
               | options
             ],
             :file

@@ -590,7 +590,7 @@ defmodule :m_code_server do
     :lists.reverse([:lists.reverse(cs) | toks])
   end
 
-  defp join([[h1, h2] | t], s) do
+  defp join([h1, h2 | t], s) do
     h1 ++ s ++ join([h2 | t], s)
   end
 
@@ -823,7 +823,7 @@ defmodule :m_code_server do
 
   defp split_base(baseName) do
     case split(baseName, '-') do
-      [[_, _] | _] = toks ->
+      [_, _ | _] = toks ->
         vsn = :lists.last(toks)
         allButLast = :lists.droplast(toks)
         {join(allButLast, '-'), vsn}
@@ -873,7 +873,7 @@ defmodule :m_code_server do
                 {:error, :bad_directory}
             end
 
-          [['ebin', app, optArchive] | revTop] ->
+          ['ebin', app, optArchive | revTop] ->
             ext = :filename.extension(optArchive)
             base = :filename.basename(optArchive, ext)
 
@@ -1944,10 +1944,10 @@ defmodule :m_code_server do
           :logger,
           {:log, :error, format, args,
            %{
-             :pid => self(),
-             :gl => :erlang.group_leader(),
-             :time => :os.system_time(:microsecond),
-             :error_logger => %{:tag => :error}
+             pid: self(),
+             gl: :erlang.group_leader(),
+             time: :os.system_time(:microsecond),
+             error_logger: %{tag: :error}
            }}
         )
       catch
@@ -1965,10 +1965,10 @@ defmodule :m_code_server do
         :logger,
         {:log, :info, format, args,
          %{
-           :pid => self(),
-           :gl => :erlang.group_leader(),
-           :time => :os.system_time(:microsecond),
-           :error_logger => %{:tag => :info_msg}
+           pid: self(),
+           gl: :erlang.group_leader(),
+           time: :os.system_time(:microsecond),
+           error_logger: %{tag: :info_msg}
          }}
       )
     catch

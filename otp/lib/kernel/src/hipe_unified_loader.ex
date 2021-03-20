@@ -247,14 +247,7 @@ defmodule :m_hipe_unified_loader do
     exports(exportMap, baseAddress, [])
   end
 
-  defp exports(
-         [
-           [offset, m, f, a, isClosure, isExported]
-           | rest
-         ],
-         baseAddress,
-         funDefs
-       ) do
+  defp exports([offset, m, f, a, isClosure, isExported | rest], baseAddress, funDefs) do
     case isExported and :erlang.is_builtin(m, f, a) do
       true ->
         exports(rest, baseAddress, funDefs)
@@ -544,7 +537,7 @@ defmodule :m_hipe_unified_loader do
     []
   end
 
-  defp group([[b1, b2, b3, b4] | ls], [o | os]) do
+  defp group([b1, b2, b3, b4 | ls], [o | os]) do
     [
       {:hipe_bifs.term_to_word(o), bytes_to_32(b4, b3, b2, b1)}
       | group(ls, os)

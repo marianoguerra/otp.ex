@@ -288,7 +288,7 @@ defmodule :m_dbg_ieval do
   end
 
   defp format_args1([a | as], p) do
-    [[:io_lib.format(p, [a]), ?,] | format_args1(as, p)]
+    [:io_lib.format(p, [a]), ?, | format_args1(as, p)]
   end
 
   defp format_args1([], _) do
@@ -793,34 +793,44 @@ defmodule :m_dbg_ieval do
              16 ->
                fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p ->
                     eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                                p],
+                                                                            p],
                                info)
                end
              17 ->
                fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q ->
                     eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                                p, q],
+                                                                            p,
+                                                                                q],
                                info)
                end
              18 ->
                fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q,
                     r ->
                     eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                                p, q, r],
+                                                                            p,
+                                                                                q,
+                                                                                    r],
                                info)
                end
              19 ->
                fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r,
                     s ->
                     eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                                p, q, r, s],
+                                                                            p,
+                                                                                q,
+                                                                                    r,
+                                                                                        s],
                                info)
                end
              20 ->
                fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r,
                     s, t ->
                     eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                                p, q, r, s, t],
+                                                                            p,
+                                                                                q,
+                                                                                    r,
+                                                                                        s,
+                                                                                            t],
                                info)
                end
              _Other ->
@@ -912,35 +922,41 @@ defmodule :m_dbg_ieval do
                fn rF
                a, b, c, d, e, f, g, h, i, j, k, l, m, n ->
                  eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                   n],
+                                                                         n],
                                   rF, info)
                end
              15 ->
                fn rF
                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o ->
                  eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                   n, o],
+                                                                         n, o],
                                   rF, info)
                end
              16 ->
                fn rF
                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p ->
                  eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                   n, o, p],
+                                                                         n, o,
+                                                                                p],
                                   rF, info)
                end
              17 ->
                fn rF
                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q ->
                  eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                   n, o, p, q],
+                                                                         n, o,
+                                                                                p,
+                                                                                    q],
                                   rF, info)
                end
              18 ->
                fn rF
                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r ->
                  eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                   n, o, p, q, r],
+                                                                         n, o,
+                                                                                p,
+                                                                                    q,
+                                                                                        r],
                                   rF, info)
                end
              19 ->
@@ -948,7 +964,11 @@ defmodule :m_dbg_ieval do
                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r,
                  s ->
                  eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                   n, o, p, q, r, s],
+                                                                         n, o,
+                                                                                p,
+                                                                                    q,
+                                                                                        r,
+                                                                                            s],
                                   rF, info)
                end
              20 ->
@@ -956,7 +976,12 @@ defmodule :m_dbg_ieval do
                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s,
                  t ->
                  eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                   n, o, p, q, r, s, t],
+                                                                         n, o,
+                                                                                p,
+                                                                                    q,
+                                                                                        r,
+                                                                                            s,
+                                                                                                t],
                                   rF, info)
                end
              _Other ->
@@ -1958,43 +1983,43 @@ defmodule :m_dbg_ieval do
     {:value, val}
   end
 
-  defp binding(name, [[_, {name, val}] | _]) do
+  defp binding(name, [_, {name, val} | _]) do
     {:value, val}
   end
 
-  defp binding(name, [[_, _, {name, val}] | _]) do
+  defp binding(name, [_, _, {name, val} | _]) do
     {:value, val}
   end
 
-  defp binding(name, [[_, _, _, {name, val}] | _]) do
+  defp binding(name, [_, _, _, {name, val} | _]) do
     {:value, val}
   end
 
-  defp binding(name, [[_, _, _, _, {name, val}] | _]) do
+  defp binding(name, [_, _, _, _, {name, val} | _]) do
     {:value, val}
   end
 
-  defp binding(name, [[_, _, _, _, _, {name, val}] | _]) do
+  defp binding(name, [_, _, _, _, _, {name, val} | _]) do
     {:value, val}
   end
 
-  defp binding(name, [[_, _, _, _, _, _] | bs]) do
+  defp binding(name, [_, _, _, _, _, _ | bs]) do
     binding(name, bs)
   end
 
-  defp binding(name, [[_, _, _, _, _] | bs]) do
+  defp binding(name, [_, _, _, _, _ | bs]) do
     binding(name, bs)
   end
 
-  defp binding(name, [[_, _, _, _] | bs]) do
+  defp binding(name, [_, _, _, _ | bs]) do
     binding(name, bs)
   end
 
-  defp binding(name, [[_, _, _] | bs]) do
+  defp binding(name, [_, _, _ | bs]) do
     binding(name, bs)
   end
 
-  defp binding(name, [[_, _] | bs]) do
+  defp binding(name, [_, _ | bs]) do
     binding(name, bs)
   end
 
@@ -2010,44 +2035,44 @@ defmodule :m_dbg_ieval do
     [{:_, val} | bs]
   end
 
-  defp add_anon(val, [[b1, {:_, _}] | bs]) do
-    [[b1, {:_, val}] | bs]
+  defp add_anon(val, [b1, {:_, _} | bs]) do
+    [b1, {:_, val} | bs]
   end
 
-  defp add_anon(val, [[b1, b2, {:_, _}] | bs]) do
-    [[b1, b2, {:_, val}] | bs]
+  defp add_anon(val, [b1, b2, {:_, _} | bs]) do
+    [b1, b2, {:_, val} | bs]
   end
 
-  defp add_anon(val, [[b1, b2, b3, {:_, _}] | bs]) do
-    [[b1, b2, b3, {:_, val}] | bs]
+  defp add_anon(val, [b1, b2, b3, {:_, _} | bs]) do
+    [b1, b2, b3, {:_, val} | bs]
   end
 
-  defp add_anon(val, [[b1, b2, b3, b4, {:_, _}] | bs]) do
-    [[b1, b2, b3, b4, {:_, val}] | bs]
+  defp add_anon(val, [b1, b2, b3, b4, {:_, _} | bs]) do
+    [b1, b2, b3, b4, {:_, val} | bs]
   end
 
-  defp add_anon(val, [[b1, b2, b3, b4, b5, {:_, _}] | bs]) do
-    [[b1, b2, b3, b4, b5, {:_, val}] | bs]
+  defp add_anon(val, [b1, b2, b3, b4, b5, {:_, _} | bs]) do
+    [b1, b2, b3, b4, b5, {:_, val} | bs]
   end
 
-  defp add_anon(val, [[b1, b2, b3, b4, b5, b6] | bs]) do
-    [[b1, b2, b3, b4, b5, b6] | add_anon(val, bs)]
+  defp add_anon(val, [b1, b2, b3, b4, b5, b6 | bs]) do
+    [b1, b2, b3, b4, b5, b6 | add_anon(val, bs)]
   end
 
-  defp add_anon(val, [[b1, b2, b3, b4, b5] | bs]) do
-    [[b1, b2, b3, b4, b5] | add_anon(val, bs)]
+  defp add_anon(val, [b1, b2, b3, b4, b5 | bs]) do
+    [b1, b2, b3, b4, b5 | add_anon(val, bs)]
   end
 
-  defp add_anon(val, [[b1, b2, b3, b4] | bs]) do
-    [[b1, b2, b3, b4] | add_anon(val, bs)]
+  defp add_anon(val, [b1, b2, b3, b4 | bs]) do
+    [b1, b2, b3, b4 | add_anon(val, bs)]
   end
 
-  defp add_anon(val, [[b1, b2, b3] | bs]) do
-    [[b1, b2, b3] | add_anon(val, bs)]
+  defp add_anon(val, [b1, b2, b3 | bs]) do
+    [b1, b2, b3 | add_anon(val, bs)]
   end
 
-  defp add_anon(val, [[b1, b2] | bs]) do
-    [[b1, b2] | add_anon(val, bs)]
+  defp add_anon(val, [b1, b2 | bs]) do
+    [b1, b2 | add_anon(val, bs)]
   end
 
   defp add_anon(val, [b1 | bs]) do
@@ -2097,44 +2122,44 @@ defmodule :m_dbg_ieval do
     [{n, val} | bs]
   end
 
-  defp add_binding(n, val, [[b1, {n, _}] | bs]) do
-    [[b1, {n, val}] | bs]
+  defp add_binding(n, val, [b1, {n, _} | bs]) do
+    [b1, {n, val} | bs]
   end
 
-  defp add_binding(n, val, [[b1, b2, {n, _}] | bs]) do
-    [[b1, b2, {n, val}] | bs]
+  defp add_binding(n, val, [b1, b2, {n, _} | bs]) do
+    [b1, b2, {n, val} | bs]
   end
 
-  defp add_binding(n, val, [[b1, b2, b3, {n, _}] | bs]) do
-    [[b1, b2, b3, {n, val}] | bs]
+  defp add_binding(n, val, [b1, b2, b3, {n, _} | bs]) do
+    [b1, b2, b3, {n, val} | bs]
   end
 
-  defp add_binding(n, val, [[b1, b2, b3, b4, {n, _}] | bs]) do
-    [[b1, b2, b3, b4, {n, val}] | bs]
+  defp add_binding(n, val, [b1, b2, b3, b4, {n, _} | bs]) do
+    [b1, b2, b3, b4, {n, val} | bs]
   end
 
-  defp add_binding(n, val, [[b1, b2, b3, b4, b5, {n, _}] | bs]) do
-    [[b1, b2, b3, b4, b5, {n, val}] | bs]
+  defp add_binding(n, val, [b1, b2, b3, b4, b5, {n, _} | bs]) do
+    [b1, b2, b3, b4, b5, {n, val} | bs]
   end
 
-  defp add_binding(n, val, [[b1, b2, b3, b4, b5, b6] | bs]) do
-    [[b1, b2, b3, b4, b5, b6] | add_binding(n, val, bs)]
+  defp add_binding(n, val, [b1, b2, b3, b4, b5, b6 | bs]) do
+    [b1, b2, b3, b4, b5, b6 | add_binding(n, val, bs)]
   end
 
-  defp add_binding(n, val, [[b1, b2, b3, b4, b5] | bs]) do
-    [[b1, b2, b3, b4, b5] | add_binding(n, val, bs)]
+  defp add_binding(n, val, [b1, b2, b3, b4, b5 | bs]) do
+    [b1, b2, b3, b4, b5 | add_binding(n, val, bs)]
   end
 
-  defp add_binding(n, val, [[b1, b2, b3, b4] | bs]) do
-    [[b1, b2, b3, b4] | add_binding(n, val, bs)]
+  defp add_binding(n, val, [b1, b2, b3, b4 | bs]) do
+    [b1, b2, b3, b4 | add_binding(n, val, bs)]
   end
 
-  defp add_binding(n, val, [[b1, b2, b3] | bs]) do
-    [[b1, b2, b3] | add_binding(n, val, bs)]
+  defp add_binding(n, val, [b1, b2, b3 | bs]) do
+    [b1, b2, b3 | add_binding(n, val, bs)]
   end
 
-  defp add_binding(n, val, [[b1, b2] | bs]) do
-    [[b1, b2] | add_binding(n, val, bs)]
+  defp add_binding(n, val, [b1, b2 | bs]) do
+    [b1, b2 | add_binding(n, val, bs)]
   end
 
   defp add_binding(n, val, [b1 | bs]) do

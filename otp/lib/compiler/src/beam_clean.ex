@@ -179,7 +179,9 @@ defmodule :m_beam_clean do
     temp = {:x, 1022}
 
     [
-      [{:move, reg1, temp}, {:move, reg2, reg1}, {:move, temp, reg2}]
+      {:move, reg1, temp},
+      {:move, reg2, reg1},
+      {:move, temp, reg2}
       | swap_moves(is)
     ]
   end

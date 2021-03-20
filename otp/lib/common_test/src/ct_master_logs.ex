@@ -458,7 +458,7 @@ defmodule :m_ct_master_logs do
                    [?., ?_]
                  )
                ) do
-            [[sS, mM, hH, date] | _] ->
+            [sS, mM, hH, date | _] ->
               {{date, hH, mM, sS}, dir}
 
             _Other ->
@@ -516,12 +516,10 @@ defmodule :m_ct_master_logs do
     [
       header('Master Test Runs', {[1], [2, 3], []}),
       '<center>\n',
-      xhtml(['<table border="3" cellpadding="5" bgcolor="', 'lightblue', '">\n'], [
-        '<table id="',
-        'SortableTable',
-        '">\n',
-        '<thead>\n<tr>\n'
-      ]),
+      xhtml(
+        ['<table border="3" cellpadding="5" bgcolor="', 'lightblue', '">\n'],
+        ['<table id="', 'SortableTable', '">\n', '<thead>\n<tr>\n']
+      ),
       '<th><b>History</b></th>\n<th><b>Master Host</b></th>\n<th><b>Test Nodes</b></th>\n',
       xhtml('', '</tr></thead>\n<tbody>\n')
     ]
@@ -529,7 +527,12 @@ defmodule :m_ct_master_logs do
 
   defp timestamp(dir) do
     [
-      [s, min, h, d, m, y]
+      s,
+      min,
+      h,
+      d,
+      m,
+      y
       | _
     ] = :lists.reverse(:string.lexemes(dir, '.-_'))
 
@@ -605,13 +608,18 @@ defmodule :m_ct_master_logs do
       '<meta http-equiv="cache-control" content="no-cache"></meta>\n',
       '<meta http-equiv="content-type" content="text/html; ',
       'charset=utf-8"></meta>\n',
-      xhtml('', [
-        '<link rel="stylesheet" href="',
-        :ct_logs.uri(cSSFile),
-        '" type="text/css"></link>\n'
-      ]),
-      xhtml('', ['<script type="text/javascript" src="', jQueryFile, '"></script>\n']),
-      xhtml('', ['<script type="text/javascript" src="', tableSorterFile, '"></script>\n']),
+      xhtml(
+        '',
+        ['<link rel="stylesheet" href="', :ct_logs.uri(cSSFile), '" type="text/css"></link>\n']
+      ),
+      xhtml(
+        '',
+        ['<script type="text/javascript" src="', jQueryFile, '"></script>\n']
+      ),
+      xhtml(
+        '',
+        ['<script type="text/javascript" src="', tableSorterFile, '"></script>\n']
+      ),
       xhtml(
         fn ->
           ''
@@ -644,8 +652,14 @@ defmodule :m_ct_master_logs do
       'Updated: <!--date-->',
       current_time(),
       '<--!/date-->',
-      xhtml('<br>\n', '<br />\n'),
-      xhtml('</font></p>\n', '</div>\n'),
+      xhtml(
+        '<br>\n',
+        '<br />\n'
+      ),
+      xhtml(
+        '</font></p>\n',
+        '</div>\n'
+      ),
       '</center>\n</body>\n'
     ]
   end

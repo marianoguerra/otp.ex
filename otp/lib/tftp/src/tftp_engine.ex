@@ -2492,7 +2492,7 @@ defmodule :m_tftp_engine do
   end
 
   defp do_format(config, side, local, format, args) do
-    info_msg(config, '~p(~p): ' ++ format, [[side, local] | args])
+    info_msg(config, '~p(~p): ' ++ format, [side, local | args])
   end
 
   def system_continue(_Parent, _Debug, r_sys_misc(module: mod, function: fun, arguments: args)) do

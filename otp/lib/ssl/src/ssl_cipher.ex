@@ -1380,7 +1380,7 @@ defmodule :m_ssl_cipher do
   end
 
   def security_parameters(version, cipherSuite, secParams) do
-    %{:cipher => cipher, :mac => hash, :prf => prfHashAlg} =
+    %{cipher: cipher, mac: hash, prf: prfHashAlg} =
       :ssl_cipher_format.suite_bin_to_map(cipherSuite)
 
     r_security_parameters(secParams,
@@ -1398,7 +1398,7 @@ defmodule :m_ssl_cipher do
   end
 
   def security_parameters_1_3(secParams, cipherSuite) do
-    %{:cipher => cipher, :prf => prfHashAlg} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+    %{cipher: cipher, prf: prfHashAlg} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
 
     r_security_parameters(secParams,
       cipher_suite: cipherSuite,
@@ -1641,9 +1641,9 @@ defmodule :m_ssl_cipher do
           level: 2,
           description: 20,
           where: %{
-            :mfa => {:ssl_cipher, :decipher, 6},
-            :line => 273,
-            :file => 'otp/lib/ssl/src/ssl_cipher.erl'
+            mfa: {:ssl_cipher, :decipher, 6},
+            line: 273,
+            file: 'otp/lib/ssl/src/ssl_cipher.erl'
           },
           reason: :decryption_failed
         )
@@ -1727,9 +1727,9 @@ defmodule :m_ssl_cipher do
           level: 2,
           description: 20,
           where: %{
-            :mfa => {:ssl_cipher, :block_decipher, 6},
-            :line => 318,
-            :file => 'otp/lib/ssl/src/ssl_cipher.erl'
+            mfa: {:ssl_cipher, :block_decipher, 6},
+            line: 318,
+            file: 'otp/lib/ssl/src/ssl_cipher.erl'
           },
           reason: :decryption_failed
         )
@@ -1994,12 +1994,12 @@ defmodule :m_ssl_cipher do
   end
 
   defp filter_suite(
-         %{:key_exchange => keyExchange, :cipher => cipher, :mac => hash, :prf => prf},
+         %{key_exchange: keyExchange, cipher: cipher, mac: hash, prf: prf},
          %{
-           :key_exchange_filters => keyFilters,
-           :cipher_filters => cipherFilters,
-           :mac_filters => hashFilters,
-           :prf_filters => prfFilters
+           key_exchange_filters: keyFilters,
+           cipher_filters: cipherFilters,
+           mac_filters: hashFilters,
+           prf_filters: prfFilters
          }
        ) do
     all_filters(
@@ -2051,7 +2051,7 @@ defmodule :m_ssl_cipher do
     hashs = :proplists.get_value(:hashs, algos)
 
     %{
-      :key_exchange_filters => [
+      key_exchange_filters: [
         fn keyExchange ->
           is_acceptable_keyexchange(
             keyExchange,
@@ -2062,7 +2062,7 @@ defmodule :m_ssl_cipher do
           )
         end
       ],
-      :cipher_filters => [
+      cipher_filters: [
         fn cipher ->
           is_acceptable_cipher(
             cipher,
@@ -2070,12 +2070,12 @@ defmodule :m_ssl_cipher do
           )
         end
       ],
-      :mac_filters => [
+      mac_filters: [
         fn hash ->
           is_acceptable_hash(hash, hashs)
         end
       ],
-      :prf_filters => [
+      prf_filters: [
         fn prf ->
           is_acceptable_prf(
             prf,
@@ -2221,9 +2221,9 @@ defmodule :m_ssl_cipher do
   end
 
   def calc_mac_hash(type, version, plainFragment, %{
-        :sequence_number => seqNo,
-        :mac_secret => macSecret,
-        :security_parameters => r_security_parameters(mac_algorithm: macAlgorithm)
+        sequence_number: seqNo,
+        mac_secret: macSecret,
+        security_parameters: r_security_parameters(mac_algorithm: macAlgorithm)
       }) do
     calc_mac_hash(type, version, plainFragment, macAlgorithm, macSecret, seqNo)
   end
@@ -2233,7 +2233,7 @@ defmodule :m_ssl_cipher do
     mac_hash(version, macAlgorithm, macSecret, seqNo, type, length, plainFragment)
   end
 
-  def is_stream_ciphersuite(%{:cipher => :rc4_128}) do
+  def is_stream_ciphersuite(%{cipher: :rc4_128}) do
     true
   end
 
@@ -3252,10 +3252,10 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [rsa_signed(version)],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        key_exchange_filters: [rsa_signed(version)],
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3287,10 +3287,10 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [ecdsa_signed(version)],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        key_exchange_filters: [ecdsa_signed(version)],
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3323,14 +3323,14 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [
+        key_exchange_filters: [
           fn kex ->
             rsa_keyed(kex)
           end
         ],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3339,7 +3339,7 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [
+        key_exchange_filters: [
           fn
             :rsa ->
               true
@@ -3351,9 +3351,9 @@ defmodule :m_ssl_cipher do
               false
           end
         ],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3374,14 +3374,14 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [
+        key_exchange_filters: [
           fn kex ->
             dss_keyed(kex)
           end
         ],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3390,10 +3390,10 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [dsa_signed(version)],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        key_exchange_filters: [dsa_signed(version)],
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3412,7 +3412,7 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [
+        key_exchange_filters: [
           fn
             :dhe_dss ->
               true
@@ -3421,9 +3421,9 @@ defmodule :m_ssl_cipher do
               false
           end
         ],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3448,14 +3448,14 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [
+        key_exchange_filters: [
           fn kex ->
             ec_keyed(kex)
           end
         ],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3464,7 +3464,7 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [
+        key_exchange_filters: [
           fn
             :ecdh_ecdsa ->
               true
@@ -3473,9 +3473,9 @@ defmodule :m_ssl_cipher do
               false
           end
         ],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3484,7 +3484,7 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [
+        key_exchange_filters: [
           fn
             :ecdhe_ecdsa ->
               true
@@ -3496,9 +3496,9 @@ defmodule :m_ssl_cipher do
               false
           end
         ],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end
@@ -3507,7 +3507,7 @@ defmodule :m_ssl_cipher do
     filter_suites(
       ciphers,
       %{
-        :key_exchange_filters => [
+        key_exchange_filters: [
           fn
             :dhe_rsa ->
               true
@@ -3519,9 +3519,9 @@ defmodule :m_ssl_cipher do
               false
           end
         ],
-        :cipher_filters => [],
-        :mac_filters => [],
-        :prf_filters => []
+        cipher_filters: [],
+        mac_filters: [],
+        prf_filters: []
       }
     )
   end

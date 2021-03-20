@@ -1825,7 +1825,7 @@ defmodule :m_shell do
   defp parse_file(file, opts) do
     cwd = '.'
     dir = :filename.dirname(file)
-    includePath = [[cwd, dir] | inc_paths(opts)]
+    includePath = [cwd, dir | inc_paths(opts)]
 
     case :epp.parse_file(file, includePath, pre_defs(opts)) do
       {:ok, forms} ->
@@ -1874,10 +1874,7 @@ defmodule :m_shell do
   end
 
   defp list_commands(
-         [
-           [{{n, :command}, es0}, {{n, :result}, v}]
-           | ds
-         ],
+         [{{n, :command}, es0}, {{n, :result}, v} | ds],
          rT
        ) do
     es = prep_list_commands(es0)

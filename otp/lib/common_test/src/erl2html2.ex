@@ -14,7 +14,10 @@ defmodule :m_erl2html2 do
       '\'. -->\n<html>\n<head>\n<meta http-equiv="Content-Type" content="text/html;charset=',
       html_encoding(encoding),
       '"/></meta>\n<title>',
-      to_raw_list(file, encoding),
+      to_raw_list(
+        file,
+        encoding
+      ),
       '</title>\n</head>\n\n<body bgcolor="white" text="black" link="blue" vlink="purple" alink="red">\n'
     ]
 
@@ -176,10 +179,10 @@ defmodule :m_erl2html2 do
 
   defp classify_exprs(exprs) do
     case :erlang.tuple_to_list(:lists.last(exprs)) do
-      [[:macro, {_var, anno, _MACRO}] | _] ->
+      [:macro, {_var, anno, _MACRO} | _] ->
         {:anno, anno}
 
-      [[t, exprAnno] | exprs1] ->
+      [t, exprAnno | exprs1] ->
         case :erl_anno.is_anno(exprAnno) do
           true ->
             {:anno, exprAnno}
@@ -278,19 +281,19 @@ defmodule :m_erl2html2 do
   end
 
   defp htmlize([?< | str]) do
-    [[?&, ?l, ?t, ?;] | htmlize(str)]
+    [?&, ?l, ?t, ?; | htmlize(str)]
   end
 
   defp htmlize([?> | str]) do
-    [[?&, ?g, ?t, ?;] | htmlize(str)]
+    [?&, ?g, ?t, ?; | htmlize(str)]
   end
 
   defp htmlize([?& | str]) do
-    [[?&, ?a, ?m, ?p, ?;] | htmlize(str)]
+    [?&, ?a, ?m, ?p, ?; | htmlize(str)]
   end
 
   defp htmlize([?" | str]) do
-    [[?&, ?q, ?u, ?o, ?t, ?;] | htmlize(str)]
+    [?&, ?q, ?u, ?o, ?t, ?; | htmlize(str)]
   end
 
   defp htmlize([ch | str]) do

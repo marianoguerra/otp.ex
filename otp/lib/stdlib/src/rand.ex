@@ -1,7 +1,7 @@
 defmodule :m_rand do
   use Bitwise
 
-  defp uniform_range(range, %{:next => next, :bits => bits} = alg, r, v) do
+  defp uniform_range(range, %{next: next, bits: bits} = alg, r, v) do
     weakLowBits = :maps.get(:weak_low_bits, alg, 0)
     shift = bits - weakLowBits
     shiftMask = ~~~(1 <<< (weakLowBits - 1))
@@ -49,7 +49,7 @@ defmodule :m_rand do
 
   def export_seed() do
     case :erlang.get(:rand_seed) do
-      {%{:type => alg}, seed} ->
+      {%{type: alg}, seed} ->
         {alg, seed}
 
       _ ->
@@ -57,7 +57,7 @@ defmodule :m_rand do
     end
   end
 
-  def export_seed_s({%{:type => alg}, algState}) do
+  def export_seed_s({%{type: alg}, algState}) do
     {alg, algState}
   end
 
@@ -104,26 +104,26 @@ defmodule :m_rand do
     x
   end
 
-  def uniform_s(state = {%{:uniform => uniform}, _}) do
+  def uniform_s(state = {%{uniform: uniform}, _}) do
     uniform.(state)
   end
 
-  def uniform_s({%{:bits => bits, :next => next} = alg, r0}) do
+  def uniform_s({%{bits: bits, next: next} = alg, r0}) do
     {v, r1} = next.(r0)
     {(v >>> (bits - 53)) * 1.1102230246251565e-16, {alg, r1}}
   end
 
-  def uniform_s({%{:max => max, :next => next} = alg, r0}) do
+  def uniform_s({%{max: max, next: next} = alg, r0}) do
     {v, r1} = next.(r0)
     {v / (max + 1), {alg, r1}}
   end
 
-  def uniform_s(n, state = {%{:uniform_n => uniformN}, _})
+  def uniform_s(n, state = {%{uniform_n: uniformN}, _})
       when is_integer(n) and 1 <= n do
     uniformN.(n, state)
   end
 
-  def uniform_s(n, {%{:bits => bits, :next => next} = alg, r0})
+  def uniform_s(n, {%{bits: bits, next: next} = alg, r0})
       when is_integer(n) and 1 <= n do
     {v, r1} = next.(r0)
     maxMinusN = 1 <<< (bits - n)
@@ -151,7 +151,7 @@ defmodule :m_rand do
     end
   end
 
-  def uniform_s(n, {%{:max => max, :next => next} = alg, r0})
+  def uniform_s(n, {%{max: max, next: next} = alg, r0})
       when is_integer(n) and 1 <= n do
     {v, r1} = next.(r0)
 
@@ -171,7 +171,7 @@ defmodule :m_rand do
     x
   end
 
-  def uniform_real_s({%{:bits => bits, :next => next} = alg, r0}) do
+  def uniform_real_s({%{bits: bits, next: next} = alg, r0}) do
     {v1, r1} = next.(r0)
     m1 = v1 >>> (bits - 56)
 
@@ -194,7 +194,7 @@ defmodule :m_rand do
     end
   end
 
-  def uniform_real_s({%{:max => _, :next => next} = alg, r0}) do
+  def uniform_real_s({%{max: _, next: next} = alg, r0}) do
     {v1, r1} = next.(r0)
     m1 = v1 &&& 1 <<< (56 - 1)
 
@@ -290,17 +290,17 @@ defmodule :m_rand do
     end
   end
 
-  defp uniform_real_s(%{:bits => bits} = alg, next, m0, bitNo, r0) do
+  defp uniform_real_s(%{bits: bits} = alg, next, m0, bitNo, r0) do
     {v1, r1} = next.(r0)
     uniform_real_s(alg, next, m0, bitNo, r1, v1, bits)
   end
 
-  defp uniform_real_s(%{:max => _} = alg, next, m0, bitNo, r0) do
+  defp uniform_real_s(%{max: _} = alg, next, m0, bitNo, r0) do
     {v1, r1} = next.(r0)
     uniform_real_s(alg, next, m0, bitNo, r1, v1 &&& 1 <<< (56 - 1), 56)
   end
 
-  def jump(state = {%{:jump => jump}, _}) do
+  def jump(state = {%{jump: jump}, _}) do
     jump.(state)
   end
 
@@ -365,80 +365,67 @@ defmodule :m_rand do
   end
 
   defp mk_alg(:exs64) do
-    {%{:type => :exs64, :max => 1 <<< (64 - 1), :next => &exs64_next/1}, &exs64_seed/1}
+    {%{type: :exs64, max: 1 <<< (64 - 1), next: &exs64_next/1}, &exs64_seed/1}
   end
 
   defp mk_alg(:exsplus) do
-    {%{
-       :type => :exsplus,
-       :max => 1 <<< (58 - 1),
-       :next => &exsplus_next/1,
-       :jump => &exsplus_jump/1
-     }, &exsplus_seed/1}
+    {%{type: :exsplus, max: 1 <<< (58 - 1), next: &exsplus_next/1, jump: &exsplus_jump/1},
+     &exsplus_seed/1}
   end
 
   defp mk_alg(:exsp) do
     {%{
-       :type => :exsp,
-       :bits => 58,
-       :weak_low_bits => 1,
-       :next => &exsplus_next/1,
-       :uniform => &exsp_uniform/1,
-       :uniform_n => &exsp_uniform/2,
-       :jump => &exsplus_jump/1
+       type: :exsp,
+       bits: 58,
+       weak_low_bits: 1,
+       next: &exsplus_next/1,
+       uniform: &exsp_uniform/1,
+       uniform_n: &exsp_uniform/2,
+       jump: &exsplus_jump/1
      }, &exsplus_seed/1}
   end
 
   defp mk_alg(:exsss) do
     {%{
-       :type => :exsss,
-       :bits => 58,
-       :next => &exsss_next/1,
-       :uniform => &exsss_uniform/1,
-       :uniform_n => &exsss_uniform/2,
-       :jump => &exsplus_jump/1
+       type: :exsss,
+       bits: 58,
+       next: &exsss_next/1,
+       uniform: &exsss_uniform/1,
+       uniform_n: &exsss_uniform/2,
+       jump: &exsplus_jump/1
      }, &exsss_seed/1}
   end
 
   defp mk_alg(:exs1024) do
-    {%{
-       :type => :exs1024,
-       :max => 1 <<< (64 - 1),
-       :next => &exs1024_next/1,
-       :jump => &exs1024_jump/1
-     }, &exs1024_seed/1}
+    {%{type: :exs1024, max: 1 <<< (64 - 1), next: &exs1024_next/1, jump: &exs1024_jump/1},
+     &exs1024_seed/1}
   end
 
   defp mk_alg(:exs1024s) do
-    {%{
-       :type => :exs1024s,
-       :bits => 64,
-       :weak_low_bits => 3,
-       :next => &exs1024_next/1,
-       :jump => &exs1024_jump/1
-     }, &exs1024_seed/1}
+    {%{type: :exs1024s, bits: 64, weak_low_bits: 3, next: &exs1024_next/1, jump: &exs1024_jump/1},
+     &exs1024_seed/1}
   end
 
   defp mk_alg(:exrop) do
     {%{
-       :type => :exrop,
-       :bits => 58,
-       :weak_low_bits => 1,
-       :next => &exrop_next/1,
-       :uniform => &exrop_uniform/1,
-       :uniform_n => &exrop_uniform/2,
-       :jump => &exrop_jump/1
+       type: :exrop,
+       bits: 58,
+       weak_low_bits: 1,
+       next: &exrop_next/1,
+       uniform: &exrop_uniform/1,
+       uniform_n: &exrop_uniform/2,
+       jump: &exrop_jump/1
      }, &exrop_seed/1}
   end
 
   defp mk_alg(:exro928ss) do
     {%{
-       :type => :exro928ss,
-       :bits => 58,
-       :next => &exro928ss_next/1,
-       :uniform => &exro928ss_uniform/1,
-       :uniform_n => &exro928ss_uniform/2,
-       :jump => &exro928_jump/1
+       type: :exro928ss,
+       bits: 58,
+       next: &exro928ss_next/1,
+       uniform: &exro928ss_uniform/1,
+       uniform_n: &exro928ss_uniform/2,
+       jump: &exro928_jump/1
      }, &exro928_seed/1}
   end
 
@@ -656,7 +643,7 @@ defmodule :m_rand do
     {nS1 * 1_181_783_497_276_652_981 &&& 1 <<< (64 - 1), nS1}
   end
 
-  defp exs1024_next({[[s0, s1] | l3], rL}) do
+  defp exs1024_next({[s0, s1 | l3], rL}) do
     {x, nS1} = exs1024_calc(s0, s1)
     {x, {[nS1 | l3], [s0 | rL]}}
   end
@@ -742,10 +729,10 @@ defmodule :m_rand do
     {s0, x0} = seed58(a1 &&& 1 <<< (64 - 1))
     {s1, x1} = seed58(a2 &&& (1 <<< (64 - 1)) ^^^ x0)
     {s2, x2} = seed58(a3 &&& (1 <<< (64 - 1)) ^^^ x1)
-    {[[s0, s1, s2] | seed58(13, x2)], []}
+    {[s0, s1, s2 | seed58(13, x2)], []}
   end
 
-  defp exro928ss_next({[[s15, s0] | ss], rs}) do
+  defp exro928ss_next({[s15, s0 | ss], rs}) do
     sR = exro928_next_state(ss, rs, s15, s0)
 
     {(
@@ -759,7 +746,7 @@ defmodule :m_rand do
     exro928ss_next({[s15 | :lists.reverse(rs)], []})
   end
 
-  def exro928_next({[[s15, s0] | ss], rs}) do
+  def exro928_next({[s15, s0 | ss], rs}) do
     sR = exro928_next_state(ss, rs, s15, s0)
     {{s15, s0}, sR}
   end
@@ -768,7 +755,7 @@ defmodule :m_rand do
     exro928_next({[s15 | :lists.reverse(rs)], []})
   end
 
-  def exro928_next_state({[[s15, s0] | ss], rs}) do
+  def exro928_next_state({[s15, s0 | ss], rs}) do
     exro928_next_state(ss, rs, s15, s0)
   end
 
@@ -1139,12 +1126,12 @@ defmodule :m_rand do
     format_jumpconst58_value(j >>> 58)
   end
 
-  defp get_52({alg = %{:bits => bits, :next => next}, s0}) do
+  defp get_52({alg = %{bits: bits, next: next}, s0}) do
     {int, s1} = next.(s0)
     {1 <<< (bits - 51 - 1) &&& int, int >>> (bits - 51), {alg, s1}}
   end
 
-  defp get_52({alg = %{:next => next}, s0}) do
+  defp get_52({alg = %{next: next}, s0}) do
     {int, s1} = next.(s0)
     {1 <<< 51 &&& int, int &&& 1 <<< (51 - 1), {alg, s1}}
   end

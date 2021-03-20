@@ -1317,7 +1317,7 @@ defmodule :m_dtls_record do
         beastMitigation
       )
 
-    current = %{initial | :epoch => 0}
+    current = %{initial | epoch: 0}
 
     initialPending =
       :ssl_record.empty_connection_state(
@@ -1328,141 +1328,113 @@ defmodule :m_dtls_record do
     pending = empty_connection_state(initialPending)
 
     %{
-      :saved_read => current,
-      :current_read => current,
-      :pending_read => pending,
-      :saved_write => current,
-      :current_write => current,
-      :pending_write => pending
+      saved_read: current,
+      current_read: current,
+      pending_read: pending,
+      saved_write: current,
+      current_write: current,
+      pending_write: pending
     }
   end
 
   def empty_connection_state(empty) do
-    %{empty | :epoch => :undefined, :replay_window => init_replay_window(64)}
+    Map.merge(empty, %{epoch: :undefined, replay_window: init_replay_window(64)})
   end
 
-  def save_current_connection_state(%{:current_read => current} = states, :read) do
-    %{states | :saved_read => current}
+  def save_current_connection_state(%{current_read: current} = states, :read) do
+    %{states | saved_read: current}
   end
 
-  def save_current_connection_state(%{:current_write => current} = states, :write) do
-    %{states | :saved_write => current}
+  def save_current_connection_state(%{current_write: current} = states, :write) do
+    %{states | saved_write: current}
   end
 
   def next_epoch(
-        %{:pending_read => pending, :current_read => %{:epoch => epoch}} = states,
+        %{pending_read: pending, current_read: %{epoch: epoch}} = states,
         :read
       ) do
-    %{
-      states
-      | :pending_read => %{
-          pending
-          | :epoch => epoch + 1,
-            :replay_window => init_replay_window(64)
-        }
-    }
+    %{states | pending_read: %{pending | epoch: epoch + 1, replay_window: init_replay_window(64)}}
   end
 
   def next_epoch(
-        %{:pending_write => pending, :current_write => %{:epoch => epoch}} = states,
+        %{pending_write: pending, current_write: %{epoch: epoch}} = states,
         :write
       ) do
     %{
       states
-      | :pending_write => %{
-          pending
-          | :epoch => epoch + 1,
-            :replay_window => init_replay_window(64)
-        }
+      | pending_write: %{pending | epoch: epoch + 1, replay_window: init_replay_window(64)}
     }
   end
 
-  def get_connection_state_by_epoch(
-        epoch,
-        %{:current_write => %{:epoch => epoch} = current},
-        :write
-      ) do
+  def get_connection_state_by_epoch(epoch, %{current_write: %{epoch: epoch} = current}, :write) do
     current
   end
 
-  def get_connection_state_by_epoch(
-        epoch,
-        %{:saved_write => %{:epoch => epoch} = saved},
-        :write
-      ) do
+  def get_connection_state_by_epoch(epoch, %{saved_write: %{epoch: epoch} = saved}, :write) do
     saved
   end
 
-  def get_connection_state_by_epoch(
-        epoch,
-        %{:current_read => %{:epoch => epoch} = current},
-        :read
-      ) do
+  def get_connection_state_by_epoch(epoch, %{current_read: %{epoch: epoch} = current}, :read) do
     current
   end
 
-  def get_connection_state_by_epoch(epoch, %{:saved_read => %{:epoch => epoch} = saved}, :read) do
+  def get_connection_state_by_epoch(epoch, %{saved_read: %{epoch: epoch} = saved}, :read) do
     saved
   end
 
   defp set_connection_state_by_epoch(
          writeState,
          epoch,
-         %{:current_write => %{:epoch => epoch}} = states,
+         %{current_write: %{epoch: epoch}} = states,
          :write
        ) do
-    %{states | :current_write => writeState}
+    %{states | current_write: writeState}
   end
 
   defp set_connection_state_by_epoch(
          writeState,
          epoch,
-         %{:saved_write => %{:epoch => epoch}} = states,
+         %{saved_write: %{epoch: epoch}} = states,
          :write
        ) do
-    %{states | :saved_write => writeState}
+    %{states | saved_write: writeState}
   end
 
   defp set_connection_state_by_epoch(
          readState,
          epoch,
-         %{:current_read => %{:epoch => epoch}} = states,
+         %{current_read: %{epoch: epoch}} = states,
          :read
        ) do
-    %{states | :current_read => readState}
+    %{states | current_read: readState}
   end
 
   defp set_connection_state_by_epoch(
          readState,
          epoch,
-         %{:saved_read => %{:epoch => epoch}} = states,
+         %{saved_read: %{epoch: epoch}} = states,
          :read
        ) do
-    %{states | :saved_read => readState}
+    %{states | saved_read: readState}
   end
 
   def init_connection_state_seq(
         {254, _},
-        %{
-          :current_read => %{:epoch => 0, :sequence_number => seq},
-          :current_write => %{:epoch => 0} = write
-        } = connnectionStates0
+        %{current_read: %{epoch: 0, sequence_number: seq}, current_write: %{epoch: 0} = write} =
+          connnectionStates0
       ) do
-    %{connnectionStates0 | :current_write => %{write | :sequence_number => seq}}
+    Map.put(connnectionStates0, :current_write, Map.put(write, :sequence_number, seq))
   end
 
   def init_connection_state_seq(_, connnectionStates) do
     connnectionStates
   end
 
-  def current_connection_state_epoch(%{:current_read => %{:epoch => epoch}}, :read) do
+  def current_connection_state_epoch(%{current_read: %{epoch: epoch}}, :read) do
     epoch
   end
 
-  def current_connection_state_epoch(
-        %{:current_write => %{:epoch => epoch}},
-        :write
-      ) do
+  def current_connection_state_epoch(%{current_write: %{epoch: epoch}}, :write) do
     epoch
   end
 
@@ -1480,7 +1452,7 @@ defmodule :m_dtls_record do
         version,
         connectionStates
       ) do
-    %{:epoch => epoch} =
+    %{epoch: epoch} =
       :ssl_record.current_connection_state(
         connectionStates,
         :write
@@ -1500,7 +1472,7 @@ defmodule :m_dtls_record do
   end
 
   def encode_data(data, version, connectionStates) do
-    %{:epoch => epoch, :max_fragment_length => maxFragmentLength} =
+    %{epoch: epoch, max_fragment_length: maxFragmentLength} =
       :ssl_record.current_connection_state(
         connectionStates,
         :write
@@ -1710,18 +1682,18 @@ defmodule :m_dtls_record do
 
   defp initial_connection_state(connectionEnd, beastMitigation) do
     %{
-      :security_parameters => :ssl_record.initial_security_params(connectionEnd),
-      :epoch => :undefined,
-      :sequence_number => 0,
-      :replay_window => init_replay_window(64),
-      :beast_mitigation => beastMitigation,
-      :compression_state => :undefined,
-      :cipher_state => :undefined,
-      :mac_secret => :undefined,
-      :secure_renegotiation => :undefined,
-      :client_verify_data => :undefined,
-      :server_verify_data => :undefined,
-      :max_fragment_length => :undefined
+      security_parameters: :ssl_record.initial_security_params(connectionEnd),
+      epoch: :undefined,
+      sequence_number: 0,
+      replay_window: init_replay_window(64),
+      beast_mitigation: beastMitigation,
+      compression_state: :undefined,
+      cipher_state: :undefined,
+      mac_secret: :undefined,
+      secure_renegotiation: :undefined,
+      client_verify_data: :undefined,
+      server_verify_data: :undefined,
+      max_fragment_length: :undefined
     }
   end
 
@@ -1732,7 +1704,7 @@ defmodule :m_dtls_record do
            sequenceNumber::size(48)-unsigned-big-integer, length::size(16)-unsigned-big-integer,
            data::size(length)-binary, rest::binary>> = rawDTLSRecord,
          acc,
-         %{:log_level => logLevel} = sslOpts
+         %{log_level: logLevel} = sslOpts
        )
        when (stateName == :hello or (stateName == :certify and dataTag == :udp) or
                (stateName == :abbreviated and dataTag == :udp)) and (type == 22 or type == 21) do
@@ -1764,9 +1736,9 @@ defmodule :m_dtls_record do
           level: 2,
           description: 20,
           where: %{
-            :mfa => {:dtls_record, :get_dtls_records_aux, 4},
-            :line => 435,
-            :file => 'otp/lib/ssl/src/dtls_record.erl'
+            mfa: {:dtls_record, :get_dtls_records_aux, 4},
+            line: 435,
+            file: 'otp/lib/ssl/src/dtls_record.erl'
           }
         )
     end
@@ -1779,7 +1751,7 @@ defmodule :m_dtls_record do
            sequenceNumber::size(48)-unsigned-big-integer, length::size(16)-unsigned-big-integer,
            data::size(length)-binary, rest::binary>> = rawDTLSRecord,
          acc,
-         %{:log_level => logLevel} = sslOpts
+         %{log_level: logLevel} = sslOpts
        )
        when type == 23 or type == 22 or type == 21 or type == 20 do
     :ssl_logger.debug(logLevel, :inbound, :record, [rawDTLSRecord])
@@ -1807,9 +1779,9 @@ defmodule :m_dtls_record do
           level: 2,
           description: 20,
           where: %{
-            :mfa => {:dtls_record, :get_dtls_records_aux, 4},
-            :line => 452,
-            :file => 'otp/lib/ssl/src/dtls_record.erl'
+            mfa: {:dtls_record, :get_dtls_records_aux, 4},
+            line: 452,
+            file: 'otp/lib/ssl/src/dtls_record.erl'
           }
         )
     end
@@ -1828,9 +1800,9 @@ defmodule :m_dtls_record do
       level: 2,
       description: 22,
       where: %{
-        :mfa => {:dtls_record, :get_dtls_records_aux, 4},
-        :line => 457,
-        :file => 'otp/lib/ssl/src/dtls_record.erl'
+        mfa: {:dtls_record, :get_dtls_records_aux, 4},
+        line: 457,
+        file: 'otp/lib/ssl/src/dtls_record.erl'
       }
     )
   end
@@ -1845,33 +1817,33 @@ defmodule :m_dtls_record do
           level: 2,
           description: 10,
           where: %{
-            :mfa => {:dtls_record, :get_dtls_records_aux, 4},
-            :line => 464,
-            :file => 'otp/lib/ssl/src/dtls_record.erl'
+            mfa: {:dtls_record, :get_dtls_records_aux, 4},
+            line: 464,
+            file: 'otp/lib/ssl/src/dtls_record.erl'
           }
         )
     end
   end
 
   defp init_replay_window(size) do
-    %{:size => size, :top => size, :bottom => 0, :mask => 0 <<< 64}
+    %{size: size, top: size, bottom: 0, mask: 0 <<< 64}
   end
 
   def replay_detect(
         r_ssl_tls(sequence_number: sequenceNumber),
-        %{:replay_window => window}
+        %{replay_window: window}
       ) do
     is_replay(sequenceNumber, window)
   end
 
-  defp is_replay(sequenceNumber, %{:bottom => bottom})
+  defp is_replay(sequenceNumber, %{bottom: bottom})
        when sequenceNumber < bottom do
     true
   end
 
   defp is_replay(
          sequenceNumber,
-         %{:size => size, :top => top, :bottom => bottom, :mask => mask}
+         %{size: size, top: top, bottom: bottom, mask: mask}
        )
        when sequenceNumber >= bottom and sequenceNumber <= top do
     index = rem(sequenceNumber, size)
@@ -1884,23 +1856,21 @@ defmodule :m_dtls_record do
 
   defp update_replay_window(
          sequenceNumber,
-         %{
-           :replay_window =>
-             %{:size => size, :top => top, :bottom => bottom, :mask => mask0} = window0
-         } = connectionStates
+         %{replay_window: %{size: size, top: top, bottom: bottom, mask: mask0} = window0} =
+           connectionStates
        ) do
     noNewBits = sequenceNumber - top
     index = rem(sequenceNumber, size)
     mask = mask0 <<< noNewBits ||| index
-    window = %{window0 | :top => sequenceNumber, :bottom => bottom + noNewBits, :mask => mask}
-    %{connectionStates | :replay_window => window}
+    window = Map.merge(window0, %{top: sequenceNumber, bottom: bottom + noNewBits, mask: mask})
+    %{connectionStates | replay_window: window}
   end
 
   defp encode_dtls_cipher_text(
          type,
          {majVer, minVer},
          fragment,
-         %{:epoch => epoch, :sequence_number => seq} = writeState
+         %{epoch: epoch, sequence_number: seq} = writeState
        ) do
     length = :erlang.iolist_size(fragment)
 
@@ -1909,7 +1879,7 @@ defmodule :m_dtls_record do
          minVer::size(8)-unsigned-big-integer, epoch::size(16)-unsigned-big-integer,
          seq::size(48)-unsigned-big-integer, length::size(16)-unsigned-big-integer>>,
        fragment
-     ], %{writeState | :sequence_number => seq + 1}}
+     ], Map.put(writeState, :sequence_number, seq + 1)}
   end
 
   defp encode_plain_text(
@@ -1917,11 +1887,11 @@ defmodule :m_dtls_record do
          version,
          data,
          %{
-           :compression_state => compS0,
-           :cipher_state => cipherS0,
-           :epoch => epoch,
-           :sequence_number => seq,
-           :security_parameters =>
+           compression_state: compS0,
+           cipher_state: cipherS0,
+           epoch: epoch,
+           sequence_number: seq,
+           security_parameters:
              r_security_parameters(
                cipher_type: 2,
                bulk_cipher_algorithm: bCAlg,
@@ -1939,7 +1909,7 @@ defmodule :m_dtls_record do
         cipherS0
       )
 
-    writeState = %{writeState0 | :compression_state => compS1, :cipher_state => cipherS}
+    writeState = Map.merge(writeState0, %{compression_state: compS1, cipher_state: cipherS})
     tLSVersion = :dtls_v1.corresponding_tls_version(version)
     :ssl_record.cipher_aead(tLSVersion, comp, writeState, aAD)
   end
@@ -1949,11 +1919,11 @@ defmodule :m_dtls_record do
          version,
          fragment,
          %{
-           :compression_state => compS0,
-           :epoch => epoch,
-           :sequence_number => seq,
-           :cipher_state => cipherS0,
-           :security_parameters =>
+           compression_state: compS0,
+           epoch: epoch,
+           sequence_number: seq,
+           cipher_state: cipherS0,
+           security_parameters:
              r_security_parameters(
                compression_algorithm: compAlg,
                bulk_cipher_algorithm: bulkCipherAlgo
@@ -1961,14 +1931,14 @@ defmodule :m_dtls_record do
          } = writeState0
        ) do
     {comp, compS1} = :ssl_record.compress(compAlg, fragment, compS0)
-    writeState1 = %{writeState0 | :compression_state => compS1}
+    writeState1 = Map.put(writeState0, :compression_state, compS1)
     mAC = calc_mac_hash(type, version, writeState1, epoch, seq, comp)
     tLSVersion = :dtls_v1.corresponding_tls_version(version)
 
     {cipherFragment, cipherS1} =
       :ssl_cipher.cipher(bulkCipherAlgo, cipherS0, mAC, fragment, tLSVersion)
 
-    {cipherFragment, %{writeState0 | :cipher_state => cipherS1}}
+    {cipherFragment, Map.put(writeState0, :cipher_state, cipherS1)}
   end
 
   defp decode_cipher_text(
@@ -1980,9 +1950,9 @@ defmodule :m_dtls_record do
            fragment: cipherFragment
          ) = cipherText,
          %{
-           :compression_state => compressionS0,
-           :cipher_state => cipherS0,
-           :security_parameters =>
+           compression_state: compressionS0,
+           cipher_state: cipherS0,
+           security_parameters:
              r_security_parameters(
                cipher_type: 2,
                bulk_cipher_algorithm: bulkCipherAlgo,
@@ -2011,7 +1981,7 @@ defmodule :m_dtls_record do
             compressionS0
           )
 
-        readState1 = %{readState0 | :compression_state => compressionS, :cipher_state => cipherS}
+        readState1 = %{readState0 | compression_state: compressionS, cipher_state: cipherS}
         readState = update_replay_window(seq, readState1)
 
         connnectionStates =
@@ -2038,8 +2008,8 @@ defmodule :m_dtls_record do
            fragment: cipherFragment
          ) = cipherText,
          %{
-           :compression_state => compressionS0,
-           :security_parameters => r_security_parameters(compression_algorithm: compAlg)
+           compression_state: compressionS0,
+           security_parameters: r_security_parameters(compression_algorithm: compAlg)
          } = readState0,
          connnectionStates0
        ) do
@@ -2062,7 +2032,7 @@ defmodule :m_dtls_record do
             compressionS0
           )
 
-        readState2 = %{readState1 | :compression_state => compressionS1}
+        readState2 = Map.put(readState1, :compression_state, compressionS1)
         readState = update_replay_window(seq, readState2)
 
         connnectionStates =
@@ -2080,9 +2050,9 @@ defmodule :m_dtls_record do
           level: 2,
           description: 20,
           where: %{
-            :mfa => {:dtls_record, :decode_cipher_text, 3},
-            :line => 597,
-            :file => 'otp/lib/ssl/src/dtls_record.erl'
+            mfa: {:dtls_record, :decode_cipher_text, 3},
+            line: 597,
+            file: 'otp/lib/ssl/src/dtls_record.erl'
           }
         )
     end
@@ -2092,8 +2062,8 @@ defmodule :m_dtls_record do
          type,
          version,
          %{
-           :mac_secret => macSecret,
-           :security_parameters => r_security_parameters(mac_algorithm: macAlg)
+           mac_secret: macSecret,
+           security_parameters: r_security_parameters(mac_algorithm: macAlg)
          },
          epoch,
          seqNo,

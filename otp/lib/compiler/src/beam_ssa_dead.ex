@@ -74,7 +74,7 @@ defmodule :m_beam_ssa_dead do
 
       last ->
         blk = r_b_blk(blk0, last: last)
-        blocks = %{blocks0 | l => blk}
+        blocks = Map.put(blocks0, l, blk)
         shortcut_opt(ls, r_st(st, bs: blocks))
     end
   end
@@ -531,7 +531,7 @@ defmodule :m_beam_ssa_dead do
 
   defp bind_var(var, val0, bs) do
     val = get_value(val0, bs)
-    %{bs | var => val}
+    Map.put(bs, var, val)
   end
 
   defp get_value(r_b_var() = var, bs) do
@@ -1251,7 +1251,7 @@ defmodule :m_beam_ssa_dead do
 
     case maySkip do
       true ->
-        skip = %{skip0 | l => true}
+        skip = Map.put(skip0, l, true)
         used_vars(bs, usedVars, skip)
 
       false ->
@@ -1283,7 +1283,7 @@ defmodule :m_beam_ssa_dead do
   end
 
   defp used_vars_phis(is, l, live0, usedVars0) do
-    usedVars = %{usedVars0 | l => live0}
+    usedVars = Map.put(usedVars0, l, live0)
 
     phis =
       takewhile(

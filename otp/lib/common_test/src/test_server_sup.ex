@@ -1080,7 +1080,9 @@ defmodule :m_test_server_sup do
 
   def format_loc([{mod, func, line} | rest]) do
     [
-      ['[', format_loc1({mod, func, line}), ',\n']
+      '[',
+      format_loc1({mod, func, line}),
+      ',\n'
       | format_loc1(rest)
     ]
   end
@@ -1103,7 +1105,9 @@ defmodule :m_test_server_sup do
 
   defp format_loc1([{mod, func, line} | rest]) do
     [
-      ['              ', format_loc1({mod, func, line}), ',\n']
+      '              ',
+      format_loc1({mod, func, line}),
+      ',\n'
       | format_loc1(rest)
     ]
   end
@@ -1115,7 +1119,7 @@ defmodule :m_test_server_sup do
             :no_src,
             :erlang.get(:test_server_logopts)
           ), :lists.reverse(modStr)} do
-      {false, [[?E, ?T, ?I, ?U, ?S, ?_] | _]} ->
+      {false, [?E, ?T, ?I, ?U, ?S, ?_ | _]} ->
         link =
           cond do
             is_integer(line) ->

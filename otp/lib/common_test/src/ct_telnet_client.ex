@@ -299,7 +299,7 @@ defmodule :m_ct_telnet_client do
     :ok
   end
 
-  defp check_msg(sock, [[255, 255] | t], acc) do
+  defp check_msg(sock, [255, 255 | t], acc) do
     check_msg(sock, t, [255 | acc])
   end
 
@@ -358,7 +358,7 @@ defmodule :m_ct_telnet_client do
   end
 
   defp respond_cmd([253 | opt], sock) do
-    r = [[255, 252] | opt]
+    r = [255, 252 | opt]
     cmd_dbg('Responding', r)
     :gen_tcp.send(sock, r)
   end
@@ -387,7 +387,7 @@ defmodule :m_ct_telnet_client do
     {241, rest}
   end
 
-  defp get_cmd([[cmd, opt] | rest])
+  defp get_cmd([cmd, opt | rest])
        when cmd >= 251 and
               cmd <= 254 do
     {[cmd, opt], rest}

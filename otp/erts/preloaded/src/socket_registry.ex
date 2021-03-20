@@ -99,10 +99,10 @@ defmodule :m_socket_registry do
 
   defp mk_unexpected_msg(level, tag, f, a) do
     meta = %{
-      :pid => self(),
-      :gl => :erlang.group_leader(),
-      :time => :os.system_time(:microsecond),
-      :error_logger => %{:tag => tag}
+      pid: self(),
+      gl: :erlang.group_leader(),
+      time: :os.system_time(:microsecond),
+      error_logger: %{tag: tag}
     }
 
     {:log, level, f, a, meta}

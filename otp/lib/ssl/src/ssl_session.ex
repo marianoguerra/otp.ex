@@ -1222,7 +1222,7 @@ defmodule :m_ssl_session do
   end
 
   def client_select_session(
-        {_, _, %{:versions => versions, :protocol => protocol}} = clientInfo,
+        {_, _, %{versions: versions, protocol: protocol}} = clientInfo,
         cache,
         cacheCb,
         newSession
@@ -1268,7 +1268,7 @@ defmodule :m_ssl_session do
   end
 
   defp do_client_select_session(
-         {_, _, %{:reuse_session => {sessionId, sessionData}}},
+         {_, _, %{reuse_session: {sessionId, sessionData}}},
          _,
          _,
          newSession
@@ -1286,7 +1286,7 @@ defmodule :m_ssl_session do
   end
 
   defp do_client_select_session(
-         {host, port, %{:reuse_session => sessionId}},
+         {host, port, %{reuse_session: sessionId}},
          cache,
          cacheCb,
          newSession
@@ -1319,7 +1319,7 @@ defmodule :m_ssl_session do
     end
   end
 
-  defp select_session({_, _, %{:reuse_sessions => reuse}}, _Cache, _CacheCb, _OwnCert)
+  defp select_session({_, _, %{reuse_sessions: reuse}}, _Cache, _CacheCb, _OwnCert)
        when reuse !== true do
     :no_session
   end
@@ -1333,7 +1333,7 @@ defmodule :m_ssl_session do
     :no_session
   end
 
-  defp select_session(sessions, %{:ciphers => ciphers}, ownCert) do
+  defp select_session(sessions, %{ciphers: ciphers}, ownCert) do
     isNotResumable = fn session ->
       not (resumable(r_session(session, :is_resumable)) and
              :lists.member(
@@ -1351,14 +1351,14 @@ defmodule :m_ssl_session do
     end
   end
 
-  defp is_resumable(_, _, %{:reuse_sessions => false}, _) do
+  defp is_resumable(_, _, %{reuse_sessions: false}, _) do
     {false, :undefined}
   end
 
   defp is_resumable(
          suggestedSessionId,
          sessIdTracker,
-         %{:reuse_session => reuseFun} = options,
+         %{reuse_session: reuseFun} = options,
          ownCert
        ) do
     case :ssl_server_session_cache.reuse_session(
@@ -1404,7 +1404,7 @@ defmodule :m_ssl_session do
   end
 
   defp reusable_options(
-         %{:fail_if_no_peer_cert => true, :verify => :verify_peer},
+         %{fail_if_no_peer_cert: true, verify: :verify_peer},
          session
        ) do
     r_session(session, :peer_certificate) !== :undefined

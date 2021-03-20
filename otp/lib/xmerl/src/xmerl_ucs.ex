@@ -572,7 +572,7 @@ defmodule :m_xmerl_ucs do
     expand_utf8_1(cs, [c | acc], bad)
   end
 
-  defp expand_utf8_1([[c1, c2] | cs], acc, bad)
+  defp expand_utf8_1([c1, c2 | cs], acc, bad)
        when c1 &&& 224 === 192 and c2 &&& 192 === 128 do
     case (c1 &&& 31 <<< 6) ||| (c2 &&& 63) do
       c when 128 <= c ->
@@ -583,7 +583,7 @@ defmodule :m_xmerl_ucs do
     end
   end
 
-  defp expand_utf8_1([[c1, c2, c3] | cs], acc, bad)
+  defp expand_utf8_1([c1, c2, c3 | cs], acc, bad)
        when c1 &&& 240 === 224 and c2 &&& 192 === 128 and
               c3 &&& 192 === 128 do
     case (c1 &&& 15 <<< 6) ||| (c2 &&& 63 <<< 6) ||| (c3 &&& 63) do
@@ -595,7 +595,7 @@ defmodule :m_xmerl_ucs do
     end
   end
 
-  defp expand_utf8_1([[c1, c2, c3, c4] | cs], acc, bad)
+  defp expand_utf8_1([c1, c2, c3, c4 | cs], acc, bad)
        when c1 &&& 248 === 240 and c2 &&& 192 === 128 and
               c3 &&& 192 === 128 and c4 &&& 192 === 128 do
     case (c1 &&& 15 <<< 6) ||| (c2 &&& 63 <<< 6) ||| (c3 &&& 63 <<< 6) ||| (c4 &&& 63) do

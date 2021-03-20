@@ -1106,7 +1106,7 @@ defmodule :m_ssl_crl_cache do
 
   def delete(uRI) do
     case :uri_string.normalize(uRI, [:return_map]) do
-      %{:scheme => 'http', :path => path} ->
+      %{scheme: 'http', path: path} ->
         :ssl_manager.delete_crls(:string.trim(path, :leading, '/'))
 
       _ ->
@@ -1116,7 +1116,7 @@ defmodule :m_ssl_crl_cache do
 
   defp do_insert(uRI, cRLs) do
     case :uri_string.normalize(uRI, [:return_map]) do
-      %{:scheme => 'http', :path => path} ->
+      %{scheme: 'http', path: path} ->
         :ssl_manager.insert_crls(
           :string.trim(path, :leading, '/'),
           cRLs
@@ -1203,7 +1203,7 @@ defmodule :m_ssl_crl_cache do
   end
 
   defp cache_lookup(uRL, {{cache, _}, _}) do
-    %{:path => path} =
+    %{path: path} =
       :uri_string.normalize(
         uRL,
         [:return_map]

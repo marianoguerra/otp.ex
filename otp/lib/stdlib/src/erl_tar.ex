@@ -623,7 +623,7 @@ defmodule :m_erl_tar do
        when is_list(name) or is_binary(name) do
     case :file.open(
            name,
-           raw ++ [[:binary, access] | opts]
+           raw ++ [:binary, access | opts]
          ) do
       {:ok, file} ->
         {:ok, r_reader(handle: file, access: access, func: &file_op/2)}
@@ -654,7 +654,7 @@ defmodule :m_erl_tar do
   end
 
   defp open_mode([:compressed | rest], access, raw, opts) do
-    open_mode(rest, access, raw, [[:compressed, :read_ahead] | opts])
+    open_mode(rest, access, raw, [:compressed, :read_ahead | opts])
   end
 
   defp open_mode([:cooked | rest], access, _Raw, opts) do

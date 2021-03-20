@@ -171,7 +171,7 @@ defmodule :m_pool do
   end
 
   defp pure_insert({load, node}, [{l, n} | tail]) when load < l do
-    [[{load, node}, {l, n}] | tail]
+    [{load, node}, {l, n} | tail]
   end
 
   defp pure_insert(l, [h | t]) do

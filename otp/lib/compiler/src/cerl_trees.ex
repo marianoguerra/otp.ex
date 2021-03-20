@@ -1174,7 +1174,7 @@ defmodule :m_cerl_trees do
   end
 
   defp label_vars([t | ts], n, env) do
-    env1 = %{env | var_name(t) => n}
+    env1 = Map.put(env, var_name(t), n)
     {as, n1} = label_ann(t, n)
     t1 = set_ann(t, as)
     {ts1, n2, env2} = label_vars(ts, n1, env1)

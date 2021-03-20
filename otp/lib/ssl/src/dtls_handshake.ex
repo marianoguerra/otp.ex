@@ -1320,7 +1320,7 @@ defmodule :m_dtls_handshake do
     premaster_secret: :undefined,
     server_psk_identity: :undefined,
     cookie_iv_shard: :undefined,
-    ocsp_stapling_state: %{:ocsp_stapling => false, :ocsp_expect => :no_staple}
+    ocsp_stapling_state: %{ocsp_stapling: false, ocsp_expect: :no_staple}
   )
 
   Record.defrecord(:r_connection_env, :connection_env,
@@ -1421,7 +1421,7 @@ defmodule :m_dtls_handshake do
         _Port,
         cookie,
         connectionStates,
-        %{:versions => versions, :ciphers => userSuites, :fallback => fallback} = sslOpts,
+        %{versions: versions, ciphers: userSuites, fallback: fallback} = sslOpts,
         id,
         renegotiation,
         _OwnCert,
@@ -1476,7 +1476,7 @@ defmodule :m_dtls_handshake do
           session_id: sessionId,
           extensions: helloExt
         ),
-        %{:versions => supportedVersions} = sslOpt,
+        %{versions: supportedVersions} = sslOpt,
         connectionStates0,
         renegotiation,
         oldId
@@ -1506,9 +1506,9 @@ defmodule :m_dtls_handshake do
           level: 2,
           description: 70,
           where: %{
-            :mfa => {:dtls_handshake, :hello, 5},
-            :line => 108,
-            :file => 'otp/lib/ssl/src/dtls_handshake.erl'
+            mfa: {:dtls_handshake, :hello, 5},
+            line: 108,
+            file: 'otp/lib/ssl/src/dtls_handshake.erl'
           }
         )
     end
@@ -1516,7 +1516,7 @@ defmodule :m_dtls_handshake do
 
   def hello(
         r_client_hello(client_version: clientVersion) = hello,
-        %{:versions => versions} = sslOpts,
+        %{versions: versions} = sslOpts,
         info,
         renegotiation
       ) do
@@ -1589,10 +1589,10 @@ defmodule :m_dtls_handshake do
            extensions: helloExt
          ),
          %{
-           :versions => versions,
-           :signature_algs => supportedHashSigns,
-           :eccs => supportedECCs,
-           :honor_ecc_order => eCCOrder
+           versions: versions,
+           signature_algs: supportedHashSigns,
+           eccs: supportedECCs,
+           honor_ecc_order: eCCOrder
          } = sslOpts,
          {sessIdTracker, session0, connectionStates0, cert, _},
          renegotiation
@@ -1635,14 +1635,14 @@ defmodule :m_dtls_handshake do
               level: 2,
               description: 71,
               where: %{
-                :mfa => {:dtls_handshake, :handle_client_hello, 5},
-                :line => 194,
-                :file => 'otp/lib/ssl/src/dtls_handshake.erl'
+                mfa: {:dtls_handshake, :handle_client_hello, 5},
+                line: 194,
+                file: 'otp/lib/ssl/src/dtls_handshake.erl'
               }
             )
 
           _ ->
-            %{:key_exchange => keyExAlg} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+            %{key_exchange: keyExAlg} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
 
             case :ssl_handshake.select_hashsign(
                    {clientHashSigns, :undefined},
@@ -1675,9 +1675,9 @@ defmodule :m_dtls_handshake do
           level: 2,
           description: 70,
           where: %{
-            :mfa => {:dtls_handshake, :handle_client_hello, 5},
-            :line => 208,
-            :file => 'otp/lib/ssl/src/dtls_handshake.erl'
+            mfa: {:dtls_handshake, :handle_client_hello, 5},
+            line: 208,
+            file: 'otp/lib/ssl/src/dtls_handshake.erl'
           }
         )
     end
@@ -1896,7 +1896,7 @@ defmodule :m_dtls_handshake do
          version,
          [fragment | fragments],
          buffers0,
-         %{:log_level => logLevel} = options,
+         %{log_level: logLevel} = options,
          acc
        ) do
     case reassemble(version, fragment, buffers0) do

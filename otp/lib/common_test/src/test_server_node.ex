@@ -805,7 +805,7 @@ defmodule :m_test_server_node do
     '"' ++ prog ++ '"'
   end
 
-  defp do_quote_progname([[prog, arg] | args]) do
+  defp do_quote_progname([prog, arg | args]) do
     case :os.find_executable(prog) do
       false ->
         do_quote_progname([prog ++ ' ' ++ arg | args])

@@ -1248,12 +1248,7 @@ defmodule :m_ssl_server_session_cache do
 
   def init([
         listner,
-        %{
-          :lifetime => lifetime,
-          :session_cb => cb,
-          :session_cb_init_args => initArgs,
-          :max => max
-        }
+        %{lifetime: lifetime, session_cb: cb, session_cb_init_args: initArgs, max: max}
       ]) do
     :erlang.process_flag(:trap_exit, true)
     :erlang.monitor(:process, listner)
@@ -1322,7 +1317,7 @@ defmodule :m_ssl_server_session_cache do
 
           r_state(state0,
             db: store,
-            session_index: %{index | sessionId => id}
+            session_index: Map.put(index, sessionId, id)
           )
 
         size when size > 0 ->
@@ -1338,7 +1333,7 @@ defmodule :m_ssl_server_session_cache do
 
               r_state(state0,
                 db: store,
-                session_index: %{index0 | sessionId => id}
+                session_index: Map.put(index0, sessionId, id)
               )
 
             false ->
@@ -1347,7 +1342,7 @@ defmodule :m_ssl_server_session_cache do
 
               r_state(state0,
                 db: store,
-                session_index: %{index | sessionId => id}
+                session_index: Map.put(index, sessionId, id)
               )
           end
 
@@ -1356,7 +1351,7 @@ defmodule :m_ssl_server_session_cache do
 
           r_state(state0,
             db: store,
-            session_index: %{index0 | sessionId => id}
+            session_index: Map.put(index0, sessionId, id)
           )
       end
 

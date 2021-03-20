@@ -351,11 +351,9 @@ defmodule :m_mnesia_lib do
     search_key(
       node,
       [
-        [
-          {:disc_copies, val({tab, :disc_copies})},
-          {:ram_copies, val({tab, :ram_copies})},
-          {:disc_only_copies, val({tab, :disc_only_copies})}
-        ]
+        {:disc_copies, val({tab, :disc_copies})},
+        {:ram_copies, val({tab, :ram_copies})},
+        {:disc_only_copies, val({tab, :disc_only_copies})}
         | wrap_external(val({tab, :external_copies}))
       ]
     )
@@ -365,11 +363,9 @@ defmodule :m_mnesia_lib do
     search_key(
       node,
       [
-        [
-          {:disc_copies, r_cstruct(cs, :disc_copies)},
-          {:ram_copies, r_cstruct(cs, :ram_copies)},
-          {:disc_only_copies, r_cstruct(cs, :disc_only_copies)}
-        ]
+        {:disc_copies, r_cstruct(cs, :disc_copies)},
+        {:ram_copies, r_cstruct(cs, :ram_copies)},
+        {:disc_only_copies, r_cstruct(cs, :disc_only_copies)}
         | wrap_external(r_cstruct(cs, :external_copies))
       ]
     )
@@ -871,7 +867,12 @@ defmodule :m_mnesia_lib do
       {:nodes,
        (fn ->
           try do
-            :rpc.multicall(nodes, :mnesia_lib, :get_node_number, [])
+            :rpc.multicall(
+              nodes,
+              :mnesia_lib,
+              :get_node_number,
+              []
+            )
           catch
             _, _Reason ->
               {:EXIT, _Reason}
@@ -1194,7 +1195,8 @@ defmodule :m_mnesia_lib do
     linfo = :lists.zf(info, loaders)
 
     [
-      [{:senders, sInfo}, {:loader, linfo}]
+      {:senders, sInfo},
+      {:loader, linfo}
       | :lists.zf(
           info,
           [{:dumper, dumper}]
@@ -1400,7 +1402,7 @@ defmodule :m_mnesia_lib do
         save(x)
 
         case :erlang.atom_to_list(mod) do
-          [[?m, ?n, ?e] | _] ->
+          [?m, ?n, ?e | _] ->
             :badarg
 
           _ ->

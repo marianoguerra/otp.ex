@@ -835,13 +835,19 @@ defmodule :m_observer_port_wx do
          r_create_menu(id: 304, text: 'Port info for selected ports\tCtrl-I'),
          :separator,
          r_create_menu(id: 301, text: 'Refresh\tCtrl-R'),
-         r_create_menu(id: 302, text: 'Refresh Interval...')
+         r_create_menu(
+           id: 302,
+           text: 'Refresh Interval...'
+         )
        ]},
       {'Trace',
        [
          r_create_menu(id: 305, text: 'Trace selected ports'),
          r_create_menu(id: 306, text: 'Trace selected ports by name (all nodes)'),
-         r_create_menu(id: 307, text: 'Trace new ports')
+         r_create_menu(
+           id: 307,
+           text: 'Trace new ports'
+         )
        ]}
     ]
 
@@ -917,20 +923,18 @@ defmodule :m_observer_port_wx do
          )
        ) do
     [
-      [
-        {:id, id},
-        {:slot, slot},
-        {:connected, connected},
-        {:links, links},
-        {:name, name},
-        {:monitors, monitors},
-        {:monitored_by, monitoredBy},
-        {:controls, controls},
-        {:parallelism, parallelism},
-        {:locking, locking},
-        {:queue_size, queueSize},
-        {:memory, memory}
-      ]
+      {:id, id},
+      {:slot, slot},
+      {:connected, connected},
+      {:links, links},
+      {:name, name},
+      {:monitors, monitors},
+      {:monitored_by, monitoredBy},
+      {:controls, controls},
+      {:parallelism, parallelism},
+      {:locking, locking},
+      {:queue_size, queueSize},
+      {:memory, memory}
       | inet
     ]
   end
@@ -983,25 +987,23 @@ defmodule :m_observer_port_wx do
     {inetStruct, port} = inet_extra_fields(port0)
 
     struct = [
-      [
-        {'Overview',
-         [
-           {'Registered Name', :name},
-           {'Connected', {:click, :connected}},
-           {'Slot', :slot},
-           {'Controls', :controls},
-           {'Parallelism', :parallelism},
-           {'Locking', :locking},
-           {'Queue Size', {:bytes, :queue_size}},
-           {'Memory', {:bytes, :memory}}
-         ]},
-        {:scroll_boxes,
-         [
-           {'Links', 1, {:click, :links}},
-           {'Monitors', 1, {:click, filter_monitor_info()}},
-           {'Monitored by', 1, {:click, :monitored_by}}
-         ]}
-      ]
+      {'Overview',
+       [
+         {'Registered Name', :name},
+         {'Connected', {:click, :connected}},
+         {'Slot', :slot},
+         {'Controls', :controls},
+         {'Parallelism', :parallelism},
+         {'Locking', :locking},
+         {'Queue Size', {:bytes, :queue_size}},
+         {'Memory', {:bytes, :memory}}
+       ]},
+      {:scroll_boxes,
+       [
+         {'Links', 1, {:click, :links}},
+         {'Monitors', 1, {:click, filter_monitor_info()}},
+         {'Monitored by', 1, {:click, :monitored_by}}
+       ]}
       | inetStruct
     ]
 

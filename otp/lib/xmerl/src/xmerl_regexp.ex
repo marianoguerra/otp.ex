@@ -37,35 +37,35 @@ defmodule :m_xmerl_regexp do
     send(from, {:ok, res})
   end
 
-  defp setup([[?\\, ?d] | s], acc) do
+  defp setup([?\\, ?d | s], acc) do
     setup(s, ']9-0[' ++ acc)
   end
 
-  defp setup([[?\\, ?D] | s], acc) do
+  defp setup([?\\, ?D | s], acc) do
     setup(s, ']9-0^[' ++ acc)
   end
 
-  defp setup([[?\\, ?s] | s], acc) do
+  defp setup([?\\, ?s | s], acc) do
     setup(s, ']s\\t\\n\\r\\[' ++ acc)
   end
 
-  defp setup([[?\\, ?S] | s], acc) do
+  defp setup([?\\, ?S | s], acc) do
     setup(s, ']\\s\\t\\n\\r^[' ++ acc)
   end
 
-  defp setup([[?\\, ?i] | s], acc) do
+  defp setup([?\\, ?i | s], acc) do
     setup(s, ']z-aZ-A_:[' ++ acc)
   end
 
-  defp setup([[?\\, ?I] | s], acc) do
+  defp setup([?\\, ?I | s], acc) do
     setup(s, ']z-aZ-A_:^[' ++ acc)
   end
 
-  defp setup([[?\\, ?c] | s], acc) do
+  defp setup([?\\, ?c | s], acc) do
     setup(s, ']9-0z-aZ-A_:.' ++ [183] ++ '-[' ++ acc)
   end
 
-  defp setup([[?\\, ?C] | s], acc) do
+  defp setup([?\\, ?C | s], acc) do
     setup(s, ']9-0z-aZ-A_:.' ++ [183] ++ '-^[' ++ acc)
   end
 
@@ -89,7 +89,7 @@ defmodule :m_xmerl_regexp do
     [?. | sh_to_awk_1(sh)]
   end
 
-  defp sh_to_awk_1([[?[, ?^, ?]] | sh]) do
+  defp sh_to_awk_1([?[, ?^, ?] | sh]) do
     '\\^' ++ sh_to_awk_1(sh)
   end
 
@@ -108,7 +108,7 @@ defmodule :m_xmerl_regexp do
   defp sh_to_awk_1([c | sh]) do
     case sh_special_char(c) do
       true ->
-        [[?\\, c] | sh_to_awk_1(sh)]
+        [?\\, c | sh_to_awk_1(sh)]
 
       false ->
         [c | sh_to_awk_1(sh)]
@@ -902,11 +902,10 @@ defmodule :m_xmerl_regexp do
     {:epsilon, sc, []}
   end
 
-  defp char(?\\, [[o1, o2, o3] | s])
+  defp char(?\\, [o1, o2, o3 | s])
        when o1 >= ?0 and
-              o1 <= ?7 and o2 >= ?0 and
-              o2 <= ?7 and o3 >= ?0 and
-              o3 <= ?7 do
+              o1 <= ?7 and o2 >= ?0 and o2 <= ?7 and
+              o3 >= ?0 and o3 <= ?7 do
     {(o1 * 8 + o2) * 8 + o3 - 73 * ?0, s}
   end
 
@@ -994,34 +993,34 @@ defmodule :m_xmerl_regexp do
     pack_cc1(cc1)
   end
 
-  defp pack_cc1([[{cf1, cl1}, {cf2, cl2}] | cc])
+  defp pack_cc1([{cf1, cl1}, {cf2, cl2} | cc])
        when cl1 >= cf2 and cl1 <= cl2 do
     pack_cc1([{cf1, cl2} | cc])
   end
 
-  defp pack_cc1([[{cf1, cl1}, {cf2, cl2}] | cc])
+  defp pack_cc1([{cf1, cl1}, {cf2, cl2} | cc])
        when cl1 >= cf2 and cl1 >= cl2 do
     pack_cc1([{cf1, cl1} | cc])
   end
 
-  defp pack_cc1([[{cf1, cl1}, {cf2, cl2}] | cc])
+  defp pack_cc1([{cf1, cl1}, {cf2, cl2} | cc])
        when cl1 + 1 == cf2 do
     pack_cc1([{cf1, cl2} | cc])
   end
 
-  defp pack_cc1([[{cf, cl}, c] | cc]) when cl >= c do
+  defp pack_cc1([{cf, cl}, c | cc]) when cl >= c do
     pack_cc1([{cf, cl} | cc])
   end
 
-  defp pack_cc1([[{cf, cl}, c] | cc]) when cl + 1 == c do
+  defp pack_cc1([{cf, cl}, c | cc]) when cl + 1 == c do
     pack_cc1([{cf, c} | cc])
   end
 
-  defp pack_cc1([[c, {cf, cl}] | cc]) when c == cf - 1 do
+  defp pack_cc1([c, {cf, cl} | cc]) when c == cf - 1 do
     pack_cc1([{c, cl} | cc])
   end
 
-  defp pack_cc1([[c1, c2] | cc]) when c1 + 1 == c2 do
+  defp pack_cc1([c1, c2 | cc]) when c1 + 1 == c2 do
     pack_cc1([{c1, c2} | cc])
   end
 
@@ -1045,7 +1044,7 @@ defmodule :m_xmerl_regexp do
 
   defp char_class([c1 | s0], cc) when c1 != ?] do
     case char(c1, s0) do
-      {cf, [[?-, c2] | s1]} when c2 != ?] ->
+      {cf, [?-, c2 | s1]} when c2 != ?] ->
         case char(c2, s1) do
           {cl, s2} when cf < cl ->
             char_class(s2, [{cf, cl} | cc])
@@ -1065,24 +1064,27 @@ defmodule :m_xmerl_regexp do
 
   defp posix_cc('alnum' ++ s, cc) do
     {[
-       [{?0, ?9}, {?A, ?Z}, {192, 214}, {216, 223}, {?a, ?z}, {224, 246}, {248, 255}]
+       {?0, ?9},
+       {?A, ?Z},
+       {192, 214},
+       {216, 223},
+       {?a, ?z},
+       {224, 246},
+       {248, 255}
        | cc
      ], s}
   end
 
   defp posix_cc('alpha' ++ s, cc) do
-    {[
-       [{?A, ?Z}, {192, 214}, {216, 223}, {?a, ?z}, {224, 246}, {248, 255}]
-       | cc
-     ], s}
+    {[{?A, ?Z}, {192, 214}, {216, 223}, {?a, ?z}, {224, 246}, {248, 255} | cc], s}
   end
 
   defp posix_cc('blank' ++ s, cc) do
-    {[[?\s, ?\t, 160] | cc], s}
+    {[?\s, ?\t, 160 | cc], s}
   end
 
   defp posix_cc('cntrl' ++ s, cc) do
-    {[[{0, 31}, {127, 159}] | cc], s}
+    {[{0, 31}, {127, 159} | cc], s}
   end
 
   defp posix_cc('digit' ++ s, cc) do
@@ -1090,31 +1092,31 @@ defmodule :m_xmerl_regexp do
   end
 
   defp posix_cc('graph' ++ s, cc) do
-    {[[{33, 126}, {161, 255}] | cc], s}
+    {[{33, 126}, {161, 255} | cc], s}
   end
 
   defp posix_cc('lower' ++ s, cc) do
-    {[[{?a, ?z}, {224, 246}, {248, 255}] | cc], s}
+    {[{?a, ?z}, {224, 246}, {248, 255} | cc], s}
   end
 
   defp posix_cc('print' ++ s, cc) do
-    {[[{32, 126}, {160, 255}] | cc], s}
+    {[{32, 126}, {160, 255} | cc], s}
   end
 
   defp posix_cc('punct' ++ s, cc) do
-    {[[{?!, ?/}, {?:, ??}, {?{, ?~}, {161, 191}] | cc], s}
+    {[{?!, ?/}, {?:, ??}, {?{, ?~}, {161, 191} | cc], s}
   end
 
   defp posix_cc('space' ++ s, cc) do
-    {[[?\s, ?\t, ?\f, ?\r, ?\v, 160] | cc], s}
+    {[?\s, ?\t, ?\f, ?\r, ?\v, 160 | cc], s}
   end
 
   defp posix_cc('upper' ++ s, cc) do
-    {[[{?A, ?Z}, {192, 214}, {216, 223}] | cc], s}
+    {[{?A, ?Z}, {192, 214}, {216, 223} | cc], s}
   end
 
   defp posix_cc('xdigit' ++ s, cc) do
-    {[[{?a, ?f}, {?A, ?F}, {?0, ?9}] | cc], s}
+    {[{?a, ?f}, {?A, ?F}, {?0, ?9} | cc], s}
   end
 
   defp posix_cc(s, _Cc) do
@@ -1466,11 +1468,12 @@ defmodule :m_xmerl_regexp do
     e = n2
 
     {[
-       [
-         r_nfa_state(no: s, edges: [{:epsilon, n0}, {:epsilon, n1}]),
-         r_nfa_state(no: e1, edges: [{:epsilon, e}]),
-         r_nfa_state(no: e2, edges: [{:epsilon, e}])
-       ]
+       r_nfa_state(no: s, edges: [{:epsilon, n0}, {:epsilon, n1}]),
+       r_nfa_state(no: e1, edges: [{:epsilon, e}]),
+       r_nfa_state(
+         no: e2,
+         edges: [{:epsilon, e}]
+       )
        | nFA2
      ], n2 + 1, e}
   end
@@ -1495,10 +1498,8 @@ defmodule :m_xmerl_regexp do
     e = n1
 
     {[
-       [
-         r_nfa_state(no: s, edges: [{:epsilon, n0}, {:epsilon, e}]),
-         r_nfa_state(no: e1, edges: [{:epsilon, n0}, {:epsilon, e}])
-       ]
+       r_nfa_state(no: s, edges: [{:epsilon, n0}, {:epsilon, e}]),
+       r_nfa_state(no: e1, edges: [{:epsilon, n0}, {:epsilon, e}])
        | nFA1
      ], n1 + 1, e}
   end
@@ -1508,10 +1509,11 @@ defmodule :m_xmerl_regexp do
     e = n1
 
     {[
-       [
-         r_nfa_state(no: s, edges: [{:epsilon, n0}]),
-         r_nfa_state(no: e1, edges: [{:epsilon, n0}, {:epsilon, e}])
-       ]
+       r_nfa_state(no: s, edges: [{:epsilon, n0}]),
+       r_nfa_state(
+         no: e1,
+         edges: [{:epsilon, n0}, {:epsilon, e}]
+       )
        | nFA1
      ], n1 + 1, e}
   end
@@ -1521,11 +1523,8 @@ defmodule :m_xmerl_regexp do
     e = n1
 
     {[
-       [
-         r_nfa_state(no: s, edges: [{:epsilon, n0}, {:epsilon, e}]),
-         r_nfa_state(no: e1, edges: [{:epsilon, e}])
-       ]
-       | nFA1
+       r_nfa_state(no: s, edges: [{:epsilon, n0}, {:epsilon, e}]),
+       r_nfa_state(no: e1, edges: [{:epsilon, e}]) | nFA1
      ], n1 + 1, e}
   end
 
@@ -1583,19 +1582,18 @@ defmodule :m_xmerl_regexp do
     pack_crs(crs)
   end
 
-  defp pack_crs([[{c1, c2} = cr, {c3, c4}] | crs])
+  defp pack_crs([{c1, c2} = cr, {c3, c4} | crs])
        when c1 <= c3 and c2 >= c4 do
     pack_crs([cr | crs])
   end
 
-  defp pack_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp pack_crs([{c1, c2}, {c3, c4} | crs])
        when c2 >= c3 and
               c2 < c4 do
     pack_crs([{c1, c4} | crs])
   end
 
-  defp pack_crs([[{c1, c2}, {c3, c4}] | crs])
-       when c2 + 1 == c3 do
+  defp pack_crs([{c1, c2}, {c3, c4} | crs]) when c2 + 1 == c3 do
     pack_crs([{c1, c4} | crs])
   end
 
@@ -1650,12 +1648,12 @@ defmodule :m_xmerl_regexp do
     build_dfa(test, set, us, n, ts, ms, nFA)
   end
 
-  defp disjoint_crs([[{_C1, c2} = cr1, {c3, _C4} = cr2] | crs])
+  defp disjoint_crs([{_C1, c2} = cr1, {c3, _C4} = cr2 | crs])
        when c2 < c3 do
     [cr1 | disjoint_crs([cr2 | crs])]
   end
 
-  defp disjoint_crs([[{c1, c2}, {c3, c4}] | crs]) when c1 == c3 do
+  defp disjoint_crs([{c1, c2}, {c3, c4} | crs]) when c1 == c3 do
     [
       {c1, c2}
       | disjoint_crs(
@@ -1667,7 +1665,7 @@ defmodule :m_xmerl_regexp do
     ]
   end
 
-  defp disjoint_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp disjoint_crs([{c1, c2}, {c3, c4} | crs])
        when c1 < c3 and
               c2 >= c3 and c2 < c4 do
     [
@@ -1681,7 +1679,7 @@ defmodule :m_xmerl_regexp do
     ]
   end
 
-  defp disjoint_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp disjoint_crs([{c1, c2}, {c3, c4} | crs])
        when c1 < c3 and
               c2 == c4 do
     [
@@ -1695,7 +1693,7 @@ defmodule :m_xmerl_regexp do
     ]
   end
 
-  defp disjoint_crs([[{c1, c2}, {c3, c4}] | crs])
+  defp disjoint_crs([{c1, c2}, {c3, c4} | crs])
        when c1 < c3 and
               c2 > c4 do
     [

@@ -544,7 +544,7 @@ defmodule :m_wxe_server do
   end
 
   defp log(mod, line, str, args) do
-    :error_logger.format('~p:~p: ' ++ str, [[mod, line] | args])
+    :error_logger.format('~p:~p: ' ++ str, [mod, line | args])
   end
 
   defp handle_connect(object, r_evh(handler: :undefined, cb: callback) = evData0, from, state0) do

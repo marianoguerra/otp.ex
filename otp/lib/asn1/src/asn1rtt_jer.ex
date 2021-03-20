@@ -167,7 +167,7 @@ defmodule :m_asn1rtt_jer do
 
   defp encode_jer(:bit_string, value) do
     str = bitstring2json(value)
-    %{:value => str, :length => bit_size(value)}
+    %{value: str, length: bit_size(value)}
   end
 
   defp encode_jer({:bit_string, fixedLength}, value)
@@ -260,7 +260,7 @@ defmodule :m_asn1rtt_jer do
          mapAcc
        ) do
     enc = encode_jer(type, value)
-    encode_jer_component_tab(compInfos, rest, simple, %{mapAcc | name => enc})
+    encode_jer_component_tab(compInfos, rest, simple, Map.put(mapAcc, name, enc))
   end
 
   defp encode_jer_component_tab([], _, _Simple, mapAcc) do
@@ -285,7 +285,7 @@ defmodule :m_asn1rtt_jer do
 
   defp encode_jer_component([{name, type, _OptOrDefault} | compInfos], [value | rest], mapAcc) do
     enc = encode_jer(type, value)
-    encode_jer_component(compInfos, rest, %{mapAcc | name => enc})
+    encode_jer_component(compInfos, rest, Map.put(mapAcc, name, enc))
   end
 
   defp encode_jer_component([], _, mapAcc) do
@@ -534,7 +534,7 @@ defmodule :m_asn1rtt_jer do
     json2octetstring(value, [])
   end
 
-  defp json2octetstring([[a1, a2] | rest], acc) do
+  defp json2octetstring([a1, a2 | rest], acc) do
     int = :erlang.list_to_integer([a1, a2], 16)
     json2octetstring(rest, [int | acc])
   end
@@ -558,7 +558,7 @@ defmodule :m_asn1rtt_jer do
     <<bin::binary, int::size(length)>>
   end
 
-  defp json2bitstring([[a1, a2] | rest], length, acc) do
+  defp json2bitstring([a1, a2 | rest], length, acc) do
     int = :erlang.list_to_integer([a1, a2], 16)
     json2bitstring(rest, length - 8, [int | acc])
   end
@@ -610,7 +610,7 @@ defmodule :m_asn1rtt_jer do
   end
 
   defp oid2json([num | t], acc) do
-    oid2json(t, [[num, ?.] | acc])
+    oid2json(t, [num, ?. | acc])
   end
 
   defp oid2json([], acc) do
@@ -789,7 +789,7 @@ defmodule :m_asn1rtt_jer do
     [0 | jer_make_and_set_list(len - 1, [], xPos + 1)]
   end
 
-  defp encode_bitstring([[b8, b7, b6, b5, b4, b3, b2, b1] | rest]) do
+  defp encode_bitstring([b8, b7, b6, b5, b4, b3, b2, b1 | rest]) do
     val =
       b8 <<< 7 ||| b7 <<< 6 ||| b6 <<< 5 ||| b5 <<< 4 ||| b4 <<< 3 ||| b3 <<< 2 ||| b2 <<< 1 |||
         b1
@@ -801,10 +801,7 @@ defmodule :m_asn1rtt_jer do
     unused_bitlist(val, <<>>)
   end
 
-  defp encode_bitstring(
-         [[b8, b7, b6, b5, b4, b3, b2, b1] | rest],
-         ack
-       ) do
+  defp encode_bitstring([b8, b7, b6, b5, b4, b3, b2, b1 | rest], ack) do
     val =
       b8 <<< 7 ||| b7 <<< 6 ||| b6 <<< 5 ||| b5 <<< 4 ||| b4 <<< 3 ||| b3 <<< 2 ||| b2 <<< 1 |||
         b1

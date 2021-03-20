@@ -1711,7 +1711,7 @@ defmodule :m_yecc do
       end)
 
     usedSymbols = :ets.select(r_yecc(st0, :goto_tab), selSyms)
-    syms = :ordsets.from_list([[{}, :"$empty"] | usedSymbols])
+    syms = :ordsets.from_list([{}, :"$empty" | usedSymbols])
     nonTerms = :ordsets.from_list(r_yecc(st0, :nonterminals))
 
     unusedNonTerms =
@@ -1853,7 +1853,7 @@ defmodule :m_yecc do
   defp create_symbol_table(st) do
     r_yecc(terminals: terminals, endsymbol: endsymbol) = st
     symbolTab = :ets.new(:yecc_symbols, [{:keypos, 1}])
-    ts = [[:"$empty", endsymbol] | delete(:"$empty", terminals)]
+    ts = [:"$empty", endsymbol | delete(:"$empty", terminals)]
     tsC = count(0, ts)
 
     nTsC =
@@ -2544,10 +2544,7 @@ defmodule :m_yecc do
   end
 
   defp find_action_conflicts2(
-         [
-           [r_shift(state: st, pos: pos, prec: prec), r_shift(state: st) = s]
-           | as
-         ],
+         [r_shift(state: st, pos: pos, prec: prec), r_shift(state: st) = s | as],
          cxt
        )
        when pos === :a or prec === {0, :none} do
@@ -2555,10 +2552,7 @@ defmodule :m_yecc do
   end
 
   defp find_action_conflicts2(
-         [
-           [r_shift(state: newState, pos: :z) = s1, r_shift(state: newState) = s2]
-           | _
-         ],
+         [r_shift(state: newState, pos: :z) = s1, r_shift(state: newState) = s2 | _],
          cxt
        ) do
     confl = conflict(s1, s2, cxt)
@@ -2608,7 +2602,7 @@ defmodule :m_yecc do
     {r, cxt}
   end
 
-  defp find_reduce_reduce([[:accept = a, r_reduce() = r] | rs], cxt0) do
+  defp find_reduce_reduce([:accept = a, r_reduce() = r | rs], cxt0) do
     confl = conflict(r, a, cxt0)
     st = conflict_error(confl, r_cxt(cxt0, :yecc))
     cxt = r_cxt(cxt0, yecc: st)
@@ -2617,11 +2611,8 @@ defmodule :m_yecc do
 
   defp find_reduce_reduce(
          [
-           [
-             r_reduce(head: categ1, prec: {p1, _}) = r1,
-             r_reduce(head: categ2, prec: {p2, _}) = r2
-           ]
-           | rs
+           r_reduce(head: categ1, prec: {p1, _}) = r1,
+           r_reduce(head: categ2, prec: {p2, _}) = r2 | rs
          ],
          cxt0
        ) do
@@ -3314,7 +3305,10 @@ defmodule :m_yecc do
           ' erlang:error({yecc_bug,"',
           '1.4',
           '",',
-          :io_lib.fwrite("{missing_state_in_action_table, Other}", []),
+          :io_lib.fwrite(
+            "{missing_state_in_action_table, Other}",
+            []
+          ),
           '}).\n\n'
         ]),
         []
@@ -3796,7 +3790,7 @@ defmodule :m_yecc do
   end
 
   defp format_symbols1([h | t]) do
-    [[' ', format_symbol(h)] | format_symbols1(t)]
+    [' ', format_symbol(h) | format_symbols1(t)]
   end
 
   defp include(st, file, outport) do
@@ -3881,7 +3875,8 @@ defmodule :m_yecc do
     line = location(anno(t))
 
     [
-      [pp_sep(line, line0, t0), pp_symbol(t, enc)]
+      pp_sep(line, line0, t0),
+      pp_symbol(t, enc)
       | pp_tokens1(ts, line, enc, t)
     ]
   end

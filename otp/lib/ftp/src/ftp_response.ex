@@ -6,15 +6,15 @@ defmodule :m_ftp_response do
   end
 
   def parse_lines(<<c1, c2, c3, ?-, rest::binary>>, lines, :start) do
-    parse_lines(rest, [[?-, c3, c2, c1] | lines], {c1, c2, c3})
+    parse_lines(rest, [?-, c3, c2, c1 | lines], {c1, c2, c3})
   end
 
   def parse_lines(<<c1, c2, c3, ?\s, bin::binary>>, lines, :start) do
-    parse_lines(bin, [[?\s, c3, c2, c1] | lines], :finish)
+    parse_lines(bin, [?\s, c3, c2, c1 | lines], :finish)
   end
 
   def parse_lines(<<?\r, ?\n, c1, c2, c3, ?\s, rest::binary>>, lines, {c1, c2, c3}) do
-    parse_lines(rest, [[?\s, c3, c2, c1, ?\n, ?\r] | lines], :finish)
+    parse_lines(rest, [?\s, c3, c2, c1, ?\n, ?\r | lines], :finish)
   end
 
   def parse_lines(<<?\r, ?\n, c1, c2, c3>> = bin, lines, {c1, c2, c3}) do
@@ -22,7 +22,7 @@ defmodule :m_ftp_response do
   end
 
   def parse_lines(<<?\r, ?\n, c1, c2, c3, rest::binary>>, lines, {c1, c2, c3}) do
-    parse_lines(rest, [[c3, c2, c1, ?\n, ?\r] | lines], {c1, c2, c3})
+    parse_lines(rest, [c3, c2, c1, ?\n, ?\r | lines], {c1, c2, c3})
   end
 
   def parse_lines(<<?\r, ?\n, c1, c2>> = data, lines, {c1, c2, _} = statusCode) do
@@ -50,11 +50,11 @@ defmodule :m_ftp_response do
   end
 
   def parse_lines(<<?\r, ?\n>>, lines, :finish) do
-    {:ok, :lists.reverse([[?\n, ?\r] | lines]), <<>>}
+    {:ok, :lists.reverse([?\n, ?\r | lines]), <<>>}
   end
 
   def parse_lines(<<?\r, ?\n, rest::binary>>, lines, :finish) do
-    {:ok, :lists.reverse([[?\n, ?\r] | lines]), rest}
+    {:ok, :lists.reverse([?\n, ?\r | lines]), rest}
   end
 
   def parse_lines(<<?\r>> = data, lines, :finish) do
@@ -69,7 +69,7 @@ defmodule :m_ftp_response do
     parse_lines(rest, [octet | lines], :finish)
   end
 
-  def interpret([[didgit1, didgit2, didgit3] | data]) do
+  def interpret([didgit1, didgit2, didgit3 | data]) do
     code1 = didgit1 - ?0
     code2 = didgit2 - ?0
     code3 = didgit3 - ?0

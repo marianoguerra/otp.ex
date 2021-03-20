@@ -236,19 +236,19 @@ defmodule :m_edoc_macros do
     expand(cs, l, defs, st, [])
   end
 
-  defp expand([[?@, ?@] | cs], l, defs, st, as) do
+  defp expand([?@, ?@ | cs], l, defs, st, as) do
     expand(cs, l, defs, st, [?@ | as])
   end
 
-  defp expand([[?@, ?{] | cs], l, defs, st, as) do
+  defp expand([?@, ?{ | cs], l, defs, st, as) do
     expand(cs, l, defs, st, [?{ | as])
   end
 
-  defp expand([[?@, ?}] | cs], l, defs, st, as) do
+  defp expand([?@, ?} | cs], l, defs, st, as) do
     expand(cs, l, defs, st, [?} | as])
   end
 
-  defp expand([[?{, ?@] | cs], l, defs, st, as) do
+  defp expand([?{, ?@ | cs], l, defs, st, as) do
     expand_macro(cs, l, defs, st, as)
   end
 
@@ -441,20 +441,20 @@ defmodule :m_edoc_macros do
     end
   end
 
-  defp macro_content([[?@, ?@] | cs], as, l, n) do
-    macro_content(cs, [[?@, ?@] | as], l, n)
+  defp macro_content([?@, ?@ | cs], as, l, n) do
+    macro_content(cs, [?@, ?@ | as], l, n)
   end
 
-  defp macro_content([[?@, ?}] | cs], as, l, n) do
-    macro_content(cs, [[?}, ?@] | as], l, n)
+  defp macro_content([?@, ?} | cs], as, l, n) do
+    macro_content(cs, [?}, ?@ | as], l, n)
   end
 
-  defp macro_content([[?@, ?{] | cs], as, l, n) do
-    macro_content(cs, [[?{, ?@] | as], l, n)
+  defp macro_content([?@, ?{ | cs], as, l, n) do
+    macro_content(cs, [?{, ?@ | as], l, n)
   end
 
-  defp macro_content([[?{, ?@] | cs], as, l, n) do
-    macro_content(cs, [[?@, ?{] | as], l, n + 1)
+  defp macro_content([?{, ?@ | cs], as, l, n) do
+    macro_content(cs, [?@, ?{ | as], l, n + 1)
   end
 
   defp macro_content([?} | cs], as, l, 0) do

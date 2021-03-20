@@ -29,11 +29,14 @@ defmodule :m_base64 do
     [b64e(b1 >>> 2), b64e((b1 &&& 3 <<< 4) ||| b2 >>> 4), b64e(b2 &&& 15 <<< 2), ?=]
   end
 
-  defp encode_list_to_string([[b1, b2, b3] | ls]) do
+  defp encode_list_to_string([b1, b2, b3 | ls]) do
     bB = b1 <<< 16 ||| b2 <<< 8 ||| b3
 
     [
-      [b64e(bB >>> 18), b64e(bB >>> 12 &&& 63), b64e(bB >>> 6 &&& 63), b64e(bB &&& 63)]
+      b64e(bB >>> 18),
+      b64e(bB >>> 12 &&& 63),
+      b64e(bB >>> 6 &&& 63),
+      b64e(bB &&& 63)
       | encode_list_to_string(ls)
     ]
   end
@@ -77,7 +80,7 @@ defmodule :m_base64 do
       b64e(b2 &&& 15 <<< 2)::size(8), ?=::size(8)>>
   end
 
-  defp encode_list([[b1, b2, b3] | ls], a) do
+  defp encode_list([b1, b2, b3 | ls], a) do
     bB = b1 <<< 16 ||| b2 <<< 8 ||| b3
 
     encode_list(
@@ -381,7 +384,9 @@ defmodule :m_base64 do
         octet3 = bits4x6 &&& 255
 
         [
-          [octet1, octet2, octet3]
+          octet1,
+          octet2,
+          octet3
           | mime_decode_list_to_string(cs)
         ]
 
@@ -411,7 +416,9 @@ defmodule :m_base64 do
             octet3 = bits4x6 &&& 255
 
             [
-              [octet1, octet2, octet3]
+              octet1,
+              octet2,
+              octet3
               | mime_decode_list_to_string(cs)
             ]
         end
@@ -614,7 +621,7 @@ defmodule :m_base64 do
         octet1 = bits4x6 >>> 16
         octet2 = bits4x6 >>> 8 &&& 255
         octet3 = bits4x6 &&& 255
-        [[octet1, octet2, octet3] | decode_list_to_string(cs)]
+        [octet1, octet2, octet3 | decode_list_to_string(cs)]
     end
   end
 

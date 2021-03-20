@@ -1369,7 +1369,7 @@ defmodule :m_tls_server_session_ticket do
   def handle_call(
         {:new_session_ticket, prf, masterSecret},
         _From,
-        r_state(nonce: nonce, lifetime: lifeTime, stateful: %{:id_generator => idGen}) = state0
+        r_state(nonce: nonce, lifetime: lifeTime, stateful: %{id_generator: idGen}) = state0
       ) do
     id = stateful_psk_ticket_id(idGen)
     pSK = :tls_v1.pre_shared_key(masterSecret, ticket_nonce(nonce), prf)
@@ -1412,12 +1412,11 @@ defmodule :m_tls_server_session_ticket do
 
   def handle_info(
         :rotate_bloom_filters,
-        r_state(stateless: %{:bloom_filter => bloomFilter0, :window => window} = stateless) =
-          state
+        r_state(stateless: %{bloom_filter: bloomFilter0, window: window} = stateless) = state
       ) do
     bloomFilter = :tls_bloom_filter.rotate(bloomFilter0)
     :erlang.send_after(window * 1000, self(), :rotate_bloom_filters)
-    {:noreply, r_state(state, stateless: %{stateless | :bloom_filter => bloomFilter})}
+    {:noreply, r_state(state, stateless: Map.put(stateless, :bloom_filter, bloomFilter))}
   end
 
   def handle_info(_Info, state) do
@@ -1440,8 +1439,8 @@ defmodule :m_tls_server_session_ticket do
     r_state(
       nonce: 0,
       stateless: %{
-        :seed => {:crypto.strong_rand_bytes(16), :crypto.strong_rand_bytes(32)},
-        :window => :undefined
+        seed: {:crypto.strong_rand_bytes(16), :crypto.strong_rand_bytes(32)},
+        window: :undefined
       },
       lifetime: lifetime
     )
@@ -1453,23 +1452,23 @@ defmodule :m_tls_server_session_ticket do
     r_state(
       nonce: 0,
       stateless: %{
-        :bloom_filter => :tls_bloom_filter.new(k, m),
-        :seed => {:crypto.strong_rand_bytes(16), :crypto.strong_rand_bytes(32)},
-        :window => window
+        bloom_filter: :tls_bloom_filter.new(k, m),
+        seed: {:crypto.strong_rand_bytes(16), :crypto.strong_rand_bytes(32)},
+        window: window
       },
       lifetime: lifetime
     )
   end
 
-  defp inital_state([[:stateful, lifetime, ticketStoreSize] | _]) do
+  defp inital_state([:stateful, lifetime, ticketStoreSize | _]) do
     r_state(
       lifetime: lifetime,
       nonce: 0,
       stateful: %{
-        :db => stateful_store(),
-        :max => ticketStoreSize,
-        :ref_index => %{},
-        :id_generator => :crypto.strong_rand_bytes(16)
+        db: stateful_store(),
+        max: ticketStoreSize,
+        ref_index: %{},
+        id_generator: :crypto.strong_rand_bytes(16)
       }
     )
   end
@@ -1520,9 +1519,9 @@ defmodule :m_tls_server_session_ticket do
            level: 2,
            description: 47,
            where: %{
-             :mfa => {:tls_server_session_ticket, :validate_binder, 5},
-             :line => 209,
-             :file => 'otp/lib/ssl/src/tls_server_session_ticket.erl'
+             mfa: {:tls_server_session_ticket, :validate_binder, 5},
+             line: 209,
+             file: 'otp/lib/ssl/src/tls_server_session_ticket.erl'
            },
            reason: alertDetail
          )}
@@ -1540,7 +1539,7 @@ defmodule :m_tls_server_session_ticket do
          psk,
          r_state(
            nonce: nonce,
-           stateful: %{:db => tree0, :max => max, :ref_index => index0} = stateful
+           stateful: %{db: tree0, max: max, ref_index: index0} = stateful
          ) = state0
        ) do
     id = {:erlang.monotonic_time(), :erlang.unique_integer([:monotonic])}
@@ -1554,7 +1553,7 @@ defmodule :m_tls_server_session_ticket do
 
         r_state(state0,
           nonce: nonce + 1,
-          stateful: %{stateful | :db => tree, :ref_index => %{index | ref => id}}
+          stateful: Map.merge(stateful, %{db: tree, ref_index: Map.put(index, ref, id)})
         )
 
       _ ->
@@ -1562,7 +1561,7 @@ defmodule :m_tls_server_session_ticket do
 
         r_state(state0,
           nonce: nonce + 1,
-          stateful: %{stateful | :db => tree, :ref_index => %{index0 | ref => id}}
+          stateful: Map.merge(stateful, %{db: tree, ref_index: Map.put(index0, ref, id)})
         )
     end
   end
@@ -1586,7 +1585,7 @@ defmodule :m_tls_server_session_ticket do
          prf,
          handshakeHist,
          index,
-         r_state(stateful: %{:db => tree0, :ref_index => refIndex0} = stateful) = state
+         r_state(stateful: %{db: tree0, ref_index: refIndex0} = stateful) = state
        ) do
     try do
       :maps.get(ref, refIndex0)
@@ -1601,7 +1600,7 @@ defmodule :m_tls_server_session_ticket do
             {{_, _, pSK}, tree} = :gb_trees.take(key, tree0)
 
             {{:ok, {index, pSK}},
-             r_state(state, stateful: %{stateful | :db => tree, :ref_index => refIndex})}
+             r_state(state, stateful: Map.merge(stateful, %{db: tree, ref_index: refIndex}))}
 
           false ->
             stateful_use(refs, binders, prf, handshakeHist, index + 1, state)
@@ -1650,7 +1649,7 @@ defmodule :m_tls_server_session_ticket do
          ) = ticket,
          prf,
          masterSecret,
-         r_state(stateless: %{:seed => {iV, shard}})
+         r_state(stateless: %{seed: {iV, shard}})
        ) do
     pSK = :tls_v1.pre_shared_key(masterSecret, nonce, prf)
     timestamp = :erlang.system_time(:second)
@@ -1696,7 +1695,7 @@ defmodule :m_tls_server_session_ticket do
          prf,
          handshakeHist,
          index,
-         r_state(stateless: %{:seed => {iV, shard}, :window => window}) = state
+         r_state(stateless: %{seed: {iV, shard}, window: window}) = state
        ) do
     case :ssl_cipher.decrypt_ticket(encrypted, shard, iV) do
       r_stateless_ticket(hash: ^prf, pre_shared_key: pSK) = ticket ->
@@ -1765,7 +1764,7 @@ defmodule :m_tls_server_session_ticket do
          index,
          pSK,
          binder,
-         r_state(stateless: %{:bloom_filter => bloomFilter0} = stateless) = state
+         r_state(stateless: %{bloom_filter: bloomFilter0} = stateless) = state
        ) do
     case :tls_bloom_filter.contains(
            bloomFilter0,
@@ -1782,7 +1781,7 @@ defmodule :m_tls_server_session_ticket do
           )
 
         {{:ok, {index, pSK}},
-         r_state(state, stateless: %{stateless | :bloom_filter => bloomFilter})}
+         r_state(state, stateless: Map.put(stateless, :bloom_filter, bloomFilter))}
     end
   end
 

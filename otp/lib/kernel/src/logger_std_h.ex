@@ -56,7 +56,7 @@ defmodule :m_logger_std_h do
 
     case file_ctrl_start(name, myConfig) do
       {:ok, fileCtrlPid} ->
-        {:ok, %{myConfig | :file_ctrl_pid => fileCtrlPid}}
+        {:ok, Map.put(myConfig, :file_ctrl_pid, fileCtrlPid)}
 
       error ->
         error
@@ -167,27 +167,27 @@ defmodule :m_logger_std_h do
     :ok
   end
 
-  defp normalize_config(%{:type => {:file, file}} = hConfig) do
-    normalize_config(%{hConfig | :type => :file, :file => file})
+  defp normalize_config(%{type: {:file, file}} = hConfig) do
+    normalize_config(Map.merge(hConfig, %{type: :file, file: file}))
   end
 
-  defp normalize_config(%{:type => {:file, file, modes}} = hConfig) do
-    normalize_config(%{hConfig | :type => :file, :file => file, :modes => modes})
+  defp normalize_config(%{type: {:file, file, modes}} = hConfig) do
+    normalize_config(Map.merge(hConfig, %{type: :file, file: file, modes: modes}))
   end
 
-  defp normalize_config(%{:file => file} = hConfig) do
-    %{hConfig | :file => :filename.absname(file)}
+  defp normalize_config(%{file: file} = hConfig) do
+    Map.put(hConfig, :file, :filename.absname(file))
   end
 
   defp normalize_config(hConfig) do
     hConfig
   end
 
-  defp merge_default_config(name, %{:type => type} = hConfig) do
+  defp merge_default_config(name, %{type: type} = hConfig) do
     merge_default_config(name, type, hConfig)
   end
 
-  defp merge_default_config(name, %{:file => _} = hConfig) do
+  defp merge_default_config(name, %{file: _} = hConfig) do
     merge_default_config(name, :file, hConfig)
   end
 
@@ -201,26 +201,26 @@ defmodule :m_logger_std_h do
 
   defp get_default_config(name, :file) do
     %{
-      :type => :file,
-      :file => :filename.absname(:erlang.atom_to_list(name)),
-      :modes => [:raw, :append],
-      :file_check => 0,
-      :max_no_bytes => :infinity,
-      :max_no_files => 0,
-      :compress_on_rotate => false
+      type: :file,
+      file: :filename.absname(:erlang.atom_to_list(name)),
+      modes: [:raw, :append],
+      file_check: 0,
+      max_no_bytes: :infinity,
+      max_no_files: 0,
+      compress_on_rotate: false
     }
   end
 
   defp get_default_config(_Name, type) do
-    %{:type => type}
+    %{type: type}
   end
 
-  defp fix_file_opts(%{:modes => modes} = hConfig) do
-    %{hConfig | :modes => fix_modes(modes)}
+  defp fix_file_opts(%{modes: modes} = hConfig) do
+    Map.put(hConfig, :modes, fix_modes(modes))
   end
 
   defp fix_file_opts(hConfig) do
-    %{hConfig | :filesync_repeat_interval => :no_repeat}
+    Map.put(hConfig, :filesync_repeat_interval, :no_repeat)
   end
 
   defp fix_modes(modes) do
@@ -269,16 +269,16 @@ defmodule :m_logger_std_h do
   def config_changed(
         _Name,
         %{
-          :file_check => fileCheck,
-          :max_no_bytes => size,
-          :max_no_files => count,
-          :compress_on_rotate => compress
+          file_check: fileCheck,
+          max_no_bytes: size,
+          max_no_files: count,
+          compress_on_rotate: compress
         },
         %{
-          :file_check => fileCheck,
-          :max_no_bytes => size,
-          :max_no_files => count,
-          :compress_on_rotate => compress
+          file_check: fileCheck,
+          max_no_bytes: size,
+          max_no_files: count,
+          compress_on_rotate: compress
         } = state
       ) do
     state
@@ -287,30 +287,30 @@ defmodule :m_logger_std_h do
   def config_changed(
         _Name,
         %{
-          :file_check => fileCheck,
-          :max_no_bytes => size,
-          :max_no_files => count,
-          :compress_on_rotate => compress
+          file_check: fileCheck,
+          max_no_bytes: size,
+          max_no_files: count,
+          compress_on_rotate: compress
         },
-        %{:file_ctrl_pid => fileCtrlPid} = state
+        %{file_ctrl_pid: fileCtrlPid} = state
       ) do
     send(
       fileCtrlPid,
       {:update_config,
        %{
-         :file_check => fileCheck,
-         :max_no_bytes => size,
-         :max_no_files => count,
-         :compress_on_rotate => compress
+         file_check: fileCheck,
+         max_no_bytes: size,
+         max_no_files: count,
+         compress_on_rotate: compress
        }}
     )
 
     %{
       state
-      | :file_check => fileCheck,
-        :max_no_bytes => size,
-        :max_no_files => count,
-        :compress_on_rotate => compress
+      | file_check: fileCheck,
+        max_no_bytes: size,
+        max_no_files: count,
+        compress_on_rotate: compress
     }
   end
 
@@ -318,12 +318,12 @@ defmodule :m_logger_std_h do
     state
   end
 
-  def filesync(_Name, syncAsync, %{:file_ctrl_pid => fileCtrlPid} = state) do
+  def filesync(_Name, syncAsync, %{file_ctrl_pid: fileCtrlPid} = state) do
     result = file_ctrl_filesync(syncAsync, fileCtrlPid)
     {result, state}
   end
 
-  def write(_Name, syncAsync, bin, %{:file_ctrl_pid => fileCtrlPid} = state) do
+  def write(_Name, syncAsync, bin, %{file_ctrl_pid: fileCtrlPid} = state) do
     result = file_write(syncAsync, fileCtrlPid, bin)
     {result, state}
   end
@@ -332,7 +332,7 @@ defmodule :m_logger_std_h do
     state
   end
 
-  def handle_info(_Name, {:EXIT, pid, why}, %{:file_ctrl_pid => pid} = state) do
+  def handle_info(_Name, {:EXIT, pid, why}, %{file_ctrl_pid: pid} = state) do
     exit({:error, {:write_failed, :maps.with([:type, :file, :modes], state), why}})
   end
 
@@ -340,7 +340,7 @@ defmodule :m_logger_std_h do
     state
   end
 
-  def terminate(_Name, _Reason, %{:file_ctrl_pid => fWPid}) do
+  def terminate(_Name, _Reason, %{file_ctrl_pid: fWPid}) do
     case :erlang.is_process_alive(fWPid) do
       true ->
         :erlang.unlink(fWPid)
@@ -363,7 +363,7 @@ defmodule :m_logger_std_h do
 
   defp open_log_file(
          handlerName,
-         %{:type => :file, :file => fileName, :modes => modes, :file_check => fileCheck}
+         %{type: :file, file: fileName, modes: modes, file_check: fileCheck}
        ) do
     try do
       case :filelib.ensure_dir(fileName) do
@@ -380,16 +380,16 @@ defmodule :m_logger_std_h do
 
               {:ok,
                %{
-                 :handler_name => handlerName,
-                 :file_name => fileName,
-                 :modes => updateModes,
-                 :file_check => fileCheck,
-                 :fd => fd,
-                 :inode => iNode,
-                 :last_check => timestamp(),
-                 :synced => false,
-                 :write_res => :ok,
-                 :sync_res => :ok
+                 handler_name: handlerName,
+                 file_name: fileName,
+                 modes: updateModes,
+                 file_check: fileCheck,
+                 fd: fd,
+                 inode: iNode,
+                 last_check: timestamp(),
+                 synced: false,
+                 write_res: :ok,
+                 sync_res: :ok
                }}
 
             error ->
@@ -405,7 +405,7 @@ defmodule :m_logger_std_h do
     end
   end
 
-  defp close_log_file(%{:fd => fd}) do
+  defp close_log_file(%{fd: fd}) do
     _ = :file.datasync(fd)
     _ = :file.close(fd)
     :ok
@@ -415,7 +415,7 @@ defmodule :m_logger_std_h do
     :ok
   end
 
-  defp delayed_write_close(%{:fd => fd}) do
+  defp delayed_write_close(%{fd: fd}) do
     case :file.close(fd) do
       {:error, _} ->
         :file.close(fd)
@@ -488,11 +488,11 @@ defmodule :m_logger_std_h do
   defp file_ctrl_init(
          handlerName,
          %{
-           :type => :file,
-           :max_no_bytes => size,
-           :max_no_files => count,
-           :compress_on_rotate => compress,
-           :file => fileName
+           type: :file,
+           max_no_bytes: size,
+           max_no_files: count,
+           compress_on_rotate: compress,
+           file: fileName
          } = hConfig,
          starter
        ) do
@@ -515,14 +515,14 @@ defmodule :m_logger_std_h do
     end
   end
 
-  defp file_ctrl_init(handlerName, %{:type => {:device, dev}}, starter) do
+  defp file_ctrl_init(handlerName, %{type: {:device, dev}}, starter) do
     send(starter, {self(), :ok})
-    file_ctrl_loop(%{:handler_name => handlerName, :dev => dev})
+    file_ctrl_loop(%{handler_name: handlerName, dev: dev})
   end
 
-  defp file_ctrl_init(handlerName, %{:type => stdDev}, starter) do
+  defp file_ctrl_init(handlerName, %{type: stdDev}, starter) do
     send(starter, {self(), :ok})
-    file_ctrl_loop(%{:handler_name => handlerName, :dev => stdDev})
+    file_ctrl_loop(%{handler_name: handlerName, dev: stdDev})
   end
 
   defp file_ctrl_loop(state) do
@@ -549,13 +549,13 @@ defmodule :m_logger_std_h do
 
       {:update_config,
        %{
-         :file_check => fileCheck,
-         :max_no_bytes => size,
-         :max_no_files => count,
-         :compress_on_rotate => compress
+         file_check: fileCheck,
+         max_no_bytes: size,
+         max_no_files: count,
+         compress_on_rotate: compress
        }} ->
         state1 = update_rotation({size, count, compress}, state)
-        file_ctrl_loop(%{state1 | :file_check => fileCheck})
+        file_ctrl_loop(Map.put(state1, :file_check, fileCheck))
 
       :stop ->
         close_log_file(state)
@@ -563,11 +563,11 @@ defmodule :m_logger_std_h do
     end
   end
 
-  defp maybe_ensure_file(%{:file_check => 0} = state) do
+  defp maybe_ensure_file(%{file_check: 0} = state) do
     ensure_file(state)
   end
 
-  defp maybe_ensure_file(%{:last_check => t0, :file_check => checkInt} = state)
+  defp maybe_ensure_file(%{last_check: t0, file_check: checkInt} = state)
        when is_integer(checkInt) do
     t = timestamp()
 
@@ -584,10 +584,10 @@ defmodule :m_logger_std_h do
     state
   end
 
-  defp ensure_file(%{:inode => iNode0, :file_name => fileName, :modes => modes} = state) do
+  defp ensure_file(%{inode: iNode0, file_name: fileName, modes: modes} = state) do
     case :file.read_file_info(fileName, [:raw]) do
       {:ok, r_file_info(inode: ^iNode0)} ->
-        %{state | :last_check => timestamp()}
+        Map.put(state, :last_check, timestamp())
 
       _ ->
         close_log_file(state)
@@ -600,14 +600,13 @@ defmodule :m_logger_std_h do
                 [:raw]
               )
 
-            %{
-              state
-              | :fd => fd,
-                :inode => iNode,
-                :last_check => timestamp(),
-                :synced => true,
-                :sync_res => :ok
-            }
+            Map.merge(state, %{
+              fd: fd,
+              inode: iNode,
+              last_check: timestamp(),
+              synced: true,
+              sync_res: :ok
+            })
 
           error ->
             exit({:could_not_reopen_file, error})
@@ -619,24 +618,24 @@ defmodule :m_logger_std_h do
     state
   end
 
-  defp write_to_dev(bin, %{:dev => devName} = state) do
+  defp write_to_dev(bin, %{dev: devName} = state) do
     :io.put_chars(devName, bin)
     state
   end
 
   defp write_to_dev(bin, state) do
-    state1 = %{:fd => fd} = maybe_ensure_file(state)
+    state1 = %{fd: fd} = maybe_ensure_file(state)
     result = :file.write(fd, bin)
     state2 = maybe_rotate_file(bin, state1)
     maybe_notify_error(:write, result, state2)
-    %{state2 | :synced => false, :write_res => result}
+    Map.merge(state2, %{synced: false, write_res: result})
   end
 
-  defp sync_dev(%{:synced => false} = state) do
-    state1 = %{:fd => fd} = maybe_ensure_file(state)
+  defp sync_dev(%{synced: false} = state) do
+    state1 = %{fd: fd} = maybe_ensure_file(state)
     result = :file.datasync(fd)
     maybe_notify_error(:filesync, result, state1)
-    %{state1 | :synced => true, :sync_res => result}
+    Map.merge(state1, %{synced: true, sync_res: result})
   end
 
   defp sync_dev(state) do
@@ -650,7 +649,7 @@ defmodule :m_logger_std_h do
 
   defp update_rotation(
          {size, count, compress},
-         %{:file_name => fileName} = state
+         %{file_name: fileName} = state
        ) do
     maybe_remove_archives(count, state)
 
@@ -660,21 +659,19 @@ defmodule :m_logger_std_h do
         [:raw]
       )
 
-    state1 = %{
-      state
-      | :rotation => %{
-          :size => size,
-          :count => count,
-          :compress => compress,
-          :curr_size => currSize
-        }
-    }
+    state1 =
+      Map.put(state, :rotation, %{
+        size: size,
+        count: count,
+        compress: compress,
+        curr_size: currSize
+      })
 
     maybe_update_compress(0, state1)
     maybe_rotate_file(0, state1)
   end
 
-  defp maybe_remove_archives(count, %{:file_name => fileName} = state) do
+  defp maybe_remove_archives(count, %{file_name: fileName} = state) do
     archive = rot_file_name(fileName, count, false)
     compressedArchive = rot_file_name(fileName, count, true)
 
@@ -689,13 +686,13 @@ defmodule :m_logger_std_h do
     end
   end
 
-  defp maybe_update_compress(count, %{:rotation => %{:count => count}}) do
+  defp maybe_update_compress(count, %{rotation: %{count: count}}) do
     :ok
   end
 
   defp maybe_update_compress(
          n,
-         %{:file_name => fileName, :rotation => %{:compress => compress}} = state
+         %{file_name: fileName, rotation: %{compress: compress}} = state
        ) do
     archive = rot_file_name(fileName, n, not compress)
 
@@ -713,23 +710,23 @@ defmodule :m_logger_std_h do
     maybe_update_compress(n + 1, state)
   end
 
-  defp maybe_rotate_file(bin, %{:rotation => _} = state)
+  defp maybe_rotate_file(bin, %{rotation: _} = state)
        when is_binary(bin) do
     maybe_rotate_file(byte_size(bin), state)
   end
 
   defp maybe_rotate_file(
          addSize,
-         %{:rotation => %{:size => rotSize, :curr_size => currSize} = rotation} = state
+         %{rotation: %{size: rotSize, curr_size: currSize} = rotation} = state
        ) do
     newSize = currSize + addSize
 
     cond do
       newSize > rotSize ->
-        rotate_file(%{state | :rotation => %{rotation | :curr_size => newSize}})
+        rotate_file(Map.put(state, :rotation, Map.put(rotation, :curr_size, newSize)))
 
       true ->
-        %{state | :rotation => %{rotation | :curr_size => newSize}}
+        Map.put(state, :rotation, Map.put(rotation, :curr_size, newSize))
     end
   end
 
@@ -737,7 +734,7 @@ defmodule :m_logger_std_h do
     state
   end
 
-  defp rotate_file(%{:file_name => fileName, :modes => modes, :rotation => rotation} = state) do
+  defp rotate_file(%{file_name: fileName, modes: modes, rotation: rotation} = state) do
     state1 = sync_dev(state)
     _ = delayed_write_close(state)
     rotate_files(fileName, :maps.get(:count, rotation), :maps.get(:compress, rotation))
@@ -750,7 +747,7 @@ defmodule :m_logger_std_h do
             [:raw]
           )
 
-        %{state1 | :fd => fd, :inode => iNode, :rotation => %{rotation | :curr_size => 0}}
+        Map.merge(state1, %{fd: fd, inode: iNode, rotation: Map.put(rotation, :curr_size, 0)})
 
       error ->
         exit({:could_not_reopen_file, error})
@@ -859,12 +856,12 @@ defmodule :m_logger_std_h do
     :ok
   end
 
-  defp maybe_notify_error(op, result, %{:write_res => wR, :sync_res => sR})
+  defp maybe_notify_error(op, result, %{write_res: wR, sync_res: sR})
        when (op == :write and result == wR) or (op == :filesync and result == sR) do
     :ok
   end
 
-  defp maybe_notify_error(op, error, %{:handler_name => handlerName, :file_name => fileName}) do
+  defp maybe_notify_error(op, error, %{handler_name: handlerName, file_name: fileName}) do
     :logger_h_common.error_notify({handlerName, op, fileName, error})
     :ok
   end

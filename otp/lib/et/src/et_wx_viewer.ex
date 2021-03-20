@@ -1800,22 +1800,20 @@ defmodule :m_et_wx_viewer do
       end
 
     options = [
-      [
-        {:parent_pid, r_state(s, :parent_pid)},
-        {:title, r_state(s, :title)},
-        {:collector_pid, r_state(s, :collector_pid)},
-        {:detail_level, r_state(s, :detail_level)},
-        {:active_filter, filterName},
-        {:event_order, r_state(s, :event_order)},
-        {:first_event, r_state(s, :first_event)},
-        {:max_actors, r_state(s, :max_actors)},
-        {:hide_actions, r_state(s, :hide_actions)},
-        {:hide_actors, r_state(s, :hide_actors)},
-        {:actors, actors},
-        {:scale, scale},
-        {:width, r_state(s, :width)},
-        {:height, r_state(s, :height)}
-      ]
+      {:parent_pid, r_state(s, :parent_pid)},
+      {:title, r_state(s, :title)},
+      {:collector_pid, r_state(s, :collector_pid)},
+      {:detail_level, r_state(s, :detail_level)},
+      {:active_filter, filterName},
+      {:event_order, r_state(s, :event_order)},
+      {:first_event, r_state(s, :first_event)},
+      {:max_actors, r_state(s, :max_actors)},
+      {:hide_actions, r_state(s, :hide_actions)},
+      {:hide_actors, r_state(s, :hide_actors)},
+      {:actors, actors},
+      {:scale, scale},
+      {:width, r_state(s, :width)},
+      {:height, r_state(s, :height)}
       | filters
     ]
 
@@ -2061,10 +2059,30 @@ defmodule :m_et_wx_viewer do
       menuitem(menu, -1, 'Save all events in the Collector to file', :save_all),
       menuitem(menu, 5011, 'Print setup', :print_setup),
       menuitem(menu, -1, 'Print current page', :print_one_page),
-      menuitem(menu, 5010, 'Print all pages', :print_all_pages),
-      menuitem(menu, -1, 'Close this Viewer', :close),
-      menuitem(menu, -1, 'Close all other Viewers, but this (c)', :close_all_others),
-      menuitem(menu, -1, 'Close all Viewers and the Collector)   (C) ', :close_all)
+      menuitem(
+        menu,
+        5010,
+        'Print all pages',
+        :print_all_pages
+      ),
+      menuitem(
+        menu,
+        -1,
+        'Close this Viewer',
+        :close
+      ),
+      menuitem(
+        menu,
+        -1,
+        'Close all other Viewers, but this (c)',
+        :close_all_others
+      ),
+      menuitem(
+        menu,
+        -1,
+        'Close all Viewers and the Collector)   (C) ',
+        :close_all
+      )
     ]
 
     _ = :wxMenu.insertSeparator(menu, 3)
@@ -2186,7 +2204,12 @@ defmodule :m_et_wx_viewer do
       menuitem(menu, -1, smaller, {:data, filter, -1}),
       menuitem(menu, -1, larger, {:data, filter, 1}),
       :wxMenu.appendSeparator(menu),
-      i2 = :wxMenu.append(menu, -1, 'New Filter Same Scale'),
+      i2 =
+        :wxMenu.append(
+          menu,
+          -1,
+          'New Filter Same Scale'
+        ),
       :wxMenu.appendSeparator(menu)
     ]
 
@@ -2723,7 +2746,7 @@ defmodule :m_et_wx_viewer do
   defp insert_actor_after(from, to, [h | t]) do
     case r_actor(to, :name) === r_actor(h, :name) do
       true ->
-        [[h, from] | t]
+        [h, from | t]
 
       false ->
         [h | insert_actor_after(from, to, t)]
@@ -2737,7 +2760,7 @@ defmodule :m_et_wx_viewer do
   defp insert_actor_before(from, to, [h | t]) do
     case r_actor(to, :name) === r_actor(h, :name) do
       true ->
-        [[from, h] | t]
+        [from, h | t]
 
       false ->
         [h | insert_actor_before(from, to, t)]
@@ -2847,13 +2870,11 @@ defmodule :m_et_wx_viewer do
 
   defp create_contents_window(event, {s, res}) do
     options = [
-      [
-        {:viewer_pid, self()},
-        {:event, event},
-        {:event_order, r_state(s, :event_order)},
-        {:active_filter, r_state(s, :active_filter)},
-        {:wx_debug, r_state(s, :wx_debug)}
-      ]
+      {:viewer_pid, self()},
+      {:event, event},
+      {:event_order, r_state(s, :event_order)},
+      {:active_filter, r_state(s, :active_filter)},
+      {:wx_debug, r_state(s, :wx_debug)}
       | r_state(s, :filters)
     ]
 

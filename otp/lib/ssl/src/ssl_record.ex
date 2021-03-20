@@ -1320,7 +1320,7 @@ defmodule :m_ssl_record do
     premaster_secret: :undefined,
     server_psk_identity: :undefined,
     cookie_iv_shard: :undefined,
-    ocsp_stapling_state: %{:ocsp_stapling => false, :ocsp_expect => :no_staple}
+    ocsp_stapling_state: %{ocsp_stapling: false, ocsp_expect: :no_staple}
   )
 
   Record.defrecord(:r_connection_env, :connection_env,
@@ -1376,13 +1376,13 @@ defmodule :m_ssl_record do
   end
 
   def activate_pending_connection_state(
-        %{:current_read => current, :pending_read => pending} = states,
+        %{current_read: current, pending_read: pending} = states,
         :read,
         connection
       ) do
-    %{:secure_renegotiation => secureRenegotation} = current
-    %{:beast_mitigation => beastMitigation, :security_parameters => secParams} = pending
-    newCurrent = %{pending | :sequence_number => 0}
+    %{secure_renegotiation: secureRenegotation} = current
+    %{beast_mitigation: beastMitigation, security_parameters: secParams} = pending
+    newCurrent = Map.put(pending, :sequence_number, 0)
     connectionEnd = r_security_parameters(secParams, :connection_end)
 
     emptyPending =
@@ -1391,18 +1391,18 @@ defmodule :m_ssl_record do
         beastMitigation
       )
 
-    newPending = %{emptyPending | :secure_renegotiation => secureRenegotation}
-    %{states | :current_read => newCurrent, :pending_read => newPending}
+    newPending = Map.put(emptyPending, :secure_renegotiation, secureRenegotation)
+    Map.merge(states, %{current_read: newCurrent, pending_read: newPending})
   end
 
   def activate_pending_connection_state(
-        %{:current_write => current, :pending_write => pending} = states,
+        %{current_write: current, pending_write: pending} = states,
         :write,
         connection
       ) do
-    newCurrent = %{pending | :sequence_number => 0}
-    %{:secure_renegotiation => secureRenegotation} = current
-    %{:beast_mitigation => beastMitigation, :security_parameters => secParams} = pending
+    newCurrent = Map.put(pending, :sequence_number, 0)
+    %{secure_renegotiation: secureRenegotation} = current
+    %{beast_mitigation: beastMitigation, security_parameters: secParams} = pending
     connectionEnd = r_security_parameters(secParams, :connection_end)
 
     emptyPending =
@@ -1411,34 +1411,33 @@ defmodule :m_ssl_record do
         beastMitigation
       )
 
-    newPending = %{emptyPending | :secure_renegotiation => secureRenegotation}
-    %{states | :current_write => newCurrent, :pending_write => newPending}
+    newPending = Map.put(emptyPending, :secure_renegotiation, secureRenegotation)
+    Map.merge(states, %{current_write: newCurrent, pending_write: newPending})
   end
 
   def step_encryption_state(
         r_state(
           connection_states:
-            %{:pending_read => pendingRead, :pending_write => pendingWrite} = connStates
+            %{pending_read: pendingRead, pending_write: pendingWrite} = connStates
         ) = state
       ) do
-    newRead = %{pendingRead | :sequence_number => 0}
-    newWrite = %{pendingWrite | :sequence_number => 0}
+    newRead = Map.put(pendingRead, :sequence_number, 0)
+    newWrite = Map.put(pendingWrite, :sequence_number, 0)
 
     r_state(state,
-      connection_states: %{connStates | :current_read => newRead, :current_write => newWrite}
+      connection_states: Map.merge(connStates, %{current_read: newRead, current_write: newWrite})
     )
   end
 
   def set_security_params(
         readParams,
         writeParams,
-        %{:pending_read => read, :pending_write => write} = states
+        %{pending_read: read, pending_write: write} = states
       ) do
-    %{
-      states
-      | :pending_read => %{read | :security_parameters => readParams},
-        :pending_write => %{write | :security_parameters => writeParams}
-    }
+    Map.merge(states, %{
+      pending_read: Map.put(read, :security_parameters, readParams),
+      pending_write: Map.put(write, :security_parameters, writeParams)
+    })
   end
 
   def set_mac_secret(clientWriteMacSecret, serverWriteMacSecret, :client, states) do
@@ -1452,65 +1451,67 @@ defmodule :m_ssl_record do
   defp set_mac_secret(
          readMacSecret,
          writeMacSecret,
-         states = %{:pending_read => read, :pending_write => write}
+         states = %{pending_read: read, pending_write: write}
        ) do
-    %{
-      states
-      | :pending_read => %{read | :mac_secret => readMacSecret},
-        :pending_write => %{write | :mac_secret => writeMacSecret}
-    }
+    Map.merge(states, %{
+      pending_read: Map.put(read, :mac_secret, readMacSecret),
+      pending_write: Map.put(write, :mac_secret, writeMacSecret)
+    })
   end
 
   def set_master_secret(
         masterSecret,
         states = %{
-          :pending_read => read = %{:security_parameters => readSecPar},
-          :pending_write => write = %{:security_parameters => writeSecPar}
+          pending_read: read = %{security_parameters: readSecPar},
+          pending_write: write = %{security_parameters: writeSecPar}
         }
       ) do
-    read1 = %{
-      read
-      | :security_parameters => r_security_parameters(readSecPar, master_secret: masterSecret)
-    }
+    read1 =
+      Map.put(
+        read,
+        :security_parameters,
+        r_security_parameters(readSecPar, master_secret: masterSecret)
+      )
 
-    write1 = %{
-      write
-      | :security_parameters => r_security_parameters(writeSecPar, master_secret: masterSecret)
-    }
+    write1 =
+      Map.put(
+        write,
+        :security_parameters,
+        r_security_parameters(writeSecPar, master_secret: masterSecret)
+      )
 
-    %{states | :pending_read => read1, :pending_write => write1}
+    Map.merge(states, %{pending_read: read1, pending_write: write1})
   end
 
   def set_renegotiation_flag(
         flag,
         %{
-          :current_read => currentRead0,
-          :current_write => currentWrite0,
-          :pending_read => pendingRead0,
-          :pending_write => pendingWrite0
+          current_read: currentRead0,
+          current_write: currentWrite0,
+          pending_read: pendingRead0,
+          pending_write: pendingWrite0
         } = connectionStates
       ) do
-    currentRead = %{currentRead0 | :secure_renegotiation => flag}
-    currentWrite = %{currentWrite0 | :secure_renegotiation => flag}
-    pendingRead = %{pendingRead0 | :secure_renegotiation => flag}
-    pendingWrite = %{pendingWrite0 | :secure_renegotiation => flag}
+    currentRead = Map.put(currentRead0, :secure_renegotiation, flag)
+    currentWrite = Map.put(currentWrite0, :secure_renegotiation, flag)
+    pendingRead = Map.put(pendingRead0, :secure_renegotiation, flag)
+    pendingWrite = Map.put(pendingWrite0, :secure_renegotiation, flag)
 
-    %{
-      connectionStates
-      | :current_read => currentRead,
-        :current_write => currentWrite,
-        :pending_read => pendingRead,
-        :pending_write => pendingWrite
-    }
+    Map.merge(connectionStates, %{
+      current_read: currentRead,
+      current_write: currentWrite,
+      pending_read: pendingRead,
+      pending_write: pendingWrite
+    })
   end
 
   def set_max_fragment_length(
         r_max_frag_enum(enum: maxFragEnum),
         %{
-          :current_read => currentRead0,
-          :current_write => currentWrite0,
-          :pending_read => pendingRead0,
-          :pending_write => pendingWrite0
+          current_read: currentRead0,
+          current_write: currentWrite0,
+          pending_read: pendingRead0,
+          pending_write: pendingWrite0
         } = connectionStates
       ) do
     maxFragmentLength =
@@ -1528,18 +1529,17 @@ defmodule :m_ssl_record do
           4096
       end
 
-    currentRead = %{currentRead0 | :max_fragment_length => maxFragmentLength}
-    currentWrite = %{currentWrite0 | :max_fragment_length => maxFragmentLength}
-    pendingRead = %{pendingRead0 | :max_fragment_length => maxFragmentLength}
-    pendingWrite = %{pendingWrite0 | :max_fragment_length => maxFragmentLength}
+    currentRead = Map.put(currentRead0, :max_fragment_length, maxFragmentLength)
+    currentWrite = Map.put(currentWrite0, :max_fragment_length, maxFragmentLength)
+    pendingRead = Map.put(pendingRead0, :max_fragment_length, maxFragmentLength)
+    pendingWrite = Map.put(pendingWrite0, :max_fragment_length, maxFragmentLength)
 
-    %{
-      connectionStates
-      | :current_read => currentRead,
-        :current_write => currentWrite,
-        :pending_read => pendingRead,
-        :pending_write => pendingWrite
-    }
+    Map.merge(connectionStates, %{
+      current_read: currentRead,
+      current_write: currentWrite,
+      pending_read: pendingRead,
+      pending_write: pendingWrite
+    })
   end
 
   def set_max_fragment_length(_, connectionStates) do
@@ -1549,87 +1549,85 @@ defmodule :m_ssl_record do
   def set_client_verify_data(
         :current_read,
         data,
-        %{:current_read => currentRead0, :pending_write => pendingWrite0} = connectionStates
+        %{current_read: currentRead0, pending_write: pendingWrite0} = connectionStates
       ) do
-    currentRead = %{currentRead0 | :client_verify_data => data}
-    pendingWrite = %{pendingWrite0 | :client_verify_data => data}
-    %{connectionStates | :current_read => currentRead, :pending_write => pendingWrite}
+    currentRead = Map.put(currentRead0, :client_verify_data, data)
+    pendingWrite = Map.put(pendingWrite0, :client_verify_data, data)
+    Map.merge(connectionStates, %{current_read: currentRead, pending_write: pendingWrite})
   end
 
   def set_client_verify_data(
         :current_write,
         data,
-        %{:pending_read => pendingRead0, :current_write => currentWrite0} = connectionStates
+        %{pending_read: pendingRead0, current_write: currentWrite0} = connectionStates
       ) do
-    pendingRead = %{pendingRead0 | :client_verify_data => data}
-    currentWrite = %{currentWrite0 | :client_verify_data => data}
-    %{connectionStates | :pending_read => pendingRead, :current_write => currentWrite}
+    pendingRead = Map.put(pendingRead0, :client_verify_data, data)
+    currentWrite = Map.put(currentWrite0, :client_verify_data, data)
+    Map.merge(connectionStates, %{pending_read: pendingRead, current_write: currentWrite})
   end
 
   def set_client_verify_data(
         :current_both,
         data,
-        %{:current_read => currentRead0, :current_write => currentWrite0} = connectionStates
+        %{current_read: currentRead0, current_write: currentWrite0} = connectionStates
       ) do
-    currentRead = %{currentRead0 | :client_verify_data => data}
-    currentWrite = %{currentWrite0 | :client_verify_data => data}
-    %{connectionStates | :current_read => currentRead, :current_write => currentWrite}
+    currentRead = Map.put(currentRead0, :client_verify_data, data)
+    currentWrite = Map.put(currentWrite0, :client_verify_data, data)
+    Map.merge(connectionStates, %{current_read: currentRead, current_write: currentWrite})
   end
 
   def set_server_verify_data(
         :current_write,
         data,
-        %{:pending_read => pendingRead0, :current_write => currentWrite0} = connectionStates
+        %{pending_read: pendingRead0, current_write: currentWrite0} = connectionStates
       ) do
-    pendingRead = %{pendingRead0 | :server_verify_data => data}
-    currentWrite = %{currentWrite0 | :server_verify_data => data}
-    %{connectionStates | :pending_read => pendingRead, :current_write => currentWrite}
+    pendingRead = Map.put(pendingRead0, :server_verify_data, data)
+    currentWrite = Map.put(currentWrite0, :server_verify_data, data)
+    Map.merge(connectionStates, %{pending_read: pendingRead, current_write: currentWrite})
   end
 
   def set_server_verify_data(
         :current_read,
         data,
-        %{:current_read => currentRead0, :pending_write => pendingWrite0} = connectionStates
+        %{current_read: currentRead0, pending_write: pendingWrite0} = connectionStates
       ) do
-    currentRead = %{currentRead0 | :server_verify_data => data}
-    pendingWrite = %{pendingWrite0 | :server_verify_data => data}
-    %{connectionStates | :current_read => currentRead, :pending_write => pendingWrite}
+    currentRead = Map.put(currentRead0, :server_verify_data, data)
+    pendingWrite = Map.put(pendingWrite0, :server_verify_data, data)
+    Map.merge(connectionStates, %{current_read: currentRead, pending_write: pendingWrite})
   end
 
   def set_server_verify_data(
         :current_both,
         data,
-        %{:current_read => currentRead0, :current_write => currentWrite0} = connectionStates
+        %{current_read: currentRead0, current_write: currentWrite0} = connectionStates
       ) do
-    currentRead = %{currentRead0 | :server_verify_data => data}
-    currentWrite = %{currentWrite0 | :server_verify_data => data}
-    %{connectionStates | :current_read => currentRead, :current_write => currentWrite}
+    currentRead = Map.put(currentRead0, :server_verify_data, data)
+    currentWrite = Map.put(currentWrite0, :server_verify_data, data)
+    Map.merge(connectionStates, %{current_read: currentRead, current_write: currentWrite})
   end
 
   def set_pending_cipher_state(
-        %{:pending_read => read, :pending_write => write} = states,
+        %{pending_read: read, pending_write: write} = states,
         clientState,
         serverState,
         :server
       ) do
-    %{
-      states
-      | :pending_read => %{read | :cipher_state => clientState},
-        :pending_write => %{write | :cipher_state => serverState}
-    }
+    Map.merge(states, %{
+      pending_read: Map.put(read, :cipher_state, clientState),
+      pending_write: Map.put(write, :cipher_state, serverState)
+    })
   end
 
   def set_pending_cipher_state(
-        %{:pending_read => read, :pending_write => write} = states,
+        %{pending_read: read, pending_write: write} = states,
         clientState,
         serverState,
         :client
       ) do
-    %{
-      states
-      | :pending_read => %{read | :cipher_state => serverState},
-        :pending_write => %{write | :cipher_state => clientState}
-    }
+    Map.merge(states, %{
+      pending_read: Map.put(read, :cipher_state, serverState),
+      pending_write: Map.put(write, :cipher_state, clientState)
+    })
   end
 
   def uncompress(0, data, cS) do
@@ -1648,15 +1646,15 @@ defmodule :m_ssl_record do
         version,
         fragment,
         %{
-          :cipher_state => cipherS0,
-          :security_parameters => r_security_parameters(bulk_cipher_algorithm: bulkCipherAlgo)
+          cipher_state: cipherS0,
+          security_parameters: r_security_parameters(bulk_cipher_algorithm: bulkCipherAlgo)
         } = writeState0,
         macHash
       ) do
     {cipherFragment, cipherS1} =
       :ssl_cipher.cipher(bulkCipherAlgo, cipherS0, macHash, fragment, version)
 
-    {cipherFragment, %{writeState0 | :cipher_state => cipherS1}}
+    {cipherFragment, Map.put(writeState0, :cipher_state, cipherS1)}
   end
 
   def cipher(
@@ -1673,13 +1671,13 @@ defmodule :m_ssl_record do
         _Version,
         fragment,
         %{
-          :cipher_state => cipherS0,
-          :security_parameters => r_security_parameters(bulk_cipher_algorithm: bulkCipherAlgo)
+          cipher_state: cipherS0,
+          security_parameters: r_security_parameters(bulk_cipher_algorithm: bulkCipherAlgo)
         } = writeState0,
         aAD
       ) do
     {cipherFragment, cipherS1} = do_cipher_aead(bulkCipherAlgo, fragment, cipherS0, aAD)
-    {cipherFragment, %{writeState0 | :cipher_state => cipherS1}}
+    {cipherFragment, Map.put(writeState0, :cipher_state, cipherS1)}
   end
 
   def cipher_aead(
@@ -1696,12 +1694,12 @@ defmodule :m_ssl_record do
         version,
         cipherFragment,
         %{
-          :security_parameters =>
+          security_parameters:
             r_security_parameters(
               bulk_cipher_algorithm: bulkCipherAlgo,
               hash_size: hashSz
             ),
-          :cipher_state => cipherS0
+          cipher_state: cipherS0
         } = readState,
         paddingCheck
       ) do
@@ -1714,7 +1712,7 @@ defmodule :m_ssl_record do
            paddingCheck
          ) do
       {plainFragment, mac, cipherS1} ->
-        cS1 = %{readState | :cipher_state => cipherS1}
+        cS1 = Map.put(readState, :cipher_state, cipherS1)
         {plainFragment, mac, cS1}
 
       r_alert() = alert ->
@@ -1738,9 +1736,9 @@ defmodule :m_ssl_record do
             level: 2,
             description: 20,
             where: %{
-              :mfa => {:ssl_record, :decipher_aead, 5},
-              :line => 430,
-              :file => 'otp/lib/ssl/src/ssl_record.erl'
+              mfa: {:ssl_record, :decipher_aead, 5},
+              line: 430,
+              file: 'otp/lib/ssl/src/ssl_record.erl'
             },
             reason: :decryption_failed
           )
@@ -1751,9 +1749,9 @@ defmodule :m_ssl_record do
           level: 2,
           description: 20,
           where: %{
-            :mfa => {:ssl_record, :decipher_aead, 5},
-            :line => 434,
-            :file => 'otp/lib/ssl/src/ssl_record.erl'
+            mfa: {:ssl_record, :decipher_aead, 5},
+            line: 434,
+            file: 'otp/lib/ssl/src/ssl_record.erl'
           },
           reason: :decryption_failed
         )
@@ -1772,15 +1770,15 @@ defmodule :m_ssl_record do
     secParams = empty_security_params(connectionEnd)
 
     %{
-      :security_parameters => secParams,
-      :beast_mitigation => beastMitigation,
-      :compression_state => :undefined,
-      :cipher_state => :undefined,
-      :mac_secret => :undefined,
-      :secure_renegotiation => :undefined,
-      :client_verify_data => :undefined,
-      :server_verify_data => :undefined,
-      :max_fragment_length => :undefined
+      security_parameters: secParams,
+      beast_mitigation: beastMitigation,
+      compression_state: :undefined,
+      cipher_state: :undefined,
+      mac_secret: :undefined,
+      secure_renegotiation: :undefined,
+      client_verify_data: :undefined,
+      server_verify_data: :undefined,
+      max_fragment_length: :undefined
     }
   end
 
@@ -1824,16 +1822,16 @@ defmodule :m_ssl_record do
 
   def initial_connection_state(connectionEnd, beastMitigation) do
     %{
-      :security_parameters => initial_security_params(connectionEnd),
-      :sequence_number => 0,
-      :beast_mitigation => beastMitigation,
-      :compression_state => :undefined,
-      :cipher_state => :undefined,
-      :mac_secret => :undefined,
-      :secure_renegotiation => :undefined,
-      :client_verify_data => :undefined,
-      :server_verify_data => :undefined,
-      :max_fragment_length => :undefined
+      security_parameters: initial_security_params(connectionEnd),
+      sequence_number: 0,
+      beast_mitigation: beastMitigation,
+      compression_state: :undefined,
+      cipher_state: :undefined,
+      mac_secret: :undefined,
+      secure_renegotiation: :undefined,
+      client_verify_data: :undefined,
+      server_verify_data: :undefined,
+      max_fragment_length: :undefined
     }
   end
 

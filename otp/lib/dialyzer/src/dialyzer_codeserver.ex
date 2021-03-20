@@ -140,7 +140,10 @@ defmodule :m_dialyzer_codeserver do
             :dialyzer_codeserver_temp_contracts,
             :dialyzer_codeserver_temp_callbacks
           ] do
-        :ets.new(name, tempOptions)
+        :ets.new(
+          name,
+          tempOptions
+        )
       end
 
     r_codeserver(
@@ -192,7 +195,7 @@ defmodule :m_dialyzer_codeserver do
     true =
       :ets.insert(
         r_codeserver(cS, :code),
-        [[modEntry, modFileEntry] | funs]
+        [modEntry, modFileEntry | funs]
       )
 
     cS

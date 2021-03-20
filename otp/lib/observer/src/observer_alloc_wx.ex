@@ -463,7 +463,7 @@ defmodule :m_observer_alloc_wx do
 
   def handle_call(:get_config, _, r_state(time: ti) = state) do
     r_ti(fetch: fetch, secs: range) = ti
-    {:reply, %{:fetch => fetch, :secs => range}, state}
+    {:reply, %{fetch: fetch, secs: range}, state}
   end
 
   def handle_call(event, from, _State) do
@@ -636,7 +636,7 @@ defmodule :m_observer_alloc_wx do
   defp calc_max({name, _, cs}, max0) do
     case :maps.get(name, max0, 0) do
       value when value < cs ->
-        %{max0 | name => cs}
+        Map.put(max0, name, cs)
 
       _V ->
         max0

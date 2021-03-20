@@ -644,19 +644,16 @@ defmodule :m_gen_server do
               true ->
                 :erlang.apply(:logger, :macro_log, [
                   %{
-                    :mfa => {:gen_server, :try_dispatch, 4},
-                    :line => 687,
-                    :file => 'otp/lib/stdlib/src/gen_server.erl'
+                    mfa: {:gen_server, :try_dispatch, 4},
+                    line: 687,
+                    file: 'otp/lib/stdlib/src/gen_server.erl'
                   },
                   :warning,
-                  %{:label => {:gen_server, :no_handle_info}, :module => mod, :message => msg},
+                  %{label: {:gen_server, :no_handle_info}, module: mod, message: msg},
                   %{
-                    :domain => [:otp],
-                    :report_cb => &:gen_server.format_log/2,
-                    :error_logger => %{
-                      :tag => :warning_msg,
-                      :report_cb => &:gen_server.format_log/1
-                    }
+                    domain: [:otp],
+                    report_cb: &:gen_server.format_log/2,
+                    error_logger: %{tag: :warning_msg, report_cb: &:gen_server.format_log/1}
                   }
                 ])
 
@@ -1088,24 +1085,24 @@ defmodule :m_gen_server do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:gen_server, :error_info, 7},
-            :line => 934,
-            :file => 'otp/lib/stdlib/src/gen_server.erl'
+            mfa: {:gen_server, :error_info, 7},
+            line: 934,
+            file: 'otp/lib/stdlib/src/gen_server.erl'
           },
           :error,
           %{
-            :label => {:gen_server, :terminate},
-            :name => name,
-            :last_message => msg,
-            :state => format_status(:terminate, mod, :erlang.get(), state),
-            :log => format_log_state(mod, log),
-            :reason => reason,
-            :client_info => client_stacktrace(from)
+            label: {:gen_server, :terminate},
+            name: name,
+            last_message: msg,
+            state: format_status(:terminate, mod, :erlang.get(), state),
+            log: format_log_state(mod, log),
+            reason: reason,
+            client_info: client_stacktrace(from)
           },
           %{
-            :domain => [:otp],
-            :report_cb => &:gen_server.format_log/2,
-            :error_logger => %{:tag => :error, :report_cb => &:gen_server.format_log/1}
+            domain: [:otp],
+            report_cb: &:gen_server.format_log/2,
+            error_logger: %{tag: :error, report_cb: &:gen_server.format_log/1}
           }
         ])
 
@@ -1148,13 +1145,7 @@ defmodule :m_gen_server do
 
   def format_log(report) do
     depth = :error_logger.get_format_depth()
-
-    formatOpts = %{
-      :chars_limit => :unlimited,
-      :depth => depth,
-      :single_line => false,
-      :encoding => :utf8
-    }
+    formatOpts = %{chars_limit: :unlimited, depth: depth, single_line: false, encoding: :utf8}
 
     format_log_multi(
       limit_report(report, depth),
@@ -1168,33 +1159,32 @@ defmodule :m_gen_server do
 
   defp limit_report(
          %{
-           :label => {:gen_server, :terminate},
-           :last_message => msg,
-           :state => state,
-           :log => log,
-           :reason => reason,
-           :client_info => client
+           label: {:gen_server, :terminate},
+           last_message: msg,
+           state: state,
+           log: log,
+           reason: reason,
+           client_info: client
          } = report,
          depth
        ) do
-    %{
-      report
-      | :last_message => :io_lib.limit_term(msg, depth),
-        :state => :io_lib.limit_term(state, depth),
-        :log =>
-          for l <- log do
-            :io_lib.limit_term(l, depth)
-          end,
-        :reason => :io_lib.limit_term(reason, depth),
-        :client_info => limit_client_report(client, depth)
-    }
+    Map.merge(report, %{
+      last_message: :io_lib.limit_term(msg, depth),
+      state: :io_lib.limit_term(state, depth),
+      log:
+        for l <- log do
+          :io_lib.limit_term(l, depth)
+        end,
+      reason: :io_lib.limit_term(reason, depth),
+      client_info: limit_client_report(client, depth)
+    })
   end
 
   defp limit_report(
-         %{:label => {:gen_server, :no_handle_info}, :message => msg} = report,
+         %{label: {:gen_server, :no_handle_info}, message: msg} = report,
          depth
        ) do
-    %{report | :message => :io_lib.limit_term(msg, depth)}
+    Map.put(report, :message, :io_lib.limit_term(msg, depth))
   end
 
   defp limit_client_report({from, {name, stacktrace}}, depth) do
@@ -1206,21 +1196,15 @@ defmodule :m_gen_server do
   end
 
   def format_log(report, formatOpts0) do
-    default = %{
-      :chars_limit => :unlimited,
-      :depth => :unlimited,
-      :single_line => false,
-      :encoding => :utf8
-    }
-
+    default = %{chars_limit: :unlimited, depth: :unlimited, single_line: false, encoding: :utf8}
     formatOpts = :maps.merge(default, formatOpts0)
 
     ioOpts =
       case formatOpts do
-        %{:chars_limit => :unlimited} ->
+        %{chars_limit: :unlimited} ->
           []
 
-        %{:chars_limit => limit} ->
+        %{chars_limit: limit} ->
           [{:chars_limit, limit}]
       end
 
@@ -1230,15 +1214,15 @@ defmodule :m_gen_server do
 
   defp format_log_single(
          %{
-           :label => {:gen_server, :terminate},
-           :name => name,
-           :last_message => msg,
-           :state => state,
-           :log => log,
-           :reason => reason,
-           :client_info => client
+           label: {:gen_server, :terminate},
+           name: name,
+           last_message: msg,
+           state: state,
+           log: log,
+           reason: reason,
+           client_info: client
          },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
 
@@ -1280,8 +1264,8 @@ defmodule :m_gen_server do
   end
 
   defp format_log_single(
-         %{:label => {:gen_server, :no_handle_info}, :module => mod, :message => msg},
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{label: {:gen_server, :no_handle_info}, module: mod, message: msg},
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = :lists.append(['Undefined handle_info in ', p, '. Unhandled message: ', p, '.'])
@@ -1304,15 +1288,15 @@ defmodule :m_gen_server do
 
   defp format_log_multi(
          %{
-           :label => {:gen_server, :terminate},
-           :name => name,
-           :last_message => msg,
-           :state => state,
-           :log => log,
-           :reason => reason,
-           :client_info => client
+           label: {:gen_server, :terminate},
+           name: name,
+           last_message: msg,
+           state: state,
+           log: log,
+           reason: reason,
+           client_info: client
          },
-         %{:depth => depth} = formatOpts
+         %{depth: depth} = formatOpts
        ) do
     reason1 = fix_reason(reason)
 
@@ -1387,8 +1371,8 @@ defmodule :m_gen_server do
   end
 
   defp format_log_multi(
-         %{:label => {:gen_server, :no_handle_info}, :module => mod, :message => msg},
-         %{:depth => depth} = formatOpts
+         %{label: {:gen_server, :no_handle_info}, module: mod, message: msg},
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = '** Undefined handle_info in ~p~n** Unhandled message: ' ++ p ++ '~n'
@@ -1498,7 +1482,7 @@ defmodule :m_gen_server do
     {format, args}
   end
 
-  defp p(%{:single_line => single, :depth => depth, :encoding => enc}) do
+  defp p(%{single_line: single, depth: depth, encoding: enc}) do
     '~' ++ single(single) ++ mod(enc) ++ p(depth)
   end
 
@@ -1543,11 +1527,17 @@ defmodule :m_gen_server do
       end
 
     [
-      [
-        {:header, header},
-        {:data,
-         [{'Status', sysState}, {'Parent', parent}, {'Logged events', format_log_state(mod, log)}]}
-      ]
+      {:header, header},
+      {:data,
+       [
+         {'Status', sysState},
+         {'Parent', parent},
+         {'Logged events',
+          format_log_state(
+            mod,
+            log
+          )}
+       ]}
       | specific
     ]
   end

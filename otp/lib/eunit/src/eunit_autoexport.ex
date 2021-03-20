@@ -135,7 +135,8 @@ defmodule :m_eunit_autoexport do
       end
 
     [
-      [m, {:attribute, :erl_anno.new(0), :export, es}]
+      m,
+      {:attribute, :erl_anno.new(0), :export, es}
       | :lists.reverse(fs1)
     ]
   end

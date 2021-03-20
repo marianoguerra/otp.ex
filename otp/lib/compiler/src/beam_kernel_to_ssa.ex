@@ -239,7 +239,7 @@ defmodule :m_beam_kernel_to_ssa do
       {as, st1} = new_ssa_vars(as0, st0)
       {asm, st} = cg_fun(kb, st1)
       anno1 = line_anno(anno0)
-      anno = %{anno1 | :func_info => {mod, name, arity}}
+      anno = Map.put(anno1, :func_info, {mod, name, arity})
       r_b_function(anno: anno, args: as, bs: asm, cnt: r_cg(st, :lcount))
     catch
       class, error ->
@@ -343,7 +343,7 @@ defmodule :m_beam_kernel_to_ssa do
        ) do
     {tf, st1} = new_label(st0)
     {b, st2} = new_label(st1)
-    labels = %{labels0 | label => tf}
+    labels = Map.put(labels0, label, tf)
 
     {fis, st3} =
       cg(
@@ -474,7 +474,7 @@ defmodule :m_beam_kernel_to_ssa do
     {bool, st} = new_ssa_var(:"@ssa_bool", st0)
     succeeded = r_b_set(op: {:succeeded, :guard}, dst: bool, args: [dst])
     br = r_b_br(bool: bool, succ: succ, fail: fail)
-    {[[succeeded, br] | sis], st}
+    {[succeeded, br | sis], st}
   end
 
   defp select_val_cg(:k_tuple, tuple, vls, tf, vf, sis, st0) do
@@ -518,7 +518,7 @@ defmodule :m_beam_kernel_to_ssa do
     {:bif, :is_float}
   end
 
-  defp combine([[{is, vs1}, {is, vs2}] | vis]) do
+  defp combine([{is, vs1}, {is, vs2} | vis]) do
     combine([{is, vs1 ++ vs2} | vis])
   end
 
@@ -588,8 +588,19 @@ defmodule :m_beam_kernel_to_ssa do
     {testIs, st} = make_succeeded(ctx, {:guard, tf}, st2)
 
     bis1 =
-      [r_b_set(op: :bs_start_match, dst: ctx, args: [r_b_literal(val: :new), ssa_arg(src, st)])] ++
-        testIs ++ bis0
+      [
+        r_b_set(
+          op: :bs_start_match,
+          dst: ctx,
+          args: [
+            r_b_literal(val: :new),
+            ssa_arg(
+              src,
+              st
+            )
+          ]
+        )
+      ] ++ testIs ++ bis0
 
     bis = finish_bs_matching(bis1)
     {bis, st}
@@ -714,18 +725,31 @@ defmodule :m_beam_kernel_to_ssa do
     is =
       case mis ++ bis do
         [
-          [
-            r_b_set(
-              op: :bs_match,
-              args: [r_b_literal(val: :string), otherCtx1, bin1]
-            ),
-            r_b_set(op: {:succeeded, :guard}, dst: bool1),
-            r_b_br(bool: bool1, succ: succ, fail: ^fail),
-            {:label, succ},
-            r_b_set(op: :bs_match, dst: dst, args: [r_b_literal(val: :string), _OtherCtx2, bin2])
-          ]
+          r_b_set(
+            op: :bs_match,
+            args: [r_b_literal(val: :string), otherCtx1, bin1]
+          ),
+          r_b_set(op: {:succeeded, :guard}, dst: bool1),
+          r_b_br(
+            bool: bool1,
+            succ: succ,
+            fail: ^fail
+          ),
+          {:label, succ},
+          r_b_set(
+            op: :bs_match,
+            dst: dst,
+            args: [r_b_literal(val: :string), _OtherCtx2, bin2]
+          )
           | [
-              [r_b_set(op: {:succeeded, :guard}, dst: bool2), r_b_br(bool: bool2, fail: ^fail)]
+              r_b_set(
+                op: {:succeeded, :guard},
+                dst: bool2
+              ),
+              r_b_br(
+                bool: bool2,
+                fail: ^fail
+              )
               | _
             ] = is0
         ] ->
@@ -1163,7 +1187,10 @@ defmodule :m_beam_kernel_to_ssa do
     is3 = [
       r_cg_break(args: [r_b_literal(val: true)], phi: phi),
       {:label, false__},
-      r_cg_break(args: [r_b_literal(val: false)], phi: phi),
+      r_cg_break(
+        args: [r_b_literal(val: false)],
+        phi: phi
+      ),
       {:label, phi},
       r_cg_phi(vars: [dst])
     ]
@@ -1240,8 +1267,14 @@ defmodule :m_beam_kernel_to_ssa do
         args = [r_b_literal(val: :try), tryTag]
 
         handler =
-          [{:label, h}, r_b_set(op: :landingpad, dst: catchedAgg, args: args)] ++
-            extractVs ++ [killTryTag]
+          [
+            {:label, h},
+            r_b_set(
+              op: :landingpad,
+              dst: catchedAgg,
+              args: args
+            )
+          ] ++ extractVs ++ [killTryTag]
 
         {[
            r_b_set(op: :new_try_tag, dst: tryTag, args: [r_b_literal(val: :try)]),
@@ -1317,8 +1350,14 @@ defmodule :m_beam_kernel_to_ssa do
     args = [r_b_literal(val: :try), tryTag]
 
     handler =
-      [{:label, h}, r_b_set(op: :landingpad, dst: catchedAgg, args: args)] ++
-        extractVs ++ [killTryTag]
+      [
+        {:label, h},
+        r_b_set(
+          op: :landingpad,
+          dst: catchedAgg,
+          args: args
+        )
+      ] ++ extractVs ++ [killTryTag]
 
     {[
        r_b_set(op: :new_try_tag, dst: tryTag, args: [r_b_literal(val: :try)]),
@@ -1365,15 +1404,33 @@ defmodule :m_beam_kernel_to_ssa do
        cis ++
        [
          {:label, h},
-         r_b_set(op: :landingpad, dst: catchedAgg, args: args),
-         r_b_set(op: :extract, dst: catchedVal, args: [catchedAgg, r_b_literal(val: 0)]),
-         r_cg_break(args: [catchedVal], phi: b),
+         r_b_set(
+           op: :landingpad,
+           dst: catchedAgg,
+           args: args
+         ),
+         r_b_set(
+           op: :extract,
+           dst: catchedVal,
+           args: [catchedAgg, r_b_literal(val: 0)]
+         ),
+         r_cg_break(
+           args: [catchedVal],
+           phi: b
+         ),
          {:label, succ},
          r_cg_phi(vars: [succVal]),
-         r_cg_break(args: [succVal], phi: b),
+         r_cg_break(
+           args: [succVal],
+           phi: b
+         ),
          {:label, b},
          r_cg_phi(vars: [catchEndVal]),
-         r_b_set(op: :catch_end, dst: dst, args: [catchReg, catchEndVal])
+         r_b_set(
+           op: :catch_end,
+           dst: dst,
+           args: [catchReg, catchEndVal]
+         )
        ],
      r_cg(st,
        break: r_cg(st1, :break),
@@ -1444,7 +1501,7 @@ defmodule :m_beam_kernel_to_ssa do
   end
 
   defp put_cg_map(lineAnno, op, srcMap, dst, list, st0) do
-    args = [[r_b_literal(val: op), srcMap] | list]
+    args = [r_b_literal(val: op), srcMap | list]
     putMap = r_b_set(anno: lineAnno, op: :put_map, dst: dst, args: args)
 
     cond do
@@ -1465,12 +1522,9 @@ defmodule :m_beam_kernel_to_ssa do
 
     case putCode0 do
       [
-        [
-          r_b_set(op: :bs_put, dst: bool, args: [[_, _, src, r_b_literal(val: :all)] | _]),
-          r_b_br(bool: bool),
-          {:label, _}
-        ]
-        | _
+        r_b_set(op: :bs_put, dst: bool, args: [_, _, src, r_b_literal(val: :all) | _]),
+        r_b_br(bool: bool),
+        {:label, _} | _
       ] ->
         r_k_bin_seg(unit: unit0, next: segs) = segs0
         unit = r_b_literal(val: unit0)
@@ -1710,7 +1764,8 @@ defmodule :m_beam_kernel_to_ssa do
 
     sizes =
       sort([
-        [{1, r_b_literal(val: remBits)}, {8, r_b_literal(val: bytes)}]
+        {1, r_b_literal(val: remBits)},
+        {8, r_b_literal(val: bytes)}
         | acc
       ])
 
@@ -1745,12 +1800,12 @@ defmodule :m_beam_kernel_to_ssa do
   end
 
   defp new_succeeded_value(varBase, var, r_cg(vars: vars0) = st) do
-    vars = %{vars0 | varBase => {:succeeded, var}}
+    vars = Map.put(vars0, varBase, {:succeeded, var})
     r_cg(st, vars: vars)
   end
 
   defp new_bool_value(varBase, var, r_cg(vars: vars0) = st) do
-    vars = %{vars0 | varBase => {:bool, var}}
+    vars = Map.put(vars0, varBase, {:bool, var})
     r_cg(st, vars: vars)
   end
 
@@ -1773,14 +1828,14 @@ defmodule :m_beam_kernel_to_ssa do
         st =
           r_cg(st0,
             lcount: uniq + 1,
-            vars: %{vars | varBase => var}
+            vars: Map.put(vars, varBase, var)
           )
 
         {var, st}
 
       %{} ->
         var = r_b_var(name: varBase)
-        st = r_cg(st0, vars: %{vars | varBase => var})
+        st = r_cg(st0, vars: Map.put(vars, varBase, var))
         {var, st}
     end
   end
@@ -1797,7 +1852,7 @@ defmodule :m_beam_kernel_to_ssa do
 
   defp set_ssa_var(varBase, val, r_cg(vars: vars) = st)
        when is_atom(varBase) or is_integer(varBase) do
-    r_cg(st, vars: %{vars | varBase => val})
+    r_cg(st, vars: Map.put(vars, varBase, val))
   end
 
   defp new_label(r_cg(lcount: next) = st) do
@@ -1826,7 +1881,7 @@ defmodule :m_beam_kernel_to_ssa do
   end
 
   defp line_anno_1(name, line) do
-    %{:location => {name, line}}
+    %{location: {name, line}}
   end
 
   defp find_loc([line | t], file, _) when is_integer(line) do
@@ -1865,7 +1920,7 @@ defmodule :m_beam_kernel_to_ssa do
     fix_phis_1(is, :none, %{})
   end
 
-  defp fix_phis_1([[{:label, lbl}, r_cg_phi(vars: vars)] | is0], _Lbl, map0) do
+  defp fix_phis_1([{:label, lbl}, r_cg_phi(vars: vars) | is0], _Lbl, map0) do
     case map0 do
       %{^lbl => pairs} ->
         phis = gen_phis(vars, pairs)
@@ -1906,7 +1961,7 @@ defmodule :m_beam_kernel_to_ssa do
     ]
 
     i = make_uncond_branch(target)
-    [i | fix_phis_1(is, :none, %{map | target => pairs})]
+    [i | fix_phis_1(is, :none, Map.put(map, target, pairs))]
   end
 
   defp fix_phis_1([i | is], lbl, map) do
@@ -1946,7 +2001,8 @@ defmodule :m_beam_kernel_to_ssa do
 
   defp fix_sets(
          [
-           [r_b_set(op: op, dst: dst) = set, r_b_ret(arg: dst) = ret]
+           r_b_set(op: op, dst: dst) = set,
+           r_b_ret(arg: dst) = ret
            | is
          ],
          acc,
@@ -1966,10 +2022,10 @@ defmodule :m_beam_kernel_to_ssa do
 
     case noValue do
       true ->
-        fix_sets(is, [[r_b_ret(ret, arg: r_b_literal(val: :ok)), set] | acc], st)
+        fix_sets(is, [r_b_ret(ret, arg: r_b_literal(val: :ok)), set | acc], st)
 
       false ->
-        fix_sets(is, [[ret, set] | acc], st)
+        fix_sets(is, [ret, set | acc], st)
     end
   end
 

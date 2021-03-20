@@ -134,7 +134,7 @@ defmodule :m_xmerl_sax_simple_dom do
           {1, [1]}
 
         [n | cNs] ->
-          {n, [[1, n + 1] | cNs]}
+          {n, [1, n + 1 | cNs]}
       end
 
     r_xmerl_sax_simple_dom_state(state,
@@ -156,7 +156,8 @@ defmodule :m_xmerl_sax_simple_dom do
            tags: [_ | t],
            cno: [_ | cN],
            dom: [
-             [{cName, cAttributes, cContent}, {pName, pAttributes, pContent}]
+             {cName, cAttributes, cContent},
+             {pName, pAttributes, pContent}
              | d
            ]
          ) = state

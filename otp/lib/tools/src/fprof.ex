@@ -105,7 +105,8 @@ defmodule :m_fprof do
         receive do
           {^parent, ^ref, :start_trace} ->
             case trace([
-                   [:start, {:procs, [parent | procs]}]
+                   :start,
+                   {:procs, [parent | procs]}
                    | options
                  ]) do
               :ok ->
@@ -195,7 +196,8 @@ defmodule :m_fprof do
         receive do
           {^parent, ^ref, :start_trace} ->
             case trace([
-                   [:start, {:procs, [parent | procs]}]
+                   :start,
+                   {:procs, [parent | procs]}
                    | options
                  ]) do
               :ok ->
@@ -2093,7 +2095,7 @@ defmodule :m_fprof do
       [[{:garbage_collect, _} | _] | _] ->
         throw({:inconsistent_trace_data, :fprof, 1804, [pid, func, tS, cP, stack]})
 
-      [[[{^cP, _} | _], [{^cP, _} | _]] | _] ->
+      [[{^cP, _} | _], [{^cP, _} | _] | _] ->
         init_log(table, proc, func)
 
         :erlang.put(
@@ -2109,7 +2111,7 @@ defmodule :m_fprof do
           trace_call_push(table, pid, func, tS, stack)
         )
 
-      [[_, [{^cP, _} | _]] | _] ->
+      [_, [{^cP, _} | _] | _] ->
         init_log(table, proc, func)
 
         :erlang.put(
@@ -2118,7 +2120,9 @@ defmodule :m_fprof do
         )
 
       [
-        [[{func0, _} | _], [{func0, _} | _], [{^cP, _} | _]]
+        [{func0, _} | _],
+        [{func0, _} | _],
+        [{^cP, _} | _]
         | _
       ] ->
         init_log(table, proc, func)
@@ -2473,7 +2477,7 @@ defmodule :m_fprof do
       [[{:suspend, _}] | [[{:suspend, _}] | _] = newStack] ->
         :erlang.put(pid, newStack)
 
-      [[[{:suspend, _}], [{func1, _} | _]] | _] ->
+      [[{:suspend, _}], [{func1, _} | _] | _] ->
         :erlang.put(
           pid,
           trace_return_to_int(table, pid, func1, tS, stack)
@@ -2511,7 +2515,7 @@ defmodule :m_fprof do
           trace_return_to_int(table, pid, :undefined, tS, stack)
         )
 
-      [[[{:garbage_collect, _}], [{func1, _} | _]] | _] ->
+      [[{:garbage_collect, _}], [{func1, _} | _] | _] ->
         :erlang.put(
           pid,
           trace_return_to_int(table, pid, func1, tS, stack)
@@ -2576,7 +2580,7 @@ defmodule :m_fprof do
     init_log(table, proc, entry)
   end
 
-  defp trace_clock(_Table, _Pid, _T, [[[{:suspend, _}], [{:suspend, _}]] | _] = _Stack, _Clock) do
+  defp trace_clock(_Table, _Pid, _T, [[{:suspend, _}], [{:suspend, _}] | _] = _Stack, _Clock) do
     dbg(9, 'trace_clock(Table, ~w, ~w, ~w, ~w)~n', [_Pid, _T, _Stack, _Clock])
     :ok
   end
@@ -2590,7 +2594,12 @@ defmodule :m_fprof do
          pid,
          t,
          [
-           [[{:garbage_collect, tS0}], [{:suspend, _}], [{func2, _} | _]]
+           [{:garbage_collect, tS0}],
+           [{:suspend, _}],
+           [
+             {func2, _}
+             | _
+           ]
            | _
          ],
          clock
@@ -2598,11 +2607,11 @@ defmodule :m_fprof do
     trace_clock_1(table, pid, t, tS0, func2, :garbage_collect, clock)
   end
 
-  defp trace_clock(table, pid, t, [[[{func0, tS0}, {func1, _}] | _] | _], clock) do
+  defp trace_clock(table, pid, t, [[{func0, tS0}, {func1, _} | _] | _], clock) do
     trace_clock_1(table, pid, t, tS0, func1, func0, clock)
   end
 
-  defp trace_clock(table, pid, t, [[[{func0, tS0}], [{func1, _} | _]] | _], clock) do
+  defp trace_clock(table, pid, t, [[{func0, tS0}], [{func1, _} | _] | _], clock) do
     trace_clock_1(table, pid, t, tS0, func1, func0, clock)
   end
 
@@ -3121,8 +3130,16 @@ defmodule :m_fprof do
         pad(?\s, ' CNT ', w2),
         pad(?\s, ' ACC ', w3),
         pad(?\s, ' OWN', w4 - 1),
-        pad(tail, ?\s, 4),
-        pad(?\s, comment, 4),
+        pad(
+          tail,
+          ?\s,
+          4
+        ),
+        pad(
+          ?\s,
+          comment,
+          4
+        ),
         :io_lib.nl()
       ]
     )

@@ -754,7 +754,7 @@ defmodule :m_xref_compiler do
         e = function_vertices_to_family(type, oType, {:constants, s})
         {:expr, type, oType, e}
 
-      [[{type1, [c1 | _]}, {type2, [c2 | _]}] | _] ->
+      [{type1, [c1 | _]}, {type2, [c2 | _]} | _] ->
         throw_error({:type_mismatch, make_vertex(type1, c1), make_vertex(type2, c2)})
     end
   end
@@ -810,7 +810,7 @@ defmodule :m_xref_compiler do
   end
 
   defp constant_vertices([{:constant, _Type, :edge, {a, b}} | cs], l) do
-    constant_vertices(cs, [[a, b] | l])
+    constant_vertices(cs, [a, b | l])
   end
 
   defp constant_vertices([{:constant, _Type, :vertex, v} | cs], l) do
@@ -1352,7 +1352,7 @@ defmodule :m_xref_compiler do
         insert_unput(is, d, [i | l])
 
       :error ->
-        insert_unput(is, :dict.store(v, [], d), [[i, {:unput, v}] | l])
+        insert_unput(is, :dict.store(v, [], d), [i, {:unput, v} | l])
     end
   end
 

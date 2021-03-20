@@ -1320,7 +1320,7 @@ defmodule :m_ssl_config do
     premaster_secret: :undefined,
     server_psk_identity: :undefined,
     cookie_iv_shard: :undefined,
-    ocsp_stapling_state: %{:ocsp_stapling => false, :ocsp_expect => :no_staple}
+    ocsp_stapling_state: %{ocsp_stapling: false, ocsp_expect: :no_staple}
   )
 
   Record.defrecord(:r_connection_env, :connection_env,
@@ -1353,20 +1353,20 @@ defmodule :m_ssl_config do
 
   def init(
         %{
-          :erl_dist => erlDist,
-          :key => key,
-          :keyfile => keyFile,
-          :password => password,
-          :dh => dH,
-          :dhfile => dHFile
+          erl_dist: erlDist,
+          key: key,
+          keyfile: keyFile,
+          password: password,
+          dh: dH,
+          dhfile: dHFile
         } = sslOpts,
         role
       ) do
     init_manager_name(erlDist)
-    {:ok, %{:pem_cache => pemCache} = config} = init_certificates(sslOpts, role)
+    {:ok, %{pem_cache: pemCache} = config} = init_certificates(sslOpts, role)
     privateKey = init_private_key(pemCache, key, keyFile, password, role)
     dHParams = init_diffie_hellman(pemCache, dH, dHFile, role)
-    {:ok, %{config | :private_key => privateKey, :dh_params => dHParams}}
+    {:ok, Map.merge(config, %{private_key: privateKey, dh_params: dHParams})}
   end
 
   defp init_manager_name(false) do
@@ -1385,11 +1385,11 @@ defmodule :m_ssl_config do
 
   defp init_certificates(
          %{
-           :cacerts => caCerts,
-           :cacertfile => cACertFile,
-           :certfile => certFile,
-           :cert => cert,
-           :crl_cache => cRLCache
+           cacerts: caCerts,
+           cacertfile: cACertFile,
+           certfile: certFile,
+           cert: cert,
+           crl_cache: cRLCache
          },
          role
        ) do
@@ -1414,10 +1414,10 @@ defmodule :m_ssl_config do
   end
 
   defp init_certificates(:undefined, config, <<>>, _) do
-    {:ok, %{config | :own_certificate => :undefined}}
+    {:ok, Map.put(config, :own_certificate, :undefined)}
   end
 
-  defp init_certificates(:undefined, %{:pem_cache => pemCache} = config, certFile, :client) do
+  defp init_certificates(:undefined, %{pem_cache: pemCache} = config, certFile, :client) do
     try do
       [
         ownCert
@@ -1428,14 +1428,14 @@ defmodule :m_ssl_config do
           pemCache
         )
 
-      {:ok, %{config | :own_certificate => ownCert}}
+      {:ok, Map.put(config, :own_certificate, ownCert)}
     catch
       _Error, _Reason ->
-        {:ok, %{config | :own_certificate => :undefined}}
+        {:ok, Map.put(config, :own_certificate, :undefined)}
     end
   end
 
-  defp init_certificates(:undefined, %{:pem_cache => pemCache} = config, certFile, :server) do
+  defp init_certificates(:undefined, %{pem_cache: pemCache} = config, certFile, :server) do
     try do
       [
         ownCert
@@ -1446,7 +1446,7 @@ defmodule :m_ssl_config do
           pemCache
         )
 
-      {:ok, %{config | :own_certificate => ownCert}}
+      {:ok, Map.put(config, :own_certificate, ownCert)}
     catch
       _, reason ->
         file_error(certFile, {:certfile, reason})
@@ -1454,10 +1454,10 @@ defmodule :m_ssl_config do
   end
 
   defp init_certificates(cert, config, _, _) do
-    {:ok, %{config | :own_certificate => cert}}
+    {:ok, Map.put(config, :own_certificate, cert)}
   end
 
-  defp init_private_key(_, %{:algorithm => alg} = key, _, _Password, _Client)
+  defp init_private_key(_, %{algorithm: alg} = key, _, _Password, _Client)
        when alg == :ecdsa or alg == :rsa or alg == :dss do
     case :maps.is_key(
            :engine,

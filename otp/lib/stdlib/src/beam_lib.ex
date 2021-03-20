@@ -423,7 +423,8 @@ defmodule :m_beam_lib do
     size = byte_size(data)
 
     chunk = [
-      [<<bId::binary, size::size(32)>>, data]
+      <<bId::binary, size::size(32)>>,
+      data
       | pad(size)
     ]
 
@@ -517,7 +518,7 @@ defmodule :m_beam_lib do
          <<important::size(20)-binary, _OldUniq::size(4)-binary, t::binary>>,
          zero
        ) do
-    [[important, zero] | filter_funtab_1(t, zero)]
+    [important, zero | filter_funtab_1(t, zero)]
   end
 
   defp filter_funtab_1(tail, _) when is_binary(tail) do
@@ -577,14 +578,16 @@ defmodule :m_beam_lib do
   end
 
   defp check_chunks([:atoms | ids], file, iL, l, o) do
-    check_chunks(ids, file, [['Atom', 'AtU8'] | iL], [{:atom_chunk, :atoms} | l], [
-      ['Atom', 'AtU8'] | o
+    check_chunks(ids, file, ['Atom', 'AtU8' | iL], [{:atom_chunk, :atoms} | l], [
+      'Atom',
+      'AtU8' | o
     ])
   end
 
   defp check_chunks([:abstract_code | ids], file, iL, l, o) do
-    check_chunks(ids, file, [['Abst', 'Dbgi'] | iL], [{:abst_chunk, :abstract_code} | l], [
-      ['Abst', 'Dbgi'] | o
+    check_chunks(ids, file, ['Abst', 'Dbgi' | iL], [{:abst_chunk, :abstract_code} | l], [
+      'Abst',
+      'Dbgi' | o
     ])
   end
 

@@ -2124,7 +2124,7 @@ defmodule :m_xmerl_xsd do
       {[], _S} ->
         s
 
-      {[[_, []] | _], _S} ->
+      {[_, [] | _], _S} ->
         s
 
       {_CM, s2} ->
@@ -2140,7 +2140,7 @@ defmodule :m_xmerl_xsd do
       {:ok, []} ->
         {[], s}
 
-      {:ok, [[s4SCMRest, cMRest] | _]} ->
+      {:ok, [s4SCMRest, cMRest | _]} ->
         case all_optional(s4SCMRest) do
           true ->
             {cMRest, s}
@@ -2161,7 +2161,7 @@ defmodule :m_xmerl_xsd do
       {:ok, []} ->
         {[], s}
 
-      {:ok, [[_, cMRest] | _]} ->
+      {:ok, [_, cMRest | _]} ->
         {cMRest, s}
 
       {:error, reason} ->
@@ -2174,7 +2174,7 @@ defmodule :m_xmerl_xsd do
       {:ok, []} ->
         {[], s}
 
-      {:ok, [[_, cMRest] | _]} ->
+      {:ok, [_, cMRest | _]} ->
         {cMRest, s}
 
       {:error, reason} ->
@@ -2282,7 +2282,7 @@ defmodule :m_xmerl_xsd do
     {:error, {[], :xmerl_xsd, {:no_match, kind}}}
   end
 
-  defp occurance_loop({min, max}, _CheckFun, [[_, []] | _Rest], n)
+  defp occurance_loop({min, max}, _CheckFun, [_, [] | _Rest], n)
        when min <= n and max >= n do
     {:ok, []}
   end
@@ -3528,7 +3528,7 @@ defmodule :m_xmerl_xsd do
   end
 
   defp mixify2([h | t], acc) do
-    mixify2(t, [[:optional_text, h] | acc])
+    mixify2(t, [:optional_text, h | acc])
   end
 
   defp complexity([]) do
@@ -4414,7 +4414,7 @@ defmodule :m_xmerl_xsd do
                   [], _Fun ->
                     []
 
-                  [[sLNS, sLLoc] | rest], fun ->
+                  [sLNS, sLLoc | rest], fun ->
                     [{sLNS, sLLoc} | fun.(rest, fun)]
                 end
 
@@ -5733,7 +5733,7 @@ defmodule :m_xmerl_xsd do
   end
 
   defp mk_name([h], acc) do
-    :erlang.list_to_atom(:lists.concat([[h, :_] | acc]))
+    :erlang.list_to_atom(:lists.concat([h, :_ | acc]))
   end
 
   defp mk_name([h | t], []) do
@@ -5741,7 +5741,7 @@ defmodule :m_xmerl_xsd do
   end
 
   defp mk_name([h1 | t], acc) do
-    mk_name(t, [[h1, :_] | acc])
+    mk_name(t, [h1, :_ | acc])
   end
 
   defp cmp_name({lName, scope, nS}, {lName, scope, nS}, _S) do
@@ -5884,8 +5884,8 @@ defmodule :m_xmerl_xsd do
 
   defp mk_xpath_path(nodes) do
     slash = fn
-      [[h1, h2] | t], fun, acc ->
-        fun.([h2 | t], fun, [['/', h1] | acc])
+      [h1, h2 | t], fun, acc ->
+        fun.([h2 | t], fun, ['/', h1 | acc])
 
       [h1], _, acc ->
         [h1 | acc]

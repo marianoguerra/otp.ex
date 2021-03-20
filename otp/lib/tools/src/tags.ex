@@ -295,8 +295,8 @@ defmodule :m_tags do
     {[?' | acc], rest}
   end
 
-  defp quoted([[?\\, c] | rest], acc) do
-    quoted(rest, [[c, ?\\] | acc])
+  defp quoted([?\\, c | rest], acc) do
+    quoted(rest, [c, ?\\ | acc])
   end
 
   defp quoted([c | rest], acc) do

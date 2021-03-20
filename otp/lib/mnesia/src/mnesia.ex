@@ -1182,7 +1182,7 @@ defmodule :m_mnesia do
             [^key] ->
               :"$end_of_table"
 
-            [[^key, next2] | _] ->
+            [^key, next2 | _] ->
               next2
           end
       end
@@ -4271,13 +4271,11 @@ defmodule :m_mnesia do
 
     qlcOptions =
       [
-        [
-          {:pre_fun, pre},
-          {:post_fun, post},
-          {:info_fun, info},
-          {:parent_fun, parentFun},
-          {:format_fun, mFA}
-        ]
+        {:pre_fun, pre},
+        {:post_fun, post},
+        {:info_fun, info},
+        {:parent_fun, parentFun},
+        {:format_fun, mFA}
         | lookup
       ] ++ qlcOptions0
 
@@ -4443,18 +4441,12 @@ defmodule :m_mnesia do
   end
 
   defp qlc_format(:all, tab, nObjects, lock, opts) do
-    {:mnesia, :table, [tab, [[{:n_objects, nObjects}, {:lock, lock}] | opts]]}
+    {:mnesia, :table, [tab, [{:n_objects, nObjects}, {:lock, lock} | opts]]}
   end
 
   defp qlc_format({:match_spec, ms}, tab, nObjects, lock, opts) do
     {:mnesia, :table,
-     [
-       tab,
-       [
-         [{:traverse, {:select, ms}}, {:n_objects, nObjects}, {:lock, lock}]
-         | opts
-       ]
-     ]}
+     [tab, [{:traverse, {:select, ms}}, {:n_objects, nObjects}, {:lock, lock} | opts]]}
   end
 
   defp qlc_format({:lookup, 2, keys}, tab, _, lock, _) do

@@ -11,7 +11,7 @@ defmodule :m_kernel_refc do
 
   def init([]) do
     resource(:scheduler_wall_time, false)
-    {:ok, %{:scheduler_wall_time => %{}}}
+    {:ok, %{scheduler_wall_time: %{}}}
   end
 
   def handle_call({what, who, false}, _From, state) do
@@ -59,15 +59,15 @@ defmodule :m_kernel_refc do
 
         case any(cnt) do
           true ->
-            {true, %{cnt | pid => {1, ref}}}
+            {true, Map.put(cnt, pid, {1, ref})}
 
           false ->
             resource(resource, true)
-            {false, %{cnt | pid => {1, ref}}}
+            {false, Map.put(cnt, pid, {1, ref})}
         end
 
       {n, ref} ->
-        {true, %{cnt | pid => {n + 1, ref}}}
+        {true, Map.put(cnt, pid, {n + 1, ref})}
     end
   end
 
@@ -90,7 +90,7 @@ defmodule :m_kernel_refc do
         end
 
       {n, ref} ->
-        {true, %{cnt0 | pid => {n - 1, ref}}}
+        {true, Map.put(cnt0, pid, {n - 1, ref})}
     end
   end
 

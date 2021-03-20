@@ -456,7 +456,7 @@ defmodule :m_io do
           [op, _Enc] ->
             {maybeConvert, op}
 
-          [[op, _Enc] | t] ->
+          [op, _Enc | t] ->
             req = :erlang.list_to_tuple([op | t])
             {maybeConvert, req}
         end

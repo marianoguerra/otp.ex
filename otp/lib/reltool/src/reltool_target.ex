@@ -401,7 +401,10 @@ defmodule :m_reltool_target do
           []
       end,
       for m <- mods do
-        do_gen_config(m, inclDefs)
+        do_gen_config(
+          m,
+          inclDefs
+        )
       end
     ]
 
@@ -540,18 +543,16 @@ defmodule :m_reltool_target do
 
     {:application, name,
      [
-       [
-         {:description, desc},
-         {:vsn, vsn},
-         {:id, id},
-         {:modules, mods},
-         {:registered, regs},
-         {:applications, reqApps},
-         {:included_applications, inclApps},
-         {:env, env},
-         {:maxT, maxT},
-         {:maxP, maxP}
-       ]
+       {:description, desc},
+       {:vsn, vsn},
+       {:id, id},
+       {:modules, mods},
+       {:registered, regs},
+       {:applications, reqApps},
+       {:included_applications, inclApps},
+       {:env, env},
+       {:maxT, maxT},
+       {:maxP, maxP}
        | tail
      ]}
   end
@@ -785,25 +786,52 @@ defmodule :m_reltool_target do
     deepList = [
       {:preLoaded, :lists.sort(preloaded)},
       {:progress, :preloaded},
-      {:path, create_mandatory_path(mergedApps, pathFlag, variables)},
+      {:path,
+       create_mandatory_path(
+         mergedApps,
+         pathFlag,
+         variables
+       )},
       {:primLoad, :lists.sort(mandatory)},
       {:kernel_load_completed},
       {:progress, :kernel_load_completed},
       for a <- mergedApps do
-        load_app_mods(a, early, pathFlag, variables)
+        load_app_mods(
+          a,
+          early,
+          pathFlag,
+          variables
+        )
       end,
       {:progress, :modules_loaded},
-      {:path, create_path(mergedApps, pathFlag, variables)},
+      {:path,
+       create_path(
+         mergedApps,
+         pathFlag,
+         variables
+       )},
       kernel_processes(gen_app(kernelApp)),
       {:progress, :init_kernel_started},
-      for a = r_app(name: name, app_type: type) <- mergedApps, name !== :kernel, type !== :none do
+      for a =
+            r_app(
+              name: name,
+              app_type: type
+            ) <- mergedApps,
+          name !== :kernel,
+          type !== :none do
         {:apply, {:application, :load, [gen_app(a)]}}
       end,
       {:progress, :applications_loaded},
-      for r_app(name: name, app_type: type) <- mergedApps,
+      for r_app(
+            name: name,
+            app_type: type
+          ) <- mergedApps,
           type !== :none,
           type !== :load,
-          not :lists.member(name, inclApps) do
+          not :lists.member(
+            name,
+            inclApps
+          ) do
         {:apply, {:application, :start_boot, [name, type]}}
       end,
       case loadErlangRc do
@@ -1062,10 +1090,10 @@ defmodule :m_reltool_target do
     fullName = name ++ '-' ++ vsn
 
     case :lists.reverse(dir) do
-      [['ebin', ^name] | d] ->
+      ['ebin', ^name | d] ->
         {:ok, :lists.reverse(d)}
 
-      [['ebin', ^fullName] | d] ->
+      ['ebin', ^fullName | d] ->
         {:ok, :lists.reverse(d)}
 
       [^name | d] ->
@@ -2077,7 +2105,7 @@ defmodule :m_reltool_target do
            :unicode.characters_to_list(bin),
            ' \n'
          ) do
-      [[erlVsn, relVsn] | _] ->
+      [erlVsn, relVsn | _] ->
         ertsBinDir = :filename.join([targetDir2, 'erts-' ++ erlVsn, 'bin'])
         binDir = :filename.join([targetDir2, 'bin'])
 
@@ -2131,7 +2159,7 @@ defmodule :m_reltool_target do
   end
 
   defp escape_backslash([?\\ | t]) do
-    [[?\\, ?\\] | escape_backslash(t)]
+    [?\\, ?\\ | escape_backslash(t)]
   end
 
   defp escape_backslash([h | t]) do
@@ -2182,17 +2210,19 @@ defmodule :m_reltool_target do
     subst(str, vars, [])
   end
 
-  defp subst([[?%, c] | rest], vars, result)
-       when ?A <= c and c <= ?Z do
+  defp subst([?%, c | rest], vars, result)
+       when ?A <= c and
+              c <= ?Z do
     subst_var([c | rest], vars, result, [])
   end
 
-  defp subst([[?%, c] | rest], vars, result)
-       when ?a <= c and c <= ?z do
+  defp subst([?%, c | rest], vars, result)
+       when ?a <= c and
+              c <= ?z do
     subst_var([c | rest], vars, result, [])
   end
 
-  defp subst([[?%, c] | rest], vars, result) when c == ?_ do
+  defp subst([?%, c | rest], vars, result) when c == ?_ do
     subst_var([c | rest], vars, result, [])
   end
 

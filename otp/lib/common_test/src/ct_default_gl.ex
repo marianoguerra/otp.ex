@@ -34,9 +34,7 @@ defmodule :m_ct_default_gl do
   def init([parentGL]) do
     :erlang.register(:ct_default_gl, self())
     :ct_util.mark_process()
-
-    {:ok,
-     %{:parent_gl_pid => parentGL, :parent_gl_monitor => :erlang.monitor(:process, parentGL)}}
+    {:ok, %{parent_gl_pid: parentGL, parent_gl_monitor: :erlang.monitor(:process, parentGL)}}
   end
 
   def handle_cast(:stop, st) do
@@ -45,17 +43,17 @@ defmodule :m_ct_default_gl do
 
   def handle_info(
         {:DOWN, ref, :process, _, _Reason},
-        %{:parent_gl_monitor => ref} = st
+        %{parent_gl_monitor: ref} = st
       ) do
     user = :erlang.whereis(:user)
 
     {:noreply,
-     %{st | :parent_gl_pid => user, :parent_gl_monitor => :erlang.monitor(:process, user)}}
+     Map.merge(st, %{parent_gl_pid: user, parent_gl_monitor: :erlang.monitor(:process, user)})}
   end
 
   def handle_info(
         {:io_request, _From, _ReplyAs, _Req} = ioReq,
-        %{:parent_gl_pid => parentGL} = st
+        %{parent_gl_pid: parentGL} = st
       ) do
     send(parentGL, ioReq)
     {:noreply, st}

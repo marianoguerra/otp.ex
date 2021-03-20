@@ -1075,7 +1075,7 @@ defmodule :m_inet_tls_dist do
     :dist_util.is_node_name(node)
   end
 
-  defp hs_data_common(r_sslsocket(pid: [[_, distCtrl] | _]) = sslSocket) do
+  defp hs_data_common(r_sslsocket(pid: [_, distCtrl | _]) = sslSocket) do
     r_hs_data(
       f_send: fn _Ctrl, packet ->
         f_send(sslSocket, packet)
@@ -1256,9 +1256,9 @@ defmodule :m_inet_tls_dist do
               true ->
                 apply(:logger, :macro_log, [
                   %{
-                    :mfa => {:inet_tls_dist, :accept_loop, 3},
-                    :line => 237,
-                    :file => 'otp/lib/ssl/src/inet_tls_dist.erl'
+                    mfa: {:inet_tls_dist, :accept_loop, 3},
+                    line: 237,
+                    file: 'otp/lib/ssl/src/inet_tls_dist.erl'
                   },
                   :error,
                   '** Connection attempt from disallowed IP ~w ** ~n',
@@ -1288,10 +1288,10 @@ defmodule :m_inet_tls_dist do
 
     case :ssl.handshake(
            socket,
-           trace([[{:active, false}, {:packet, 4}] | opts]),
+           trace([{:active, false}, {:packet, 4} | opts]),
            :net_kernel.connecttime()
          ) do
-      {:ok, r_sslsocket(pid: [[_, distCtrl] | _]) = sslSocket} ->
+      {:ok, r_sslsocket(pid: [_, distCtrl | _]) = sslSocket} ->
         trace(send(kernel, {:accept, self(), distCtrl, driver.family(), :tls}))
 
         receive do
@@ -1310,9 +1310,9 @@ defmodule :m_inet_tls_dist do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:inet_tls_dist, :accept_loop, 4},
-                :line => 272,
-                :file => 'otp/lib/ssl/src/inet_tls_dist.erl'
+                mfa: {:inet_tls_dist, :accept_loop, 4},
+                line: 272,
+                file: 'otp/lib/ssl/src/inet_tls_dist.erl'
               },
               :error,
               'Cannot accept TLS distribution connection: ~s~n',
@@ -1502,9 +1502,9 @@ defmodule :m_inet_tls_dist do
                   true ->
                     apply(:logger, :macro_log, [
                       %{
-                        :mfa => {:inet_tls_dist, :allowed_nodes, 2},
-                        :line => 448,
-                        :file => 'otp/lib/ssl/src/inet_tls_dist.erl'
+                        mfa: {:inet_tls_dist, :allowed_nodes, 2},
+                        line: 448,
+                        file: 'otp/lib/ssl/src/inet_tls_dist.erl'
                       },
                       :error,
                       '** Connection attempt from disallowed node(s) ~p ** ~n',
@@ -1655,7 +1655,7 @@ defmodule :m_inet_tls_dist do
            [:binary, {:active, false}, {:packet, 4}, driver.family(), {:nodelay, true}] ++ opts,
            :net_kernel.connecttime()
          ) do
-      {:ok, r_sslsocket(pid: [[_, distCtrl] | _]) = sslSocket} ->
+      {:ok, r_sslsocket(pid: [_, distCtrl | _]) = sslSocket} ->
         _ = monitor_pid(distCtrl)
         :ok = :ssl.controlling_process(sslSocket, self())
         hSData0 = hs_data_common(sslSocket)
@@ -1867,9 +1867,9 @@ defmodule :m_inet_tls_dist do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:inet_tls_dist, :split_node, 3},
-                :line => 707,
-                :file => 'otp/lib/ssl/src/inet_tls_dist.erl'
+                mfa: {:inet_tls_dist, :split_node, 3},
+                line: 707,
+                file: 'otp/lib/ssl/src/inet_tls_dist.erl'
               },
               :error,
               '** Nodename ~p illegal, no \'@\' character **~n',
@@ -1887,9 +1887,9 @@ defmodule :m_inet_tls_dist do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:inet_tls_dist, :split_node, 3},
-                :line => 712,
-                :file => 'otp/lib/ssl/src/inet_tls_dist.erl'
+                mfa: {:inet_tls_dist, :split_node, 3},
+                line: 712,
+                file: 'otp/lib/ssl/src/inet_tls_dist.erl'
               },
               :error,
               '** Nodename ~p illegal **~n',
@@ -1916,9 +1916,9 @@ defmodule :m_inet_tls_dist do
               true ->
                 apply(:logger, :macro_log, [
                   %{
-                    :mfa => {:inet_tls_dist, :check_node, 5},
-                    :line => 724,
-                    :file => 'otp/lib/ssl/src/inet_tls_dist.erl'
+                    mfa: {:inet_tls_dist, :check_node, 5},
+                    line: 724,
+                    file: 'otp/lib/ssl/src/inet_tls_dist.erl'
                   },
                   :error,
                   '** System running to use fully qualified hostnames **~n** Hostname ~s is illegal **~n',
@@ -1932,14 +1932,14 @@ defmodule :m_inet_tls_dist do
             :dist_util.shutdown(:inet_tls_dist, 729, node, trace({:not_longnames, host}))
         end
 
-      [[_, _] | _] when longOrShortNames === :shortnames ->
+      [_, _ | _] when longOrShortNames === :shortnames ->
         case :logger.allow(:error, :inet_tls_dist) do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:inet_tls_dist, :check_node, 5},
-                :line => 732,
-                :file => 'otp/lib/ssl/src/inet_tls_dist.erl'
+                mfa: {:inet_tls_dist, :check_node, 5},
+                line: 732,
+                file: 'otp/lib/ssl/src/inet_tls_dist.erl'
               },
               :error,
               '** System NOT running to use fully qualified hostnames **~n** Hostname ~s is illegal **~n',
@@ -1994,7 +1994,7 @@ defmodule :m_inet_tls_dist do
         get_ssl_dist_arguments(type)
     else
       [{^type, opts}] ->
-        [[{:erl_dist, true}, {:versions, [:"tlsv1.2"]}] | opts]
+        [{:erl_dist, true}, {:versions, [:"tlsv1.2"]} | opts]
 
       _ ->
         get_ssl_dist_arguments(type)
@@ -2005,7 +2005,8 @@ defmodule :m_inet_tls_dist do
     case :init.get_argument(:ssl_dist_opt) do
       {:ok, args} ->
         [
-          [{:erl_dist, true}, {:versions, [:"tlsv1.2"]}]
+          {:erl_dist, true},
+          {:versions, [:"tlsv1.2"]}
           | ssl_options(type, :lists.append(args))
         ]
 
@@ -2018,15 +2019,15 @@ defmodule :m_inet_tls_dist do
     []
   end
 
-  defp ssl_options(:client, [['client_' ++ opt, value] | t] = opts) do
+  defp ssl_options(:client, ['client_' ++ opt, value | t] = opts) do
     ssl_options(:client, t, opts, opt, value)
   end
 
-  defp ssl_options(:server, [['server_' ++ opt, value] | t] = opts) do
+  defp ssl_options(:server, ['server_' ++ opt, value | t] = opts) do
     ssl_options(:server, t, opts, opt, value)
   end
 
-  defp ssl_options(type, [[_Opt, _Value] | t]) do
+  defp ssl_options(type, [_Opt, _Value | t]) do
     ssl_options(type, t)
   end
 

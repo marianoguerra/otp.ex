@@ -85,7 +85,7 @@ defmodule :m_erl_recomment do
             [n1 | nodes]
 
           true ->
-            [[n, n1] | ns]
+            [n, n1 | ns]
         end
 
       insert === true ->
@@ -172,7 +172,7 @@ defmodule :m_erl_recomment do
         case tree_node_type(f) do
           :attribute ->
             case node_subtrees(f) do
-              [[l1, l2] | _] ->
+              [l1, l2 | _] ->
                 check_file_attr_1(l1, l2)
 
               _ ->
@@ -214,7 +214,7 @@ defmodule :m_erl_recomment do
 
   defp check_file_attr_2(l) do
     case node_subtrees(l) do
-      [[n1, n2] | _] ->
+      [n1, n2 | _] ->
         t1 = :erl_syntax.concrete(revert_tree(n1))
         t2 = :erl_syntax.concrete(revert_tree(n2))
         {true, t1, t2}

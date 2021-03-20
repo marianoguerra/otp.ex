@@ -441,7 +441,7 @@ defmodule :m_dbg_wx_win do
   end
 
   def update_break(break, options) do
-    [[status, trigger] | _] = options
+    [status, trigger | _] = options
 
     label =
       case status do

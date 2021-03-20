@@ -265,7 +265,7 @@ defmodule :m_io_lib do
   end
 
   defp write_tail([h | t], d, e) do
-    [[?,, write1(h, d - 1, e)] | write_tail(t, d - 1, e)]
+    [?,, write1(h, d - 1, e) | write_tail(t, d - 1, e)]
   end
 
   defp write_tail(other, d, e) do
@@ -282,7 +282,8 @@ defmodule :m_io_lib do
 
   defp write_tuple(t, i, d, e) do
     [
-      [?,, write1(:erlang.element(i, t), d - 1, e)]
+      ?,,
+      write1(:erlang.element(i, t), d - 1, e)
       | write_tuple(t, i + 1, d - 1, e)
     ]
   end
@@ -321,7 +322,7 @@ defmodule :m_io_lib do
     case :maps.next(i) do
       {k, v, nextI} ->
         w = write_map_assoc(k, v, d0, e)
-        [[?,, w] | write_map_body(nextI, d - 1, d0, e)]
+        [?,, w | write_map_body(nextI, d - 1, d0, e)]
 
       :none ->
         ''
@@ -356,17 +357,13 @@ defmodule :m_io_lib do
 
   defp write_binary_body(<<x::size(8), rest::bitstring>>, d, t, acc) do
     s = :erlang.integer_to_list(x)
-    write_binary_body(rest, d - 1, tsub(t, length(s) + 1), [[?,, s] | acc])
+    write_binary_body(rest, d - 1, tsub(t, length(s) + 1), [?,, s | acc])
   end
 
   defp write_binary_body(b, _D, _T, acc) do
     l = bit_size(b)
     <<x::size(l)>> = b
-
-    {[
-       [:erlang.integer_to_list(l), ?:, :erlang.integer_to_list(x)]
-       | acc
-     ], <<>>}
+    {[:erlang.integer_to_list(l), ?:, :erlang.integer_to_list(x) | acc], <<>>}
   end
 
   defp tsub(t, _) when t < 0 do
@@ -468,11 +465,11 @@ defmodule :m_io_lib do
   end
 
   defp string_char(_, q, q, tail) do
-    [[?\\, q] | tail]
+    [?\\, q | tail]
   end
 
   defp string_char(_, ?\\, _, tail) do
-    [[?\\, ?\\] | tail]
+    [?\\, ?\\ | tail]
   end
 
   defp string_char(_, c, _, tail) when c >= ?\s and c <= ?~ do
@@ -500,42 +497,42 @@ defmodule :m_io_lib do
   end
 
   defp string_char(_, ?\n, _, tail) do
-    [[?\\, ?n] | tail]
+    [?\\, ?n | tail]
   end
 
   defp string_char(_, ?\r, _, tail) do
-    [[?\\, ?r] | tail]
+    [?\\, ?r | tail]
   end
 
   defp string_char(_, ?\t, _, tail) do
-    [[?\\, ?t] | tail]
+    [?\\, ?t | tail]
   end
 
   defp string_char(_, ?\v, _, tail) do
-    [[?\\, ?v] | tail]
+    [?\\, ?v | tail]
   end
 
   defp string_char(_, ?\b, _, tail) do
-    [[?\\, ?b] | tail]
+    [?\\, ?b | tail]
   end
 
   defp string_char(_, ?\f, _, tail) do
-    [[?\\, ?f] | tail]
+    [?\\, ?f | tail]
   end
 
   defp string_char(_, ?\e, _, tail) do
-    [[?\\, ?e] | tail]
+    [?\\, ?e | tail]
   end
 
   defp string_char(_, ?\d, _, tail) do
-    [[?\\, ?d] | tail]
+    [?\\, ?d | tail]
   end
 
   defp string_char(_, c, _, tail) when c < 160 do
     c1 = c >>> (6 + ?0)
     c2 = c >>> 3 &&& 7 + ?0
     c3 = c &&& 7 + ?0
-    [[?\\, c1, c2, c3] | tail]
+    [?\\, c1, c2, c3 | tail]
   end
 
   def write_char(?\s) do
@@ -974,7 +971,7 @@ defmodule :m_io_lib do
   defp collect_line_bin(<<?\r>>, data0, stack, _) do
     n = byte_size(data0) - 1
     <<data::size(n)-binary, _::binary>> = data0
-    [[<<?\r>>, data] | stack]
+    [<<?\r>>, data | stack]
   end
 
   defp collect_line_bin(<<_, t::binary>>, data, stack, enc) do
@@ -1022,7 +1019,7 @@ defmodule :m_io_lib do
           data
       end
 
-    case apply(mod, func, [[cont, chars] | xtraArgs]) do
+    case apply(mod, func, [cont, chars | xtraArgs]) do
       {:done, result, buf} ->
         {:stop,
          cond do

@@ -280,7 +280,7 @@ defmodule :m_beam_ssa_type do
     [_ | callArgs] = args
     {i, state} = sig_local_call(i1, callee, callArgs, ts0, fdb, state0)
     ts = update_types(i, ts0, ds0)
-    ds = %{ds0 | dst => i}
+    ds = Map.put(ds0, dst, i)
     sig_is(is, ts, ds, ls, fdb, sub, state)
   end
 
@@ -310,7 +310,7 @@ defmodule :m_beam_ssa_type do
       end
 
     ts = update_types(i, ts0, ds0)
-    ds = %{ds0 | dst => i}
+    ds = Map.put(ds0, dst, i)
     sig_is(is, ts, ds, ls, fdb, sub, state)
   end
 
@@ -332,7 +332,7 @@ defmodule :m_beam_ssa_type do
     i1 = :beam_ssa.normalize(r_b_set(i0, args: args))
     {i, state} = sig_make_fun(i1, ts0, fdb, state0)
     ts = update_types(i, ts0, ds0)
-    ds = %{ds0 | dst => i}
+    ds = Map.put(ds0, dst, i)
     sig_is(is, ts, ds, ls, fdb, sub0, state)
   end
 
@@ -418,7 +418,7 @@ defmodule :m_beam_ssa_type do
   defp init_sig_args([root | roots], stMap, acc) do
     r_opt_st(args: args0) = :erlang.map_get(root, stMap)
     argTypes = :lists.duplicate(length(args0), :any)
-    init_sig_args(roots, stMap, %{acc | root => argTypes})
+    init_sig_args(roots, stMap, Map.put(acc, root, argTypes))
   end
 
   defp init_sig_args([], _StMap, acc) do
@@ -430,7 +430,7 @@ defmodule :m_beam_ssa_type do
          r_sig_st(updates: us, committed: committed0) = state0
        ) do
     types = :erlang.map_get(id, us)
-    committed = %{committed0 | id => types}
+    committed = Map.put(committed0, id, types)
     state = r_sig_st(state0, committed: committed)
     {types, state}
   end
@@ -455,10 +455,10 @@ defmodule :m_beam_ssa_type do
     us =
       case us0 do
         %{^callee => current} ->
-          %{us0 | callee => parallel_join(current, types)}
+          Map.put(us0, callee, parallel_join(current, types))
 
         %{} ->
-          %{us0 | callee => types}
+          Map.put(us0, callee, types)
       end
 
     r_sig_st(state, updates: us, wl: wl_add(callee, wl0))
@@ -501,7 +501,7 @@ defmodule :m_beam_ssa_type do
 
   defp join_arg_types([arg | args], [typeMap | tMs], ts) do
     type = :beam_types.join(:maps.values(typeMap))
-    join_arg_types(args, tMs, %{ts | arg => type})
+    join_arg_types(args, tMs, Map.put(ts, arg, type))
   end
 
   defp join_arg_types([], [], ts) do
@@ -539,7 +539,7 @@ defmodule :m_beam_ssa_type do
   end
 
   defp get_func_id(anno) do
-    %{:func_info => {_Mod, name, arity}} = anno
+    %{func_info: {_Mod, name, arity}} = anno
     r_b_local(name: r_b_literal(val: name), arity: arity)
   end
 
@@ -592,7 +592,7 @@ defmodule :m_beam_ssa_type do
     [_ | callArgs] = args
     {i, fdb} = opt_local_call(i1, callee, callArgs, dst, ts0, fdb0, meta)
     ts = update_types(i, ts0, ds0)
-    ds = %{ds0 | dst => i}
+    ds = Map.put(ds0, dst, i)
     opt_is(is, ts, ds, ls, fdb, sub, meta, [i | acc])
   end
 
@@ -623,7 +623,7 @@ defmodule :m_beam_ssa_type do
       end
 
     ts = update_types(i, ts0, ds0)
-    ds = %{ds0 | dst => i}
+    ds = Map.put(ds0, dst, i)
     opt_is(is, ts, ds, ls, fdb, sub, meta, [i | acc])
   end
 
@@ -646,7 +646,7 @@ defmodule :m_beam_ssa_type do
     i1 = :beam_ssa.normalize(r_b_set(i0, args: args))
     {i, fdb} = opt_make_fun(i1, ts0, fdb0, meta)
     ts = update_types(i, ts0, ds0)
-    ds = %{ds0 | dst => i}
+    ds = Map.put(ds0, dst, i)
     opt_is(is, ts, ds, ls, fdb, sub0, meta, [i | acc])
   end
 
@@ -727,7 +727,7 @@ defmodule :m_beam_ssa_type do
   end
 
   defp update_arg_types([argType | argTypes], [typeMap0 | typeMaps], callId) do
-    typeMap = %{typeMap0 | callId => argType}
+    typeMap = Map.put(typeMap0, callId, argType)
     [typeMap | update_arg_types(argTypes, typeMaps, callId)]
   end
 
@@ -742,7 +742,7 @@ defmodule :m_beam_ssa_type do
       %{^id => r_func_info(exported: false, arg_types: argTypes)} ->
         paramInfo0 = :maps.get(:parameter_info, anno, %{})
         paramInfo = opt_finish_1(args, argTypes, paramInfo0)
-        {%{anno | :parameter_info => paramInfo}, funcDb}
+        {Map.put(anno, :parameter_info, paramInfo), funcDb}
 
       %{} ->
         {anno, funcDb}
@@ -756,7 +756,7 @@ defmodule :m_beam_ssa_type do
 
       joinedType ->
         info = :maps.get(arg, acc0, [])
-        acc = %{acc0 | arg => [{:type, joinedType} | info]}
+        acc = Map.put(acc0, arg, [{:type, joinedType} | info])
         opt_finish_1(args, typeMaps, acc)
     end
   end
@@ -814,12 +814,12 @@ defmodule :m_beam_ssa_type do
     case phi_all_same(args) do
       true ->
         [{val, _} | _] = args
-        %{sub | dst => val}
+        Map.put(sub, dst, val)
 
       false ->
         i = r_b_set(i0, args: args)
-        ts = %{ts0 | dst => type}
-        ds = %{ds0 | dst => i}
+        ts = Map.put(ts0, dst, type)
+        ds = Map.put(ds0, dst, i)
         {i, ts, ds}
     end
   end
@@ -840,17 +840,17 @@ defmodule :m_beam_ssa_type do
     case type do
       r_t_atom(elements: [true]) ->
         lit = r_b_literal(val: true)
-        %{sub | dst => lit}
+        Map.put(sub, dst, lit)
 
       r_t_atom(elements: [false]) when kind === :guard ->
         lit = r_b_literal(val: false)
-        %{sub | dst => lit}
+        Map.put(sub, dst, lit)
 
       _ ->
         true = :erlang.is_map_key(arg, ds0)
         i = :beam_ssa.normalize(i0)
-        ts = %{ts0 | dst => type}
-        ds = %{ds0 | dst => i}
+        ts = Map.put(ts0, dst, type)
+        ds = Map.put(ds0, dst, i)
         {i, ts, ds}
     end
   end
@@ -871,7 +871,7 @@ defmodule :m_beam_ssa_type do
     r_b_set() = i3 = simplify(i2, ts0)
     i = :beam_ssa.normalize(i3)
     ts = update_types(i, ts0, ds0)
-    ds = %{ds0 | dst => i}
+    ds = Map.put(ds0, dst, i)
     {i, ts, ds}
   end
 
@@ -883,14 +883,14 @@ defmodule :m_beam_ssa_type do
       r_b_set() = i2 ->
         i = :beam_ssa.normalize(i2)
         ts = update_types(i, ts0, ds0)
-        ds = %{ds0 | dst => i}
+        ds = Map.put(ds0, dst, i)
         {i, ts, ds}
 
       r_b_literal() = lit ->
-        %{sub | dst => lit}
+        Map.put(sub, dst, lit)
 
       r_b_var() = var ->
-        %{sub | dst => var}
+        Map.put(sub, dst, var)
     end
   end
 
@@ -2280,13 +2280,13 @@ defmodule :m_beam_ssa_type do
         %{ls | s => {:incoming, ts}}
 
       %{} ->
-        %{ls | s => {:incoming, ts0}}
+        Map.put(ls, s, {:incoming, ts0})
     end
   end
 
   defp update_types(r_b_set(op: op, dst: dst, anno: anno, args: args), ts, ds) do
     t = type(op, args, anno, ts, ds)
-    %{ts | dst => t}
+    Map.put(ts, dst, t)
   end
 
   defp type({:bif, bif}, args, _Anno, ts, _Ds) do
@@ -2334,7 +2334,7 @@ defmodule :m_beam_ssa_type do
   end
 
   defp type(:bs_match, args, _Anno, ts, _Ds) do
-    [[_, ctx] | _] = args
+    [_, ctx | _] = args
     r_t_bs_context(tail_unit: ctxUnit) = raw_type(ctx, ts)
     opUnit = bs_match_stride(args, ts)
     r_t_bs_context(tail_unit: gcd(opUnit, ctxUnit))
@@ -2363,7 +2363,7 @@ defmodule :m_beam_ssa_type do
 
   defp type(:call, [r_b_local() | _Args], anno, _Ts, _Ds) do
     case anno do
-      %{:result_type => type} ->
+      %{result_type: type} ->
         type
 
       %{} ->
@@ -2373,7 +2373,7 @@ defmodule :m_beam_ssa_type do
 
   defp type(:call, [r_b_var() | _Args], anno, _Ts, _Ds) do
     case anno do
-      %{:result_type => type} ->
+      %{result_type: type} ->
         type
 
       %{} ->
@@ -2448,7 +2448,7 @@ defmodule :m_beam_ssa_type do
               makeFun === :old_make_fun do
     retType =
       case anno do
-        %{:result_type => type} ->
+        %{result_type: type} ->
           type
 
         %{} ->
@@ -2458,7 +2458,7 @@ defmodule :m_beam_ssa_type do
     r_t_fun(arity: totalArity - length(env), type: retType)
   end
 
-  defp type(:put_map, [[_Kind, map] | ss], _Anno, ts, _Ds) do
+  defp type(:put_map, [_Kind, map | ss], _Anno, ts, _Ds) do
     put_map_type(map, ss, ts)
   end
 
@@ -2495,7 +2495,7 @@ defmodule :m_beam_ssa_type do
     pmt_1(ss, ts, normalized_type(map, ts))
   end
 
-  defp pmt_1([[key0, value0] | ss], ts, acc0) do
+  defp pmt_1([key0, value0 | ss], ts, acc0) do
     key = normalized_type(key0, ts)
     value = normalized_type(value0, ts)
     {acc, _, _} = :beam_call_types.types(:maps, :put, [key, value, acc0])
@@ -3027,7 +3027,7 @@ defmodule :m_beam_ssa_type do
         used_once_uses(vs, l, uses)
 
       %{} ->
-        used_once_uses(vs, l, %{uses | v => :more_than_once})
+        used_once_uses(vs, l, Map.put(uses, v, :more_than_once))
     end
   end
 
@@ -3044,7 +3044,7 @@ defmodule :m_beam_ssa_type do
         used_once_last_uses(vs, l, uses)
 
       %{} ->
-        used_once_last_uses(vs, l, %{uses | v => [l]})
+        used_once_last_uses(vs, l, Map.put(uses, v, [l]))
     end
   end
 
@@ -3074,7 +3074,7 @@ defmodule :m_beam_ssa_type do
   defp wl_add_1(element, counter0, es0, is0) do
     counter = counter0 + 1
     es = :gb_trees.insert(counter, element, es0)
-    is = %{is0 | element => counter}
+    is = Map.put(is0, element, counter)
     r_worklist(counter: counter, elements: es, indexes: is)
   end
 
@@ -3101,7 +3101,7 @@ defmodule :m_beam_ssa_type do
       %{} ->
         counter = counter0 + 1
         es = :gb_trees.insert(-counter, element, es0)
-        is = %{is0 | element => -counter}
+        is = Map.put(is0, element, -counter)
         wl_defer_list_1(elements, counter, es, is)
     end
   end

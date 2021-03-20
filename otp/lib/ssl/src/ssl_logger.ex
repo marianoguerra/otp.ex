@@ -1389,10 +1389,18 @@ defmodule :m_ssl_logger do
   def log(level, logLevel, reportMap, meta) do
     case :logger.compare_levels(logLevel, level) do
       :lt ->
-        :logger.log(level, reportMap, %{meta | :depth => 20, :report_cb => &:ssl_logger.format/1})
+        :logger.log(
+          level,
+          reportMap,
+          Map.merge(meta, %{depth: 20, report_cb: &:ssl_logger.format/1})
+        )
 
       :eq ->
-        :logger.log(level, reportMap, %{meta | :depth => 20, :report_cb => &:ssl_logger.format/1})
+        :logger.log(
+          level,
+          reportMap,
+          Map.merge(meta, %{depth: 20, report_cb: &:ssl_logger.format/1})
+        )
 
       _ ->
         :ok
@@ -1407,14 +1415,10 @@ defmodule :m_ssl_logger do
         case :logger.allow(:debug, :ssl_logger) do
           true ->
             apply(:logger, :macro_log, [
-              %{
-                :mfa => {:ssl_logger, :debug, 4},
-                :line => 65,
-                :file => 'otp/lib/ssl/src/ssl_logger.erl'
-              },
+              %{mfa: {:ssl_logger, :debug, 4}, line: 65, file: 'otp/lib/ssl/src/ssl_logger.erl'},
               :debug,
-              %{:direction => direction, :protocol => protocol, :message => message},
-              %{:domain => [:otp, :ssl, protocol]}
+              %{direction: direction, protocol: protocol, message: message},
+              %{domain: [:otp, :ssl, protocol]}
             ])
 
           false ->
@@ -1425,14 +1429,10 @@ defmodule :m_ssl_logger do
         case :logger.allow(:debug, :ssl_logger) do
           true ->
             apply(:logger, :macro_log, [
-              %{
-                :mfa => {:ssl_logger, :debug, 4},
-                :line => 70,
-                :file => 'otp/lib/ssl/src/ssl_logger.erl'
-              },
+              %{mfa: {:ssl_logger, :debug, 4}, line: 70, file: 'otp/lib/ssl/src/ssl_logger.erl'},
               :debug,
-              %{:direction => direction, :protocol => protocol, :message => message},
-              %{:domain => [:otp, :ssl, protocol]}
+              %{direction: direction, protocol: protocol, message: message},
+              %{domain: [:otp, :ssl, protocol]}
             ])
 
           false ->
@@ -1444,35 +1444,29 @@ defmodule :m_ssl_logger do
     end
   end
 
-  def format(%{:alert => alert, :alerter => :own} = report) do
-    %{:protocol => protocolName, :role => role, :alert => ^alert, :statename => stateName} =
-      report
-
+  def format(%{alert: alert, alerter: :own} = report) do
+    %{protocol: protocolName, role: role, alert: ^alert, statename: stateName} = report
     :ssl_alert.own_alert_format(protocolName, role, stateName, alert)
   end
 
-  def format(%{:alert => alert, :alerter => :peer} = report) do
-    %{:protocol => protocolName, :role => role, :alert => ^alert, :statename => stateName} =
-      report
-
+  def format(%{alert: alert, alerter: :peer} = report) do
+    %{protocol: protocolName, role: role, alert: ^alert, statename: stateName} = report
     :ssl_alert.alert_format(protocolName, role, stateName, alert)
   end
 
-  def format(%{:alert => alert, :alerter => :ignored} = report) do
-    %{:protocol => protocolName, :role => role, :alert => ^alert, :statename => stateName} =
-      report
-
+  def format(%{alert: alert, alerter: :ignored} = report) do
+    %{protocol: protocolName, role: role, alert: ^alert, statename: stateName} = report
     {fmt, args} = :ssl_alert.own_alert_format(protocolName, role, stateName, alert)
     {'~s ' ++ fmt, ['Ignored alert to mitigate DoS attacks', args]}
   end
 
-  def format(%{:description => desc} = report) do
-    %{:reason => reason} = report
+  def format(%{description: desc} = report) do
+    %{reason: reason} = report
     {'~s11:~p~n~s11:~p~n', ['Description', desc, 'Reason', reason]}
   end
 
-  def format(%{:msg => {:report, msg}}, _Config0) do
-    %{:direction => direction, :protocol => protocol, :message => content} = msg
+  def format(%{msg: {:report, msg}}, _Config0) do
+    %{direction: direction, protocol: protocol, message: content} = msg
 
     case protocol do
       :record ->
@@ -2201,23 +2195,21 @@ defmodule :m_ssl_logger do
 
   defp prepend_hex(a, b, acc) do
     [
-      [
-        ?\s,
-        cond do
-          b >= 0 and b <= 9 ->
-            b + ?0
+      ?\s,
+      cond do
+        b >= 0 and b <= 9 ->
+          b + ?0
 
-          b >= 10 and b <= 15 ->
-            b + ?a - 10
-        end,
-        cond do
-          a >= 0 and a <= 9 ->
-            a + ?0
+        b >= 10 and b <= 15 ->
+          b + ?a - 10
+      end,
+      cond do
+        a >= 0 and a <= 9 ->
+          a + ?0
 
-          a >= 10 and a <= 15 ->
-            a + ?a - 10
-        end
-      ]
+        a >= 10 and a <= 15 ->
+          a + ?a - 10
+      end
       | acc
     ]
   end
@@ -2228,24 +2220,22 @@ defmodule :m_ssl_logger do
 
   defp prepend_eighths_hex(a, b, acc) do
     [
-      [
-        ?\s,
-        ?\s,
-        cond do
-          b >= 0 and b <= 9 ->
-            b + ?0
+      ?\s,
+      ?\s,
+      cond do
+        b >= 0 and b <= 9 ->
+          b + ?0
 
-          b >= 10 and b <= 15 ->
-            b + ?a - 10
-        end,
-        cond do
-          a >= 0 and a <= 9 ->
-            a + ?0
+        b >= 10 and b <= 15 ->
+          b + ?a - 10
+      end,
+      cond do
+        a >= 0 and a <= 9 ->
+          a + ?0
 
-          a >= 10 and a <= 15 ->
-            a + ?a - 10
-        end
-      ]
+        a >= 10 and a <= 15 ->
+          a + ?a - 10
+      end
       | acc
     ]
   end

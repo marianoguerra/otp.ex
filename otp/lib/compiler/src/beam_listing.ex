@@ -345,7 +345,7 @@ defmodule :m_beam_listing do
   end
 
   defp format_asm([i | is]) do
-    [[:io_lib.format('    ~p', [i]), '.\n'] | format_asm(is)]
+    [:io_lib.format('    ~p', [i]), '.\n' | format_asm(is)]
   end
 
   defp format_asm([]) do

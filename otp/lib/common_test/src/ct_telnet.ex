@@ -1622,7 +1622,13 @@ defmodule :m_ct_telnet do
       rest,
       [?\n | lastLine] ++
         [
-          [?\s, ?\s, ?\s, ?\s, ?\s, ?\s, ?\s]
+          ?\s,
+          ?\s,
+          ?\s,
+          ?\s,
+          ?\s,
+          ?\s,
+          ?\s
           | acc
         ],
       []
@@ -1735,10 +1741,10 @@ defmodule :m_ct_telnet do
   defp split_prompt_string([ch | rest], _Start, end__, n, uptoPrompt, prompt)
        when n == end__ do
     case uptoPrompt do
-      [[?", ?=, ?T, ?P, ?M, ?O, ?R, ?P] | _] ->
+      [?", ?=, ?T, ?P, ?M, ?O, ?R, ?P | _] ->
         {:noprompt, [ch | prompt] ++ uptoPrompt, rest}
 
-      [[?\s, ?t, ?s, ?a] | _] when prompt == ':nigol' ->
+      [?\s, ?t, ?s, ?a | _] when prompt == ':nigol' ->
         {:noprompt, [ch | prompt] ++ uptoPrompt, rest}
 
       _ ->

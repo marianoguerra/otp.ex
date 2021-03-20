@@ -1321,7 +1321,7 @@ defmodule :m_dtls_connection do
     premaster_secret: :undefined,
     server_psk_identity: :undefined,
     cookie_iv_shard: :undefined,
-    ocsp_stapling_state: %{:ocsp_stapling => false, :ocsp_expect => :no_staple}
+    ocsp_stapling_state: %{ocsp_stapling: false, ocsp_expect: :no_staple}
   )
 
   Record.defrecord(:r_connection_env, :connection_env,
@@ -1408,7 +1408,7 @@ defmodule :m_dtls_connection do
         host,
         port,
         socket,
-        {%{:erl_dist => false}, _, tracker} = opts,
+        {%{erl_dist: false}, _, tracker} = opts,
         user,
         {cbModule, _, _, _, _} = cbInfo,
         timeout
@@ -1446,7 +1446,7 @@ defmodule :m_dtls_connection do
       :gen_statem.enter_loop(:dtls_connection, [], :init, state)
     catch
       error ->
-        eState = r_state(state0, protocol_specific: %{map | :error => error})
+        eState = r_state(state0, protocol_specific: Map.put(map, :error, error))
         :gen_statem.enter_loop(:dtls_connection, [], :error, eState)
     end
   end
@@ -1472,7 +1472,7 @@ defmodule :m_dtls_connection do
                  | rest
                ]
              ) = buffers,
-           connection_states: %{:current_read => %{:epoch => epoch}} = connectionStates
+           connection_states: %{current_read: %{epoch: epoch}} = connectionStates
          ) = state
        ) do
     currentRead =
@@ -1505,7 +1505,7 @@ defmodule :m_dtls_connection do
                  | rest
                ]
              ) = buffers,
-           connection_states: %{:current_read => %{:epoch => currentEpoch}} = connectionStates
+           connection_states: %{current_read: %{epoch: currentEpoch}} = connectionStates
          ) = state
        )
        when epoch > currentEpoch do
@@ -1552,7 +1552,7 @@ defmodule :m_dtls_connection do
 
   defp next_record(
          r_state(
-           protocol_specific: %{:active_n_toggle => true, :active_n => n} = protocolSpec,
+           protocol_specific: %{active_n_toggle: true, active_n: n} = protocolSpec,
            static_env:
              r_static_env(
                role: :client,
@@ -1565,7 +1565,7 @@ defmodule :m_dtls_connection do
     case :dtls_socket.setopts(transport, socket, [{:active, n}]) do
       :ok ->
         {:no_record,
-         r_state(state, protocol_specific: %{protocolSpec | :active_n_toggle => false})}
+         r_state(state, protocol_specific: Map.put(protocolSpec, :active_n_toggle, false))}
 
       _ ->
         send(self(), {closeTag, dTLSSocket})
@@ -1584,7 +1584,7 @@ defmodule :m_dtls_connection do
   def next_event(
         stateName,
         :no_record,
-        r_state(connection_states: %{:current_read => %{:epoch => currentEpoch}}) = state0,
+        r_state(connection_states: %{current_read: %{epoch: currentEpoch}}) = state0,
         actions
       ) do
     case next_record(state0) do
@@ -1639,7 +1639,7 @@ defmodule :m_dtls_connection do
   def next_event(
         :connection = stateName,
         record,
-        r_state(connection_states: %{:current_read => %{:epoch => currentEpoch}}) = state0,
+        r_state(connection_states: %{current_read: %{epoch: currentEpoch}}) = state0,
         actions
       ) do
     case record do
@@ -1687,7 +1687,7 @@ defmodule :m_dtls_connection do
   def next_event(
         stateName,
         record,
-        r_state(connection_states: %{:current_read => %{:epoch => currentEpoch}}) = state0,
+        r_state(connection_states: %{current_read: %{epoch: currentEpoch}}) = state0,
         actions
       ) do
     case record do
@@ -1804,7 +1804,7 @@ defmodule :m_dtls_connection do
         handshake,
         r_state(connection_states: connectionStates) = state
       ) do
-    %{:epoch => epoch} =
+    %{epoch: epoch} =
       :ssl_record.current_connection_state(
         connectionStates,
         :write
@@ -1822,9 +1822,8 @@ defmodule :m_dtls_connection do
           handshake_env: r_handshake_env(tls_handshake_history: hist0) = hsEnv,
           connection_env: r_connection_env(negotiated_version: version),
           flight_buffer:
-            %{:handshakes => hsBuffer0, :change_cipher_spec => :undefined, :next_sequence => seq} =
-              flight0,
-          ssl_options: %{:log_level => logLevel}
+            %{handshakes: hsBuffer0, change_cipher_spec: :undefined, next_sequence: seq} = flight0,
+          ssl_options: %{log_level: logLevel}
         ) = state
       ) do
     handshake = :dtls_handshake.encode_handshake(handshake0, version, seq)
@@ -1832,11 +1831,8 @@ defmodule :m_dtls_connection do
     :ssl_logger.debug(logLevel, :outbound, :handshake, handshake0)
 
     r_state(state,
-      flight_buffer: %{
-        flight0
-        | :handshakes => [handshake | hsBuffer0],
-          :next_sequence => seq + 1
-      },
+      flight_buffer:
+        Map.merge(flight0, %{handshakes: [handshake | hsBuffer0], next_sequence: seq + 1}),
       handshake_env: r_handshake_env(hsEnv, tls_handshake_history: hist)
     )
   end
@@ -1847,8 +1843,8 @@ defmodule :m_dtls_connection do
           handshake_env: r_handshake_env(tls_handshake_history: hist0) = hsEnv,
           connection_env: r_connection_env(negotiated_version: version),
           flight_buffer:
-            %{:handshakes_after_change_cipher_spec => buffer0, :next_sequence => seq} = flight0,
-          ssl_options: %{:log_level => logLevel}
+            %{handshakes_after_change_cipher_spec: buffer0, next_sequence: seq} = flight0,
+          ssl_options: %{log_level: logLevel}
         ) = state
       ) do
     handshake = :dtls_handshake.encode_handshake(handshake0, version, seq)
@@ -1856,11 +1852,11 @@ defmodule :m_dtls_connection do
     :ssl_logger.debug(logLevel, :outbound, :handshake, handshake0)
 
     r_state(state,
-      flight_buffer: %{
-        flight0
-        | :handshakes_after_change_cipher_spec => [handshake | buffer0],
-          :next_sequence => seq + 1
-      },
+      flight_buffer:
+        Map.merge(flight0, %{
+          handshakes_after_change_cipher_spec: [handshake | buffer0],
+          next_sequence: seq + 1
+        }),
       handshake_env: r_handshake_env(hsEnv, tls_handshake_history: hist)
     )
   end
@@ -1879,7 +1875,7 @@ defmodule :m_dtls_connection do
       )
 
     r_state(state,
-      flight_buffer: %{flight | :change_cipher_spec => changeCipher},
+      flight_buffer: Map.put(flight, :change_cipher_spec, changeCipher),
       connection_states: connectionStates
     )
   end
@@ -1903,7 +1899,7 @@ defmodule :m_dtls_connection do
           public_key_info: :undefined,
           premaster_secret: :undefined
         ),
-      protocol_specific: %{pS | :flight_state => initial_flight_state(dataTag)},
+      protocol_specific: Map.put(pS, :flight_state, initial_flight_state(dataTag)),
       flight_buffer: new_flight(),
       protocol_buffers:
         r_protocol_buffers(buffers,
@@ -1914,7 +1910,7 @@ defmodule :m_dtls_connection do
     )
   end
 
-  def select_sni_extension(r_client_hello(extensions: %{:sni => sNI})) do
+  def select_sni_extension(r_client_hello(extensions: %{sni: sNI})) do
     sNI
   end
 
@@ -1946,7 +1942,7 @@ defmodule :m_dtls_connection do
             ),
           connection_env: r_connection_env(negotiated_version: version),
           connection_states: connectionStates0,
-          ssl_options: %{:log_level => logLevel}
+          ssl_options: %{log_level: logLevel}
         ) = state0
       ) do
     {binMsg, connectionStates} = encode_alert(alert, version, connectionStates0)
@@ -2011,7 +2007,7 @@ defmodule :m_dtls_connection do
             ),
           handshake_env: r_handshake_env(renegotiation: {renegotiation, _}),
           connection_env: cEnv,
-          ssl_options: %{:versions => versions} = sslOpts,
+          ssl_options: %{versions: versions} = sslOpts,
           session: r_session(own_certificate: cert) = newSession,
           connection_states: connectionStates0
         ) = state0
@@ -2084,13 +2080,13 @@ defmodule :m_dtls_connection do
         type,
         event,
         r_state(state,
-          protocol_specific: %{
-            pS
-            | :current_cookie_secret => :dtls_v1.cookie_secret(),
-              :previous_cookie_secret => <<>>,
-              :ignored_alerts => 0,
-              :max_ignored_alerts => 10
-          }
+          protocol_specific:
+            Map.merge(pS, %{
+              current_cookie_secret: :dtls_v1.cookie_secret(),
+              previous_cookie_secret: <<>>,
+              ignored_alerts: 0,
+              max_ignored_alerts: 10
+            })
         )
       )
 
@@ -2109,7 +2105,7 @@ defmodule :m_dtls_connection do
   def error(
         {:call, from},
         {:start, _Timeout},
-        r_state(protocol_specific: %{:error => error}) = state
+        r_state(protocol_specific: %{error: error}) = state
       ) do
     {:stop_and_reply, {:shutdown, :normal}, [{:reply, from, {:error, error}}], state}
   end
@@ -2138,7 +2134,7 @@ defmodule :m_dtls_connection do
           static_env: r_static_env(role: :server, transport_cb: transport, socket: socket),
           handshake_env: hsEnv,
           connection_env: cEnv,
-          protocol_specific: %{:current_cookie_secret => secret}
+          protocol_specific: %{current_cookie_secret: secret}
         ) = state0
       ) do
     state1 =
@@ -2190,8 +2186,7 @@ defmodule :m_dtls_connection do
               ocsp_stapling_state: ocspState0
             ) = hsEnv,
           connection_env: cEnv,
-          ssl_options:
-            %{:ocsp_stapling => ocspStaplingOpt, :ocsp_nonce => ocspNonceOpt} = sslOpts,
+          ssl_options: %{ocsp_stapling: ocspStaplingOpt, ocsp_nonce: ocspNonceOpt} = sslOpts,
           session: r_session(own_certificate: cert, session_id: id),
           connection_states: connectionStates0
         ) = state0
@@ -2223,7 +2218,7 @@ defmodule :m_dtls_connection do
           handshake_env:
             r_handshake_env(hsEnv,
               tls_handshake_history: :ssl_handshake.init_handshake_history(),
-              ocsp_stapling_state: %{ocspState0 | :ocsp_nonce => ocspNonce}
+              ocsp_stapling_state: Map.put(ocspState0, :ocsp_nonce, ocspNonce)
             )
         )
       )
@@ -2237,7 +2232,7 @@ defmodule :m_dtls_connection do
         :internal,
         r_client_hello(extensions: extensions) = hello,
         r_state(
-          ssl_options: %{:handshake => :hello},
+          ssl_options: %{handshake: :hello},
           handshake_env: hsEnv,
           start_or_recv_from: from
         ) = state0
@@ -2259,7 +2254,7 @@ defmodule :m_dtls_connection do
         :internal,
         r_server_hello(extensions: extensions) = hello,
         r_state(
-          ssl_options: %{:handshake => :hello},
+          ssl_options: %{handshake: :hello},
           handshake_env: hsEnv,
           start_or_recv_from: from
         ) = state
@@ -2276,10 +2271,7 @@ defmodule :m_dtls_connection do
         r_client_hello(cookie: cookie) = hello,
         r_state(
           static_env: r_static_env(role: :server, transport_cb: transport, socket: socket),
-          protocol_specific: %{
-            :current_cookie_secret => secret,
-            :previous_cookie_secret => pSecret
-          }
+          protocol_specific: %{current_cookie_secret: secret, previous_cookie_secret: pSecret}
         ) = state0
       ) do
     state =
@@ -2441,7 +2433,7 @@ defmodule :m_dtls_connection do
       prepare_flight(
         r_state(state,
           connection_states: connectionStates,
-          protocol_specific: %{pS | :flight_state => :connection}
+          protocol_specific: Map.put(pS, :flight_state, :connection)
         )
       )
     )
@@ -2555,7 +2547,7 @@ defmodule :m_dtls_connection do
       prepare_flight(
         r_state(state,
           connection_states: connectionStates,
-          protocol_specific: %{pS | :flight_state => :connection}
+          protocol_specific: Map.put(pS, :flight_state, :connection)
         )
       ),
       :dtls_connection
@@ -2593,7 +2585,7 @@ defmodule :m_dtls_connection do
           handshake_env: r_handshake_env(renegotiation: {renegotiation, _}),
           connection_env: cEnv,
           session: r_session(own_certificate: cert) = session0,
-          ssl_options: %{:versions => versions} = sslOpts,
+          ssl_options: %{versions: versions} = sslOpts,
           connection_states: connectionStates0,
           protocol_specific: pS
         ) = state0
@@ -2629,7 +2621,7 @@ defmodule :m_dtls_connection do
 
     state =
       r_state(state2,
-        protocol_specific: %{pS | :flight_state => initial_flight_state(dataTag)},
+        protocol_specific: Map.put(pS, :flight_state, initial_flight_state(dataTag)),
         session: session
       )
 
@@ -2669,9 +2661,9 @@ defmodule :m_dtls_connection do
         level: 1,
         description: 100,
         where: %{
-          :mfa => {:dtls_connection, :connection, 3},
-          :line => 761,
-          :file => 'otp/lib/ssl/src/dtls_connection.erl'
+          mfa: {:dtls_connection, :connection, 3},
+          line: 761,
+          file: 'otp/lib/ssl/src/dtls_connection.erl'
         }
       )
 
@@ -2728,11 +2720,11 @@ defmodule :m_dtls_connection do
          host,
          port,
          socket,
-         {%{:client_renegotiation => clientRenegotiation} = sSLOptions, socketOptions, trackers},
+         {%{client_renegotiation: clientRenegotiation} = sSLOptions, socketOptions, trackers},
          user,
          {cbModule, dataTag, closeTag, errorTag, passiveTag}
        ) do
-    %{:beast_mitigation => beastMitigation} = sSLOptions
+    %{beast_mitigation: beastMitigation} = sSLOptions
 
     connectionStates =
       :dtls_record.init_connection_states(
@@ -2792,7 +2784,7 @@ defmodule :m_dtls_connection do
         ),
       connection_env: r_connection_env(user_application: {monitor, user}),
       socket_options: socketOptions,
-      ssl_options: %{sSLOptions | :password => :undefined},
+      ssl_options: Map.put(sSLOptions, :password, :undefined),
       session: r_session(is_resumable: false),
       connection_states: connectionStates,
       protocol_buffers: r_protocol_buffers(),
@@ -2800,9 +2792,9 @@ defmodule :m_dtls_connection do
       start_or_recv_from: :undefined,
       flight_buffer: new_flight(),
       protocol_specific: %{
-        :active_n => internalActiveN,
-        :active_n_toggle => true,
-        :flight_state => initial_flight_state(dataTag)
+        active_n: internalActiveN,
+        active_n_toggle: true,
+        flight_state: initial_flight_state(dataTag)
       }
     )
   end
@@ -3009,7 +3001,7 @@ defmodule :m_dtls_connection do
     next_event(
       stateName,
       :no_record,
-      r_state(state, protocol_specific: %{pS | :active_n_toggle => true})
+      r_state(state, protocol_specific: Map.put(pS, :active_n_toggle, true))
     )
   end
 
@@ -3039,9 +3031,9 @@ defmodule :m_dtls_connection do
             level: 2,
             description: 0,
             where: %{
-              :mfa => {:dtls_connection, :handle_info, 3},
-              :line => 983,
-              :file => 'otp/lib/ssl/src/dtls_connection.erl'
+              mfa: {:dtls_connection, :handle_info, 3},
+              line: 983,
+              file: 'otp/lib/ssl/src/dtls_connection.erl'
             },
             reason: :transport_closed
           )
@@ -3053,7 +3045,7 @@ defmodule :m_dtls_connection do
         next_event(
           stateName,
           :no_record,
-          r_state(state, protocol_specific: %{pS | :active_n_toggle => true})
+          r_state(state, protocol_specific: Map.put(pS, :active_n_toggle, true))
         )
     end
   end
@@ -3061,17 +3053,17 @@ defmodule :m_dtls_connection do
   defp handle_info(
          :new_cookie_secret,
          stateName,
-         r_state(protocol_specific: %{:current_cookie_secret => secret} = cookieInfo) = state
+         r_state(protocol_specific: %{current_cookie_secret: secret} = cookieInfo) = state
        ) do
     :erlang.send_after(:dtls_v1.cookie_timeout(), self(), :new_cookie_secret)
 
     {:next_state, stateName,
      r_state(state,
-       protocol_specific: %{
-         cookieInfo
-         | :current_cookie_secret => :dtls_v1.cookie_secret(),
-           :previous_cookie_secret => secret
-       }
+       protocol_specific:
+         Map.merge(cookieInfo, %{
+           current_cookie_secret: :dtls_v1.cookie_secret(),
+           previous_cookie_secret: secret
+         })
      )}
   end
 
@@ -3082,7 +3074,7 @@ defmodule :m_dtls_connection do
   defp handle_state_timeout(
          :flight_retransmission_timeout,
          stateName,
-         r_state(protocol_specific: %{:flight_state => {:retransmit, _NextTimeout}}) = state0
+         r_state(protocol_specific: %{flight_state: {:retransmit, _NextTimeout}}) = state0
        ) do
     {state1, actions0} =
       send_handshake_flight(
@@ -3133,7 +3125,7 @@ defmodule :m_dtls_connection do
          stateName,
          r_state(
            static_env: r_static_env(data_tag: :udp, role: role),
-           ssl_options: %{:log_level => logLevel}
+           ssl_options: %{log_level: logLevel}
          ) = state0
        ) do
     case ignore_alert(alert, state0) do
@@ -3188,9 +3180,9 @@ defmodule :m_dtls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:dtls_connection, :gen_handshake, 4},
-              :line => 1054,
-              :file => 'otp/lib/ssl/src/dtls_connection.erl'
+              mfa: {:dtls_connection, :gen_handshake, 4},
+              line: 1054,
+              file: 'otp/lib/ssl/src/dtls_connection.erl'
             },
             reason: :malformed_handshake_data
           ),
@@ -3218,9 +3210,9 @@ defmodule :m_dtls_connection do
             level: 2,
             description: 80,
             where: %{
-              :mfa => {:dtls_connection, :gen_info, 3},
-              :line => 1065,
-              :file => 'otp/lib/ssl/src/dtls_connection.erl'
+              mfa: {:dtls_connection, :gen_info, 3},
+              line: 1065,
+              file: 'otp/lib/ssl/src/dtls_connection.erl'
             },
             reason: :malformed_data
           ),
@@ -3248,9 +3240,9 @@ defmodule :m_dtls_connection do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:dtls_connection, :gen_info, 3},
-              :line => 1076,
-              :file => 'otp/lib/ssl/src/dtls_connection.erl'
+              mfa: {:dtls_connection, :gen_info, 3},
+              line: 1076,
+              file: 'otp/lib/ssl/src/dtls_connection.erl'
             },
             reason: :malformed_handshake_data
           ),
@@ -3305,26 +3297,25 @@ defmodule :m_dtls_connection do
 
   defp new_flight() do
     %{
-      :next_sequence => 0,
-      :handshakes => [],
-      :change_cipher_spec => :undefined,
-      :handshakes_after_change_cipher_spec => []
+      next_sequence: 0,
+      handshakes: [],
+      change_cipher_spec: :undefined,
+      handshakes_after_change_cipher_spec: []
     }
   end
 
   defp next_flight(flight) do
-    %{
-      flight
-      | :handshakes => [],
-        :change_cipher_spec => :undefined,
-        :handshakes_after_change_cipher_spec => []
-    }
+    Map.merge(flight, %{
+      handshakes: [],
+      change_cipher_spec: :undefined,
+      handshakes_after_change_cipher_spec: []
+    })
   end
 
   defp handle_flight_timer(
          r_state(
            static_env: r_static_env(data_tag: :udp),
-           protocol_specific: %{:flight_state => {:retransmit, timeout}}
+           protocol_specific: %{flight_state: {:retransmit, timeout}}
          ) = state
        ) do
     start_retransmision_timer(timeout, state)
@@ -3333,19 +3324,19 @@ defmodule :m_dtls_connection do
   defp handle_flight_timer(
          r_state(
            static_env: r_static_env(data_tag: :udp),
-           protocol_specific: %{:flight_state => :connection}
+           protocol_specific: %{flight_state: :connection}
          ) = state
        ) do
     {state, []}
   end
 
-  defp handle_flight_timer(r_state(protocol_specific: %{:flight_state => :reliable}) = state) do
+  defp handle_flight_timer(r_state(protocol_specific: %{flight_state: :reliable}) = state) do
     {state, []}
   end
 
   defp start_retransmision_timer(timeout, r_state(protocol_specific: pS) = state) do
     {r_state(state,
-       protocol_specific: %{pS | :flight_state => {:retransmit, new_timeout(timeout)}}
+       protocol_specific: Map.put(pS, :flight_state, {:retransmit, new_timeout(timeout)})
      ), [{:state_timeout, timeout, :flight_retransmission_timeout}]}
   end
 
@@ -3365,14 +3356,14 @@ defmodule :m_dtls_connection do
                transport_cb: transport
              ),
            connection_env: r_connection_env(negotiated_version: version),
-           flight_buffer: %{:handshakes => flight, :change_cipher_spec => :undefined},
+           flight_buffer: %{handshakes: flight, change_cipher_spec: :undefined},
            connection_states: connectionStates0,
-           ssl_options: %{:log_level => logLevel}
+           ssl_options: %{log_level: logLevel}
          ) = state0,
          epoch
        ) do
     pMTUEstimate = 1400
-    %{:current_write => %{:max_fragment_length => maxFragmentLength}} = connectionStates0
+    %{current_write: %{max_fragment_length: maxFragmentLength}} = connectionStates0
     maxSize = min(maxFragmentLength, pMTUEstimate)
 
     {encoded, connectionStates} =
@@ -3392,17 +3383,17 @@ defmodule :m_dtls_connection do
              ),
            connection_env: r_connection_env(negotiated_version: version),
            flight_buffer: %{
-             :handshakes => [_ | _] = flight0,
-             :change_cipher_spec => changeCipher,
-             :handshakes_after_change_cipher_spec => []
+             handshakes: [_ | _] = flight0,
+             change_cipher_spec: changeCipher,
+             handshakes_after_change_cipher_spec: []
            },
            connection_states: connectionStates0,
-           ssl_options: %{:log_level => logLevel}
+           ssl_options: %{log_level: logLevel}
          ) = state0,
          epoch
        ) do
     pMTUEstimate = 1400
-    %{:current_write => %{:max_fragment_length => maxFragmentLength}} = connectionStates0
+    %{current_write: %{max_fragment_length: maxFragmentLength}} = connectionStates0
     maxSize = min(maxFragmentLength, pMTUEstimate)
 
     {hsBefore, connectionStates1} =
@@ -3426,17 +3417,17 @@ defmodule :m_dtls_connection do
              ),
            connection_env: r_connection_env(negotiated_version: version),
            flight_buffer: %{
-             :handshakes => [_ | _] = flight0,
-             :change_cipher_spec => changeCipher,
-             :handshakes_after_change_cipher_spec => flight1
+             handshakes: [_ | _] = flight0,
+             change_cipher_spec: changeCipher,
+             handshakes_after_change_cipher_spec: flight1
            },
            connection_states: connectionStates0,
-           ssl_options: %{:log_level => logLevel}
+           ssl_options: %{log_level: logLevel}
          ) = state0,
          epoch
        ) do
     pMTUEstimate = 1400
-    %{:current_write => %{:max_fragment_length => maxFragmentLength}} = connectionStates0
+    %{current_write: %{max_fragment_length: maxFragmentLength}} = connectionStates0
     maxSize = min(maxFragmentLength, pMTUEstimate)
 
     {hsBefore, connectionStates1} =
@@ -3470,17 +3461,17 @@ defmodule :m_dtls_connection do
              ),
            connection_env: r_connection_env(negotiated_version: version),
            flight_buffer: %{
-             :handshakes => [],
-             :change_cipher_spec => changeCipher,
-             :handshakes_after_change_cipher_spec => flight1
+             handshakes: [],
+             change_cipher_spec: changeCipher,
+             handshakes_after_change_cipher_spec: flight1
            },
            connection_states: connectionStates0,
-           ssl_options: %{:log_level => logLevel}
+           ssl_options: %{log_level: logLevel}
          ) = state0,
          epoch
        ) do
     pMTUEstimate = 1400
-    %{:current_write => %{:max_fragment_length => maxFragmentLength}} = connectionStates0
+    %{current_write: %{max_fragment_length: maxFragmentLength}} = connectionStates0
     maxSize = min(maxFragmentLength, pMTUEstimate)
 
     {encChangeCipher, connectionStates1} =
@@ -3499,7 +3490,7 @@ defmodule :m_dtls_connection do
          _StateName,
          r_state(connection_states: connectionStates)
        ) do
-    %{:epoch => epoch} =
+    %{epoch: epoch} =
       :ssl_record.current_connection_state(
         connectionStates,
         :write
@@ -3510,18 +3501,18 @@ defmodule :m_dtls_connection do
 
   defp ignore_alert(
          r_alert(level: 2),
-         r_state(protocol_specific: %{:ignored_alerts => n, :max_ignored_alerts => n}) = state
+         r_state(protocol_specific: %{ignored_alerts: n, max_ignored_alerts: n}) = state
        ) do
     {false, state}
   end
 
   defp ignore_alert(
          r_alert(level: 2) = alert,
-         r_state(protocol_specific: %{:ignored_alerts => n} = pS) = state
+         r_state(protocol_specific: %{ignored_alerts: n} = pS) = state
        ) do
     case is_ignore_alert(alert) do
       true ->
-        {true, r_state(state, protocol_specific: %{pS | :ignored_alerts => n + 1})}
+        {true, r_state(state, protocol_specific: Map.put(pS, :ignored_alerts, n + 1))}
 
       false ->
         {false, state}
@@ -3561,11 +3552,11 @@ defmodule :m_dtls_connection do
       :info,
       level,
       %{
-        :alert => alert,
-        :alerter => :ignored,
-        :statename => stateName,
-        :role => role,
-        :protocol => protocol_name()
+        alert: alert,
+        alerter: :ignored,
+        statename: stateName,
+        role: role,
+        protocol: protocol_name()
       },
       location
     )
@@ -3584,7 +3575,7 @@ defmodule :m_dtls_connection do
            connection_env: r_connection_env(negotiated_version: version),
            handshake_env: hsEnv,
            connection_states: connectionStates0,
-           ssl_options: %{:renegotiate_at => renegotiateAt, :log_level => logLevel}
+           ssl_options: %{renegotiate_at: renegotiateAt, log_level: logLevel}
          ) = state0
        ) do
     case time_to_renegotiate(data, connectionStates0, renegotiateAt) do
@@ -3617,7 +3608,7 @@ defmodule :m_dtls_connection do
 
   defp time_to_renegotiate(
          _Data,
-         %{:current_write => %{:sequence_number => num}},
+         %{current_write: %{sequence_number: num}},
          renegotiateAt
        ) do
     is_time_to_renegotiate(num, renegotiateAt)

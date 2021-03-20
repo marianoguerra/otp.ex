@@ -25,8 +25,22 @@ defmodule :m_cdv_term_cb do
         {'Format ~tp', :cdv_html_wx, {type, format_term_fun('~tp', binSaved, tab, cs)}},
         {'Format ~w', :cdv_html_wx, {type, format_term_fun('~w', binSaved, tab, cs)}},
         {'Format ~tw', :cdv_html_wx, {type, format_term_fun('~tw', binSaved, tab, cs)}},
-        {'Format ~s', :cdv_html_wx, {type, format_term_fun('~s', expanded, tab, cs)}},
-        {'Format ~ts', :cdv_html_wx, {type, format_term_fun('~ts', expanded, tab, cs)}}
+        {'Format ~s', :cdv_html_wx,
+         {type,
+          format_term_fun(
+            '~s',
+            expanded,
+            tab,
+            cs
+          )}},
+        {'Format ~ts', :cdv_html_wx,
+         {type,
+          format_term_fun(
+            '~ts',
+            expanded,
+            tab,
+            cs
+          )}}
       ]
     )
   end

@@ -98,8 +98,18 @@ defmodule :m_edoc do
           :subpackages,
           {:title, :io_lib.fwrite('The ~ts application', [app])},
           {:overview, overview},
-          {:dir, :filename.join(dir, 'doc')},
-          {:includes, [:filename.join(dir, 'include')]}
+          {:dir,
+           :filename.join(
+             dir,
+             'doc'
+           )},
+          {:includes,
+           [
+             :filename.join(
+               dir,
+               'include'
+             )
+           ]}
         ]
 
     opts1 = set_app_default(app, dir, opts)

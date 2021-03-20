@@ -1401,7 +1401,7 @@ defmodule :m_mnesia_schema do
     []
   end
 
-  defp intersect_types([[s1, s2] | rest]) do
+  defp intersect_types([s1, s2 | rest]) do
     intersect_types([s1 -- s1 -- s2 | rest])
   end
 
@@ -1989,7 +1989,9 @@ defmodule :m_mnesia_schema do
 
   def backend_types() do
     [
-      [:ram_copies, :disc_copies, :disc_only_copies]
+      :ram_copies,
+      :disc_copies,
+      :disc_only_copies
       | for {t, _} <- get_ext_types() do
           t
         end
@@ -3785,7 +3787,10 @@ defmodule :m_mnesia_schema do
     etsOpts = :proplists.get_value(:ets, props, [])
 
     args = [
-      [{:keypos, 2}, :public, :named_table, type]
+      {:keypos, 2},
+      :public,
+      :named_table,
+      type
       | etsOpts
     ]
 
@@ -3824,12 +3829,14 @@ defmodule :m_mnesia_schema do
     detsOpts = :proplists.get_value(:dets, props, [])
 
     args = [
-      [
-        {:file, :mnesia_lib.tab2dat(tab)},
-        {:type, :mnesia_lib.disk_type(tab, type)},
-        {:keypos, 2},
-        {:repair, :mnesia_monitor.get_env(:auto_repair)}
-      ]
+      {:file, :mnesia_lib.tab2dat(tab)},
+      {:type,
+       :mnesia_lib.disk_type(
+         tab,
+         type
+       )},
+      {:keypos, 2},
+      {:repair, :mnesia_monitor.get_env(:auto_repair)}
       | detsOpts
     ]
 
@@ -3902,7 +3909,8 @@ defmodule :m_mnesia_schema do
 
       type == :bag ->
         transform_objs(fun, tab, recName, nextKey, a, storage, type, [
-          [{:op, :rec, storage, {oid, ws, :write}}, {:op, :rec, storage, {oid, [oid], :delete}}]
+          {:op, :rec, storage, {oid, ws, :write}},
+          {:op, :rec, storage, {oid, [oid], :delete}}
           | acc
         ])
 
@@ -3918,7 +3926,8 @@ defmodule :m_mnesia_schema do
 
       true ->
         transform_objs(fun, tab, recName, nextKey, a, storage, type, [
-          [{:op, :rec, storage, {oid, ws, :write}}, {:op, :rec, storage, {oid, ds, :delete}}]
+          {:op, :rec, storage, {oid, ws, :write}},
+          {:op, :rec, storage, {oid, ds, :delete}}
           | acc
         ])
     end
@@ -4421,7 +4430,7 @@ defmodule :m_mnesia_schema do
             size = {:size, :mnesia.table_info(tab, :size)}
             memory = {:memory, :mnesia.table_info(tab, :memory)}
             master = {:master_nodes, :mnesia.table_info(tab, :master_nodes)}
-            :lists.sort([[size, memory, master] | gvar])
+            :lists.sort([size, memory, master | gvar])
         end
     end
   end

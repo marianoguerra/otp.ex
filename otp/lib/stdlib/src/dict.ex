@@ -637,7 +637,7 @@ defmodule :m_dict do
         [[keyBag | l1] | l2]
 
       ^slot2 ->
-        [[l1, keyBag] | l2]
+        [l1, keyBag | l2]
     end
   end
 

@@ -201,7 +201,7 @@ defmodule :m_inet_config do
   end
 
   defp add_dns_lookup([:yp | t], acc) do
-    add_dns_lookup(t, [[:yp, :dns] | acc])
+    add_dns_lookup(t, [:yp, :dns | acc])
   end
 
   defp add_dns_lookup([h | t], acc) do

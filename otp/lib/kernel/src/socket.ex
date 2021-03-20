@@ -15,7 +15,7 @@ defmodule :m_socket do
   def which_sockets(domain)
       when domain === :inet or domain === :inet6 do
     :socket_registry.which_sockets(fn
-      %{:domain => d}
+      %{domain: d}
       when d === domain ->
         true
 
@@ -27,7 +27,7 @@ defmodule :m_socket do
   def which_sockets(type)
       when type === :stream or type === :dgram or type === :seqpacket do
     :socket_registry.which_sockets(fn
-      %{:type => t}
+      %{type: t}
       when t === type ->
         true
 
@@ -39,7 +39,7 @@ defmodule :m_socket do
   def which_sockets(proto)
       when proto === :sctp or proto === :tcp or proto === :udp do
     :socket_registry.which_sockets(fn
-      %{:protocol => p}
+      %{protocol: p}
       when p === proto ->
         true
 
@@ -50,7 +50,7 @@ defmodule :m_socket do
 
   def which_sockets(cTRL) when is_pid(cTRL) do
     :socket_registry.which_sockets(fn
-      %{:ctrl => c}
+      %{ctrl: c}
       when c === cTRL ->
         true
 
@@ -188,7 +188,7 @@ defmodule :m_socket do
           {:ok, domain} when domain === :inet or domain === :inet6 ->
             :prim_socket.bind(
               sockRef,
-              %{:family => domain, :addr => addr}
+              %{family: domain, addr: addr}
             )
 
           {:ok, _Domain} ->

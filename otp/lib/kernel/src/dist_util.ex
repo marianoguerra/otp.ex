@@ -985,7 +985,7 @@ defmodule :m_dist_util do
 
   defp recv_name_old(
          hSData,
-         [[?n, v1, v0, f3, f2, f1, f0] | node] = data
+         [?n, v1, v0, f3, f2, f1, f0 | node] = data
        ) do
     <<_Version::size(16)>> = <<v1, v0>>
     <<flags::size(32)>> = <<f3, f2, f1, f0>>
@@ -1004,7 +1004,21 @@ defmodule :m_dist_util do
   defp recv_name_new(
          hSData,
          [
-           [?N, f7, f6, f5, f4, f3, f2, f1, f0, cr3, cr2, cr1, cr0, nL1, nL0]
+           ?N,
+           f7,
+           f6,
+           f5,
+           f4,
+           f3,
+           f2,
+           f1,
+           f0,
+           cr3,
+           cr2,
+           cr1,
+           cr0,
+           nL1,
+           nL0
            | rest
          ] = data
        ) do
@@ -1183,7 +1197,17 @@ defmodule :m_dist_util do
   defp recv_challenge_old(
          r_hs_data(other_node: node),
          [
-           [?n, v1, v0, f3, f2, f1, f0, c3, c2, c1, c0]
+           ?n,
+           v1,
+           v0,
+           f3,
+           f2,
+           f1,
+           f0,
+           c3,
+           c2,
+           c1,
+           c0
            | ns
          ] = msg
        ) do
@@ -1213,7 +1237,25 @@ defmodule :m_dist_util do
   defp recv_challenge_new(
          r_hs_data(other_node: node),
          [
-           [?N, f7, f6, f5, f4, f3, f2, f1, f0, ch3, ch2, ch1, ch0, cr3, cr2, cr1, cr0, nL1, nL0]
+           ?N,
+           f7,
+           f6,
+           f5,
+           f4,
+           f3,
+           f2,
+           f1,
+           f0,
+           ch3,
+           ch2,
+           ch1,
+           ch0,
+           cr3,
+           cr2,
+           cr1,
+           cr0,
+           nL1,
+           nL0
            | rest
          ] = msg
        ) do
@@ -1288,7 +1330,7 @@ defmodule :m_dist_util do
          cookie
        ) do
     case fRecv.(socket, 0, :infinity) do
-      {:ok, [[?r, cB3, cB2, cB1, cB0] | sumB]}
+      {:ok, [?r, cB3, cB2, cB1, cB0 | sumB]}
       when length(sumB) === 16 ->
         sumA = gen_digest(challengeA, cookie)
         challengeB = cB3 <<< 24 ||| cB2 <<< 16 ||| cB1 <<< 8 ||| cB0

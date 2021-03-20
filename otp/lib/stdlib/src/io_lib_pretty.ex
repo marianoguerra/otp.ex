@@ -149,7 +149,7 @@ defmodule :m_io_lib_pretty do
 
       true ->
         indent = indent(tagInd, ind)
-        [[tag, s] | pp_list(l, tcol, ll, m, tInd, indent, lD, s, w + tlen + 1)]
+        [tag, s | pp_list(l, tcol, ll, m, tInd, indent, lD, s, w + tlen + 1)]
     end
   end
 
@@ -231,14 +231,11 @@ defmodule :m_io_lib_pretty do
                  )
                )
              )) ->
-        [
-          [?,, write_pair(p)]
-          | pp_pairs_tail(ps, col0, col + eLen, ll, m, tInd, ind, lD, w + eLen)
-        ]
+        [?,, write_pair(p) | pp_pairs_tail(ps, col0, col + eLen, ll, m, tInd, ind, lD, w + eLen)]
 
       true ->
         {pS, pW} = pp_pair(p, col0, ll, m, tInd, ind, lD1, 0)
-        [[?,, ?\n, ind, pS] | pp_pairs_tail(ps, col0, col0 + pW, ll, m, tInd, ind, lD, pW)]
+        [?,, ?\n, ind, pS | pp_pairs_tail(ps, col0, col0 + pW, ll, m, tInd, ind, lD, pW)]
     end
   end
 
@@ -282,8 +279,9 @@ defmodule :m_io_lib_pretty do
     ind = indent(i, ind0)
 
     {[
-       [pp(k, col0, ll, m, tInd, ind0, lD, w), ' =>\n', ind]
-       | pp(v, col0 + i, ll, m, tInd, ind, lD, 0)
+       pp(k, col0, ll, m, tInd, ind0, lD, w),
+       ' =>\n',
+       ind | pp(v, col0 + i, ll, m, tInd, ind, lD, 0)
      ], ll}
   end
 
@@ -299,7 +297,7 @@ defmodule :m_io_lib_pretty do
     nind = nlen + 1
     {col, ind, s, w} = rec_indent(nind, tInd, col0, ind0, w0)
     {fS, fW} = pp_field(f, col, ll, m, tInd, ind, last_depth(fs, lD), w)
-    [[s, fS] | pp_fields_tail(fs, col, col + fW, ll, m, tInd, ind, lD, w + fW)]
+    [s, fS | pp_fields_tail(fs, col, col + fW, ll, m, tInd, ind, lD, w + fW)]
   end
 
   defp pp_fields_tail([], _Col0, _Col, _Ll, _M, _TInd, _Ind, _LD, _W) do
@@ -344,13 +342,13 @@ defmodule :m_io_lib_pretty do
                )
              )) ->
         [
-          [?,, write_field(f)]
-          | pp_fields_tail(fs, col0, col + eLen, ll, m, tInd, ind, lD, w + eLen)
+          ?,,
+          write_field(f) | pp_fields_tail(fs, col0, col + eLen, ll, m, tInd, ind, lD, w + eLen)
         ]
 
       true ->
         {fS, fW} = pp_field(f, col0, ll, m, tInd, ind, lD1, 0)
-        [[?,, ?\n, ind, fS] | pp_fields_tail(fs, col0, col0 + fW, ll, m, tInd, ind, lD, fW)]
+        [?,, ?\n, ind, fS | pp_fields_tail(fs, col0, col0 + fW, ll, m, tInd, ind, lD, fW)]
     end
   end
 
@@ -389,7 +387,7 @@ defmodule :m_io_lib_pretty do
           ' = '
       end
 
-    {[[name, sep, s] | pp(f, col, ll, m, tInd, ind, lD, w)], ll}
+    {[name, sep, s | pp(f, col, ll, m, tInd, ind, lD, w)], ll}
   end
 
   defp rec_indent(rInd, tInd, col0, ind0, w0) do
@@ -451,11 +449,11 @@ defmodule :m_io_lib_pretty do
           (lD1 > 0 and eLen < ll - col - lD1 and
              w + eLen + lD1 <= m and
              is_list(:erlang.element(1, e))) ->
-        [[?,, write(e)] | pp_tail(es, col0, col + eLen, ll, m, tInd, ind, lD, s, w + eLen)]
+        [?,, write(e) | pp_tail(es, col0, col + eLen, ll, m, tInd, ind, lD, s, w + eLen)]
 
       true ->
         {eS, wE} = pp_element(e, col0, ll, m, tInd, ind, lD1, 0)
-        [[?,, ?\n, ind, eS] | pp_tail(es, col0, col0 + wE, ll, m, tInd, ind, lD, s, wE)]
+        [?,, ?\n, ind, eS | pp_tail(es, col0, col0 + wE, ll, m, tInd, ind, lD, s, wE)]
     end
   end
 
@@ -471,7 +469,7 @@ defmodule :m_io_lib_pretty do
   end
 
   defp pp_tail(e, col0, _Col, ll, m, tInd, ind, lD, s, _W) do
-    [[s, ?\n, ind] | pp(e, col0, ll, m, tInd, ind, lD + 1, 0)]
+    [s, ?\n, ind | pp(e, col0, ll, m, tInd, ind, lD + 1, 0)]
   end
 
   defp pp_element({_, len, _, _} = e, col, ll, m, _TInd, _Ind, lD, w)
@@ -494,15 +492,15 @@ defmodule :m_io_lib_pretty do
     [lT, lT, pp_binary(s, n, n, ind), gT, gT]
   end
 
-  defp pp_binary([[bS, ?,] | s], n, n0, ind) do
+  defp pp_binary([bS, ?, | s], n, n0, ind) do
     len = length(bS) + 1
 
     case n - len do
       n1 when n1 < 0 ->
-        [[?\n, ind, bS, ?,] | pp_binary(s, n0 - len, n0, ind)]
+        [?\n, ind, bS, ?, | pp_binary(s, n0 - len, n0, ind)]
 
       n1 ->
-        [[bS, ?,] | pp_binary(s, n1, n0, ind)]
+        [bS, ?, | pp_binary(s, n1, n0, ind)]
     end
   end
 
@@ -574,11 +572,11 @@ defmodule :m_io_lib_pretty do
   end
 
   defp write_fields_tail([f | fs]) do
-    [[?,, write_field(f)] | write_fields_tail(fs)]
+    [?,, write_field(f) | write_fields_tail(fs)]
   end
 
   defp write_field({{:field, name, _NameL, f}, _, _, _}) do
-    [[name, ' = '] | write(f)]
+    [name, ' = ' | write(f)]
   end
 
   defp write_list({:dots, _, _, _}, _S) do
@@ -594,7 +592,7 @@ defmodule :m_io_lib_pretty do
   end
 
   defp write_tail([e | es], s) do
-    [[?,, write(e)] | write_tail(es, s)]
+    [?,, write(e) | write_tail(es, s)]
   end
 
   defp write_tail({:dots, _, _, _}, s) do
@@ -779,7 +777,7 @@ defmodule :m_io_lib_pretty do
           print_length(bin, d + dd, t1, rF, enc, str)
         end
 
-        {[[?<, ?<, s] | '...>>'], 7 + length(s), 3, more}
+        {[?<, ?<, s | '...>>'], 7 + length(s), 3, more}
 
       {false, true, prefix} ->
         s = :io_lib.write_string(prefix, ?")
@@ -788,7 +786,7 @@ defmodule :m_io_lib_pretty do
           print_length(bin, d + dd, t1, rF, enc, str)
         end
 
-        {[[?<, ?<, s] | '/utf8...>>'], 12 + :io_lib.chars_length(s), 3, more}
+        {[?<, ?<, s | '/utf8...>>'], 12 + :io_lib.chars_length(s), 3, more}
 
       false ->
         case :io_lib.write_binary(bin, d, t) do
@@ -1748,7 +1746,7 @@ defmodule :m_io_lib_pretty do
 
   defp indent(4, ind) do
     s2 = [?\s, ?\s]
-    [[s2, s2] | ind]
+    [s2, s2 | ind]
   end
 
   defp indent(n, ind) when is_integer(n) and n > 0 do
@@ -1774,7 +1772,7 @@ defmodule :m_io_lib_pretty do
 
   defp chars(c, n) do
     s = chars(c, n >>> 1)
-    [[c, s] | s]
+    [c, s | s]
   end
 
   defp get_option(key, tupleList, default) do

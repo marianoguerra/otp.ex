@@ -116,7 +116,7 @@ defmodule :m_sets do
     )
   end
 
-  def union([[s1, s2] | ss]) do
+  def union([s1, s2 | ss]) do
     union1(union(s1, s2), ss)
   end
 
@@ -154,7 +154,7 @@ defmodule :m_sets do
     )
   end
 
-  def intersection([[s1, s2] | ss]) do
+  def intersection([s1, s2 | ss]) do
     intersection1(intersection(s1, s2), ss)
   end
 

@@ -74,7 +74,7 @@ defmodule :m_prim_file do
 
   def close(fd) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       close_nif(fRef)
     catch
       :error, :badarg ->
@@ -84,7 +84,7 @@ defmodule :m_prim_file do
 
   def read(fd, size) do
     try do
-      %{:handle => fRef, :r_ahead_size => rASz, :r_buffer => rBuf} = get_fd_data(fd)
+      %{handle: fRef, r_ahead_size: rASz, r_buffer: rBuf} = get_fd_data(fd)
       read_1(fRef, rBuf, :prim_buffer.size(rBuf), rASz, size)
     catch
       :error, :badarg ->
@@ -134,7 +134,7 @@ defmodule :m_prim_file do
 
   def read_line(fd) do
     try do
-      %{:handle => fRef, :r_ahead_size => rASz, :r_buffer => rBuf} = get_fd_data(fd)
+      %{handle: fRef, r_ahead_size: rASz, r_buffer: rBuf} = get_fd_data(fd)
       searchResult = :prim_buffer.find_byte_index(rBuf, ?\n)
       lineSize = max(256, rASz)
       read_line_1(fRef, rBuf, searchResult, lineSize)
@@ -179,7 +179,7 @@ defmodule :m_prim_file do
 
   def write(fd, iOData) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       reset_write_position(fd)
       write_1(fRef, :erlang.iolist_to_iovec(iOData))
     catch
@@ -203,7 +203,7 @@ defmodule :m_prim_file do
 
   def truncate(fd) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       reset_write_position(fd)
       truncate_nif(fRef)
     catch
@@ -214,7 +214,7 @@ defmodule :m_prim_file do
 
   def advise(fd, offset, length, advise) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       advise_nif(fRef, offset, length, advise)
     catch
       :error, :badarg ->
@@ -224,7 +224,7 @@ defmodule :m_prim_file do
 
   def allocate(fd, offset, length) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       allocate_nif(fRef, offset, length)
     catch
       :error, :badarg ->
@@ -234,7 +234,7 @@ defmodule :m_prim_file do
 
   def sync(fd) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       sync_nif(fRef, 0)
     catch
       :error, :badarg ->
@@ -244,7 +244,7 @@ defmodule :m_prim_file do
 
   def datasync(fd) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       sync_nif(fRef, 1)
     catch
       :error, :badarg ->
@@ -254,7 +254,7 @@ defmodule :m_prim_file do
 
   def position(fd, {:cur, offset}) do
     try do
-      %{:r_buffer => rBuf} = get_fd_data(fd)
+      %{r_buffer: rBuf} = get_fd_data(fd)
       position_1(fd, :cur, offset - :prim_buffer.size(rBuf))
     catch
       :error, :badarg ->
@@ -288,14 +288,14 @@ defmodule :m_prim_file do
   end
 
   defp position_1(fd, mark, offset) do
-    %{:handle => fRef, :r_buffer => rBuf} = get_fd_data(fd)
+    %{handle: fRef, r_buffer: rBuf} = get_fd_data(fd)
     :prim_buffer.wipe(rBuf)
     seek_nif(fRef, mark, offset)
   end
 
   def pread(fd, offset, size) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       pread_nif(fRef, offset, size)
     catch
       :error, :badarg ->
@@ -305,7 +305,7 @@ defmodule :m_prim_file do
 
   def pread(fd, locNums) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       pread_list(fRef, locNums, [])
     catch
       :error, :badarg ->
@@ -332,7 +332,7 @@ defmodule :m_prim_file do
 
   def pwrite(fd, offset, iOData) do
     try do
-      %{:handle => fRef, :r_buffer => rBuf} = get_fd_data(fd)
+      %{handle: fRef, r_buffer: rBuf} = get_fd_data(fd)
       :prim_buffer.wipe(rBuf)
       pwrite_plain(fRef, offset, :erlang.iolist_to_iovec(iOData))
     catch
@@ -356,7 +356,7 @@ defmodule :m_prim_file do
 
   def pwrite(fd, locBytes) do
     try do
-      %{:handle => fRef, :r_buffer => rBuf} = get_fd_data(fd)
+      %{handle: fRef, r_buffer: rBuf} = get_fd_data(fd)
       :prim_buffer.wipe(rBuf)
       pwrite_list(fRef, locBytes, 0)
     catch
@@ -401,7 +401,7 @@ defmodule :m_prim_file do
       when is_integer(offset) and
              is_integer(maxSize) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       ipread_s32bu_p32bu_nif(fRef, offset, maxSize)
     catch
       :error, :badarg ->
@@ -419,7 +419,7 @@ defmodule :m_prim_file do
 
   def get_handle(fd) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
       get_handle_nif(fRef)
     catch
       :error, :badarg ->
@@ -428,7 +428,7 @@ defmodule :m_prim_file do
   end
 
   defp reset_write_position(fd) do
-    %{:r_buffer => rBuf} = r_file_descriptor(fd, :data)
+    %{r_buffer: rBuf} = r_file_descriptor(fd, :data)
 
     case :prim_buffer.size(rBuf) do
       size when size > 0 ->
@@ -440,7 +440,7 @@ defmodule :m_prim_file do
   end
 
   defp get_fd_data(r_file_descriptor(data: data)) do
-    %{:owner => owner} = data
+    %{owner: owner} = data
 
     case self() do
       ^owner ->
@@ -452,13 +452,7 @@ defmodule :m_prim_file do
   end
 
   defp build_fd_data(fRef, modes) do
-    defaults = %{
-      :owner => self(),
-      :handle => fRef,
-      :r_ahead_size => 0,
-      :r_buffer => :prim_buffer.new()
-    }
-
+    defaults = %{owner: self(), handle: fRef, r_ahead_size: 0, r_buffer: :prim_buffer.new()}
     fill_fd_option_map(modes, defaults)
   end
 
@@ -476,7 +470,7 @@ defmodule :m_prim_file do
   defp fill_fd_option_map([{:read_ahead, size} | modes], map) do
     fill_fd_option_map(
       modes,
-      %{map | :r_ahead_size => size}
+      Map.put(map, :r_ahead_size, size)
     )
   end
 
@@ -558,7 +552,7 @@ defmodule :m_prim_file do
   end
 
   defp write_file(filename, bytes, modes) do
-    case open(filename, [[:write, :binary] | modes]) do
+    case open(filename, [:write, :binary | modes]) do
       {:ok, fd} ->
         result = write(fd, bytes)
         close(fd)
@@ -649,10 +643,10 @@ defmodule :m_prim_file do
             :logger,
             {:log, :warning, 'Non-unicode filename ~p ignored\n', [rawName],
              %{
-               :pid => self(),
-               :gl => :erlang.group_leader(),
-               :time => :os.system_time(:microsecond),
-               :error_logger => %{:tag => :warning_msg}
+               pid: self(),
+               gl: :erlang.group_leader(),
+               time: :os.system_time(:microsecond),
+               error_logger: %{tag: :warning_msg}
              }}
           )
         catch
@@ -712,7 +706,7 @@ defmodule :m_prim_file do
 
   defp read_handle_info_1(fd, timeType) do
     try do
-      %{:handle => fRef} = get_fd_data(fd)
+      %{handle: fRef} = get_fd_data(fd)
 
       case read_handle_info_nif(fRef) do
         {:error, reason} ->

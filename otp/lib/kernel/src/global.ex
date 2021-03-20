@@ -438,7 +438,7 @@ defmodule :m_global do
 
       tuple when is_tuple(tuple) ->
         list = :erlang.tuple_to_list(tuple)
-        [[_HisVsn, hisTag] | _] = list
+        [_HisVsn, hisTag | _] = list
         init_connect(5, node, initMsg, hisTag, r_state(s, :resolvers), s)
 
       _ ->

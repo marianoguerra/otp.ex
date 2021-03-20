@@ -44,14 +44,14 @@ defmodule :m_raw_file_io_delayed do
     monitor = :erlang.monitor(:process, owner)
 
     defaults = %{
-      :owner => owner,
-      :monitor => monitor,
-      :secret => secret,
-      :timer => :none,
-      :pid => self(),
-      :buffer => :prim_buffer.new(),
-      :delay_size => 64 <<< 10,
-      :delay_time => 2000
+      owner: owner,
+      monitor: monitor,
+      secret: secret,
+      timer: :none,
+      pid: self(),
+      buffer: :prim_buffer.new(),
+      delay_size: 64 <<< 10,
+      delay_time: 2000
     }
 
     data = fill_delay_values(defaults, options)
@@ -67,7 +67,7 @@ defmodule :m_raw_file_io_delayed do
          [{:delayed_write, size, time} | options]
        ) do
     fill_delay_values(
-      %{data | :delay_size => size, :delay_time => time},
+      Map.merge(data, %{delay_size: size, delay_time: time}),
       options
     )
   end
@@ -76,7 +76,7 @@ defmodule :m_raw_file_io_delayed do
     fill_delay_values(data, options)
   end
 
-  def opening({:call, from}, {:"$open", secret, filename, modes}, %{:secret => secret} = data) do
+  def opening({:call, from}, {:"$open", secret, filename, modes}, %{secret: secret} = data) do
     case :raw_file_io.open(filename, modes) do
       {:ok, privateFd} ->
         publicData =
@@ -91,7 +91,7 @@ defmodule :m_raw_file_io_delayed do
             data: publicData
           )
 
-        newData = %{data | :handle => privateFd}
+        newData = Map.put(data, :handle, privateFd)
         response = {:ok, publicFd}
         {:next_state, :opened, newData, [{:reply, from, response}]}
 
@@ -104,7 +104,7 @@ defmodule :m_raw_file_io_delayed do
     {:keep_state_and_data, [:postpone]}
   end
 
-  def opened(:info, {:"$timed_out", secret}, %{:secret => secret} = data) do
+  def opened(:info, {:"$timed_out", secret}, %{secret: secret} = data) do
     case try_flush_write_buffer(data) do
       :busy ->
         :gen_statem.cast(self(), :"$reset_timeout")
@@ -113,13 +113,13 @@ defmodule :m_raw_file_io_delayed do
         :ok
     end
 
-    {:keep_state, %{data | :timer => :none}, []}
+    {:keep_state, Map.put(data, :timer, :none), []}
   end
 
   def opened(
         :info,
         {:DOWN, monitor, :process, _Owner, reason},
-        %{:monitor => monitor} = data
+        %{monitor: monitor} = data
       ) do
     cond do
       reason !== :kill ->
@@ -136,10 +136,10 @@ defmodule :m_raw_file_io_delayed do
     :keep_state_and_data
   end
 
-  def opened({:call, {owner, _Tag} = from}, [:close], %{:owner => owner} = data) do
+  def opened({:call, {owner, _Tag} = from}, [:close], %{owner: owner} = data) do
     case flush_write_buffer(data) do
       :ok ->
-        %{:handle => privateFd} = data
+        %{handle: privateFd} = data
         response = apply(r_file_descriptor(privateFd, :module), :close, [privateFd])
         {:stop_and_reply, :normal, [{:reply, from, response}]}
 
@@ -148,17 +148,17 @@ defmodule :m_raw_file_io_delayed do
     end
   end
 
-  def opened({:call, {owner, _Tag} = from}, :"$wait", %{:owner => owner}) do
+  def opened({:call, {owner, _Tag} = from}, :"$wait", %{owner: owner}) do
     {:keep_state_and_data, [{:reply, from, :ok}]}
   end
 
-  def opened({:call, {owner, _Tag} = from}, :"$synchronous_flush", %{:owner => owner} = data) do
+  def opened({:call, {owner, _Tag} = from}, :"$synchronous_flush", %{owner: owner} = data) do
     cancel_flush_timeout(data)
     response = flush_write_buffer(data)
     {:keep_state_and_data, [{:reply, from, response}]}
   end
 
-  def opened({:call, {owner, _Tag} = from}, command, %{:owner => owner} = data) do
+  def opened({:call, {owner, _Tag} = from}, command, %{owner: owner} = data) do
     response =
       case flush_write_buffer(data) do
         :ok ->
@@ -175,10 +175,10 @@ defmodule :m_raw_file_io_delayed do
     {:shutdown, :protocol_violation}
   end
 
-  def opened(:cast, :"$reset_timeout", %{:delay_time => timeout, :secret => secret} = data) do
+  def opened(:cast, :"$reset_timeout", %{delay_time: timeout, secret: secret} = data) do
     cancel_flush_timeout(data)
     timer = :erlang.send_after(timeout, self(), {:"$timed_out", secret})
-    {:keep_state, %{data | :timer => timer}, []}
+    {:keep_state, Map.put(data, :timer, timer), []}
   end
 
   def opened(:cast, _Message, _Data) do
@@ -186,21 +186,21 @@ defmodule :m_raw_file_io_delayed do
   end
 
   defp dispatch_command(data, [function | args]) do
-    %{:handle => handle} = data
+    %{handle: handle} = data
     module = r_file_descriptor(handle, :module)
     apply(module, function, [handle | args])
   end
 
-  defp cancel_flush_timeout(%{:timer => :none}) do
+  defp cancel_flush_timeout(%{timer: :none}) do
     :ok
   end
 
-  defp cancel_flush_timeout(%{:timer => timer}) do
+  defp cancel_flush_timeout(%{timer: timer}) do
     _ = :erlang.cancel_timer(timer, [{:async, true}])
     :ok
   end
 
-  defp try_flush_write_buffer(%{:buffer => buffer, :handle => privateFd}) do
+  defp try_flush_write_buffer(%{buffer: buffer, handle: privateFd}) do
     case :prim_buffer.try_lock(buffer) do
       :acquired ->
         flush_write_buffer_1(buffer, privateFd)
@@ -212,7 +212,7 @@ defmodule :m_raw_file_io_delayed do
     end
   end
 
-  defp flush_write_buffer(%{:buffer => buffer, :handle => privateFd}) do
+  defp flush_write_buffer(%{buffer: buffer, handle: privateFd}) do
     :acquired = :prim_buffer.try_lock(buffer)
     result = flush_write_buffer_1(buffer, privateFd)
     :prim_buffer.unlock(buffer)
@@ -250,7 +250,7 @@ defmodule :m_raw_file_io_delayed do
   end
 
   defp enqueue_write(fd, iOVec) do
-    %{:delay_size => delaySize, :buffer => buffer, :pid => pid} = get_fd_data(fd)
+    %{delay_size: delaySize, buffer: buffer, pid: pid} = get_fd_data(fd)
 
     case :prim_buffer.try_lock(buffer) do
       :acquired ->
@@ -387,7 +387,7 @@ defmodule :m_raw_file_io_delayed do
   end
 
   defp wrap_call(fd, command) do
-    %{:pid => pid} = get_fd_data(fd)
+    %{pid: pid} = get_fd_data(fd)
 
     try do
       :gen_statem.call(pid, command, :infinity)
@@ -404,7 +404,7 @@ defmodule :m_raw_file_io_delayed do
   end
 
   defp get_fd_data(r_file_descriptor(data: data)) do
-    %{:owner => owner} = data
+    %{owner: owner} = data
 
     case self() do
       ^owner ->

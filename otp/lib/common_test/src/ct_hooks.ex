@@ -373,44 +373,45 @@ defmodule :m_ct_hooks do
     else__
   end
 
-  defp scope([
-         [:pre_init_per_testcase, suiteName, tC]
-         | _
-       ]) do
+  defp scope([:pre_init_per_testcase, suiteName, tC | _]) do
     [:post_init_per_testcase, suiteName, tC]
   end
 
-  defp scope([[:pre_end_per_testcase, suiteName, tC] | _]) do
+  defp scope([:pre_end_per_testcase, suiteName, tC | _]) do
     [:post_end_per_testcase, suiteName, tC]
   end
 
   defp scope([
-         [:pre_init_per_group, suiteName, groupName]
+         :pre_init_per_group,
+         suiteName,
+         groupName
          | _
        ]) do
     [:post_end_per_group, suiteName, groupName]
   end
 
   defp scope([
-         [:post_init_per_group, suiteName, groupName]
+         :post_init_per_group,
+         suiteName,
+         groupName
          | _
        ]) do
     [:post_end_per_group, suiteName, groupName]
   end
 
-  defp scope([[:pre_init_per_suite, suiteName] | _]) do
+  defp scope([:pre_init_per_suite, suiteName | _]) do
     [:post_end_per_suite, suiteName]
   end
 
-  defp scope([[:post_init_per_suite, suiteName] | _]) do
+  defp scope([:post_init_per_suite, suiteName | _]) do
     [:post_end_per_suite, suiteName]
   end
 
-  defp scope([[:post_groups, suiteName] | _]) do
+  defp scope([:post_groups, suiteName | _]) do
     [:post_groups, suiteName]
   end
 
-  defp scope([[:post_all, suiteName] | _]) do
+  defp scope([:post_all, suiteName | _]) do
     [:post_all, suiteName]
   end
 
@@ -418,39 +419,37 @@ defmodule :m_ct_hooks do
     :none
   end
 
-  defp strip_config([
-         [:post_init_per_testcase, suiteName, tC]
-         | _
-       ]) do
+  defp strip_config([:post_init_per_testcase, suiteName, tC | _]) do
     [:post_init_per_testcase, suiteName, tC]
   end
 
-  defp strip_config([
-         [:post_end_per_testcase, suiteName, tC]
-         | _
-       ]) do
+  defp strip_config([:post_end_per_testcase, suiteName, tC | _]) do
     [:post_end_per_testcase, suiteName, tC]
   end
 
   defp strip_config([
-         [:post_init_per_group, suiteName, groupName]
+         :post_init_per_group,
+         suiteName,
+         groupName
          | _
        ]) do
     [:post_init_per_group, suiteName, groupName]
   end
 
   defp strip_config([
-         [:post_end_per_group, suiteName, groupName]
+         :post_end_per_group,
+         suiteName,
+         groupName
          | _
        ]) do
     [:post_end_per_group, suiteName, groupName]
   end
 
-  defp strip_config([[:post_init_per_suite, suiteName] | _]) do
+  defp strip_config([:post_init_per_suite, suiteName | _]) do
     [:post_init_per_suite, suiteName]
   end
 
-  defp strip_config([[:post_end_per_suite, suiteName] | _]) do
+  defp strip_config([:post_end_per_suite, suiteName | _]) do
     [:post_end_per_suite, suiteName]
   end
 

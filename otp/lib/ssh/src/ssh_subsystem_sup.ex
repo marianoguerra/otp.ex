@@ -122,7 +122,7 @@ defmodule :m_ssh_subsystem_sup do
   end
 
   def init([role, address, port, profile, options]) do
-    supFlags = %{:strategy => :one_for_all, :intensity => 0, :period => 3600}
+    supFlags = %{strategy: :one_for_all, intensity: 0, period: 3600}
     childSpecs = child_specs(role, address, port, profile, options)
     {:ok, {supFlags, childSpecs}}
   end
@@ -137,28 +137,28 @@ defmodule :m_ssh_subsystem_sup do
 
   defp ssh_connection_child_spec(role, address, port, _Profile, options) do
     %{
-      :id => id(role, :ssh_connection_sup, address, port),
-      :start => {:ssh_connection_sup, :start_link, [options]},
-      :restart => :temporary,
-      :type => :supervisor
+      id: id(role, :ssh_connection_sup, address, port),
+      start: {:ssh_connection_sup, :start_link, [options]},
+      restart: :temporary,
+      type: :supervisor
     }
   end
 
   defp ssh_channel_child_spec(role, address, port, _Profile, options) do
     %{
-      :id => id(role, :ssh_channel_sup, address, port),
-      :start => {:ssh_channel_sup, :start_link, [options]},
-      :restart => :temporary,
-      :type => :supervisor
+      id: id(role, :ssh_channel_sup, address, port),
+      start: {:ssh_channel_sup, :start_link, [options]},
+      restart: :temporary,
+      type: :supervisor
     }
   end
 
   defp ssh_tcpip_forward_acceptor_child_spec() do
     %{
-      :id => make_ref(),
-      :start => {:ssh_tcpip_forward_acceptor_sup, :start_link, []},
-      :restart => :temporary,
-      :type => :supervisor
+      id: make_ref(),
+      start: {:ssh_tcpip_forward_acceptor_sup, :start_link, []},
+      restart: :temporary,
+      type: :supervisor
     }
   end
 

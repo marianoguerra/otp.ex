@@ -910,14 +910,23 @@ defmodule :m_observer_app_wx do
        [
          r_create_menu(id: 101, text: 'Process info'),
          r_create_menu(id: 102, text: 'Send Msg'),
-         r_create_menu(id: 103, text: 'Kill process')
+         r_create_menu(
+           id: 103,
+           text: 'Kill process'
+         )
        ]},
       {'Trace',
        [
          r_create_menu(id: 104, text: 'Trace process'),
          r_create_menu(id: 105, text: 'Trace named process'),
-         r_create_menu(id: 106, text: 'Trace process tree'),
-         r_create_menu(id: 107, text: 'Trace named process tree')
+         r_create_menu(
+           id: 106,
+           text: 'Trace process tree'
+         ),
+         r_create_menu(
+           id: 107,
+           text: 'Trace named process tree'
+         )
        ]}
     ]
 

@@ -28,14 +28,14 @@ defmodule :m_erl_compile_server do
 
     case verify_context(pathArgs, parameters, st0) do
       {:ok, st1} ->
-        %{:cwd => cwd, :encoding => enc} = parameters
+        %{cwd: cwd, encoding: enc} = parameters
 
         pidRef =
           spawn_monitor(fn ->
             exit(do_compile(erlcArgs, cwd, enc))
           end)
 
-        st = r_st(st1, jobs: %{jobs | pidRef => from})
+        st = r_st(st1, jobs: Map.put(jobs, pidRef, from))
         {:noreply, r_st(st, timeout: 10 * 1000)}
 
       :wrong_config ->
@@ -81,7 +81,7 @@ defmodule :m_erl_compile_server do
     {:noreply, st, timeout}
   end
 
-  defp verify_context(pathArgs, %{:env => env} = parameters, st0) do
+  defp verify_context(pathArgs, %{env: env} = parameters, st0) do
     case ensure_cwd(parameters, st0) do
       {:ok, r_st(config: config) = st} ->
         case make_config(pathArgs, env) do
@@ -97,11 +97,11 @@ defmodule :m_erl_compile_server do
     end
   end
 
-  defp ensure_cwd(%{:cwd => cwd}, r_st(cwd: cwd) = st) do
+  defp ensure_cwd(%{cwd: cwd}, r_st(cwd: cwd) = st) do
     {:ok, st}
   end
 
-  defp ensure_cwd(%{:cwd => newCwd}, r_st(jobs: jobs) = st)
+  defp ensure_cwd(%{cwd: newCwd}, r_st(jobs: jobs) = st)
        when map_size(jobs) === 0 do
     :ok = :file.set_cwd(newCwd)
     {:ok, r_st(st, cwd: newCwd)}
@@ -127,15 +127,15 @@ defmodule :m_erl_compile_server do
     end
   end
 
-  defp parse_command_line(%{:command_line => cmdLine, :cwd => cwd}) do
+  defp parse_command_line(%{command_line: cmdLine, cwd: cwd}) do
     parse_command_line_1(cmdLine, cwd, [], [])
   end
 
-  defp parse_command_line_1([['-pa', pa] | t], cwd, paAcc, pzAcc) do
+  defp parse_command_line_1(['-pa', pa | t], cwd, paAcc, pzAcc) do
     parse_command_line_1(t, cwd, [pa | paAcc], pzAcc)
   end
 
-  defp parse_command_line_1([['-pz', pz] | t], cwd, paAcc, pzAcc) do
+  defp parse_command_line_1(['-pz', pz | t], cwd, paAcc, pzAcc) do
     parse_command_line_1(t, cwd, paAcc, [pz | pzAcc])
   end
 
@@ -194,7 +194,13 @@ defmodule :m_erl_compile_server do
     {:ok, cwd} = :file.get_cwd()
 
     make_config(
-      [get_path_arg(:pa, cwd), get_path_arg(:pz, cwd)],
+      [
+        get_path_arg(:pa, cwd),
+        get_path_arg(
+          :pz,
+          cwd
+        )
+      ],
       env
     )
   end

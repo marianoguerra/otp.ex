@@ -17,9 +17,9 @@ defmodule :m_logger_backend do
     :ok
   end
 
-  defp call_handlers(%{:level => level} = log, [id | handlers], tid) do
+  defp call_handlers(%{level: level} = log, [id | handlers], tid) do
     case :logger_config.get(tid, id, level) do
-      {:ok, %{:module => module} = config} ->
+      {:ok, %{module: module} = config} ->
         filters = :maps.get(:filters, config, [])
 
         case apply_filters(id, log, filters, config) do
@@ -50,9 +50,9 @@ defmodule :m_logger_backend do
                           :logger_server.do_internal_log(
                             :debug,
                             %{
-                              :mfa => {:logger_backend, :call_handlers, 3},
-                              :line => 58,
-                              :file => 'otp/lib/kernel/src/logger_backend.erl'
+                              mfa: {:logger_backend, :call_handlers, 3},
+                              line: 58,
+                              file: 'otp/lib/kernel/src/logger_backend.erl'
                             },
                             log1,
                             [
@@ -82,9 +82,9 @@ defmodule :m_logger_backend do
                           :logger_server.do_internal_log(
                             :debug,
                             %{
-                              :mfa => {:logger_backend, :call_handlers, 3},
-                              :line => 71,
-                              :file => 'otp/lib/kernel/src/logger_backend.erl'
+                              mfa: {:logger_backend, :call_handlers, 3},
+                              line: 71,
+                              file: 'otp/lib/kernel/src/logger_backend.erl'
                             },
                             log1,
                             [[{:logger, :remove_handler_failed}, {:reason, reason}]]
@@ -142,7 +142,7 @@ defmodule :m_logger_backend do
       :ignore ->
         do_apply_filters(owner, log, filters, state)
 
-      log1 = %{:level => level, :msg => msg, :meta => meta}
+      log1 = %{level: level, msg: msg, meta: meta}
       when (is_atom(level) and
               (is_tuple(msg) and tuple_size(msg) == 2) and
               is_list(
@@ -227,9 +227,9 @@ defmodule :m_logger_backend do
               :logger_server.do_internal_log(
                 :debug,
                 %{
-                  :mfa => {:logger_backend, :handle_filter_failed, 4},
-                  :line => 123,
-                  :file => 'otp/lib/kernel/src/logger_backend.erl'
+                  mfa: {:logger_backend, :handle_filter_failed, 4},
+                  line: 123,
+                  file: 'otp/lib/kernel/src/logger_backend.erl'
                 },
                 log,
                 [

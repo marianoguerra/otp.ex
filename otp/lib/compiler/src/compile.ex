@@ -339,23 +339,23 @@ defmodule :m_compile do
   end
 
   defp expand_opt(:basic_validation, os) do
-    [[:no_code_generation, :to_pp, :binary] | os]
+    [:no_code_generation, :to_pp, :binary | os]
   end
 
   defp expand_opt(:strong_validation, os) do
-    [[:no_code_generation, :to_kernel, :binary] | os]
+    [:no_code_generation, :to_kernel, :binary | os]
   end
 
   defp expand_opt(:report, os) do
-    [[:report_errors, :report_warnings] | os]
+    [:report_errors, :report_warnings | os]
   end
 
   defp expand_opt(:return, os) do
-    [[:return_errors, :return_warnings] | os]
+    [:return_errors, :return_warnings | os]
   end
 
   defp expand_opt(:no_bsm3, os) do
-    [[:no_bsm3, :no_bsm_opt] | expand_opt(:no_bsm4, os)]
+    [:no_bsm3, :no_bsm_opt | expand_opt(:no_bsm4, os)]
   end
 
   defp expand_opt(:no_bsm4, os) do
@@ -385,7 +385,8 @@ defmodule :m_compile do
     expand_opt(
       :r23,
       [
-        [:no_shared_fun_wrappers, :no_swap]
+        :no_shared_fun_wrappers,
+        :no_swap
         | expand_opt(:no_bsm4, os)
       ]
     )
@@ -396,18 +397,15 @@ defmodule :m_compile do
   end
 
   defp expand_opt(:no_make_fun3, os) do
-    [[:no_make_fun3, :no_fun_opt] | os]
+    [:no_make_fun3, :no_fun_opt | os]
   end
 
   defp expand_opt({:debug_info_key, _} = o, os) do
-    [[:encrypt_debug_info, o] | os]
+    [:encrypt_debug_info, o | os]
   end
 
   defp expand_opt(:no_type_opt = o, os) do
-    [
-      [o, :no_ssa_opt_type_start, :no_ssa_opt_type_continue, :no_ssa_opt_type_finish]
-      | os
-    ]
+    [o, :no_ssa_opt_type_start, :no_ssa_opt_type_continue, :no_ssa_opt_type_finish | os]
   end
 
   defp expand_opt(o, os) do
@@ -416,18 +414,19 @@ defmodule :m_compile do
 
   defp expand_opt_before_21(os) do
     [
-      [
-        :no_init_yregs,
-        :no_make_fun3,
-        :no_fun_opt,
-        :no_shared_fun_wrappers,
-        :no_swap,
-        :no_put_tuple2,
-        :no_get_hd_tl,
-        :no_ssa_opt_record,
-        :no_utf8_atoms
-      ]
-      | expand_opt(:no_bsm3, os)
+      :no_init_yregs,
+      :no_make_fun3,
+      :no_fun_opt,
+      :no_shared_fun_wrappers,
+      :no_swap,
+      :no_put_tuple2,
+      :no_get_hd_tl,
+      :no_ssa_opt_record,
+      :no_utf8_atoms
+      | expand_opt(
+          :no_bsm3,
+          os
+        )
     ]
   end
 
@@ -851,7 +850,7 @@ defmodule :m_compile do
               ret1
           end
 
-        :erlang.list_to_tuple([[:ok, mod] | ret2])
+        :erlang.list_to_tuple([:ok, mod | ret2])
     end
   end
 
@@ -1205,27 +1204,25 @@ defmodule :m_compile do
 
   defp standard_passes() do
     [
-      [
-        {:transform_module, &transform_module/2},
-        {:iff, :makedep_side_effect, {:makedep_and_output, &makedep_and_output/2}},
-        {:iff, :makedep,
-         [{:makedep, &makedep/2}, {:unless, :binary, {:makedep_output, &makedep_output/2}}]},
-        {:iff, :makedep, :done},
-        {:iff, :dpp, {:listing, 'pp'}},
-        {:lint_module, &lint_module/2},
-        {:compile_directives, &compile_directives/2},
-        {:iff, :P, {:src_listing, 'P'}},
-        {:iff, :to_pp, {:done, 'P'}},
-        {:iff, :dabstr, {:listing, 'abstr'}},
-        {:delay, [{:iff, :debug_info, {:save_abstract_code, &save_abstract_code/2}}]},
-        {:expand_records, &expand_records/2},
-        {:iff, :dexp, {:listing, 'expand'}},
-        {:iff, :E, {:src_listing, 'E'}},
-        {:iff, :to_exp, {:done, 'E'}},
-        {:core, &core/2},
-        {:iff, :dcore, {:listing, 'core'}},
-        {:iff, :to_core0, {:done, 'core'}}
-      ]
+      {:transform_module, &transform_module/2},
+      {:iff, :makedep_side_effect, {:makedep_and_output, &makedep_and_output/2}},
+      {:iff, :makedep,
+       [{:makedep, &makedep/2}, {:unless, :binary, {:makedep_output, &makedep_output/2}}]},
+      {:iff, :makedep, :done},
+      {:iff, :dpp, {:listing, 'pp'}},
+      {:lint_module, &lint_module/2},
+      {:compile_directives, &compile_directives/2},
+      {:iff, :P, {:src_listing, 'P'}},
+      {:iff, :to_pp, {:done, 'P'}},
+      {:iff, :dabstr, {:listing, 'abstr'}},
+      {:delay, [{:iff, :debug_info, {:save_abstract_code, &save_abstract_code/2}}]},
+      {:expand_records, &expand_records/2},
+      {:iff, :dexp, {:listing, 'expand'}},
+      {:iff, :E, {:src_listing, 'E'}},
+      {:iff, :to_exp, {:done, 'E'}},
+      {:core, &core/2},
+      {:iff, :dcore, {:listing, 'core'}},
+      {:iff, :to_core0, {:done, 'core'}}
       | core_passes(:verified_core)
     ]
   end
@@ -1268,87 +1265,82 @@ defmodule :m_compile do
 
   defp kernel_passes() do
     [
-      [
-        {:pass, :sys_core_bsm},
-        {:iff, :dcbsm, {:listing, 'core_bsm'}},
-        {:iff, :clint, {:core_lint_module, &core_lint_module/2}},
-        {:iff, :core, {:save_core_code, &save_core_code/2}},
-        {:v3_kernel, &v3_kernel/2},
-        {:iff, :dkern, {:listing, 'kernel'}},
-        {:iff, :to_kernel, {:done, 'kernel'}},
-        {:pass, :beam_kernel_to_ssa},
-        {:iff, :dssa, {:listing, 'ssa'}},
-        {:iff, :ssalint, {:pass, :beam_ssa_lint}},
-        {:delay,
-         [
-           {:unless, :no_bool_opt, {:pass, :beam_ssa_bool}},
-           {:iff, :dbool, {:listing, 'bool'}},
-           {:unless, :no_bool_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
-           {:unless, :no_share_opt, {:pass, :beam_ssa_share}},
-           {:iff, :dssashare, {:listing, 'ssashare'}},
-           {:unless, :no_share_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
-           {:unless, :no_bsm_opt, {:pass, :beam_ssa_bsm}},
-           {:iff, :dssabsm, {:listing, 'ssabsm'}},
-           {:unless, :no_bsm_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
-           {:unless, :no_fun_opt, {:pass, :beam_ssa_funs}},
-           {:iff, :dssafuns, {:listing, 'ssafuns'}},
-           {:unless, :no_fun_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
-           {:unless, :no_ssa_opt, {:pass, :beam_ssa_opt}},
-           {:iff, :dssaopt, {:listing, 'ssaopt'}},
-           {:unless, :no_ssa_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
-           {:unless, :no_throw_opt, {:pass, :beam_ssa_throw}},
-           {:iff, :dthrow, {:listing, 'throw'}},
-           {:unless, :no_throw_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
-           {:unless, :no_recv_opt, {:pass, :beam_ssa_recv}},
-           {:iff, :drecv, {:listing, 'recv'}},
-           {:unless, :no_recv_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}}
-         ]},
-        {:pass, :beam_ssa_pre_codegen},
-        {:iff, :dprecg, {:listing, 'precodegen'}},
-        {:iff, :ssalint, {:pass, :beam_ssa_lint}},
-        {:pass, :beam_ssa_codegen},
-        {:iff, :dcg, {:listing, 'codegen'}},
-        {:iff, :doldcg, {:listing, 'codegen'}},
-        {:beam_validator_strong, &beam_validator_strong/2}
-      ]
+      {:pass, :sys_core_bsm},
+      {:iff, :dcbsm, {:listing, 'core_bsm'}},
+      {:iff, :clint, {:core_lint_module, &core_lint_module/2}},
+      {:iff, :core, {:save_core_code, &save_core_code/2}},
+      {:v3_kernel, &v3_kernel/2},
+      {:iff, :dkern, {:listing, 'kernel'}},
+      {:iff, :to_kernel, {:done, 'kernel'}},
+      {:pass, :beam_kernel_to_ssa},
+      {:iff, :dssa, {:listing, 'ssa'}},
+      {:iff, :ssalint, {:pass, :beam_ssa_lint}},
+      {:delay,
+       [
+         {:unless, :no_bool_opt, {:pass, :beam_ssa_bool}},
+         {:iff, :dbool, {:listing, 'bool'}},
+         {:unless, :no_bool_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
+         {:unless, :no_share_opt, {:pass, :beam_ssa_share}},
+         {:iff, :dssashare, {:listing, 'ssashare'}},
+         {:unless, :no_share_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
+         {:unless, :no_bsm_opt, {:pass, :beam_ssa_bsm}},
+         {:iff, :dssabsm, {:listing, 'ssabsm'}},
+         {:unless, :no_bsm_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
+         {:unless, :no_fun_opt, {:pass, :beam_ssa_funs}},
+         {:iff, :dssafuns, {:listing, 'ssafuns'}},
+         {:unless, :no_fun_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
+         {:unless, :no_ssa_opt, {:pass, :beam_ssa_opt}},
+         {:iff, :dssaopt, {:listing, 'ssaopt'}},
+         {:unless, :no_ssa_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
+         {:unless, :no_throw_opt, {:pass, :beam_ssa_throw}},
+         {:iff, :dthrow, {:listing, 'throw'}},
+         {:unless, :no_throw_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}},
+         {:unless, :no_recv_opt, {:pass, :beam_ssa_recv}},
+         {:iff, :drecv, {:listing, 'recv'}},
+         {:unless, :no_recv_opt, {:iff, :ssalint, {:pass, :beam_ssa_lint}}}
+       ]},
+      {:pass, :beam_ssa_pre_codegen},
+      {:iff, :dprecg, {:listing, 'precodegen'}},
+      {:iff, :ssalint, {:pass, :beam_ssa_lint}},
+      {:pass, :beam_ssa_codegen},
+      {:iff, :dcg, {:listing, 'codegen'}},
+      {:iff, :doldcg, {:listing, 'codegen'}},
+      {:beam_validator_strong, &beam_validator_strong/2}
       | asm_passes()
     ]
   end
 
   defp asm_passes() do
     [
-      [
-        {:delay,
-         [
-           {:pass, :beam_a},
-           {:iff, :da, {:listing, 'a'}},
-           {:unless, :no_postopt,
-            [
-              {:pass, :beam_block},
-              {:iff, :dblk, {:listing, 'block'}},
-              {:unless, :no_jopt, {:pass, :beam_jump}},
-              {:iff, :djmp, {:listing, 'jump'}},
-              {:unless, :no_peep_opt, {:pass, :beam_peep}},
-              {:iff, :dpeep, {:listing, 'peep'}},
-              {:pass, :beam_clean},
-              {:iff, :dclean, {:listing, 'clean'}},
-              {:unless, :no_stack_trimming, {:pass, :beam_trim}},
-              {:iff, :dtrim, {:listing, 'trim'}},
-              {:pass, :beam_flatten}
-            ]},
-           {:iff, :no_postopt, [{:pass, :beam_clean}]},
-           {:iff, :diffable, {:diffable, &diffable/2}},
-           {:pass, :beam_z},
-           {:iff, :diffable, {:listing, 'S'}},
-           {:iff, :dz, {:listing, 'z'}},
-           {:iff, :dopt, {:listing, 'optimize'}},
-           {:iff, :S, {:listing, 'S'}},
-           {:iff, :to_asm, {:done, 'S'}}
-         ]},
-        {:beam_validator_weak, &beam_validator_weak/2},
-        {:beam_asm, &beam_asm/2}
-      ]
-      | binary_passes()
+      {:delay,
+       [
+         {:pass, :beam_a},
+         {:iff, :da, {:listing, 'a'}},
+         {:unless, :no_postopt,
+          [
+            {:pass, :beam_block},
+            {:iff, :dblk, {:listing, 'block'}},
+            {:unless, :no_jopt, {:pass, :beam_jump}},
+            {:iff, :djmp, {:listing, 'jump'}},
+            {:unless, :no_peep_opt, {:pass, :beam_peep}},
+            {:iff, :dpeep, {:listing, 'peep'}},
+            {:pass, :beam_clean},
+            {:iff, :dclean, {:listing, 'clean'}},
+            {:unless, :no_stack_trimming, {:pass, :beam_trim}},
+            {:iff, :dtrim, {:listing, 'trim'}},
+            {:pass, :beam_flatten}
+          ]},
+         {:iff, :no_postopt, [{:pass, :beam_clean}]},
+         {:iff, :diffable, {:diffable, &diffable/2}},
+         {:pass, :beam_z},
+         {:iff, :diffable, {:listing, 'S'}},
+         {:iff, :dz, {:listing, 'z'}},
+         {:iff, :dopt, {:listing, 'optimize'}},
+         {:iff, :S, {:listing, 'S'}},
+         {:iff, :to_asm, {:done, 'S'}}
+       ]},
+      {:beam_validator_weak, &beam_validator_weak/2},
+      {:beam_asm, &beam_asm/2} | binary_passes()
     ]
   end
 
@@ -1527,7 +1519,7 @@ defmodule :m_compile do
       :epp.parse_file(
         file,
         [
-          {:includes, [['.', dir] | inc_paths(opts)]},
+          {:includes, ['.', dir | inc_paths(opts)]},
           {:source_name, sourceName},
           {:macros, pre_defs(opts)},
           {:default_encoding, defEncoding},
@@ -3001,7 +2993,7 @@ defmodule :m_compile do
         diffable_label_map(is, new, map, [{:label, newLabel} | acc])
 
       %{} ->
-        diffable_label_map(is, new + 1, %{map | old => new}, [{:label, new} | acc])
+        diffable_label_map(is, new + 1, Map.put(map, old, new), [{:label, new} | acc])
     end
   end
 
@@ -3189,7 +3181,9 @@ defmodule :m_compile do
 
     options ++
       [
-        [:report_errors, {:cwd, cwd}, {:outdir, outdir}]
+        :report_errors,
+        {:cwd, cwd},
+        {:outdir, outdir}
         | for dir <- includes do
             {:i, dir}
           end

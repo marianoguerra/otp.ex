@@ -199,13 +199,10 @@ defmodule :m_asn1ct_imm do
 
     b ++
       [
-        [
-          {:try, [bit_string_name2pos_fun(nNL, val)],
-           {positions,
-            [{:call, :per_common, :bitstring_from_positions, [positions | extraArgs]}]}, [toBs],
-           bs},
-          {:call, :erlang, :bit_size, [bs], bits}
-        ]
+        {:try, [bit_string_name2pos_fun(nNL, val)],
+         {positions, [{:call, :per_common, :bitstring_from_positions, [positions | extraArgs]}]},
+         [toBs], bs},
+        {:call, :erlang, :bit_size, [bs], bits}
         | per_enc_length(bs, 1, bits, constraint, aligned, :"BIT STRING")
       ]
   end
@@ -230,10 +227,8 @@ defmodule :m_asn1ct_imm do
 
     b ++
       [
-        [
-          {:call, :per_common, :to_bitstring, [val | extraArgs], bs},
-          {:call, :erlang, :bit_size, [bs], bits}
-        ]
+        {:call, :per_common, :to_bitstring, [val | extraArgs], bs},
+        {:call, :erlang, :bit_size, [bs], bits}
         | per_enc_length(bs, 1, bits, constraint, aligned, :"BIT STRING")
       ]
   end
@@ -267,13 +262,10 @@ defmodule :m_asn1ct_imm do
 
     b ++
       [
-        [
-          {:try, [bit_string_name2pos_fun(nNL, val)],
-           {positions,
-            [{:call, :per_common, :bitstring_from_positions, [positions | extraArgs]}]},
-           [{:call, :per_common, :to_named_bitstring, [val | extraArgs]}], bs},
-          {:call, :erlang, :bit_size, [bs], bits}
-        ]
+        {:try, [bit_string_name2pos_fun(nNL, val)],
+         {positions, [{:call, :per_common, :bitstring_from_positions, [positions | extraArgs]}]},
+         [{:call, :per_common, :to_named_bitstring, [val | extraArgs]}], bs},
+        {:call, :erlang, :bit_size, [bs], bits}
         | per_enc_length(bs, 1, bits, constraint, aligned, :"BIT STRING")
       ]
   end
@@ -409,11 +401,9 @@ defmodule :m_asn1ct_imm do
       )
 
     [
-      [
-        {:list, imm, val},
-        {:call, enc_mod(aligned), :complete, [val], bin},
-        {:call, :erlang, :byte_size, [bin], len}
-      ]
+      {:list, imm, val},
+      {:call, enc_mod(aligned), :complete, [val], bin},
+      {:call, :erlang, :byte_size, [bin], len}
       | per_enc_length(bin, 8, len, aligned)
     ]
   end
@@ -445,10 +435,8 @@ defmodule :m_asn1ct_imm do
 
     b ++
       [
-        [
-          {:call, :erlang, :iolist_to_binary, [val], bin},
-          {:call, :erlang, :byte_size, [bin], len}
-        ]
+        {:call, :erlang, :iolist_to_binary, [val], bin},
+        {:call, :erlang, :byte_size, [bin], len}
         | per_enc_length(bin, 8, len, constraint, aligned, :"OCTET STRING")
       ]
   end
@@ -458,7 +446,8 @@ defmodule :m_asn1ct_imm do
 
     b ++
       [
-        [{:call, m, f, [val], bin}, {:call, :erlang, :byte_size, [bin], len}]
+        {:call, m, f, [val], bin},
+        {:call, :erlang, :byte_size, [bin], len}
         | per_enc_length(bin, 8, len, aligned)
       ]
   end
@@ -467,7 +456,8 @@ defmodule :m_asn1ct_imm do
     build_cond([
       [{:lt, val, 64}, {:put_bits, val, 7, [1]}],
       [
-        [:_, {:put_bits, 1, 1, [1]}]
+        :_,
+        {:put_bits, 1, 1, [1]}
         | per_enc_unsigned(
             val,
             aligned
@@ -521,7 +511,17 @@ defmodule :m_asn1ct_imm do
     b ++
       [
         {:assign, bitmap, bitmapExpr},
-        {:list, [{:cond, [[{:eq, bitmap, 0}], [:_ | length ++ putBits]]}], {:var, 'Extensions'}}
+        {:list,
+         [
+           {:cond,
+            [
+              [{:eq, bitmap, 0}],
+              [
+                :_
+                | length ++ putBits
+              ]
+            ]}
+         ], {:var, 'Extensions'}}
       ]
   end
 
@@ -1646,14 +1646,15 @@ defmodule :m_asn1ct_imm do
     root =
       for sv <- svs do
         {[], _, put} = per_enc_constrained(sv, lb, ub, aligned)
-        [[{:eq, val, sv}, {:put_bits, 0, 1, [1]}] | put]
+        [{:eq, val, sv}, {:put_bits, 0, 1, [1]} | put]
       end
 
     cs =
       root ++
         [
           [
-            [:_, {:put_bits, 1, 1, [1]}]
+            :_,
+            {:put_bits, 1, 1, [1]}
             | per_enc_unconstrained(val, aligned)
           ]
         ]
@@ -1667,11 +1668,13 @@ defmodule :m_asn1ct_imm do
     prefix ++
       build_cond([
         [
-          [check, {:put_bits, 0, 1, [1]}]
+          check,
+          {:put_bits, 0, 1, [1]}
           | action
         ],
         [
-          [:_, {:put_bits, 1, 1, [1]}]
+          :_,
+          {:put_bits, 1, 1, [1]}
           | per_enc_unconstrained(val0, aligned)
         ]
       ])
@@ -1781,11 +1784,14 @@ defmodule :m_asn1ct_imm do
         binSize = {:var, varBase ++ '@bin_size'}
 
         [
-          [
-            {:call, :binary, :encode_unsigned, [val], bin},
-            {:call, :erlang, :byte_size, [bin], binSize}
-          ]
-          | per_enc_length(bin, 8, binSize, aligned)
+          {:call, :binary, :encode_unsigned, [val], bin},
+          {:call, :erlang, :byte_size, [bin], binSize}
+          | per_enc_length(
+              bin,
+              8,
+              binSize,
+              aligned
+            )
         ]
 
       true ->
@@ -1831,7 +1837,7 @@ defmodule :m_asn1ct_imm do
 
     build_length_cond(
       prefix,
-      [[[check, noExt] | putLen ++ putBits] | extConds]
+      [[check, noExt | putLen ++ putBits] | extConds]
     )
   end
 
@@ -1879,7 +1885,7 @@ defmodule :m_asn1ct_imm do
 
     build_length_cond(
       prefix,
-      [[[check, noExt] | putLen] | extConds]
+      [[check, noExt | putLen] | extConds]
     )
   end
 
@@ -2072,7 +2078,7 @@ defmodule :m_asn1ct_imm do
   end
 
   defp prepend_to_cond_1([check | t], code) do
-    [[check, code] | t]
+    [check, code | t]
   end
 
   defp enc_char_tab(:notab) do
@@ -2135,7 +2141,8 @@ defmodule :m_asn1ct_imm do
   defp per_enc_enumerated_ext_1([{h, _} | t], val, aligned, n) do
     [
       [
-        [{:eq, val, h}, {:put_bits, 1, 1, [1]}]
+        {:eq, val, h},
+        {:put_bits, 1, 1, [1]}
         | per_enc_small_number(n, aligned)
       ]
       | per_enc_enumerated_ext_1(t, val, aligned, n + 1)
@@ -2265,7 +2272,17 @@ defmodule :m_asn1ct_imm do
             [
               {:call, :erlang, :iolist_to_binary, [var], bin},
               {:call, :erlang, :byte_size, [bin], lenVar},
-              {:cond, [[{:eq, lenVar, len}, {:put_bits, bin, _, [_ | align]}]]}
+              {:cond,
+               [
+                 [
+                   {:eq, lenVar, len},
+                   {:put_bits, bin, _,
+                    [
+                      _
+                      | align
+                    ]}
+                 ]
+               ]}
             ], var, val}
          ] = lc,
          lenImm
@@ -2844,7 +2861,7 @@ defmodule :m_asn1ct_imm do
   end
 
   defp enc_opt(
-         {:call, :per_common, :encode_chars, [[list, numBits] | _], dst} = imm,
+         {:call, :per_common, :encode_chars, [list, numBits | _], dst} = imm,
          st0
        ) do
     st1 = set_type(dst, t_bitstring(), st0)
@@ -3738,7 +3755,7 @@ defmodule :m_asn1ct_imm do
   end
 
   defp enc_call_args([a | as], sep) do
-    [[sep, mk_val(a)] | enc_call_args(as, ', ')]
+    [sep, mk_val(a) | enc_call_args(as, ', ')]
   end
 
   defp enc_call_args([], _) do
@@ -3884,7 +3901,7 @@ defmodule :m_asn1ct_imm do
         enc_hoist_align_reverse(t, [h | acc])
 
       {_, _} ->
-        :lists.reverse(t, [[h, :stop] | acc])
+        :lists.reverse(t, [h, :stop | acc])
     end
   end
 
@@ -3911,10 +3928,7 @@ defmodule :m_asn1ct_imm do
         enc_hoist_align(t, false, [{:block, bl} | acc])
 
       true ->
-        enc_hoist_align(t, true, [
-          [{:put_bits, 0, 0, [1, :align]}, {:block, bl}]
-          | acc
-        ])
+        enc_hoist_align(t, true, [{:put_bits, 0, 0, [1, :align]}, {:block, bl} | acc])
     end
   end
 
@@ -4284,7 +4298,7 @@ defmodule :m_asn1ct_imm do
   end
 
   defp fixup_put_bits([{:put_bits, v, n, [u, :align]} | t]) do
-    [[:align, {:put_bits, v, n, [u]}] | fixup_put_bits(t)]
+    [:align, {:put_bits, v, n, [u]} | fixup_put_bits(t)]
   end
 
   defp fixup_put_bits([{:put_bits, _, _, _} = h | t]) do

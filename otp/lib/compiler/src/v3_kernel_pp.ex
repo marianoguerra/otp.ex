@@ -243,7 +243,13 @@ defmodule :m_v3_kernel_pp do
   end
 
   defp format_1(r_k_bin_seg(next: next) = s, ctxt) do
-    [format_bin_seg_1(s, ctxt), format_bin_seg(next, ctxt_bump_indent(ctxt, 2))]
+    [
+      format_bin_seg_1(s, ctxt),
+      format_bin_seg(
+        next,
+        ctxt_bump_indent(ctxt, 2)
+      )
+    ]
   end
 
   defp format_1(
@@ -260,7 +266,13 @@ defmodule :m_v3_kernel_pp do
         next: next
       )
 
-    [format_bin_seg_1(s, ctxt), format_bin_seg(next, ctxt_bump_indent(ctxt, 2))]
+    [
+      format_bin_seg_1(s, ctxt),
+      format_bin_seg(
+        next,
+        ctxt_bump_indent(ctxt, 2)
+      )
+    ]
   end
 
   defp format_1(r_k_bin_end(), _Ctxt) do
@@ -291,8 +303,16 @@ defmodule :m_v3_kernel_pp do
     ctxt1 = ctxt_bump_indent(ctxt, 2)
 
     [
-      ['do', nl_indent(ctxt1), format(a, ctxt1), nl_indent(ctxt), 'then', nl_indent(ctxt)]
-      | format(b, ctxt)
+      'do',
+      nl_indent(ctxt1),
+      format(a, ctxt1),
+      nl_indent(ctxt),
+      'then',
+      nl_indent(ctxt)
+      | format(
+          b,
+          ctxt
+        )
     ]
   end
 
@@ -318,10 +338,16 @@ defmodule :m_v3_kernel_pp do
       nl_indent(ctxt1),
       format(then, ctxt1),
       nl_indent(ctxt1),
-      format(first, ctxt1),
+      format(
+        first,
+        ctxt1
+      ),
       nl_indent(ctxt),
       'end',
-      format_ret(rs, ctxt1)
+      format_ret(
+        rs,
+        ctxt1
+      )
     ]
   end
 
@@ -343,7 +369,9 @@ defmodule :m_v3_kernel_pp do
     ctxt1 = ctxt_bump_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
     [
-      [format(val, ctxt), ' ->', nl_indent(ctxt1)]
+      format(val, ctxt),
+      ' ->',
+      nl_indent(ctxt1)
       | format(
           b,
           ctxt1
@@ -360,7 +388,10 @@ defmodule :m_v3_kernel_pp do
     ctxt1 = ctxt_bump_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
     [
-      [format(g, ctxt), nl_indent(ctxt), '->', nl_indent(ctxt1)]
+      format(g, ctxt),
+      nl_indent(ctxt),
+      '->',
+      nl_indent(ctxt1)
       | format(b, ctxt1)
     ]
   end
@@ -390,7 +421,13 @@ defmodule :m_v3_kernel_pp do
   end
 
   defp format_1(r_k_put(arg: a, ret: rs), ctxt) do
-    [format(a, ctxt), format_ret(rs, ctxt_bump_indent(ctxt, 1))]
+    [
+      format(a, ctxt),
+      format_ret(
+        rs,
+        ctxt_bump_indent(ctxt, 1)
+      )
+    ]
   end
 
   defp format_1(
@@ -405,17 +442,39 @@ defmodule :m_v3_kernel_pp do
       format(a, ctxt1),
       nl_indent(ctxt),
       'of ',
-      format_hseq(vs, ', ', ctxt_bump_indent(ctxt, 3), &format/2),
+      format_hseq(
+        vs,
+        ', ',
+        ctxt_bump_indent(
+          ctxt,
+          3
+        ),
+        &format/2
+      ),
       nl_indent(ctxt1),
       format(b, ctxt1),
       nl_indent(ctxt),
       'catch ',
-      format_hseq(evs, ', ', ctxt_bump_indent(ctxt, 6), &format/2),
+      format_hseq(
+        evs,
+        ', ',
+        ctxt_bump_indent(
+          ctxt,
+          6
+        ),
+        &format/2
+      ),
       nl_indent(ctxt1),
-      format(h, ctxt1),
+      format(
+        h,
+        ctxt1
+      ),
       nl_indent(ctxt),
       'end',
-      format_ret(rs, ctxt)
+      format_ret(
+        rs,
+        ctxt
+      )
     ]
   end
 
@@ -431,14 +490,33 @@ defmodule :m_v3_kernel_pp do
       format(a, ctxt1),
       nl_indent(ctxt),
       'of ',
-      format_hseq(vs, ', ', ctxt_bump_indent(ctxt, 3), &format/2),
+      format_hseq(
+        vs,
+        ', ',
+        ctxt_bump_indent(
+          ctxt,
+          3
+        ),
+        &format/2
+      ),
       nl_indent(ctxt1),
       format(b, ctxt1),
       nl_indent(ctxt),
       'catch ',
-      format_hseq(evs, ', ', ctxt_bump_indent(ctxt, 6), &format/2),
+      format_hseq(
+        evs,
+        ', ',
+        ctxt_bump_indent(
+          ctxt,
+          6
+        ),
+        &format/2
+      ),
       nl_indent(ctxt1),
-      format(h, ctxt1),
+      format(
+        h,
+        ctxt1
+      ),
       nl_indent(ctxt),
       'end'
     ]
@@ -469,7 +547,10 @@ defmodule :m_v3_kernel_pp do
       format_args(vs, ctxt_bump_indent(ctxt, 14)),
       ' =',
       nl_indent(ctxt1),
-      format(b, ctxt1)
+      format(
+        b,
+        ctxt1
+      )
     ]
   end
 
@@ -478,21 +559,34 @@ defmodule :m_v3_kernel_pp do
          ctxt
        ) do
     [
-      [
-        'module ',
-        format(r_k_literal(val: n), ctxt_bump_indent(ctxt, 7)),
-        nl_indent(ctxt),
-        'export [',
-        format_vseq(es, '', ',', ctxt_bump_indent(ctxt, 8), &format_fa_pair/2),
-        ']',
-        nl_indent(ctxt),
-        'attributes [',
-        format_vseq(as, '', ',', ctxt_bump_indent(ctxt, 12), &format_attribute/2),
-        ']',
-        nl_indent(ctxt),
-        format_vseq(b, '', '', ctxt, &format/2),
-        nl_indent(ctxt)
-      ]
+      'module ',
+      format(r_k_literal(val: n), ctxt_bump_indent(ctxt, 7)),
+      nl_indent(ctxt),
+      'export [',
+      format_vseq(es, '', ',', ctxt_bump_indent(ctxt, 8), &format_fa_pair/2),
+      ']',
+      nl_indent(ctxt),
+      'attributes [',
+      format_vseq(
+        as,
+        '',
+        ',',
+        ctxt_bump_indent(
+          ctxt,
+          12
+        ),
+        &format_attribute/2
+      ),
+      ']',
+      nl_indent(ctxt),
+      format_vseq(
+        b,
+        '',
+        '',
+        ctxt,
+        &format/2
+      ),
+      nl_indent(ctxt)
       | 'end'
     ]
   end
@@ -501,16 +595,20 @@ defmodule :m_v3_kernel_pp do
     ctxt1 = ctxt_bump_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
     [
-      [
-        'set <',
-        format_hseq(vs, ', ', ctxt_bump_indent(ctxt, 5), &format/2),
-        '> =',
-        nl_indent(ctxt1),
-        format(a, ctxt1),
-        nl_indent(ctxt),
-        'in  '
-      ]
-      | format(b, ctxt_bump_indent(ctxt, 2))
+      'set <',
+      format_hseq(vs, ', ', ctxt_bump_indent(ctxt, 5), &format/2),
+      '> =',
+      nl_indent(ctxt1),
+      format(a, ctxt1),
+      nl_indent(ctxt),
+      'in  '
+      | format(
+          b,
+          ctxt_bump_indent(
+            ctxt,
+            2
+          )
+        )
     ]
   end
 
@@ -518,13 +616,16 @@ defmodule :m_v3_kernel_pp do
     ctxt1 = ctxt_bump_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
     [
-      ['fun ', format_args(vs, ctxt_bump_indent(ctxt, 4)), ' ->', nl_indent(ctxt1)]
+      'fun ',
+      format_args(vs, ctxt_bump_indent(ctxt, 4)),
+      ' ->',
+      nl_indent(ctxt1)
       | format(b, ctxt1)
     ]
   end
 
   defp format_1(type, _Ctxt) do
-    [['** Unsupported type: ', :io_lib.write(type)] | ' **']
+    ['** Unsupported type: ', :io_lib.write(type) | ' **']
   end
 
   defp format_ret(rs, ctxt) do
@@ -555,7 +656,10 @@ defmodule :m_v3_kernel_pp do
 
   defp format_vseq([h | t], pre, suf, ctxt, fun) do
     [
-      [fun.(h, ctxt), suf, nl_indent(ctxt), pre]
+      fun.(h, ctxt),
+      suf,
+      nl_indent(ctxt),
+      pre
       | format_vseq(t, pre, suf, ctxt, fun)
     ]
   end
@@ -694,7 +798,7 @@ defmodule :m_v3_kernel_pp do
   end
 
   defp unindent([h | t], _N, _Ctxt, c) do
-    [[h, t] | c]
+    [h, t | c]
   end
 
   defp unindent([], n, ctxt, [h | t]) do

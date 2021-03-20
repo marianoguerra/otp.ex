@@ -413,7 +413,7 @@ defmodule :m_proc_lib do
     {module, :init, 1}
   end
 
-  defp trans_init(:gen, :init_it, [[_GenMod, _, _, _, module] | _])
+  defp trans_init(:gen, :init_it, [_GenMod, _, _, _, module | _])
        when is_atom(module) do
     {module, :init, 1}
   end
@@ -439,20 +439,20 @@ defmodule :m_proc_lib do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:proc_lib, :crash_report, 4},
-            :line => 525,
-            :file => 'otp/lib/stdlib/src/proc_lib.erl'
+            mfa: {:proc_lib, :crash_report, 4},
+            line: 525,
+            file: 'otp/lib/stdlib/src/proc_lib.erl'
           },
           :error,
           %{
-            :label => {:proc_lib, :crash},
-            :report => [my_info(class, reason, startF, stacktrace), linked_info(self())]
+            label: {:proc_lib, :crash},
+            report: [my_info(class, reason, startF, stacktrace), linked_info(self())]
           },
           %{
-            :domain => [:otp, :sasl],
-            :report_cb => &:proc_lib.report_cb/2,
-            :logger_formatter => %{:title => 'CRASH REPORT'},
-            :error_logger => %{:tag => :error_report, :type => :crash_report}
+            domain: [:otp, :sasl],
+            report_cb: &:proc_lib.report_cb/2,
+            logger_formatter: %{title: 'CRASH REPORT'},
+            error_logger: %{tag: :error_report, type: :crash_report}
           }
         ])
 
@@ -472,18 +472,42 @@ defmodule :m_proc_lib do
   defp my_info_1(class, reason, stacktrace) do
     [
       {:pid, self()},
-      get_process_info(self(), :registered_name),
+      get_process_info(
+        self(),
+        :registered_name
+      ),
       {:error_info, {class, reason, stacktrace}},
       get_ancestors(self()),
-      get_process_info(self(), :message_queue_len),
+      get_process_info(
+        self(),
+        :message_queue_len
+      ),
       get_messages(self()),
-      get_process_info(self(), :links),
+      get_process_info(
+        self(),
+        :links
+      ),
       get_cleaned_dictionary(self()),
-      get_process_info(self(), :trap_exit),
-      get_process_info(self(), :status),
-      get_process_info(self(), :heap_size),
-      get_process_info(self(), :stack_size),
-      get_process_info(self(), :reductions)
+      get_process_info(
+        self(),
+        :trap_exit
+      ),
+      get_process_info(
+        self(),
+        :status
+      ),
+      get_process_info(
+        self(),
+        :heap_size
+      ),
+      get_process_info(
+        self(),
+        :stack_size
+      ),
+      get_process_info(
+        self(),
+        :reductions
+      )
     ]
   end
 
@@ -601,16 +625,43 @@ defmodule :m_proc_lib do
       {:pid, pid},
       get_process_info(pid, :registered_name),
       get_initial_call(pid),
-      get_process_info(pid, :current_function),
+      get_process_info(
+        pid,
+        :current_function
+      ),
       get_ancestors(pid),
-      get_process_info(pid, :message_queue_len),
-      get_process_info(pid, :links),
-      get_process_info(pid, :trap_exit),
-      get_process_info(pid, :status),
-      get_process_info(pid, :heap_size),
-      get_process_info(pid, :stack_size),
-      get_process_info(pid, :reductions),
-      get_process_info(pid, :current_stacktrace)
+      get_process_info(
+        pid,
+        :message_queue_len
+      ),
+      get_process_info(
+        pid,
+        :links
+      ),
+      get_process_info(
+        pid,
+        :trap_exit
+      ),
+      get_process_info(
+        pid,
+        :status
+      ),
+      get_process_info(
+        pid,
+        :heap_size
+      ),
+      get_process_info(
+        pid,
+        :stack_size
+      ),
+      get_process_info(
+        pid,
+        :reductions
+      ),
+      get_process_info(
+        pid,
+        :current_stacktrace
+      )
     ]
   end
 
@@ -760,16 +811,10 @@ defmodule :m_proc_lib do
   end
 
   def report_cb(
-        %{:label => {:proc_lib, :crash}, :report => crashReport},
+        %{label: {:proc_lib, :crash}, report: crashReport},
         extra
       ) do
-    default = %{
-      :chars_limit => :unlimited,
-      :depth => :unlimited,
-      :single_line => false,
-      :encoding => :utf8
-    }
-
+    default = %{chars_limit: :unlimited, depth: :unlimited, single_line: false, encoding: :utf8}
     do_format(crashReport, :maps.merge(default, extra))
   end
 
@@ -784,12 +829,12 @@ defmodule :m_proc_lib do
   def format(crashReport, encoding, depth) do
     do_format(
       crashReport,
-      %{:chars_limit => :unlimited, :depth => depth, :encoding => encoding, :single_line => false}
+      %{chars_limit: :unlimited, depth: depth, encoding: encoding, single_line: false}
     )
   end
 
   defp do_format([ownReport, linkReport], extra) do
-    %{:encoding => enc, :single_line => single, :chars_limit => limit0} = extra
+    %{encoding: enc, single_line: single, chars_limit: limit0} = extra
 
     indent =
       cond do
@@ -837,7 +882,7 @@ defmodule :m_proc_lib do
       {first, {class, reason, stackTrace}, rest} ->
         f = format_report(first, myIndent, extra, partLimit)
         r = format_report(rest, myIndent, extra, partLimit)
-        %{:encoding => enc, :single_line => single} = extra
+        %{encoding: enc, single_line: single} = extra
         sep = nl(single, part_separator())
 
         limit =
@@ -895,7 +940,7 @@ defmodule :m_proc_lib do
 
   defp format_link_reports(linkReports, indent, extra, partLimit)
        when is_integer(partLimit) do
-    %{:encoding => enc, :depth => depth, :single_line => single} = extra
+    %{encoding: enc, depth: depth, single_line: single} = extra
 
     pids =
       for {:neighbour, [{:pid, p} | _]} <- linkReports do
@@ -919,7 +964,7 @@ defmodule :m_proc_lib do
   end
 
   defp format_link_reports(linkReports, indent, extra, partLimit) do
-    %{:single_line => single} = extra
+    %{single_line: single} = extra
     myIndent = indent ++ indent
 
     linkFormat =
@@ -932,7 +977,7 @@ defmodule :m_proc_lib do
   end
 
   defp format_link_report([link | reps], indent0, extra, partLimit) do
-    %{:single_line => single} = extra
+    %{single_line: single} = extra
 
     rep =
       case link do
@@ -965,7 +1010,7 @@ defmodule :m_proc_lib do
   end
 
   defp format_report(rep, indent, extra, limit) when is_list(rep) do
-    %{:single_line => single} = extra
+    %{single_line: single} = extra
 
     :lists.join(
       nl(single, part_separator()),
@@ -974,7 +1019,7 @@ defmodule :m_proc_lib do
   end
 
   defp format_report(rep, indent0, extra, limit) do
-    %{:encoding => enc, :depth => depth, :single_line => single} = extra
+    %{encoding: enc, depth: depth, single_line: single} = extra
     {p, tl} = p(enc, depth)
 
     {indent, width} =
@@ -987,7 +1032,7 @@ defmodule :m_proc_lib do
       end
 
     opts = chars_limit_opt(limit)
-    :io_lib.format('~s~' ++ width ++ p, [[indent, rep] | tl], opts)
+    :io_lib.format('~s~' ++ width ++ p, [indent, rep | tl], opts)
   end
 
   defp format_rep([{:initial_call, initialCall} | rep], indent, extra, limit) do
@@ -1009,7 +1054,7 @@ defmodule :m_proc_lib do
   end
 
   defp format_exception(class, reason, stackTrace, extra, limit) do
-    %{:encoding => enc, :depth => depth, :single_line => single} = extra
+    %{encoding: enc, depth: depth, single_line: single} = extra
 
     stackFun = fn m, _F, _A ->
       :erlang.or(m === :erl_eval, m === :proc_lib)
@@ -1023,7 +1068,14 @@ defmodule :m_proc_lib do
         [
           :erlang.atom_to_list(class),
           ': ',
-          :io_lib.format('~0' ++ p, [{reason, stackTrace} | tl], opts)
+          :io_lib.format(
+            '~0' ++ p,
+            [
+              {reason, stackTrace}
+              | tl
+            ],
+            opts
+          )
         ]
 
       true ->
@@ -1056,7 +1108,7 @@ defmodule :m_proc_lib do
   end
 
   defp format_mfa(indent0, {m, f, args} = startF, extra, limit) do
-    %{:encoding => enc, :single_line => single} = extra
+    %{encoding: enc, single_line: single} = extra
 
     indent =
       cond do
@@ -1094,7 +1146,7 @@ defmodule :m_proc_lib do
   end
 
   defp pp_fun(extra, enc) do
-    %{:encoding => ^enc, :depth => depth, :single_line => single} = extra
+    %{encoding: ^enc, depth: depth, single_line: single} = extra
     {p, tl} = p(enc, depth)
 
     width =
@@ -1117,7 +1169,7 @@ defmodule :m_proc_lib do
   end
 
   defp format_tag(indent0, tag, data, extra, limit) do
-    %{:encoding => enc, :depth => depth, :single_line => single} = extra
+    %{encoding: enc, depth: depth, single_line: single} = extra
     {p, tl} = p(enc, depth)
 
     {indent, width} =
@@ -1133,7 +1185,7 @@ defmodule :m_proc_lib do
 
     :io_lib.format(
       '~s~' ++ width ++ 'p: ~' ++ width ++ '.18' ++ p,
-      [[indent, tag, data] | tl],
+      [indent, tag, data | tl],
       opts
     )
   end

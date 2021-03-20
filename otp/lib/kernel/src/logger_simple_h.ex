@@ -1,14 +1,14 @@
 defmodule :m_logger_simple_h do
   use Bitwise
-  def adding_handler(%{:id => :simple} = config) do
+  def adding_handler(%{id: :simple} = config) do
     me = self()
     case (:erlang.whereis(:logger_simple_h)) do
       :undefined ->
         {pid, ref} = :erlang.spawn_opt(fn () ->
                                             init(me)
                                        end,
-                                         [:link, :monitor,
-                                            {:message_queue_data, :off_heap}])
+                                         [:link, :monitor, {:message_queue_data,
+                                                              :off_heap}])
         receive do
           {:DOWN, ^ref, :process, ^pid, reason} ->
             {:error, reason}
@@ -23,7 +23,7 @@ defmodule :m_logger_simple_h do
     end
   end
 
-  def removing_handler(%{:id => :simple}) do
+  def removing_handler(%{id: :simple}) do
     case (:erlang.whereis(:logger_simple_h)) do
       :undefined ->
         :ok
@@ -37,27 +37,23 @@ defmodule :m_logger_simple_h do
     end
   end
 
-  def log(%{:meta
-           =>
-           %{:error_logger
-             =>
-             %{:tag => :info_report, :type => type}}},
+  def log(%{meta:
+           %{error_logger: %{tag: :info_report, type: type}}},
            _Config)
       when type !== :std_info do
     :ok
   end
 
-  def log(%{:msg => _, :meta => %{:time => _} = m} = log,
+  def log(%{msg: _, meta: %{time: _} = m} = log,
            _Config) do
     _ = (case (:erlang.whereis(:logger_simple_h)) do
            :undefined ->
              case (:maps.get(:internal_log_event, m, false)) do
                false ->
-                 do_log(%{:level => :error,
-                            :msg
-                            =>
+                 do_log(%{level: :error,
+                            msg:
                             {:report, {:error, :simple_handler_process_dead}},
-                            :meta => %{:time => :logger.timestamp()}})
+                            meta: %{time: :logger.timestamp()}})
                true ->
                  :ok
              end
@@ -75,8 +71,7 @@ defmodule :m_logger_simple_h do
   defp init(starter) do
     :erlang.register(:logger_simple_h, self())
     send(starter, {self(), :started})
-    loop(%{:buffer_size => 10, :dropped => 0,
-             :buffer => []})
+    loop(%{buffer_size: 10, dropped: 0, buffer: []})
   end
 
   defp loop(buffer) do
@@ -90,7 +85,7 @@ defmodule :m_logger_simple_h do
         end
         :erlang.unlink(:erlang.whereis(:logger))
         :ok
-      {:log, %{:msg => _, :meta => %{:time => _}} = log} ->
+      {:log, %{msg: _, meta: %{time: _}} = log} ->
         do_log(log)
         loop(update_buffer(buffer, log))
       _ ->
@@ -98,23 +93,22 @@ defmodule :m_logger_simple_h do
     end
   end
 
-  defp update_buffer(%{:buffer_size => 0, :dropped => d} = buffer,
-            _Log) do
-    %{buffer | :dropped => d + 1}
+  defp update_buffer(%{buffer_size: 0, dropped: d} = buffer, _Log) do
+    Map.put(buffer, :dropped, d + 1)
   end
 
-  defp update_buffer(%{:buffer_size => s, :buffer => b} = buffer,
-            log) do
-    %{buffer | :buffer_size => s - 1, :buffer => [log | b]}
+  defp update_buffer(%{buffer_size: s, buffer: b} = buffer, log) do
+    Map.merge(buffer, %{buffer_size: s - 1,
+                          buffer: [log | b]})
   end
 
-  defp replay_buffer(%{:dropped => d, :buffer => buffer}) do
+  defp replay_buffer(%{dropped: d, buffer: buffer}) do
     :lists.foreach(fn f
-                   %{:msg => {tag, msg}} = l when tag === :string or
-                                                    tag === :report
-                                                  ->
-                     f.(%{l | :msg => msg})
-                   %{:level => level, :msg => msg, :meta => mD} ->
+                   %{msg: {tag, msg}} = l when tag === :string or
+                                                 tag === :report
+                                               ->
+                     f.(%{l | msg: msg})
+                   %{level: level, msg: msg, meta: mD} ->
                      :logger.log(level, msg, mD)
                    end,
                      :lists.reverse(buffer, drop_msg(d)))
@@ -125,19 +119,17 @@ defmodule :m_logger_simple_h do
   end
 
   defp drop_msg(n) do
-    [%{:level => :info, :msg => {'Simple handler buffer full, dropped ~w messages', [n]},
-         :meta => %{:time => :logger.timestamp()}}]
+    [%{level: :info, msg: {'Simple handler buffer full, dropped ~w messages', [n]},
+         meta: %{time: :logger.timestamp()}}]
   end
 
-  defp do_log(%{:msg => {:report, report},
-              :meta
-              =>
-              %{:time => t, :error_logger => %{:type => type}}}) do
+  defp do_log(%{msg: {:report, report},
+              meta: %{time: t, error_logger: %{type: type}}}) do
     display_date(t)
     display_report(type, report)
   end
 
-  defp do_log(%{:msg => msg, :meta => %{:time => t}}) do
+  defp do_log(%{msg: msg, meta: %{time: t}}) do
     display_date(t)
     display(msg)
   end

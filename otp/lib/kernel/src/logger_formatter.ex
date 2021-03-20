@@ -1,10 +1,7 @@
 defmodule :m_logger_formatter do
   use Bitwise
 
-  def format(
-        %{:level => level, :msg => msg0, :meta => meta},
-        config0
-      )
+  def format(%{level: level, msg: msg0, meta: meta}, config0)
       when is_map(config0) do
     config = add_default_config(config0)
     meta1 = maybe_add_legacy_header(level, meta, config)
@@ -52,7 +49,7 @@ defmodule :m_logger_formatter do
                       0
                   end
 
-                %{config | :chars_limit => size}
+                Map.put(config, :chars_limit, size)
             end
 
           msgStr0 = format_msg(msg0, meta1, config1)
@@ -123,7 +120,7 @@ defmodule :m_logger_formatter do
     string =
       case value(key, data) do
         {:ok, value} ->
-          do_format(level, %{data | key => value}, ifExist, config)
+          do_format(level, Map.put(data, key, value), ifExist, config)
 
         :error ->
           do_format(level, data, else__, config)
@@ -228,12 +225,12 @@ defmodule :m_logger_formatter do
     format_msg({'~ts', [chardata]}, meta, config)
   end
 
-  defp format_msg({:report, _} = msg, meta, %{:report_cb => fun} = config)
+  defp format_msg({:report, _} = msg, meta, %{report_cb: fun} = config)
        when is_function(fun, 1) or is_function(fun, 2) do
-    format_msg(msg, %{meta | :report_cb => fun}, :maps.remove(:report_cb, config))
+    format_msg(msg, Map.put(meta, :report_cb, fun), :maps.remove(:report_cb, config))
   end
 
-  defp format_msg({:report, report}, %{:report_cb => fun} = meta, config)
+  defp format_msg({:report, report}, %{report_cb: fun} = meta, config)
        when is_function(fun, 1) do
     try do
       fun.(report)
@@ -269,7 +266,7 @@ defmodule :m_logger_formatter do
     end
   end
 
-  defp format_msg({:report, report}, %{:report_cb => fun} = meta, config)
+  defp format_msg({:report, report}, %{report_cb: fun} = meta, config)
        when is_function(fun, 2) do
     try do
       fun.(
@@ -325,16 +322,12 @@ defmodule :m_logger_formatter do
   defp format_msg({:report, report}, meta, config) do
     format_msg(
       {:report, report},
-      %{meta | :report_cb => &:logger.format_report/1},
+      Map.put(meta, :report_cb, &:logger.format_report/1),
       config
     )
   end
 
-  defp format_msg(msg, _Meta, %{
-         :depth => depth,
-         :chars_limit => charsLimit,
-         :single_line => single
-       }) do
+  defp format_msg(msg, _Meta, %{depth: depth, chars_limit: charsLimit, single_line: single}) do
     opts = chars_limit_to_opts(charsLimit)
     format_msg(msg, depth, opts, single)
   end
@@ -371,17 +364,17 @@ defmodule :m_logger_formatter do
     format
   end
 
-  defp reformat([%{:control_char => c} = m | t], depth, true)
+  defp reformat([%{control_char: c} = m | t], depth, true)
        when c === ?p do
-    [limit_depth(%{m | :width => 0}, depth) | reformat(t, depth, true)]
+    [limit_depth(Map.put(m, :width, 0), depth) | reformat(t, depth, true)]
   end
 
-  defp reformat([%{:control_char => c} = m | t], depth, true)
+  defp reformat([%{control_char: c} = m | t], depth, true)
        when c === ?P do
-    [%{m | :width => 0} | reformat(t, depth, true)]
+    [Map.put(m, :width, 0) | reformat(t, depth, true)]
   end
 
-  defp reformat([%{:control_char => c} = m | t], depth, single)
+  defp reformat([%{control_char: c} = m | t], depth, single)
        when c === ?p or c === ?w do
     [limit_depth(m, depth) | reformat(t, depth, single)]
   end
@@ -398,12 +391,9 @@ defmodule :m_logger_formatter do
     m0
   end
 
-  defp limit_depth(
-         %{:control_char => c0, :args => args} = m0,
-         depth
-       ) do
+  defp limit_depth(%{control_char: c0, args: args} = m0, depth) do
     c = c0 - (?a - ?A)
-    %{m0 | :control_char => c, :args => args ++ [depth]}
+    %{m0 | control_char: c, args: args ++ [depth]}
   end
 
   defp chardata_to_list(chardata) do
@@ -481,7 +471,7 @@ defmodule :m_logger_formatter do
 
   defp format_time(
          sysTime,
-         %{:time_offset => offset, :time_designator => des}
+         %{time_offset: offset, time_designator: des}
        )
        when is_integer(sysTime) do
     :calendar.system_time_to_rfc3339(
@@ -528,12 +518,8 @@ defmodule :m_logger_formatter do
     to_string(mFA, config)
   end
 
-  defp maybe_add_legacy_header(
-         level,
-         %{:time => timestamp} = meta,
-         %{:legacy_header => true} = config
-       ) do
-    %{:title => title} = myMeta = add_legacy_title(level, meta, config)
+  defp maybe_add_legacy_header(level, %{time: timestamp} = meta, %{legacy_header: true} = config) do
+    %{title: title} = myMeta = add_legacy_title(level, meta, config)
     {{y, mo, d}, {h, mi, s}, micro, utcStr} = timestamp_to_datetimemicro(timestamp, config)
 
     header =
@@ -542,20 +528,20 @@ defmodule :m_logger_formatter do
         [title, d, month(mo), y, h, mi, s, micro, utcStr]
       )
 
-    %{meta | :logger_formatter => %{myMeta | :header => header}}
+    Map.put(meta, :logger_formatter, Map.put(myMeta, :header, header))
   end
 
   defp maybe_add_legacy_header(_, meta, _) do
     meta
   end
 
-  defp add_legacy_title(_Level, %{:logger_formatter => %{:title => _} = myMeta}, _) do
+  defp add_legacy_title(_Level, %{logger_formatter: %{title: _} = myMeta}, _) do
     myMeta
   end
 
   defp add_legacy_title(level, meta, config) do
     case :maps.get(:logger_formatter, meta, %{}) do
-      %{:title => _} = myMeta ->
+      %{title: _} = myMeta ->
         myMeta
 
       myMeta ->
@@ -573,7 +559,7 @@ defmodule :m_logger_formatter do
           end
 
         title = :string.uppercase(:erlang.atom_to_list(titleLevel)) ++ ' REPORT'
-        %{myMeta | :title => title}
+        Map.put(myMeta, :title, title)
     end
   end
 
@@ -627,11 +613,11 @@ defmodule :m_logger_formatter do
 
   defp add_default_config(config0) do
     default = %{
-      :chars_limit => :unlimited,
-      :error_logger_notice_header => :info,
-      :legacy_header => false,
-      :single_line => true,
-      :time_designator => ?T
+      chars_limit: :unlimited,
+      error_logger_notice_header: :info,
+      legacy_header: false,
+      single_line: true,
+      time_designator: ?T
     }
 
     maxSize = get_max_size(:maps.get(:max_size, config0, :undefined))
@@ -641,24 +627,24 @@ defmodule :m_logger_formatter do
     add_default_template(
       :maps.merge(
         default,
-        %{config0 | :max_size => maxSize, :depth => depth, :time_offset => offset}
+        Map.merge(config0, %{max_size: maxSize, depth: depth, time_offset: offset})
       )
     )
   end
 
-  defp add_default_template(%{:template => _} = config) do
+  defp add_default_template(%{template: _} = config) do
     config
   end
 
   defp add_default_template(config) do
-    %{config | :template => default_template(config)}
+    Map.put(config, :template, default_template(config))
   end
 
-  defp default_template(%{:legacy_header => true}) do
+  defp default_template(%{legacy_header: true}) do
     [[:logger_formatter, :header], '\n', :msg, '\n']
   end
 
-  defp default_template(%{:single_line => true}) do
+  defp default_template(%{single_line: true}) do
     [:time, ' ', :level, ': ', :msg, '\n']
   end
 
@@ -914,7 +900,7 @@ defmodule :m_logger_formatter do
     end
   end
 
-  defp p(%{:single_line => single}) do
+  defp p(%{single_line: single}) do
     p(single)
   end
 

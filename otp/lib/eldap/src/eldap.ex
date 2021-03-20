@@ -1635,7 +1635,7 @@ defmodule :m_eldap do
     parse_error(:invalid_attribute_type, str)
   end
 
-  defp parse_attribute_value([[?#, x, y] | t])
+  defp parse_attribute_value([?#, x, y | t])
        when (x >= ?0 and x <= ?9) or
               (x >= ?a and x <= ?f) or
               (x >= ?A and x <= ?F and y >= ?0 and
@@ -1643,7 +1643,7 @@ defmodule :m_eldap do
               (y >= ?a and y <= ?f) or
               (y >= ?A and y <= ?F) do
     {rest, hexString} = parse_hexstring(t)
-    {rest, [[?#, x, y] | hexString]}
+    {rest, [?#, x, y | hexString]}
   end
 
   defp parse_attribute_value([?" | t]) do
@@ -1659,14 +1659,14 @@ defmodule :m_eldap do
     parse_hexstring(str, [])
   end
 
-  defp parse_hexstring([[x, y] | t], acc)
+  defp parse_hexstring([x, y | t], acc)
        when (x >= ?0 and x <= ?9) or
               (x >= ?a and x <= ?f) or
               (x >= ?A and x <= ?F and y >= ?0 and
                  y <= ?9) or
               (y >= ?a and y <= ?f) or
               (y >= ?A and y <= ?F) do
-    parse_hexstring(t, [[y, x] | acc])
+    parse_hexstring(t, [y, x | acc])
   end
 
   defp parse_hexstring(t, acc) do
@@ -1689,22 +1689,22 @@ defmodule :m_eldap do
     parse_quotation(t, [x | acc])
   end
 
-  defp parse_quotation([[?\\, x] | t], acc)
+  defp parse_quotation([?\\, x | t], acc)
        when x == ?, or x == ?= or
-              x == ?+ or x == ?< or x == ?> or
-              x == ?# or x == ?; do
-    parse_quotation(t, [[x, ?\\] | acc])
+              x == ?+ or x == ?< or x == ?> or x == ?# or
+              x == ?; do
+    parse_quotation(t, [x, ?\\ | acc])
   end
 
-  defp parse_quotation([[?\\, ?\\] | t], acc) do
-    parse_quotation(t, [[?\\, ?\\] | acc])
+  defp parse_quotation([?\\, ?\\ | t], acc) do
+    parse_quotation(t, [?\\, ?\\ | acc])
   end
 
-  defp parse_quotation([[?\\, ?"] | t], acc) do
-    parse_quotation(t, [[?", ?\\] | acc])
+  defp parse_quotation([?\\, ?" | t], acc) do
+    parse_quotation(t, [?", ?\\ | acc])
   end
 
-  defp parse_quotation([[?\\, x, y] | t], acc)
+  defp parse_quotation([?\\, x, y | t], acc)
        when (x >= ?0 and
                x <= ?9) or
               (x >= ?a and x <= ?f) or
@@ -1712,7 +1712,7 @@ defmodule :m_eldap do
                  y <= ?9) or
               (y >= ?a and y <= ?f) or
               (y >= ?A and y <= ?F) do
-    parse_quotation(t, [[y, x, ?\\] | acc])
+    parse_quotation(t, [y, x, ?\\ | acc])
   end
 
   defp parse_quotation(t, _) do
@@ -1735,22 +1735,22 @@ defmodule :m_eldap do
     parse_string(t, [h | acc])
   end
 
-  defp parse_string([[?\\, x] | t], acc)
+  defp parse_string([?\\, x | t], acc)
        when x == ?, or x == ?= or
-              x == ?+ or x == ?< or x == ?> or
-              x == ?# or x == ?; do
-    parse_string(t, [[x, ?\\] | acc])
+              x == ?+ or x == ?< or x == ?> or x == ?# or
+              x == ?; do
+    parse_string(t, [x, ?\\ | acc])
   end
 
-  defp parse_string([[?\\, ?\\] | t], acc) do
-    parse_string(t, [[?\\, ?\\] | acc])
+  defp parse_string([?\\, ?\\ | t], acc) do
+    parse_string(t, [?\\, ?\\ | acc])
   end
 
-  defp parse_string([[?\\, ?"] | t], acc) do
-    parse_string(t, [[?", ?\\] | acc])
+  defp parse_string([?\\, ?" | t], acc) do
+    parse_string(t, [?", ?\\ | acc])
   end
 
-  defp parse_string([[?\\, x, y] | t], acc)
+  defp parse_string([?\\, x, y | t], acc)
        when (x >= ?0 and
                x <= ?9) or
               (x >= ?a and x <= ?f) or
@@ -1758,7 +1758,7 @@ defmodule :m_eldap do
                  y <= ?9) or
               (y >= ?a and y <= ?f) or
               (y >= ?A and y <= ?F) do
-    parse_string(t, [[y, x, ?\\] | acc])
+    parse_string(t, [y, x, ?\\ | acc])
   end
 
   defp parse_string(t, acc) do
@@ -1799,10 +1799,8 @@ defmodule :m_eldap do
     parse_oid(str, [])
   end
 
-  defp parse_oid([[h, ?.] | t], acc)
-       when h >= ?0 and
-              h <= ?9 do
-    parse_oid(t, [[?., h] | acc])
+  defp parse_oid([h, ?. | t], acc) when h >= ?0 and h <= ?9 do
+    parse_oid(t, [?., h | acc])
   end
 
   defp parse_oid([h | t], acc) when h >= ?0 and h <= ?9 do

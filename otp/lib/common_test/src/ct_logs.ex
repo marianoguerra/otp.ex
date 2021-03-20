@@ -125,7 +125,25 @@ defmodule :m_ct_logs do
   end
 
   defp datestr_from_dirname([
-         [y1, y2, y3, y4, ?-, mo1, mo2, ?-, d1, d2, ?_, h1, h2, ?., m1, m2, ?., s1, s2]
+         y1,
+         y2,
+         y3,
+         y4,
+         ?-,
+         mo1,
+         mo2,
+         ?-,
+         d1,
+         d2,
+         ?_,
+         h1,
+         h2,
+         ?.,
+         m1,
+         m2,
+         ?.,
+         s1,
+         s2
          | _
        ]) do
     [y1, y2, y3, y4, ?-, mo1, mo2, ?-, d1, d2, ?_, h1, h2, ?., m1, m2, ?., s1, s2]
@@ -1653,9 +1671,14 @@ defmodule :m_ct_logs do
       case all do
         {true, oldRuns} ->
           [
-            [_Prefix, nodeOrDate]
+            _Prefix,
+            nodeOrDate
             | _
-          ] = :string.lexemes(link, '.')
+          ] =
+            :string.lexemes(
+              link,
+              '.'
+            )
 
           node1 =
             case :string.find(
@@ -1770,7 +1793,10 @@ defmodule :m_ct_logs do
        suiteName,
        '</a>',
        crashDumpLink,
-       xhtml('</font></td>\n', '</td>\n'),
+       xhtml(
+         '</font></td>\n',
+         '</td>\n'
+       ),
        lbl,
        timestamp,
        '<td align=right>',
@@ -1837,7 +1863,10 @@ defmodule :m_ct_logs do
       '</b></td>\n',
       allInfo,
       '</tr>\n',
-      xhtml('', '</tfoot>\n')
+      xhtml(
+        '',
+        '</tfoot>\n'
+      )
     ]
   end
 
@@ -1869,13 +1898,13 @@ defmodule :m_ct_logs do
 
   defp locate_info(path = {top, obj}, allOrSuite, [{{dir, suite}, failed} | errors]) do
     case :lists.reverse(:filename.split(dir)) do
-      [['test', ^obj, ^top] | _] ->
+      ['test', ^obj, ^top | _] ->
         get_missing_suites(
           allOrSuite,
           {suite, failed}
         ) ++ locate_info(path, allOrSuite, errors)
 
-      [[^obj, ^top] | _] ->
+      [^obj, ^top | _] ->
         get_missing_suites(
           allOrSuite,
           {suite, failed}
@@ -1946,12 +1975,10 @@ defmodule :m_ct_logs do
         '">COMMON TEST FRAMEWORK LOG</a>\n</div><br>\n'
       ]),
       cover,
-      xhtml(['<table border="3" cellpadding="5" bgcolor="', '#F0F8FF', '">\n'], [
-        '<table id="',
-        'SortableTable',
-        '">\n',
-        '<thead>\n<tr>\n'
-      ]),
+      xhtml(
+        ['<table border="3" cellpadding="5" bgcolor="', '#F0F8FF', '">\n'],
+        ['<table id="', 'SortableTable', '">\n', '<thead>\n<tr>\n']
+      ),
       '<th><b>Test Name</b></th>\n',
       xhtml(
         [
@@ -1967,9 +1994,15 @@ defmodule :m_ct_logs do
       '<th>Skipped',
       xhtml('<br>', '<br />'),
       '(User/Auto)</th>\n<th>Missing',
-      xhtml('<br>', '<br />'),
+      xhtml(
+        '<br>',
+        '<br />'
+      ),
       'Suites</th>\n',
-      xhtml('', '</tr>\n</thead>\n<tbody>\n')
+      xhtml(
+        '',
+        '</tr>\n</thead>\n<tbody>\n'
+      )
     ]
   end
 
@@ -1998,13 +2031,14 @@ defmodule :m_ct_logs do
       header('Test Results', {[3], [1, 2, 8, 9, 10], [4, 5, 6, 7]}),
       '<center>\n',
       allRunsLink,
-      xhtml('<br><br>\n', '<br /><br />\n'),
-      xhtml(['<table border="3" cellpadding="5" bgcolor="', '#E4F0FE', '">\n'], [
-        '<table id="',
-        'SortableTable',
-        '">\n',
-        '<thead>\n<tr>\n'
-      ]),
+      xhtml(
+        '<br><br>\n',
+        '<br /><br />\n'
+      ),
+      xhtml(
+        ['<table border="3" cellpadding="5" bgcolor="', '#E4F0FE', '">\n'],
+        ['<table id="', 'SortableTable', '">\n', '<thead>\n<tr>\n']
+      ),
       '<th>Test Name</th>\n',
       '<th>Label</th>\n',
       '<th>Test Run Started</th>\n',
@@ -2022,7 +2056,10 @@ defmodule :m_ct_logs do
       '<th>Skipped<br>(User/Auto)</th>\n<th>Missing<br>Suites</th>\n<th>Node</th>\n',
       '<th>CT Log</th>\n',
       '<th>Old Runs</th>\n',
-      xhtml('', '</tr>\n</thead>\n<tbody>\n')
+      xhtml(
+        '',
+        '</tr>\n</thead>\n<tbody>\n'
+      )
     ]
   end
 
@@ -2129,9 +2166,18 @@ defmodule :m_ct_logs do
       '<title>' ++ title ++ ' ' ++ subTitle ++ '</title>\n',
       '<meta http-equiv="cache-control" content="no-cache"></meta>\n',
       '<meta http-equiv="content-type" content="text/html; charset=utf-8"></meta>\n',
-      xhtml('', ['<link rel="stylesheet" href="', uri(cSSFile), '" type="text/css"></link>\n']),
-      xhtml('', ['<script type="text/javascript" src="', jQueryFile, '"></script>\n']),
-      xhtml('', ['<script type="text/javascript" src="', tableSorterFile, '"></script>\n']),
+      xhtml(
+        '',
+        ['<link rel="stylesheet" href="', uri(cSSFile), '" type="text/css"></link>\n']
+      ),
+      xhtml(
+        '',
+        ['<script type="text/javascript" src="', jQueryFile, '"></script>\n']
+      ),
+      xhtml(
+        '',
+        ['<script type="text/javascript" src="', tableSorterFile, '"></script>\n']
+      ),
       xhtml(
         fn ->
           ''
@@ -2155,34 +2201,28 @@ defmodule :m_ct_logs do
     testIndex = :filename.join('../', 'index.html')
 
     [
-      [
-        '</table>\n',
-        xhtml('<br><hr><p>\n', '<br /><hr /><p>\n'),
-        '<a href="',
-        uri(allRuns),
-        '">Test run history\n</a>  |  ',
-        '<a href="',
-        uri(testIndex),
-        '">Top level test index\n</a>\n</p>\n',
-        '</center>\n'
-      ]
-      | footer()
+      '</table>\n',
+      xhtml('<br><hr><p>\n', '<br /><hr /><p>\n'),
+      '<a href="',
+      uri(allRuns),
+      '">Test run history\n</a>  |  ',
+      '<a href="',
+      uri(testIndex),
+      '">Top level test index\n</a>\n</p>\n',
+      '</center>\n' | footer()
     ]
   end
 
   defp all_suites_index_footer() do
-    [['</table>\n', '</center>\n', xhtml('<br><br>\n', '<br /><br />\n')] | footer()]
+    ['</table>\n', '</center>\n', xhtml('<br><br>\n', '<br /><br />\n') | footer()]
   end
 
   defp all_runs_index_footer() do
     [
-      [
-        xhtml('', '</tbody>\n'),
-        '</table>\n',
-        '</center>\n',
-        xhtml('<br><br>\n', '<br /><br />\n')
-      ]
-      | footer()
+      xhtml('', '</tbody>\n'),
+      '</table>\n',
+      '</center>\n',
+      xhtml('<br><br>\n', '<br /><br />\n') | footer()
     ]
   end
 
@@ -2198,8 +2238,14 @@ defmodule :m_ct_logs do
       'Updated: <!--date-->',
       current_time(),
       '<!--/date-->',
-      xhtml('<br>\n', '<br />\n'),
-      xhtml('</font></p>\n', '</div>\n'),
+      xhtml(
+        '<br>\n',
+        '<br />\n'
+      ),
+      xhtml(
+        '</font></p>\n',
+        '</div>\n'
+      ),
       '</center>\n</body>\n</html>\n'
     ]
   end
@@ -2511,7 +2557,10 @@ defmodule :m_ct_logs do
           :erlang.atom_to_list(key),
           '</td>\n',
           '<td>',
-          :io_lib.format('~tp', [value]),
+          :io_lib.format(
+            '~tp',
+            [value]
+          ),
           '</td>\n</tr>\n'
         ]
       )
@@ -2706,14 +2755,32 @@ defmodule :m_ct_logs do
     :lists.sort(
       fn dir1, dir2 ->
         [
-          [sS1, mM1, hH1, date1]
+          sS1,
+          mM1,
+          hH1,
+          date1
           | _
-        ] = :lists.reverse(:string.lexemes(dir1, [?., ?_]))
+        ] =
+          :lists.reverse(
+            :string.lexemes(
+              dir1,
+              [?., ?_]
+            )
+          )
 
         [
-          [sS2, mM2, hH2, date2]
+          sS2,
+          mM2,
+          hH2,
+          date2
           | _
-        ] = :lists.reverse(:string.lexemes(dir2, [?., ?_]))
+        ] =
+          :lists.reverse(
+            :string.lexemes(
+              dir2,
+              [?., ?_]
+            )
+          )
 
         {date1, hH1, mM1, sS1} > {date2, hH2, mM2, sS2}
       end,
@@ -2725,7 +2792,9 @@ defmodule :m_ct_logs do
     :lists.sort(
       fn dir1, dir2 ->
         [
-          [sS1, mM1, dateHH1]
+          sS1,
+          mM1,
+          dateHH1
           | _
         ] =
           :lists.reverse(
@@ -2736,7 +2805,9 @@ defmodule :m_ct_logs do
           )
 
         [
-          [sS2, mM2, dateHH2]
+          sS2,
+          mM2,
+          dateHH2
           | _
         ] =
           :lists.reverse(
@@ -3570,11 +3641,7 @@ defmodule :m_ct_logs do
     newAdded1 =
       :lists.map(
         fn {_TestName, runDir} ->
-          [
-            [topDir, testDir]
-            | _
-          ] = :filename.split(runDir)
-
+          [topDir, testDir | _] = :filename.split(runDir)
           :filename.join(topDir, testDir)
         end,
         invalidLast1
@@ -4128,7 +4195,7 @@ defmodule :m_ct_logs do
 
   defp try_cleanup(cTRunDir) do
     case :lists.reverse(:filename.split(cTRunDir)) do
-      [[[?c, ?t, ?_, ?r, ?u, ?n, ?.] | _] | _] ->
+      [[?c, ?t, ?_, ?r, ?u, ?n, ?. | _] | _] ->
         case :filelib.wildcard(:filename.join(cTRunDir, 'ct_run.*')) do
           [] ->
             rm_dir(cTRunDir)

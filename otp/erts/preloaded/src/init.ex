@@ -221,12 +221,12 @@ defmodule :m_init do
     bs2as(l)
   end
 
-  defp prepare_run_args({:s, [[m, f] | args]}) do
-    [[b2a(m), b2a(f)] | bs2as(args)]
+  defp prepare_run_args({:s, [m, f | args]}) do
+    [b2a(m), b2a(f) | bs2as(args)]
   end
 
-  defp prepare_run_args({:run, [[m, f] | args]}) do
-    [[b2a(m), b2a(f)] | bs2ss(args)]
+  defp prepare_run_args({:run, [m, f | args]}) do
+    [b2a(m), b2a(f) | bs2ss(args)]
   end
 
   defp b2a(bin) when is_binary(bin) do
@@ -370,7 +370,7 @@ defmodule :m_init do
   end
 
   defp join([elem | t]) do
-    [[elem, ','] | join(t)]
+    [elem, ',' | join(t)]
   end
 
   defp flatten([h | t], tail) when is_list(h) do
@@ -603,10 +603,10 @@ defmodule :m_init do
                 :logger,
                 {:log, :info, 'init got unexpected: ~p', [x],
                  %{
-                   :pid => self(),
-                   :gl => self(),
-                   :time => :os.system_time(:microsecond),
-                   :error_logger => %{:tag => :info_msg}
+                   pid: self(),
+                   gl: self(),
+                   time: :os.system_time(:microsecond),
+                   error_logger: %{tag: :info_msg}
                  }}
               )
             catch
@@ -909,7 +909,8 @@ defmodule :m_init do
     do_unload(
       sub(
         [
-          [:heart, :logger_server]
+          :heart,
+          :logger_server
           | :erlang.pre_loaded()
         ],
         :erlang.loaded()
@@ -1112,11 +1113,11 @@ defmodule :m_init do
   defp get_boot_vars(root, flags) do
     bootVars = get_boot_vars_1(%{}, flags)
     rootKey = "ROOT"
-    %{bootVars | rootKey => root}
+    Map.put(bootVars, rootKey, root)
   end
 
   defp get_boot_vars_1(vars, [{:boot_var, [key, value]} | t]) do
-    get_boot_vars_1(%{vars | key => value}, t)
+    get_boot_vars_1(Map.put(vars, key, value), t)
   end
 
   defp get_boot_vars_1(_, [{:boot_var, _} | _]) do
@@ -1406,7 +1407,7 @@ defmodule :m_init do
 
   defp patch_dir(orig, archiveExt) do
     case funny_split(orig, ?/) do
-      [['nibe', revApp, revArchive] | revTop] ->
+      ['nibe', revApp, revArchive | revTop] ->
         app = reverse(revApp)
 
         case funny_splitwith(revArchive, ?.) do
@@ -1484,7 +1485,7 @@ defmodule :m_init do
     {[], orig}
   end
 
-  defp join([[h1, h2] | t], s) do
+  defp join([h1, h2 | t], s) do
     h1 ++ s ++ join([h2 | t], s)
   end
 
@@ -1559,7 +1560,7 @@ defmodule :m_init do
       [m, f] ->
         apply(m, f, [])
 
-      [[m, f] | args] ->
+      [m, f | args] ->
         apply(m, f, [args])
     end
   end
@@ -1855,7 +1856,7 @@ defmodule :m_init do
     [b, a]
   end
 
-  defp reverse([[a, b] | l]) do
+  defp reverse([a, b | l]) do
     :lists.reverse(l, [b, a])
   end
 

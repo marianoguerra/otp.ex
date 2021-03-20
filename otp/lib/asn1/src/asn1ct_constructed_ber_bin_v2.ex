@@ -1442,7 +1442,7 @@ defmodule :m_asn1ct_constructed_ber_bin_v2 do
       tagList = [h | t], fun, n ->
         semicolon =
           case tagList do
-            [[_Tag1, _] | _] ->
+            [_Tag1, _ | _] ->
               [';', :nl]
 
             _ ->
@@ -1628,7 +1628,10 @@ defmodule :m_asn1ct_constructed_ber_bin_v2 do
           indent(4),
           {:curr, :res},
           ' = ',
-          match_tag(r_tag(firstT, :class), r_tag(firstT, :number)),
+          match_tag(
+            r_tag(firstT, :class),
+            r_tag(firstT, :number)
+          ),
           ' -> ',
           :nl
         ])
@@ -1638,7 +1641,10 @@ defmodule :m_asn1ct_constructed_ber_bin_v2 do
           '{',
           {:asis, cname},
           ', {\'',
-          :asn1ct_gen.list2name([cname | topType]),
+          :asn1ct_gen.list2name([
+            cname
+            | topType
+          ]),
           '\',',
           {:curr, :res},
           '}};',
@@ -1699,7 +1705,7 @@ defmodule :m_asn1ct_constructed_ber_bin_v2 do
 
   defp mk_object_val(val, acc) do
     i = :erlang.integer_to_list((val &&& 127) ||| 128)
-    mk_object_val(val >>> 7, [[i, ','] | acc])
+    mk_object_val(val >>> 7, [i, ',' | acc])
   end
 
   defp gen_enc_line(
@@ -2354,7 +2360,7 @@ defmodule :m_asn1ct_constructed_ber_bin_v2 do
     :lists.duplicate(n, 32)
   end
 
-  defp mkvlist([[h, t1] | t], sep) do
+  defp mkvlist([h, t1 | t], sep) do
     emit([{:var, h}, sep])
     mkvlist([t1 | t], sep)
   end
@@ -2422,7 +2428,12 @@ defmodule :m_asn1ct_constructed_ber_bin_v2 do
 
       _ when is_tuple(innerType) ->
         emit([
-          [:nl, '%% attribute ', cname, '(', pos, ') with type ']
+          :nl,
+          '%% attribute ',
+          cname,
+          '(',
+          pos,
+          ') with type '
           | :erlang.tuple_to_list(innerType)
         ])
 

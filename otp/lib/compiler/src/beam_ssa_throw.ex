@@ -145,7 +145,7 @@ defmodule :m_beam_ssa_throw do
       false ->
         merged = :gb_sets.union(handlersA, handlersB)
         callees = pt_callees(id, merged, edges)
-        acc = propagate_tlhs(callees, edges, %{acc0 | id => merged})
+        acc = propagate_tlhs(callees, edges, Map.put(acc0, id, merged))
         propagate_tlhs(roots, edges, acc)
     end
   end
@@ -316,7 +316,7 @@ defmodule :m_beam_ssa_throw do
           {:tentative, endLbl}
       end
 
-    suitability = %{suitability0 | stacktrace => marker}
+    suitability = Map.put(suitability0, stacktrace, marker)
     lst = r_lst(lst0, suitability: suitability)
     si_is(is, id, endLbl, last, lst, gst)
   end
@@ -352,13 +352,13 @@ defmodule :m_beam_ssa_throw do
           path = :beam_ssa.between(startLbl, endLbl, preds, blocks)
           partition = :maps.with(path, blocks)
           handler = {:tentative, startLbl, vars, partition}
-          %{handlers0 | handlerId => handler}
+          Map.put(handlers0, handlerId, handler)
 
         %{} when stacktrace !== :none ->
-          %{handlers0 | handlerId => :unsuitable}
+          Map.put(handlers0, handlerId, :unsuitable)
 
         %{} when stacktrace === :none ->
-          %{handlers0 | handlerId => :suitable}
+          Map.put(handlers0, handlerId, :suitable)
       end
 
     lst = r_lst(lst0, handlers: handlers)
@@ -375,7 +375,7 @@ defmodule :m_beam_ssa_throw do
           :gb_sets.singleton(callee)
       end
 
-    edges = %{edges0 | caller => callees}
+    edges = Map.put(edges0, caller, callees)
     r_gst(gst, tlh_edges: edges)
   end
 
@@ -584,7 +584,7 @@ defmodule :m_beam_ssa_throw do
        ) do
     srcType = ois_get_type(src, ts0)
     {type, _, _} = :beam_call_types.types(:erlang, :hd, [srcType])
-    ts = %{ts0 | dst => type}
+    ts = Map.put(ts0, dst, type)
     ois_is(is, ts)
   end
 
@@ -594,7 +594,7 @@ defmodule :m_beam_ssa_throw do
        ) do
     srcType = ois_get_type(src, ts0)
     {type, _, _} = :beam_call_types.types(:erlang, :tl, [srcType])
-    ts = %{ts0 | dst => type}
+    ts = Map.put(ts0, dst, type)
     ois_is(is, ts)
   end
 
@@ -616,7 +616,7 @@ defmodule :m_beam_ssa_throw do
           :any
       end
 
-    ts = %{ts0 | dst => type}
+    ts = Map.put(ts0, dst, type)
     ois_is(is, ts)
   end
 
@@ -742,7 +742,7 @@ defmodule :m_beam_ssa_throw do
        ) do
     srcType = ois_get_type(src, ts0)
     {type, _, _} = :beam_call_types.types(:erlang, :tuple_size, [srcType])
-    ts = %{ts0 | dst => type}
+    ts = Map.put(ts0, dst, type)
     ois_is(is, ts)
   end
 
@@ -770,7 +770,7 @@ defmodule :m_beam_ssa_throw do
           :beam_types.make_boolean()
       end
 
-    ts = %{ts0 | dst => type}
+    ts = Map.put(ts0, dst, type)
     ois_is(is, ts)
   end
 
@@ -800,7 +800,7 @@ defmodule :m_beam_ssa_throw do
           :beam_types.make_boolean()
       end
 
-    ts = %{ts0 | dst => type}
+    ts = Map.put(ts0, dst, type)
     ois_is(is, ts)
   end
 

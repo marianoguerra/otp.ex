@@ -825,7 +825,7 @@ defmodule :m_file_sorter do
     r_w(nW, runs: nRs)
   end
 
-  defp merge_runs([[r, r1] | rs], nRs0, w) do
+  defp merge_runs([r, r1 | rs], nRs0, w) do
     {m, nW} = merge_files(r, w)
     merge_runs([[m | r1] | rs], [[] | nRs0], nW)
   end
@@ -891,7 +891,7 @@ defmodule :m_file_sorter do
     end
   end
 
-  defp merge_files([[f1, f2] | fs], l0, lSz, last0, w)
+  defp merge_files([f1, f2 | fs], l0, lSz, last0, w)
        when lSz < 16384 do
     [ts0 | inEtc] = f1
     kind = merge_kind(w)
@@ -1266,8 +1266,8 @@ defmodule :m_file_sorter do
     end
   end
 
-  defp last_file([[{_Ta, bTa}, {_Tb, bTb}] | ts], l) do
-    last_file(ts, [[bTb, bTa] | l])
+  defp last_file([{_Ta, bTa}, {_Tb, bTb} | ts], l) do
+    last_file(ts, [bTb, bTa | l])
   end
 
   defp last_file([{_T, bT} | ts], l) do
@@ -1278,40 +1278,40 @@ defmodule :m_file_sorter do
     l
   end
 
-  defp insert(a, [[x1, x2, x3, x4] | xs]) when a > x4 do
-    [[x1, x2, x3, x4] | insert(a, xs)]
+  defp insert(a, [x1, x2, x3, x4 | xs]) when a > x4 do
+    [x1, x2, x3, x4 | insert(a, xs)]
   end
 
-  defp insert(a, [[x1, x2, x3] | t]) when a > x3 do
-    [[x1, x2, x3, a] | t]
+  defp insert(a, [x1, x2, x3 | t]) when a > x3 do
+    [x1, x2, x3, a | t]
   end
 
-  defp insert(a, [[x1, x2] | xs]) when a > x2 do
-    [[x1, x2, a] | xs]
+  defp insert(a, [x1, x2 | xs]) when a > x2 do
+    [x1, x2, a | xs]
   end
 
   defp insert(a, [x1 | t]) when a > x1 do
-    [[x1, a] | t]
+    [x1, a | t]
   end
 
   defp insert(a, xs) do
     [a | xs]
   end
 
-  defp rinsert(a, [[x1, x2, x3, x4] | xs]) when a < x4 do
-    [[x1, x2, x3, x4] | rinsert(a, xs)]
+  defp rinsert(a, [x1, x2, x3, x4 | xs]) when a < x4 do
+    [x1, x2, x3, x4 | rinsert(a, xs)]
   end
 
-  defp rinsert(a, [[x1, x2, x3] | t]) when a < x3 do
-    [[x1, x2, x3, a] | t]
+  defp rinsert(a, [x1, x2, x3 | t]) when a < x3 do
+    [x1, x2, x3, a | t]
   end
 
-  defp rinsert(a, [[x1, x2] | xs]) when a < x2 do
-    [[x1, x2, a] | xs]
+  defp rinsert(a, [x1, x2 | xs]) when a < x2 do
+    [x1, x2, a | xs]
   end
 
   defp rinsert(a, [x1 | t]) when a < x1 do
-    [[x1, a] | t]
+    [x1, a | t]
   end
 
   defp rinsert(a, xs) do
@@ -1325,16 +1325,17 @@ defmodule :m_file_sorter do
        ) do
     case cfun(cF, f4, a) do
       true ->
-        [[f1, f2, f3, f4] | cinsert(a, fs, cF)]
+        [f1, f2, f3, f4 | cinsert(a, fs, cF)]
 
       false ->
         case cfun(cF, f2, a) do
           true ->
             [
-              [f1, f2]
+              f1,
+              f2
               | case cfun(cF, f3, a) do
                   true ->
-                    [[f3, a] | t4]
+                    [f3, a | t4]
 
                   false ->
                     [a | t3]
@@ -1344,7 +1345,7 @@ defmodule :m_file_sorter do
           false ->
             case cfun(cF, f1, a) do
               true ->
-                [[f1, a] | t2]
+                [f1, a | t2]
 
               false ->
                 [a | t1]
@@ -1356,12 +1357,12 @@ defmodule :m_file_sorter do
   defp cinsert(a, [f1 | [f2 | fs] = t2] = t1, cF) do
     case cfun(cF, f2, a) do
       true ->
-        [[f1, f2] | cinsert(a, fs, cF)]
+        [f1, f2 | cinsert(a, fs, cF)]
 
       false ->
         case cfun(cF, f1, a) do
           true ->
-            [[f1, a] | t2]
+            [f1, a | t2]
 
           false ->
             [a | t1]
@@ -1372,7 +1373,7 @@ defmodule :m_file_sorter do
   defp cinsert(a, [f | fs] = t, cF) do
     case cfun(cF, f, a) do
       true ->
-        [[f, a] | fs]
+        [f, a | fs]
 
       false ->
         [a | t]
@@ -1412,8 +1413,8 @@ defmodule :m_file_sorter do
     l
   end
 
-  defp binterms([[{_T1, bT1}, {_T2, bT2}] | ts], l) do
-    binterms(ts, [[bT2, bT1] | l])
+  defp binterms([{_T1, bT1}, {_T2, bT2} | ts], l) do
+    binterms(ts, [bT2, bT1 | l])
   end
 
   defp binterms([{_T, bT} | ts], l) do
@@ -1757,9 +1758,10 @@ defmodule :m_file_sorter do
     [:erlang.element(kp1, t), :erlang.element(kp2, t)]
   end
 
-  defp make_key([[kp1, kp2] | kps], t) do
+  defp make_key([kp1, kp2 | kps], t) do
     [
-      [:erlang.element(kp1, t), :erlang.element(kp2, t)]
+      :erlang.element(kp1, t),
+      :erlang.element(kp2, t)
       | make_key2(kps, t)
     ]
   end
@@ -1775,10 +1777,11 @@ defmodule :m_file_sorter do
     ]
   end
 
-  defp make_stable_key([[kp1, kp2] | kps], i, t) do
+  defp make_stable_key([kp1, kp2 | kps], i, t) do
     [
       [
-        [:erlang.element(kp1, t), :erlang.element(kp2, t)]
+        :erlang.element(kp1, t),
+        :erlang.element(kp2, t)
         | make_key2(kps, t)
       ]
       | i

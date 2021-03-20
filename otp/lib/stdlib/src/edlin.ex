@@ -485,7 +485,7 @@ defmodule :m_edlin do
         {{[gC | bef0], []}, [{:put_chars, :unicode, [c]} | rs]}
 
       _ ->
-        {{[[c, bef] | bef0], []}, [{:put_chars, :unicode, [c]} | rs]}
+        {{[c, bef | bef0], []}, [{:put_chars, :unicode, [c]} | rs]}
     end
   end
 
@@ -499,7 +499,7 @@ defmodule :m_edlin do
         {{[gC | bef0], aft}, [{:insert_chars, :unicode, [c]} | rs]}
 
       _ ->
-        {{[[c, bef] | bef0], aft}, [{:insert_chars, :unicode, [c]} | rs]}
+        {{[c, bef | bef0], aft}, [{:insert_chars, :unicode, [c]} | rs]}
     end
   end
 
@@ -508,7 +508,8 @@ defmodule :m_edlin do
 
     {{[c | bef], aft},
      [
-       [{:insert_chars, :unicode, [c] ++ aft}, {:delete_chars, -3}]
+       {:insert_chars, :unicode, [c] ++ aft},
+       {:delete_chars, -3}
        | rs
      ], :search}
   end
@@ -519,7 +520,8 @@ defmodule :m_edlin do
 
     {{[c | bef], nAft},
      [
-       [{:insert_chars, :unicode, [c] ++ nAft}, {:delete_chars, -offset}]
+       {:insert_chars, :unicode, [c] ++ nAft},
+       {:delete_chars, -offset}
        | rs
      ], :search}
   end
@@ -530,7 +532,8 @@ defmodule :m_edlin do
 
     {{bef, nAft},
      [
-       [{:insert_chars, :unicode, nAft}, {:delete_chars, -offset}]
+       {:insert_chars, :unicode, nAft},
+       {:delete_chars, -offset}
        | rs
      ], :search}
   end
@@ -546,7 +549,8 @@ defmodule :m_edlin do
 
     {{[18 | bef], nAft},
      [
-       [{:insert_chars, :unicode, nAft}, {:delete_chars, -offset}]
+       {:insert_chars, :unicode, nAft},
+       {:delete_chars, -offset}
        | rs
      ], :search}
   end
@@ -557,7 +561,8 @@ defmodule :m_edlin do
 
     {{[19 | bef], nAft},
      [
-       [{:insert_chars, :unicode, nAft}, {:delete_chars, -offset}]
+       {:insert_chars, :unicode, nAft},
+       {:delete_chars, -offset}
        | rs
      ], :search}
   end
@@ -567,7 +572,8 @@ defmodule :m_edlin do
 
     {{[], nAft},
      [
-       [{:put_chars, :unicode, '\n'}, {:move_rel, -cp_len(aft)}]
+       {:put_chars, :unicode, '\n'},
+       {:move_rel, -cp_len(aft)}
        | rs
      ], :search_found}
   end
@@ -577,17 +583,19 @@ defmodule :m_edlin do
 
     {{[], nAft},
      [
-       [{:put_chars, :unicode, '\n'}, {:move_rel, -cp_len(aft)}]
+       {:put_chars, :unicode, '\n'},
+       {:move_rel, -cp_len(aft)}
        | rs
      ], :search_quit}
   end
 
-  defp do_op({:blink, c, m}, bef = [[?$, ?$] | _], aft, rs) do
+  defp do_op({:blink, c, m}, bef = [?$, ?$ | _], aft, rs) do
     n = over_paren(bef, c, m)
 
     {:blink, n + 1, {[c | bef], aft},
      [
-       [{:move_rel, -(n + 1)}, {:insert_chars, :unicode, [c]}]
+       {:move_rel, -(n + 1)},
+       {:insert_chars, :unicode, [c]}
        | rs
      ]}
   end
@@ -599,12 +607,13 @@ defmodule :m_edlin do
   defp do_op({:blink, c, m}, bef, aft, rs) do
     case over_paren(bef, c, m) do
       :beep ->
-        {{[c | bef], aft}, [[:beep, {:insert_chars, :unicode, [c]}] | rs]}
+        {{[c | bef], aft}, [:beep, {:insert_chars, :unicode, [c]} | rs]}
 
       n ->
         {:blink, n + 1, {[c | bef], aft},
          [
-           [{:move_rel, -(n + 1)}, {:insert_chars, :unicode, [c]}]
+           {:move_rel, -(n + 1)},
+           {:insert_chars, :unicode, [c]}
            | rs
          ]}
     end
@@ -615,7 +624,8 @@ defmodule :m_edlin do
       {n, paren} ->
         {:blink, n + 1, {[paren | bef], aft},
          [
-           [{:move_rel, -(n + 1)}, {:insert_chars, :unicode, [paren]}]
+           {:move_rel, -(n + 1)},
+           {:insert_chars, :unicode, [paren]}
            | rs
          ]}
 
@@ -632,12 +642,13 @@ defmodule :m_edlin do
     {{bef, aft}, [{:delete_chars, -gc_len(gC)} | rs]}
   end
 
-  defp do_op(:transpose_char, [[c1, c2] | bef], [], rs) do
+  defp do_op(:transpose_char, [c1, c2 | bef], [], rs) do
     len = gc_len(c1) + gc_len(c2)
 
-    {{[[c2, c1] | bef], []},
+    {{[c2, c1 | bef], []},
      [
-       [{:put_chars, :unicode, [c1, c2]}, {:move_rel, -len}]
+       {:put_chars, :unicode, [c1, c2]},
+       {:move_rel, -len}
        | rs
      ]}
   end
@@ -645,9 +656,10 @@ defmodule :m_edlin do
   defp do_op(:transpose_char, [c2 | bef], [c1 | aft], rs) do
     len = gc_len(c2)
 
-    {{[[c2, c1] | bef], aft},
+    {{[c2, c1 | bef], aft},
      [
-       [{:put_chars, :unicode, [c1, c2]}, {:move_rel, -len}]
+       {:put_chars, :unicode, [c1, c2]},
+       {:move_rel, -len}
        | rs
      ]}
   end
@@ -795,11 +807,11 @@ defmodule :m_edlin do
     over_paren(chars, paren, match, 1, 1, [])
   end
 
-  defp over_paren([[c, ?$, ?$] | cs], paren, match, d, n, l) do
+  defp over_paren([c, ?$, ?$ | cs], paren, match, d, n, l) do
     over_paren([c | cs], paren, match, d, n + 2, l)
   end
 
-  defp over_paren([[gC, ?$] | cs], paren, match, d, n, l) do
+  defp over_paren([gC, ?$ | cs], paren, match, d, n, l) do
     over_paren(cs, paren, match, d, n + 1 + gc_len(gC), l)
   end
 
@@ -863,11 +875,11 @@ defmodule :m_edlin do
     over_paren_auto(chars, 1, 1, [])
   end
 
-  defp over_paren_auto([[c, ?$, ?$] | cs], d, n, l) do
+  defp over_paren_auto([c, ?$, ?$ | cs], d, n, l) do
     over_paren_auto([c | cs], d, n + 2, l)
   end
 
-  defp over_paren_auto([[gC, ?$] | cs], d, n, l) do
+  defp over_paren_auto([gC, ?$ | cs], d, n, l) do
     over_paren_auto(cs, d, n + 1 + gc_len(gC), l)
   end
 
@@ -924,10 +936,7 @@ defmodule :m_edlin do
   end
 
   defp erase(pbs, bef, aft, rs) do
-    [
-      [{:delete_chars, -cp_len(pbs) - cp_len(bef)}, {:delete_chars, cp_len(aft)}]
-      | rs
-    ]
+    [{:delete_chars, -cp_len(pbs) - cp_len(bef)}, {:delete_chars, cp_len(aft)} | rs]
   end
 
   def redraw_line({:line, pbs, {bef, aft}, _}) do
@@ -936,12 +945,9 @@ defmodule :m_edlin do
 
   defp redraw(pbs, bef, aft, rs) do
     [
-      [
-        {:move_rel, -cp_len(aft)},
-        {:put_chars, :unicode, reverse(bef, aft)},
-        {:put_chars, :unicode, pbs}
-      ]
-      | rs
+      {:move_rel, -cp_len(aft)},
+      {:put_chars, :unicode, reverse(bef, aft)},
+      {:put_chars, :unicode, pbs} | rs
     ]
   end
 

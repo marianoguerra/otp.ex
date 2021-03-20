@@ -168,13 +168,13 @@ defmodule :m_ssh_options do
   def put_value(:internal_options, keyVal, opts, _CallerMod, _CallerLine)
       when is_map(opts) do
     internalOpts = :maps.get(:internal_options, opts)
-    %{opts | :internal_options => put_internal_value(keyVal, internalOpts)}
+    %{opts | internal_options: put_internal_value(keyVal, internalOpts)}
   end
 
   def put_value(:socket_options, keyVal, opts, _CallerMod, _CallerLine)
       when is_map(opts) do
     socketOpts = :maps.get(:socket_options, opts)
-    %{opts | :socket_options => put_socket_value(keyVal, socketOpts)}
+    %{opts | socket_options: put_socket_value(keyVal, socketOpts)}
   end
 
   defp put_user_value(l, opts) when is_list(l) do
@@ -190,7 +190,7 @@ defmodule :m_ssh_options do
   end
 
   defp put_internal_value({key, value}, intOpts) do
-    %{intOpts | key => value}
+    Map.put(intOpts, key, value)
   end
 
   defp put_socket_value(l, sockOpts) when is_list(l) do
@@ -208,15 +208,11 @@ defmodule :m_ssh_options do
   def delete_key(:internal_options, key, opts, _CallerMod, _CallerLine)
       when is_map(opts) do
     internalOpts = :maps.get(:internal_options, opts)
-    %{opts | :internal_options => :maps.remove(key, internalOpts)}
+    %{opts | internal_options: :maps.remove(key, internalOpts)}
   end
 
   def handle_options(role, propList0) do
-    handle_options(role, propList0, %{
-      :socket_options => [],
-      :internal_options => %{},
-      :user_options => []
-    })
+    handle_options(role, propList0, %{socket_options: [], internal_options: %{}, user_options: []})
   end
 
   defp handle_options(role, optsList0, opts0)
@@ -230,39 +226,37 @@ defmodule :m_ssh_options do
 
       {initialMap, optsList2} =
         :maps.fold(
-          fn k, %{:default => vd}, {m, pL} ->
+          fn k, %{default: vd}, {m, pL} ->
             case config_val(k, roleCnfs, optsList1) do
               {:ok, v1} ->
-                {%{
-                   m
-                   | k => v1,
-                     :user_options => [
-                       {k, v1}
-                       | :maps.get(
-                           :user_options,
-                           m
-                         )
-                     ]
-                 }, [{k, v1} | pL]}
+                {Map.merge(m, %{
+                   k => v1,
+                   user_options: [
+                     {k, v1}
+                     | :maps.get(
+                         :user_options,
+                         m
+                       )
+                   ]
+                 }), [{k, v1} | pL]}
 
               {:append, v1} ->
                 newVal = :maps.get(k, m, []) ++ v1
 
-                {%{
-                   m
-                   | k => newVal,
-                     :user_options => [
-                       {k, newVal}
-                       | :lists.keydelete(
-                           k,
-                           1,
-                           :maps.get(
-                             :user_options,
-                             m
-                           )
+                {Map.merge(m, %{
+                   k => newVal,
+                   user_options: [
+                     {k, newVal}
+                     | :lists.keydelete(
+                         k,
+                         1,
+                         :maps.get(
+                           :user_options,
+                           m
                          )
-                     ]
-                 },
+                       )
+                   ]
+                 }),
                  [
                    {k, newVal}
                    | :lists.keydelete(
@@ -273,17 +267,17 @@ defmodule :m_ssh_options do
                  ]}
 
               :undefined ->
-                {%{m | k => vd}, pL}
+                {Map.put(m, k, vd), pL}
             end
           end,
-          {%{
-             opts0
-             | :user_options =>
-                 :maps.get(
-                   :user_options,
-                   opts0
-                 )
-           },
+          {Map.put(
+             opts0,
+             :user_options,
+             :maps.get(
+               :user_options,
+               opts0
+             )
+           ),
            for {k, v} <- optsList1,
                not :maps.is_key(k, opts0) do
              {k, v}
@@ -363,7 +357,7 @@ defmodule :m_ssh_options do
   defp check_fun(key, defs) do
     case :ssh_connection_handler.prohibited_sock_option(key) do
       false ->
-        %{:chk => fun} = :maps.get(key, defs)
+        %{chk: fun} = :maps.get(key, defs)
         fun
 
       true ->
@@ -399,10 +393,10 @@ defmodule :m_ssh_options do
       check_fun(key, defs).(value)
     catch
       :error, {:badkey, :inet} ->
-        %{optMap | :socket_options => [value | :maps.get(:socket_options, optMap)]}
+        %{optMap | socket_options: [value | :maps.get(:socket_options, optMap)]}
 
       :error, {:badkey, ^key} ->
-        %{optMap | :socket_options => [{key, value} | :maps.get(:socket_options, optMap)]}
+        %{optMap | socket_options: [{key, value} | :maps.get(:socket_options, optMap)]}
 
       :error, {:check, {badValue, extra}} ->
         :erlang.error({:eoptions, {key, badValue}, extra})
@@ -428,7 +422,7 @@ defmodule :m_ssh_options do
   end
 
   defp save(opt, _Defs, optMap) when is_map(optMap) do
-    %{optMap | :socket_options => [opt | :maps.get(:socket_options, optMap)]}
+    %{optMap | socket_options: [opt | :maps.get(:socket_options, optMap)]}
   end
 
   def keep_user_options(type, opts) do
@@ -437,7 +431,7 @@ defmodule :m_ssh_options do
     :maps.filter(
       fn key, _Value ->
         try do
-          %{:class => class} = :maps.get(key, defs)
+          %{class: class} = :maps.get(key, defs)
           class == :user_option
         catch
           _, _ ->
@@ -454,7 +448,7 @@ defmodule :m_ssh_options do
     :maps.filter(
       fn key, value ->
         try do
-          %{:default => defVal} = :maps.get(key, defs)
+          %{default: defVal} = :maps.get(key, defs)
           defVal !== value
         catch
           _, _ ->
@@ -466,371 +460,368 @@ defmodule :m_ssh_options do
   end
 
   def default(:server) do
-    %{
-      default(:common)
-      | :subsystems => %{
-          :default => [:ssh_sftpd.subsystem_spec([])],
-          :chk => fn l ->
-            is_list(l) and
-              :lists.all(
-                fn
-                  {name, {cB, args}} ->
-                    check_string(name) and is_atom(cB) and is_list(args)
+    Map.merge(default(:common), %{
+      subsystems: %{
+        default: [:ssh_sftpd.subsystem_spec([])],
+        chk: fn l ->
+          is_list(l) and
+            :lists.all(
+              fn
+                {name, {cB, args}} ->
+                  check_string(name) and is_atom(cB) and is_list(args)
 
-                  _ ->
-                    false
-                end,
-                l
-              )
-          end,
-          :class => :user_option
-        },
-        :shell => %{
-          :default => {:shell, :start, []},
-          :chk => fn
-            {m, f, a} ->
-              is_atom(m) and is_atom(f) and is_list(a)
+                _ ->
+                  false
+              end,
+              l
+            )
+        end,
+        class: :user_option
+      },
+      shell: %{
+        default: {:shell, :start, []},
+        chk: fn
+          {m, f, a} ->
+            is_atom(m) and is_atom(f) and is_list(a)
 
-            :disabled ->
-              true
+          :disabled ->
+            true
 
-            v ->
-              check_function1(v) or check_function2(v)
-          end,
-          :class => :user_option
-        },
-        :exec => %{
-          :default => :undefined,
-          :chk => fn
-            {:direct, v} ->
-              check_function1(v) or check_function2(v) or check_function3(v)
+          v ->
+            check_function1(v) or check_function2(v)
+        end,
+        class: :user_option
+      },
+      exec: %{
+        default: :undefined,
+        chk: fn
+          {:direct, v} ->
+            check_function1(v) or check_function2(v) or check_function3(v)
 
-            :disabled ->
-              true
+          :disabled ->
+            true
 
-            {m, f, a} ->
-              is_atom(m) and is_atom(f) and is_list(a)
+          {m, f, a} ->
+            is_atom(m) and is_atom(f) and is_list(a)
 
-            v ->
-              check_function1(v) or check_function2(v) or check_function3(v)
-          end,
-          :class => :user_option
-        },
-        :ssh_cli => %{
-          :default => :undefined,
-          :chk => fn
-            {cb, as} ->
-              is_atom(cb) and is_list(as)
+          v ->
+            check_function1(v) or check_function2(v) or check_function3(v)
+        end,
+        class: :user_option
+      },
+      ssh_cli: %{
+        default: :undefined,
+        chk: fn
+          {cb, as} ->
+            is_atom(cb) and is_list(as)
 
-            v ->
-              v == :no_cli
-          end,
-          :class => :user_option
-        },
-        :tcpip_tunnel_out => %{
-          :default => false,
-          :chk => fn v ->
-            :erlang.is_boolean(v)
-          end,
-          :class => :user_option
-        },
-        :tcpip_tunnel_in => %{
-          :default => false,
-          :chk => fn v ->
-            :erlang.is_boolean(v)
-          end,
-          :class => :user_option
-        },
-        :system_dir => %{
-          :default => '/etc/ssh',
-          :chk => fn v ->
-            check_string(v) and check_dir(v)
-          end,
-          :class => :user_option
-        },
-        :auth_method_kb_interactive_data => %{
-          :default => :undefined,
-          :chk => fn
-            {s1, s2, s3, b} ->
-              check_string(s1) and check_string(s2) and check_string(s3) and is_boolean(b)
+          v ->
+            v == :no_cli
+        end,
+        class: :user_option
+      },
+      tcpip_tunnel_out: %{
+        default: false,
+        chk: fn v ->
+          :erlang.is_boolean(v)
+        end,
+        class: :user_option
+      },
+      tcpip_tunnel_in: %{
+        default: false,
+        chk: fn v ->
+          :erlang.is_boolean(v)
+        end,
+        class: :user_option
+      },
+      system_dir: %{
+        default: '/etc/ssh',
+        chk: fn v ->
+          check_string(v) and check_dir(v)
+        end,
+        class: :user_option
+      },
+      auth_method_kb_interactive_data: %{
+        default: :undefined,
+        chk: fn
+          {s1, s2, s3, b} ->
+            check_string(s1) and check_string(s2) and check_string(s3) and is_boolean(b)
 
-            f ->
-              check_function3(f) or check_function4(f)
-          end,
-          :class => :user_option
-        },
-        :user_passwords => %{
-          :default => [],
-          :chk => fn v ->
-            is_list(v) and
-              :lists.all(
-                fn {s1, s2} ->
-                  check_string(s1) and check_string(s2)
-                end,
-                v
-              )
-          end,
-          :class => :user_option
-        },
-        :pk_check_user => %{
-          :default => false,
-          :chk => fn v ->
-            :erlang.is_boolean(v)
-          end,
-          :class => :user_option
-        },
-        :password => %{
-          :default => :undefined,
-          :chk => fn v ->
-            check_string(v)
-          end,
-          :class => :user_option
-        },
-        :dh_gex_groups => %{
-          :default => :undefined,
-          :chk => fn v ->
-            check_dh_gex_groups(v)
-          end,
-          :class => :user_option
-        },
-        :dh_gex_limits => %{
-          :default => {0, :infinity},
-          :chk => fn
-            {i1, i2} ->
-              check_pos_integer(i1) and check_pos_integer(i2) and i1 < i2
+          f ->
+            check_function3(f) or check_function4(f)
+        end,
+        class: :user_option
+      },
+      user_passwords: %{
+        default: [],
+        chk: fn v ->
+          is_list(v) and
+            :lists.all(
+              fn {s1, s2} ->
+                check_string(s1) and check_string(s2)
+              end,
+              v
+            )
+        end,
+        class: :user_option
+      },
+      pk_check_user: %{
+        default: false,
+        chk: fn v ->
+          :erlang.is_boolean(v)
+        end,
+        class: :user_option
+      },
+      password: %{
+        default: :undefined,
+        chk: fn v ->
+          check_string(v)
+        end,
+        class: :user_option
+      },
+      dh_gex_groups: %{
+        default: :undefined,
+        chk: fn v ->
+          check_dh_gex_groups(v)
+        end,
+        class: :user_option
+      },
+      dh_gex_limits: %{
+        default: {0, :infinity},
+        chk: fn
+          {i1, i2} ->
+            check_pos_integer(i1) and check_pos_integer(i2) and i1 < i2
 
-            _ ->
-              false
-          end,
-          :class => :user_option
-        },
-        :pwdfun => %{
-          :default => :undefined,
-          :chk => fn v ->
-            check_function4(v) or check_function2(v)
-          end,
-          :class => :user_option
-        },
-        :negotiation_timeout => %{
-          :default => 2 * 60 * 1000,
-          :chk => fn v ->
-            check_timeout(v)
-          end,
-          :class => :user_option
-        },
-        :hello_timeout => %{
-          :default => 30 * 1000,
-          :chk => &check_timeout/1,
-          :class => :user_option
-        },
-        :max_sessions => %{
-          :default => :infinity,
-          :chk => fn v ->
-            check_pos_integer(v)
-          end,
-          :class => :user_option
-        },
-        :max_channels => %{
-          :default => :infinity,
-          :chk => fn v ->
-            check_pos_integer(v)
-          end,
-          :class => :user_option
-        },
-        :parallel_login => %{
-          :default => false,
-          :chk => fn v ->
-            :erlang.is_boolean(v)
-          end,
-          :class => :user_option
-        },
-        :minimal_remote_max_packet_size => %{
-          :default => 0,
-          :chk => fn v ->
-            check_pos_integer(v)
-          end,
-          :class => :user_option
-        },
-        :failfun => %{
-          :default => fn _, _, _ ->
-            :void
-          end,
-          :chk => fn v ->
-            check_function3(v) or check_function2(v)
-          end,
-          :class => :user_option
-        },
-        :connectfun => %{
-          :default => fn _, _, _ ->
-            :void
-          end,
-          :chk => fn v ->
-            check_function3(v)
-          end,
-          :class => :user_option
-        },
-        :infofun => %{
-          :default => fn _, _, _ ->
-            :void
-          end,
-          :chk => fn v ->
-            check_function3(v) or check_function2(v)
-          end,
-          :class => :undoc_user_option
-        }
-    }
+          _ ->
+            false
+        end,
+        class: :user_option
+      },
+      pwdfun: %{
+        default: :undefined,
+        chk: fn v ->
+          check_function4(v) or check_function2(v)
+        end,
+        class: :user_option
+      },
+      negotiation_timeout: %{
+        default: 2 * 60 * 1000,
+        chk: fn v ->
+          check_timeout(v)
+        end,
+        class: :user_option
+      },
+      hello_timeout: %{default: 30 * 1000, chk: &check_timeout/1, class: :user_option},
+      max_sessions: %{
+        default: :infinity,
+        chk: fn v ->
+          check_pos_integer(v)
+        end,
+        class: :user_option
+      },
+      max_channels: %{
+        default: :infinity,
+        chk: fn v ->
+          check_pos_integer(v)
+        end,
+        class: :user_option
+      },
+      parallel_login: %{
+        default: false,
+        chk: fn v ->
+          :erlang.is_boolean(v)
+        end,
+        class: :user_option
+      },
+      minimal_remote_max_packet_size: %{
+        default: 0,
+        chk: fn v ->
+          check_pos_integer(v)
+        end,
+        class: :user_option
+      },
+      failfun: %{
+        default: fn _, _, _ ->
+          :void
+        end,
+        chk: fn v ->
+          check_function3(v) or check_function2(v)
+        end,
+        class: :user_option
+      },
+      connectfun: %{
+        default: fn _, _, _ ->
+          :void
+        end,
+        chk: fn v ->
+          check_function3(v)
+        end,
+        class: :user_option
+      },
+      infofun: %{
+        default: fn _, _, _ ->
+          :void
+        end,
+        chk: fn v ->
+          check_function3(v) or check_function2(v)
+        end,
+        class: :undoc_user_option
+      }
+    })
   end
 
   def default(:client) do
-    %{
-      default(:common)
-      | :dsa_pass_phrase => %{
-          :default => :undefined,
-          :chk => fn v ->
-            check_string(v)
-          end,
-          :class => :user_option
-        },
-        :rsa_pass_phrase => %{
-          :default => :undefined,
-          :chk => fn v ->
-            check_string(v)
-          end,
-          :class => :user_option
-        },
-        :ecdsa_pass_phrase => %{
-          :default => :undefined,
-          :chk => fn v ->
-            check_string(v)
-          end,
-          :class => :user_option
-        },
-        :silently_accept_hosts => %{
-          :default => false,
-          :chk => fn v ->
-            check_silently_accept_hosts(v)
-          end,
-          :class => :user_option
-        },
-        :user_interaction => %{
-          :default => true,
-          :chk => fn v ->
-            :erlang.is_boolean(v)
-          end,
-          :class => :user_option
-        },
-        :save_accepted_host => %{
-          :default => true,
-          :chk => fn v ->
-            :erlang.is_boolean(v)
-          end,
-          :class => :user_option
-        },
-        :dh_gex_limits => %{
-          :default => {1024, 6144, 8192},
-          :chk => fn
-            {min, i, max} ->
-              :lists.all(&check_pos_integer/1, [min, i, max])
+    Map.merge(default(:common), %{
+      dsa_pass_phrase: %{
+        default: :undefined,
+        chk: fn v ->
+          check_string(v)
+        end,
+        class: :user_option
+      },
+      rsa_pass_phrase: %{
+        default: :undefined,
+        chk: fn v ->
+          check_string(v)
+        end,
+        class: :user_option
+      },
+      ecdsa_pass_phrase: %{
+        default: :undefined,
+        chk: fn v ->
+          check_string(v)
+        end,
+        class: :user_option
+      },
+      silently_accept_hosts: %{
+        default: false,
+        chk: fn v ->
+          check_silently_accept_hosts(v)
+        end,
+        class: :user_option
+      },
+      user_interaction: %{
+        default: true,
+        chk: fn v ->
+          :erlang.is_boolean(v)
+        end,
+        class: :user_option
+      },
+      save_accepted_host: %{
+        default: true,
+        chk: fn v ->
+          :erlang.is_boolean(v)
+        end,
+        class: :user_option
+      },
+      dh_gex_limits: %{
+        default: {1024, 6144, 8192},
+        chk: fn
+          {min, i, max} ->
+            :lists.all(
+              &check_pos_integer/1,
+              [min, i, max]
+            )
 
-            _ ->
-              false
-          end,
-          :class => :user_option
-        },
-        :connect_timeout => %{
-          :default => :infinity,
-          :chk => fn v ->
-            check_timeout(v)
-          end,
-          :class => :user_option
-        },
-        :user => %{
-          :default =>
-            (
-              env =
-                case :os.type() do
-                  {:win32, _} ->
-                    'USERNAME'
+          _ ->
+            false
+        end,
+        class: :user_option
+      },
+      connect_timeout: %{
+        default: :infinity,
+        chk: fn v ->
+          check_timeout(v)
+        end,
+        class: :user_option
+      },
+      user: %{
+        default:
+          (
+            env =
+              case :os.type() do
+                {:win32, _} ->
+                  'USERNAME'
 
-                  {:unix, _} ->
-                    'LOGNAME'
+                {:unix, _} ->
+                  'LOGNAME'
+              end
+
+            case :os.getenv(env) do
+              false ->
+                case :os.getenv('USER') do
+                  false ->
+                    :undefined
+
+                  user ->
+                    user
                 end
 
-              case :os.getenv(env) do
-                false ->
-                  case :os.getenv('USER') do
-                    false ->
-                      :undefined
-
-                    user ->
-                      user
-                  end
-
-                user ->
-                  user
-              end
-            ),
-          :chk => fn v ->
-            check_string(v)
-          end,
-          :class => :user_option
-        },
-        :password => %{
-          :default => :undefined,
-          :chk => fn v ->
-            check_string(v)
-          end,
-          :class => :user_option
-        },
-        :quiet_mode => %{
-          :default => false,
-          :chk => fn v ->
-            :erlang.is_boolean(v)
-          end,
-          :class => :user_option
-        },
-        :keyboard_interact_fun => %{
-          :default => :undefined,
-          :chk => fn v ->
-            check_function3(v)
-          end,
-          :class => :undoc_user_option
-        }
-    }
+              user ->
+                user
+            end
+          ),
+        chk: fn v ->
+          check_string(v)
+        end,
+        class: :user_option
+      },
+      password: %{
+        default: :undefined,
+        chk: fn v ->
+          check_string(v)
+        end,
+        class: :user_option
+      },
+      quiet_mode: %{
+        default: false,
+        chk: fn v ->
+          :erlang.is_boolean(v)
+        end,
+        class: :user_option
+      },
+      keyboard_interact_fun: %{
+        default: :undefined,
+        chk: fn v ->
+          check_function3(v)
+        end,
+        class: :undoc_user_option
+      }
+    })
   end
 
   def default(:common) do
     %{
-      :user_dir => %{
-        :default => false,
-        :chk => fn v ->
+      user_dir: %{
+        default: false,
+        chk: fn v ->
           check_string(v) and check_dir(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :pref_public_key_algs => %{
-        :default => :undefined,
-        :chk => fn v ->
+      pref_public_key_algs: %{
+        default: :undefined,
+        chk: fn v ->
           check_pref_public_key_algs(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :preferred_algorithms => %{
-        :default => :ssh.default_algorithms(),
-        :chk => fn v ->
+      preferred_algorithms: %{
+        default: :ssh.default_algorithms(),
+        chk: fn v ->
           check_preferred_algorithms(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :modify_algorithms => %{
-        :default => :undefined,
-        :chk => fn v ->
+      modify_algorithms: %{
+        default: :undefined,
+        chk: fn v ->
           check_modify_algorithms(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :id_string => %{
-        :default =>
+      id_string: %{
+        default:
           try do
             {:ok, [_ | _] = vSN} = :application.get_key(:ssh, :vsn)
             'Erlang/' ++ vSN
@@ -838,7 +829,7 @@ defmodule :m_ssh_options do
             _, _ ->
               ''
           end,
-        :chk => fn
+        chk: fn
           :random ->
             {true, {:random, 2, 5}}
 
@@ -848,11 +839,11 @@ defmodule :m_ssh_options do
           v ->
             check_string(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :key_cb => %{
-        :default => {:ssh_file, []},
-        :chk => fn
+      key_cb: %{
+        default: {:ssh_file, []},
+        chk: fn
           {mod, opts} ->
             is_atom(mod) and is_list(opts)
 
@@ -862,52 +853,52 @@ defmodule :m_ssh_options do
           _ ->
             false
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :profile => %{
-        :default => :default,
-        :chk => fn v ->
+      profile: %{
+        default: :default,
+        chk: fn v ->
           :erlang.is_atom(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :idle_time => %{
-        :default => :infinity,
-        :chk => fn v ->
+      idle_time: %{
+        default: :infinity,
+        chk: fn v ->
           check_timeout(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :disconnectfun => %{
-        :default => fn _ ->
+      disconnectfun: %{
+        default: fn _ ->
           :void
         end,
-        :chk => fn v ->
+        chk: fn v ->
           check_function1(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :unexpectedfun => %{
-        :default => fn _, _ ->
+      unexpectedfun: %{
+        default: fn _, _ ->
           :report
         end,
-        :chk => fn v ->
+        chk: fn v ->
           check_function2(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :ssh_msg_debug_fun => %{
-        :default => fn _, _, _, _ ->
+      ssh_msg_debug_fun: %{
+        default: fn _, _, _, _ ->
           :void
         end,
-        :chk => fn v ->
+        chk: fn v ->
           check_function4(v)
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :rekey_limit => %{
-        :default => {3_600_000, 1_024_000_000},
-        :chk => fn
+      rekey_limit: %{
+        default: {3_600_000, 1_024_000_000},
+        chk: fn
           {:infinity, :infinity} ->
             true
 
@@ -933,11 +924,11 @@ defmodule :m_ssh_options do
           _ ->
             false
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :auth_methods => %{
-        :default => 'publickey,keyboard-interactive,password',
-        :chk => fn as ->
+      auth_methods: %{
+        default: 'publickey,keyboard-interactive,password',
+        chk: fn as ->
           try do
             sup = :string.tokens('publickey,keyboard-interactive,password', ',')
             new = :string.tokens(as, ',')
@@ -951,48 +942,48 @@ defmodule :m_ssh_options do
               false
           end
         end,
-        :class => :user_option
+        class: :user_option
       },
-      :send_ext_info => %{:default => true, :chk => &:erlang.is_boolean/1, :class => :user_option},
-      :recv_ext_info => %{:default => true, :chk => &:erlang.is_boolean/1, :class => :user_option},
-      :transport => %{
-        :default => {:tcp, :gen_tcp, :tcp_closed},
-        :chk => fn {a, b, c} ->
+      send_ext_info: %{default: true, chk: &:erlang.is_boolean/1, class: :user_option},
+      recv_ext_info: %{default: true, chk: &:erlang.is_boolean/1, class: :user_option},
+      transport: %{
+        default: {:tcp, :gen_tcp, :tcp_closed},
+        chk: fn {a, b, c} ->
           is_atom(a) and is_atom(b) and is_atom(c)
         end,
-        :class => :undoc_user_option
+        class: :undoc_user_option
       },
-      :vsn => %{
-        :default => {2, 0},
-        :chk => fn
+      vsn: %{
+        default: {2, 0},
+        chk: fn
           {maj, min} ->
             check_non_neg_integer(maj) and check_non_neg_integer(min)
 
           _ ->
             false
         end,
-        :class => :undoc_user_option
+        class: :undoc_user_option
       },
-      :tstflg => %{
-        :default => [],
-        :chk => fn v ->
+      tstflg: %{
+        default: [],
+        chk: fn v ->
           :erlang.is_list(v)
         end,
-        :class => :undoc_user_option
+        class: :undoc_user_option
       },
-      :user_dir_fun => %{
-        :default => :undefined,
-        :chk => fn v ->
+      user_dir_fun: %{
+        default: :undefined,
+        chk: fn v ->
           check_function1(v)
         end,
-        :class => :undoc_user_option
+        class: :undoc_user_option
       },
-      :max_random_length_padding => %{
-        :default => 15,
-        :chk => fn v ->
+      max_random_length_padding: %{
+        default: 15,
+        chk: fn v ->
           check_non_neg_integer(v)
         end,
-        :class => :undoc_user_option
+        class: :undoc_user_option
       }
     }
   end
@@ -1266,7 +1257,11 @@ defmodule :m_ssh_options do
     :lists.member(
       s,
       [:md5, :sha, :sha224, :sha256, :sha384, :sha512]
-    ) and :lists.member(s, ss)
+    ) and
+      :lists.member(
+        s,
+        ss
+      )
   end
 
   defp valid_hash(l, ss) when is_list(l) do
@@ -1368,11 +1363,23 @@ defmodule :m_ssh_options do
   end
 
   defp normalize_mod_alg_list(k, true, [{:server2client, l2}, {:client2server, l1}], _) do
-    [nml1(k, {:client2server, l1}), nml1(k, {:server2client, l2})]
+    [
+      nml1(k, {:client2server, l1}),
+      nml1(
+        k,
+        {:server2client, l2}
+      )
+    ]
   end
 
   defp normalize_mod_alg_list(k, true, [{:client2server, l1}, {:server2client, l2}], _) do
-    [nml1(k, {:client2server, l1}), nml1(k, {:server2client, l2})]
+    [
+      nml1(k, {:client2server, l1}),
+      nml1(
+        k,
+        {:server2client, l2}
+      )
+    ]
   end
 
   defp normalize_mod_alg_list(k, true, l0, _) do
@@ -1579,7 +1586,7 @@ defmodule :m_ssh_options do
     :erlang.error({:eoptions, {k, :client2server}, 'Empty resulting algorithm list'})
   end
 
-  defp error_if_empty([{k, [[_, {:server2client, []}] | _]} | _]) do
+  defp error_if_empty([{k, [_, {:server2client, []} | _]} | _]) do
     :erlang.error({:eoptions, {k, :server2client}, 'Empty resulting algorithm list'})
   end
 

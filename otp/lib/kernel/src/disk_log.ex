@@ -2480,7 +2480,7 @@ defmodule :m_disk_log do
       end
     end
 
-    :lists.filter(fun, [['idx', 'siz'] | fs])
+    :lists.filter(fun, ['idx', 'siz' | fs])
   end
 
   defp add_ext(file, ext) do

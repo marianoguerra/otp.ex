@@ -5,7 +5,7 @@ defmodule :m_logger_h_common do
     call(module, name, :filesync)
   end
 
-  def adding_handler(%{:id => name, :module => module} = config) do
+  def adding_handler(%{id: name, module: module} = config) do
     hConfig0 = :maps.get(:config, config, %{})
 
     handlerConfig0 =
@@ -69,7 +69,7 @@ defmodule :m_logger_h_common do
                 hConfig0
               )
 
-            start(olpOpts, %{config | :config => hConfig})
+            start(olpOpts, Map.put(config, :config, hConfig))
 
           {:error, faulty} ->
             {:error, {:invalid_config, module, faulty}}
@@ -80,7 +80,7 @@ defmodule :m_logger_h_common do
     end
   end
 
-  def removing_handler(%{:id => name, :module => module, :config => %{:olp => olp}}) do
+  def removing_handler(%{id: name, module: module, config: %{olp: olp}}) do
     case :erlang.whereis(:erlang.list_to_atom(:lists.concat([module, '_', name]))) do
       :undefined ->
         :ok
@@ -93,7 +93,7 @@ defmodule :m_logger_h_common do
 
   def changing_config(
         setOrUpdate,
-        %{:id => name, :config => oldHConfig, :module => module},
+        %{id: name, config: oldHConfig, module: module},
         newConfig0
       ) do
     newHConfig0 = :maps.get(:config, newConfig0, %{})
@@ -230,7 +230,7 @@ defmodule :m_logger_h_common do
                     newOlpOpts
                   )
 
-                newConfig = %{newConfig0 | :config => newHConfig}
+                newConfig = Map.put(newConfig0, :config, newHConfig)
                 {:ok, newConfig}
 
               error ->
@@ -246,32 +246,29 @@ defmodule :m_logger_h_common do
     end
   end
 
-  def log(
-        logEvent,
-        config = %{:config => %{:olp => olp}}
-      ) do
+  def log(logEvent, config = %{config: %{olp: olp}}) do
     true = :erlang.is_process_alive(:logger_olp.get_pid(olp))
     bin = log_to_binary(logEvent, config)
     :logger_olp.load(olp, bin)
   end
 
-  def filter_config(%{:config => hConfig} = config) do
-    %{config | :config => :maps.without([:olp], hConfig)}
+  def filter_config(%{config: hConfig} = config) do
+    Map.put(config, :config, :maps.without([:olp], hConfig))
   end
 
   defp start(
          olpOpts0,
-         %{:id => name, :module => module, :config => hConfig} = config0
+         %{id: name, module: module, config: hConfig} = config0
        ) do
     regName = :erlang.list_to_atom(:lists.concat([module, '_', name]))
 
     childSpec = %{
-      :id => name,
-      :start => {:logger_olp, :start_link, [regName, :logger_h_common, config0, olpOpts0]},
-      :restart => :temporary,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:logger_h_common]
+      id: name,
+      start: {:logger_olp, :start_link, [regName, :logger_h_common, config0, olpOpts0]},
+      restart: :temporary,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:logger_h_common]
     }
 
     case :supervisor.start_child(
@@ -286,7 +283,7 @@ defmodule :m_logger_h_common do
           )
 
         olpOpts = :logger_olp.get_opts(olp)
-        {:ok, %{config0 | :config => %{:maps.merge(hConfig, olpOpts) | :olp => olp}}}
+        {:ok, Map.put(config0, :config, Map.put(:maps.merge(hConfig, olpOpts), :olp, olp))}
 
       {:error, {reason, ch}}
       when is_tuple(ch) and
@@ -298,7 +295,7 @@ defmodule :m_logger_h_common do
     end
   end
 
-  def init(%{:id => name, :module => module, :config => hConfig}) do
+  def init(%{id: name, module: module, config: hConfig}) do
     :erlang.process_flag(:trap_exit, true)
     :ok
 
@@ -310,14 +307,14 @@ defmodule :m_logger_h_common do
             hConfig
           )
 
-        state = %{
-          commonConfig
-          | :id => name,
-            :module => module,
-            :ctrl_sync_count => 20,
-            :last_op => :sync,
-            :handler_state => hState
-        }
+        state =
+          Map.merge(commonConfig, %{
+            id: name,
+            module: module,
+            ctrl_sync_count: 20,
+            last_op: :sync,
+            handler_state: hState
+          })
 
         state1 = set_repeated_filesync(state)
         {:ok, state1}
@@ -329,48 +326,39 @@ defmodule :m_logger_h_common do
 
   def handle_load(
         bin,
-        %{
-          :id => name,
-          :module => module,
-          :handler_state => handlerState,
-          :ctrl_sync_count => ctrlSync
-        } = state
+        %{id: name, module: module, handler_state: handlerState, ctrl_sync_count: ctrlSync} =
+          state
       ) do
     cond do
       ctrlSync == 0 ->
         {_, hS1} = module.write(name, :sync, bin, handlerState)
-        %{state | :handler_state => hS1, :ctrl_sync_count => 20, :last_op => :write}
+        Map.merge(state, %{handler_state: hS1, ctrl_sync_count: 20, last_op: :write})
 
       true ->
         {_, hS1} = module.write(name, :async, bin, handlerState)
-        %{state | :handler_state => hS1, :ctrl_sync_count => ctrlSync - 1, :last_op => :write}
+        Map.merge(state, %{handler_state: hS1, ctrl_sync_count: ctrlSync - 1, last_op: :write})
     end
   end
 
   def handle_call(
         :filesync,
         _From,
-        state = %{:id => name, :module => module, :handler_state => handlerState}
+        state = %{id: name, module: module, handler_state: handlerState}
       ) do
     {result, handlerState1} = module.filesync(name, :sync, handlerState)
-    {:reply, result, %{state | :handler_state => handlerState1, :last_op => :sync}}
+    {:reply, result, Map.merge(state, %{handler_state: handlerState1, last_op: :sync})}
   end
 
   def handle_cast(
         :repeated_filesync,
-        state = %{:filesync_repeat_interval => :no_repeat}
+        state = %{filesync_repeat_interval: :no_repeat}
       ) do
     {:noreply, state}
   end
 
   def handle_cast(
         :repeated_filesync,
-        state = %{
-          :id => name,
-          :module => module,
-          :handler_state => handlerState,
-          :last_op => lastOp
-        }
+        state = %{id: name, module: module, handler_state: handlerState, last_op: lastOp}
       ) do
     state1 =
       cond do
@@ -379,7 +367,7 @@ defmodule :m_logger_h_common do
 
         true ->
           {_, hS} = module.filesync(name, :async, handlerState)
-          %{state | :handler_state => hS, :last_op => :sync}
+          Map.merge(state, %{handler_state: hS, last_op: :sync})
       end
 
     {:noreply, set_repeated_filesync(state1)}
@@ -388,10 +376,10 @@ defmodule :m_logger_h_common do
   def handle_cast(
         {:config_changed, commonConfig, hConfig},
         state = %{
-          :id => name,
-          :module => module,
-          :handler_state => handlerState,
-          :filesync_repeat_interval => oldFSyncInt
+          id: name,
+          module: module,
+          handler_state: handlerState,
+          filesync_repeat_interval: oldFSyncInt
         }
       ) do
     state1 =
@@ -404,7 +392,7 @@ defmodule :m_logger_h_common do
 
         fSyncInt ->
           set_repeated_filesync(
-            cancel_repeated_filesync(%{state | :filesync_repeat_interval => fSyncInt})
+            cancel_repeated_filesync(Map.put(state, :filesync_repeat_interval, fSyncInt))
           )
       end
 
@@ -416,23 +404,23 @@ defmodule :m_logger_h_common do
           handlerState
       end
 
-    {:noreply, %{state1 | :handler_state => hS}}
+    {:noreply, Map.put(state1, :handler_state, hS)}
   end
 
   def handle_info(
         info,
-        %{:id => name, :module => module, :handler_state => handlerState} = state
+        %{id: name, module: module, handler_state: handlerState} = state
       ) do
-    {:noreply, %{state | :handler_state => module.handle_info(name, info, handlerState)}}
+    {:noreply, Map.put(state, :handler_state, module.handle_info(name, info, handlerState))}
   end
 
-  def terminate(:overloaded = reason, %{:id => name} = state) do
+  def terminate(:overloaded = reason, %{id: name} = state) do
     _ = log_handler_info(name, 'Handler ~p overloaded and stopping', [name], state)
     do_terminate(reason, state)
     configResult = :logger.get_handler_config(name)
 
     case configResult do
-      {:ok, %{:module => module} = hConfig0} ->
+      {:ok, %{module: module} = hConfig0} ->
         spawn(fn ->
           :logger.remove_handler(name)
         end)
@@ -462,7 +450,7 @@ defmodule :m_logger_h_common do
 
   defp do_terminate(
          reason,
-         state = %{:id => name, :module => module, :handler_state => handlerState}
+         state = %{id: name, module: module, handler_state: handlerState}
        ) do
     _ = cancel_repeated_filesync(state)
     _ = module.terminate(name, reason, handlerState)
@@ -473,8 +461,8 @@ defmodule :m_logger_h_common do
     {:ok, state}
   end
 
-  def reset_state(%{:id => name, :module => module, :handler_state => handlerState} = state) do
-    %{state | :handler_state => module.reset_state(name, handlerState)}
+  def reset_state(%{id: name, module: module, handler_state: handlerState} = state) do
+    Map.put(state, :handler_state, module.reset_state(name, handlerState))
   end
 
   defp call(module, name, op) when is_atom(name) do
@@ -496,32 +484,32 @@ defmodule :m_logger_h_common do
 
   def notify(
         {:mode_change, mode0, mode1},
-        %{:id => name} = state
+        %{id: name} = state
       ) do
     log_handler_info(name, 'Handler ~p switched from  ~p to ~p mode', [name, mode0, mode1], state)
   end
 
-  def notify({:flushed, flushed}, %{:id => name} = state) do
+  def notify({:flushed, flushed}, %{id: name} = state) do
     log_handler_info(name, 'Handler ~p flushed ~w log events', [name, flushed], state)
   end
 
-  def notify(:restart, %{:id => name} = state) do
+  def notify(:restart, %{id: name} = state) do
     log_handler_info(name, 'Handler ~p restarted', [name], state)
   end
 
   def notify(
         :idle,
-        %{:id => name, :module => module, :handler_state => handlerState} = state
+        %{id: name, module: module, handler_state: handlerState} = state
       ) do
     {_, hS} = module.filesync(name, :async, handlerState)
-    %{state | :handler_state => hS, :last_op => :sync}
+    Map.merge(state, %{handler_state: hS, last_op: :sync})
   end
 
   defp log_handler_info(
          name,
          format,
          args,
-         %{:module => module, :handler_state => handlerState} = state
+         %{module: module, handler_state: handlerState} = state
        ) do
     config =
       case :logger.get_handler_config(name) do
@@ -529,36 +517,36 @@ defmodule :m_logger_h_common do
           conf
 
         _ ->
-          %{:formatter => {:logger_formatter, %{:legacy_header => true, :single_line => false}}}
+          %{formatter: {:logger_formatter, %{legacy_header: true, single_line: false}}}
       end
 
-    meta = %{:time => :logger.timestamp()}
+    meta = %{time: :logger.timestamp()}
 
     bin =
       log_to_binary(
-        %{:level => :notice, :msg => {format, args}, :meta => meta},
+        %{level: :notice, msg: {format, args}, meta: meta},
         config
       )
 
     {_, hS} = module.write(name, :async, bin, handlerState)
-    %{state | :handler_state => hS, :last_op => :write}
+    Map.merge(state, %{handler_state: hS, last_op: :write})
   end
 
   defp log_to_binary(
-         %{:msg => {:report, _}, :meta => %{:report_cb => _}} = log,
+         %{msg: {:report, _}, meta: %{report_cb: _}} = log,
          config
        ) do
     do_log_to_binary(log, config)
   end
 
   defp log_to_binary(
-         %{:msg => {:report, _}, :meta => meta} = log,
+         %{msg: {:report, _}, meta: meta} = log,
          config
        ) do
     defaultReportCb = &:logger.format_otp_report/1
 
     do_log_to_binary(
-      %{log | :meta => %{meta | :report_cb => defaultReportCb}},
+      Map.put(log, :meta, Map.put(meta, :report_cb, defaultReportCb)),
       config
     )
   end
@@ -572,7 +560,7 @@ defmodule :m_logger_h_common do
       :maps.get(
         :formatter,
         config,
-        {:logger_formatter, %{:legacy_header => true, :single_line => false}}
+        {:logger_formatter, %{legacy_header: true, single_line: false}}
       )
 
     string = try_format(log, formatter, formatterConfig)
@@ -587,9 +575,9 @@ defmodule :m_logger_h_common do
               :logger_server.do_internal_log(
                 :debug,
                 %{
-                  :mfa => {:logger_h_common, :do_log_to_binary, 2},
-                  :line => 395,
-                  :file => 'otp/lib/kernel/src/logger_h_common.erl'
+                  mfa: {:logger_h_common, :do_log_to_binary, 2},
+                  line: 395,
+                  file: 'otp/lib/kernel/src/logger_h_common.erl'
                 },
                 log,
                 [
@@ -624,9 +612,9 @@ defmodule :m_logger_h_common do
               :logger_server.do_internal_log(
                 :debug,
                 %{
-                  :mfa => {:logger_h_common, :try_format, 3},
-                  :line => 407,
-                  :file => 'otp/lib/kernel/src/logger_h_common.erl'
+                  mfa: {:logger_h_common, :try_format, 3},
+                  line: 407,
+                  file: 'otp/lib/kernel/src/logger_h_common.erl'
                 },
                 log,
                 [
@@ -656,7 +644,7 @@ defmodule :m_logger_h_common do
 
           {defaultFormatter, defaultConfig} ->
             try_format(
-              %{log | :msg => {'FORMATTER CRASH: ~tp', [:maps.get(:msg, log)]}},
+              Map.put(log, :msg, {'FORMATTER CRASH: ~tp', [:maps.get(:msg, log)]}),
               defaultFormatter,
               defaultConfig
             )
@@ -692,13 +680,13 @@ defmodule :m_logger_h_common do
   end
 
   defp get_default_config() do
-    %{:filesync_repeat_interval => 5000}
+    %{filesync_repeat_interval: 5000}
   end
 
-  defp set_repeated_filesync(%{:filesync_repeat_interval => fSyncInt} = state)
+  defp set_repeated_filesync(%{filesync_repeat_interval: fSyncInt} = state)
        when is_integer(fSyncInt) do
     {:ok, tRef} = :timer.apply_after(fSyncInt, :gen_server, :cast, [self(), :repeated_filesync])
-    %{state | :rep_sync_tref => tRef}
+    Map.put(state, :rep_sync_tref, tRef)
   end
 
   defp set_repeated_filesync(state) do

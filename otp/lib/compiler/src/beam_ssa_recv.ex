@@ -55,7 +55,7 @@ defmodule :m_beam_ssa_recv do
       r_b_function(f, bs: blocks)
     catch
       class, error ->
-        %{:func_info => {_, name, arity}} = anno
+        %{func_info: {_, name, arity}} = anno
         :io.fwrite('Function: ~w/~w\n', [name, arity])
         :erlang.raise(class, error, __STACKTRACE__)
     end
@@ -190,7 +190,7 @@ defmodule :m_beam_ssa_recv do
   end
 
   defp opt_ref_used(l, ref, blocks) do
-    vs = %{ref => :ref, :ref => ref, :ref_matched => false}
+    vs = %{ref => :ref, ref: ref, ref_matched: false}
 
     case opt_ref_used_1(l, vs, blocks) do
       :used ->
@@ -217,7 +217,7 @@ defmodule :m_beam_ssa_recv do
   end
 
   defp opt_ref_used_is([r_b_set(op: :peek_message, dst: msg) | is], vs0) do
-    vs = %{vs0 | msg => :message}
+    vs = Map.put(vs0, msg, :message)
     opt_ref_used_is(is, vs)
   end
 
@@ -248,7 +248,7 @@ defmodule :m_beam_ssa_recv do
       bool when is_boolean(bool) ->
         case is_ref_msg_comparison(args, vs0) do
           true ->
-            vs = %{vs0 | dst => {:is_ref, bool}}
+            vs = Map.put(vs0, dst, {:is_ref, bool})
             opt_ref_used_is(is, vs)
 
           false ->
@@ -259,10 +259,10 @@ defmodule :m_beam_ssa_recv do
 
   defp opt_ref_used_is([r_b_set(op: :remove_message) | _], vs) do
     case vs do
-      %{:ref_matched => true} ->
+      %{ref_matched: true} ->
         :used
 
-      %{:ref_matched => false} ->
+      %{ref_matched: false} ->
         :not_used
     end
   end
@@ -325,10 +325,7 @@ defmodule :m_beam_ssa_recv do
         case vs do
           %{^bool => {:is_ref, matched}} ->
             ref_used_in(
-              [
-                {succ, %{vs | :ref_matched => matched}},
-                {fail, %{vs | :ref_matched => not matched}}
-              ],
+              [{succ, %{vs | ref_matched: matched}}, {fail, %{vs | ref_matched: not matched}}],
               blocks
             )
 
@@ -394,7 +391,7 @@ defmodule :m_beam_ssa_recv do
 
     case {vars, all} do
       {[_ | _], true} ->
-        %{vs | dst => :message}
+        Map.put(vs, dst, :message)
 
       {_, _} ->
         vs

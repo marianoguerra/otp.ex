@@ -126,11 +126,11 @@ defmodule :m_win32reg do
     expand(value, [], [])
   end
 
-  defp expand([[?%, ?%] | rest], [], result) do
+  defp expand([?%, ?% | rest], [], result) do
     expand(rest, [], [?% | result])
   end
 
-  defp expand([[?%, c] | rest], [], result) do
+  defp expand([?%, c | rest], [], result) do
     expand(rest, [c], result)
   end
 
@@ -277,7 +277,7 @@ defmodule :m_win32reg do
     x1 <<< 24 ||| x2 <<< 16 ||| x3 <<< 8 ||| x4
   end
 
-  defp i32_on_head([[x1, x2, x3, x4] | rest]) do
+  defp i32_on_head([x1, x2, x3, x4 | rest]) do
     {:ok, x1 <<< 24 ||| x2 <<< 16 ||| x3 <<< 8 ||| x4, rest}
   end
 
@@ -319,7 +319,7 @@ defmodule :m_win32reg do
   end
 
   defp reverse_and_join([x | rest], result) do
-    reverse_and_join(rest, [[x, '\\'] | result])
+    reverse_and_join(rest, [x, '\\' | result])
   end
 
   defp reverse_and_join([], result) do
@@ -349,7 +349,7 @@ defmodule :m_win32reg do
   defp parse_root([?\\ | rest], result) do
     root =
       case :lists.reverse(result) do
-        [[?h, ?k, ?e, ?y, ?_] | root0] ->
+        [?h, ?k, ?e, ?y, ?_ | root0] ->
           root0
 
         root0 ->

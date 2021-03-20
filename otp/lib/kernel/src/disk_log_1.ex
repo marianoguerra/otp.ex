@@ -100,11 +100,11 @@ defmodule :m_disk_log_1 do
     nBs =
       case sz < 65528 do
         true ->
-          [[bs, bSz, <<98, 87, 76, 65>>] | x]
+          [bs, bSz, <<98, 87, 76, 65>> | x]
 
         false ->
           mD5 = :erlang.md5(bSz)
-          [[bs, bSz, <<98, 87, 76, 65>>, mD5] | x]
+          [bs, bSz, <<98, 87, 76, 65>>, mD5 | x]
       end
 
     logl(t, nBs, size + 8 + sz)
@@ -1840,11 +1840,11 @@ defmodule :m_disk_log_1 do
     xB =
       case sz < 65528 do
         true ->
-          [[bSz, <<98, 87, 76, 65>>] | x]
+          [bSz, <<98, 87, 76, 65>> | x]
 
         false ->
           mD5 = :erlang.md5(bSz)
-          [[bSz, <<98, 87, 76, 65>>, mD5] | x]
+          [bSz, <<98, 87, 76, 65>>, mD5 | x]
       end
 
     cond do

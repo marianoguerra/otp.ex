@@ -26,78 +26,78 @@ defmodule :m_kernel do
   end
 
   def init([]) do
-    supFlags = %{:strategy => :one_for_all, :intensity => 0, :period => 1}
+    supFlags = %{strategy: :one_for_all, intensity: 0, period: 1}
 
     config = %{
-      :id => :kernel_config,
-      :start => {:kernel_config, :start_link, []},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:kernel_config]
+      id: :kernel_config,
+      start: {:kernel_config, :start_link, []},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:kernel_config]
     }
 
     refC = %{
-      :id => :kernel_refc,
-      :start => {:kernel_refc, :start_link, []},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:kernel_refc]
+      id: :kernel_refc,
+      start: {:kernel_refc, :start_link, []},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:kernel_refc]
     }
 
     code = %{
-      :id => :code_server,
-      :start => {:code, :start_link, []},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:code]
+      id: :code_server,
+      start: {:code, :start_link, []},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:code]
     }
 
     file = %{
-      :id => :file_server_2,
-      :start => {:file_server, :start_link, []},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:file, :file_server, :file_io_server, :prim_file]
+      id: :file_server_2,
+      start: {:file_server, :start_link, []},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:file, :file_server, :file_io_server, :prim_file]
     }
 
     stdError = %{
-      :id => :standard_error,
-      :start => {:standard_error, :start_link, []},
-      :restart => :temporary,
-      :shutdown => 2000,
-      :type => :supervisor,
-      :modules => [:standard_error]
+      id: :standard_error,
+      start: {:standard_error, :start_link, []},
+      restart: :temporary,
+      shutdown: 2000,
+      type: :supervisor,
+      modules: [:standard_error]
     }
 
     user = %{
-      :id => :user,
-      :start => {:user_sup, :start, []},
-      :restart => :temporary,
-      :shutdown => 2000,
-      :type => :supervisor,
-      :modules => [:user_sup]
+      id: :user,
+      start: {:user_sup, :start, []},
+      restart: :temporary,
+      shutdown: 2000,
+      type: :supervisor,
+      modules: [:user_sup]
     }
 
     safeSup = %{
-      :id => :kernel_safe_sup,
-      :start => {:supervisor, :start_link, [{:local, :kernel_safe_sup}, :kernel, :safe]},
-      :restart => :permanent,
-      :shutdown => :infinity,
-      :type => :supervisor,
-      :modules => [:kernel]
+      id: :kernel_safe_sup,
+      start: {:supervisor, :start_link, [{:local, :kernel_safe_sup}, :kernel, :safe]},
+      restart: :permanent,
+      shutdown: :infinity,
+      type: :supervisor,
+      modules: [:kernel]
     }
 
     loggerSup = %{
-      :id => :logger_sup,
-      :start => {:logger_sup, :start_link, []},
-      :restart => :permanent,
-      :shutdown => :infinity,
-      :type => :supervisor,
-      :modules => [:logger_sup]
+      id: :logger_sup,
+      start: {:logger_sup, :start_link, []},
+      restart: :permanent,
+      shutdown: :infinity,
+      type: :supervisor,
+      modules: [:logger_sup]
     }
 
     case :init.get_argument(:mode) do
@@ -118,21 +118,21 @@ defmodule :m_kernel do
           end
 
         inetDb = %{
-          :id => :inet_db,
-          :start => {:inet_db, :start_link, []},
-          :restart => :permanent,
-          :shutdown => 2000,
-          :type => :worker,
-          :modules => [:inet_db]
+          id: :inet_db,
+          start: {:inet_db, :start_link, []},
+          restart: :permanent,
+          shutdown: 2000,
+          type: :worker,
+          modules: [:inet_db]
         }
 
         sigSrv = %{
-          :id => :erl_signal_server,
-          :start => {:gen_event, :start_link, [{:local, :erl_signal_server}]},
-          :restart => :permanent,
-          :shutdown => 2000,
-          :type => :worker,
-          :modules => :dynamic
+          id: :erl_signal_server,
+          start: {:gen_event, :start_link, [{:local, :erl_signal_server}]},
+          restart: :permanent,
+          shutdown: 2000,
+          type: :worker,
+          modules: :dynamic
         }
 
         timer = start_timer()
@@ -140,14 +140,14 @@ defmodule :m_kernel do
 
         {:ok,
          {supFlags,
-          [[code, inetDb] | distChildren] ++
+          [code, inetDb | distChildren] ++
             [file, sigSrv, stdError, user, config, refC, safeSup, loggerSup] ++
             timer ++ compileServer}}
     end
   end
 
   def init(:safe) do
-    supFlags = %{:strategy => :one_for_one, :intensity => 4, :period => 3600}
+    supFlags = %{strategy: :one_for_one, intensity: 4, period: 3600}
     boot = start_boot_server()
     diskLog = start_disk_log()
     pg = start_pg2() ++ start_pg()
@@ -157,55 +157,55 @@ defmodule :m_kernel do
 
   defp start_distribution() do
     rpc = %{
-      :id => :rex,
-      :start => {:rpc, :start_link, []},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:rpc]
+      id: :rex,
+      start: {:rpc, :start_link, []},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:rpc]
     }
 
     global = %{
-      :id => :global_name_server,
-      :start => {:global, :start_link, []},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:global]
+      id: :global_name_server,
+      start: {:global, :start_link, []},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:global]
     }
 
     distAC = start_dist_ac()
 
     netSup = %{
-      :id => :net_sup,
-      :start => {:erl_distribution, :start_link, []},
-      :restart => :permanent,
-      :shutdown => :infinity,
-      :type => :supervisor,
-      :modules => [:erl_distribution]
+      id: :net_sup,
+      start: {:erl_distribution, :start_link, []},
+      restart: :permanent,
+      shutdown: :infinity,
+      type: :supervisor,
+      modules: [:erl_distribution]
     }
 
     glGroup = %{
-      :id => :global_group,
-      :start => {:global_group, :start_link, []},
-      :restart => :permanent,
-      :shutdown => 2000,
-      :type => :worker,
-      :modules => [:global_group]
+      id: :global_group,
+      start: {:global_group, :start_link, []},
+      restart: :permanent,
+      shutdown: 2000,
+      type: :worker,
+      modules: [:global_group]
     }
 
-    [[rpc, global] | distAC] ++ [netSup, glGroup]
+    [rpc, global | distAC] ++ [netSup, glGroup]
   end
 
   defp start_dist_ac() do
     spec = [
       %{
-        :id => :dist_ac,
-        :start => {:dist_ac, :start_link, []},
-        :restart => :permanent,
-        :shutdown => 2000,
-        :type => :worker,
-        :modules => [:dist_ac]
+        id: :dist_ac,
+        start: {:dist_ac, :start_link, []},
+        restart: :permanent,
+        shutdown: 2000,
+        type: :worker,
+        modules: [:dist_ac]
       }
     ]
 
@@ -237,12 +237,12 @@ defmodule :m_kernel do
 
         [
           %{
-            :id => :boot_server,
-            :start => {:erl_boot_server, :start_link, [args]},
-            :restart => :permanent,
-            :shutdown => 1000,
-            :type => :worker,
-            :modules => [:erl_boot_server]
+            id: :boot_server,
+            start: {:erl_boot_server, :start_link, [args]},
+            restart: :permanent,
+            shutdown: 1000,
+            type: :worker,
+            modules: [:erl_boot_server]
           }
         ]
 
@@ -269,20 +269,20 @@ defmodule :m_kernel do
       {:ok, true} ->
         [
           %{
-            :id => :disk_log_server,
-            :start => {:disk_log_server, :start_link, []},
-            :restart => :permanent,
-            :shutdown => 2000,
-            :type => :worker,
-            :modules => [:disk_log_server]
+            id: :disk_log_server,
+            start: {:disk_log_server, :start_link, []},
+            restart: :permanent,
+            shutdown: 2000,
+            type: :worker,
+            modules: [:disk_log_server]
           },
           %{
-            :id => :disk_log_sup,
-            :start => {:disk_log_sup, :start_link, []},
-            :restart => :permanent,
-            :shutdown => 1000,
-            :type => :supervisor,
-            :modules => [:disk_log_sup]
+            id: :disk_log_sup,
+            start: {:disk_log_sup, :start_link, []},
+            restart: :permanent,
+            shutdown: 1000,
+            type: :supervisor,
+            modules: [:disk_log_sup]
           }
         ]
 
@@ -296,12 +296,12 @@ defmodule :m_kernel do
       {:ok, true} ->
         [
           %{
-            :id => :pg,
-            :start => {:pg, :start_link, []},
-            :restart => :permanent,
-            :shutdown => 1000,
-            :type => :worker,
-            :modules => [:pg]
+            id: :pg,
+            start: {:pg, :start_link, []},
+            restart: :permanent,
+            shutdown: 1000,
+            type: :worker,
+            modules: [:pg]
           }
         ]
 
@@ -315,12 +315,12 @@ defmodule :m_kernel do
       {:ok, true} ->
         [
           %{
-            :id => :pg2,
-            :start => {:pg2, :start_link, []},
-            :restart => :permanent,
-            :shutdown => 1000,
-            :type => :worker,
-            :modules => [:pg2]
+            id: :pg2,
+            start: {:pg2, :start_link, []},
+            restart: :permanent,
+            shutdown: 1000,
+            type: :worker,
+            modules: [:pg2]
           }
         ]
 
@@ -334,12 +334,12 @@ defmodule :m_kernel do
       {:ok, true} ->
         [
           %{
-            :id => :timer_server,
-            :start => {:timer, :start_link, []},
-            :restart => :permanent,
-            :shutdown => 1000,
-            :type => :worker,
-            :modules => [:timer]
+            id: :timer_server,
+            start: {:timer, :start_link, []},
+            restart: :permanent,
+            shutdown: 1000,
+            type: :worker,
+            modules: [:timer]
           }
         ]
 
@@ -356,12 +356,12 @@ defmodule :m_kernel do
       {:ok, true} ->
         [
           %{
-            :id => :erl_compile_server,
-            :start => {:erl_compile_server, :start_link, []},
-            :restart => :permanent,
-            :shutdown => 2000,
-            :type => :worker,
-            :modules => [:erl_compile_server]
+            id: :erl_compile_server,
+            start: {:erl_compile_server, :start_link, []},
+            restart: :permanent,
+            shutdown: 2000,
+            type: :worker,
+            modules: [:erl_compile_server]
           }
         ]
 

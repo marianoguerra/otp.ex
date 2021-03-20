@@ -147,7 +147,7 @@ defmodule :m_i do
   end
 
   defp pb_print([
-         {{mod, line}, [[status, action, _, :null] | _]}
+         {{mod, line}, [status, action, _, :null | _]}
          | bps
        ]) do
     bformat(mod, line, status, action, '')
@@ -155,7 +155,7 @@ defmodule :m_i do
   end
 
   defp pb_print([
-         {{mod, line}, [[status, action, _, cond__] | _]}
+         {{mod, line}, [status, action, _, cond__ | _]}
          | bps
        ]) do
     bformat(mod, line, status, action, :io_lib.format('~w', [cond__]))

@@ -435,7 +435,12 @@ defmodule :m_ct_release_test do
     {:ok, toVsn} = :rpc.call(node, :release_handler, :unpack_release, [toRelName])
 
     [{'OTP upgrade test', ^toVsn, _, :unpacked}, {'OTP upgrade test', ^fromVsn, _, :permanent}] =
-      :rpc.call(node, :release_handler, :which_releases, [])
+      :rpc.call(
+        node,
+        :release_handler,
+        :which_releases,
+        []
+      )
 
     :ct.log('Installing new release')
 
@@ -450,7 +455,12 @@ defmodule :m_ct_release_test do
     {:ok, _} = wait_node_up(:current, toVsn, toAppsVsns)
 
     [{'OTP upgrade test', ^toVsn, _, :current}, {'OTP upgrade test', ^fromVsn, _, :permanent}] =
-      :rpc.call(node, :release_handler, :which_releases, [])
+      :rpc.call(
+        node,
+        :release_handler,
+        :which_releases,
+        []
+      )
 
     :ct.log('Permanenting new release')
     :ok = :rpc.call(node, :release_handler, :make_permanent, [toVsn])
@@ -472,7 +482,12 @@ defmodule :m_ct_release_test do
     {:ok, _} = wait_node_up(:current, fromVsn, fromAppsVsns)
 
     [{'OTP upgrade test', ^toVsn, _, :permanent}, {'OTP upgrade test', ^fromVsn, _, :current}] =
-      :rpc.call(node, :release_handler, :which_releases, [])
+      :rpc.call(
+        node,
+        :release_handler,
+        :which_releases,
+        []
+      )
 
     :ct.log('Permanenting old release')
     :ok = :rpc.call(node, :release_handler, :make_permanent, [fromVsn])

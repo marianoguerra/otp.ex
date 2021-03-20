@@ -90,7 +90,7 @@ defmodule :m_gen_tcp_socket do
       {:ok, server} ->
         {setopts, _} =
           setopts_split(
-            %{:socket => [], :server_read => [], :server_write => []},
+            %{socket: [], server_read: [], server_write: []},
             connectOpts
           )
 
@@ -173,11 +173,11 @@ defmodule :m_gen_tcp_socket do
             :undefined
 
           {:local, path} ->
-            %{:family => domain, :path => path}
+            %{family: domain, path: path}
         end
 
       _ when domain === :inet or domain === :inet6 ->
-        %{:family => domain, :addr => bindIP, :port => bindPort}
+        %{family: domain, addr: bindIP, port: bindPort}
     end
   end
 
@@ -247,7 +247,7 @@ defmodule :m_gen_tcp_socket do
       {:ok, server} ->
         {setopts, _} =
           setopts_split(
-            %{:socket => [], :server_read => [], :server_write => []},
+            %{socket: [], server_read: [], server_write: []},
             listenOpts
           )
 
@@ -306,7 +306,7 @@ defmodule :m_gen_tcp_socket do
     errRef = make_ref()
 
     try do
-      %{:start_opts => startOpts} =
+      %{start_opts: startOpts} =
         serverData =
         val(
           errRef,
@@ -365,7 +365,7 @@ defmodule :m_gen_tcp_socket do
 
   def send({:"$inet", :gen_tcp_socket, {server, socket}}, data) do
     case :socket.getopt(socket, {:otp, :meta}) do
-      {:ok, %{:packet => packet, :send_timeout => sendTimeout} = meta} ->
+      {:ok, %{packet: packet, send_timeout: sendTimeout} = meta} ->
         cond do
           packet === 1 or packet === 2 or packet === 4 ->
             size = :erlang.iolist_size(data)
@@ -614,11 +614,11 @@ defmodule :m_gen_tcp_socket do
 
   defp address(sockAddr) do
     case sockAddr do
-      %{:family => family, :addr => iP, :port => port}
+      %{family: family, addr: iP, port: port}
       when family === :inet or family === :inet6 ->
         {iP, port}
 
-      %{:family => :local, :path => path} ->
+      %{family: :local, path: path} ->
         {:local, path}
     end
   end
@@ -642,14 +642,11 @@ defmodule :m_gen_tcp_socket do
 
   defp sockaddrs([{:local, path} | iPs], tP, domain)
        when domain === :local do
-    [%{:family => domain, :path => path} | sockaddrs(iPs, tP, domain)]
+    [%{family: domain, path: path} | sockaddrs(iPs, tP, domain)]
   end
 
   defp sockaddrs([iP | iPs], tP, domain) do
-    [
-      %{:family => domain, :addr => iP, :port => tP}
-      | sockaddrs(iPs, tP, domain)
-    ]
+    [%{family: domain, addr: iP, port: tP} | sockaddrs(iPs, tP, domain)]
   end
 
   defp setopts_split(filterTags, opts) do
@@ -739,7 +736,7 @@ defmodule :m_gen_tcp_socket do
   end
 
   defp socket_setopt_value(:linger, {onOff, linger}) do
-    %{:onoff => onOff, :linger => linger}
+    %{onoff: onOff, linger: linger}
   end
 
   defp socket_setopt_value(_Tag, value) do
@@ -766,7 +763,7 @@ defmodule :m_gen_tcp_socket do
 
   defp socket_getopt_value(
          :linger,
-         {:ok, %{:onoff => onOff, :linger => linger}}
+         {:ok, %{onoff: onOff, linger: linger}}
        ) do
     {:ok, {onOff, linger}}
   end
@@ -816,10 +813,10 @@ defmodule :m_gen_tcp_socket do
   defp setopt_categories(opt) do
     case opt do
       {:raw, _, _, _} ->
-        %{:socket => []}
+        %{socket: []}
 
       {:raw, {_, _, _}} ->
-        %{:socket => []}
+        %{socket: []}
 
       {tag, _} ->
         opt_categories(tag)
@@ -832,10 +829,10 @@ defmodule :m_gen_tcp_socket do
   defp getopt_categories(opt) do
     case opt do
       {:raw, _, _, _} ->
-        %{:socket => []}
+        %{socket: []}
 
       {:raw, {_, _, _}} ->
-        %{:socket => []}
+        %{socket: []}
 
       _ ->
         opt_categories(opt)
@@ -845,20 +842,20 @@ defmodule :m_gen_tcp_socket do
   defp opt_categories(tag) when is_atom(tag) do
     case tag do
       :sys_debug ->
-        %{:start => []}
+        %{start: []}
 
       :debug ->
-        %{:socket => [], :start => []}
+        %{socket: [], start: []}
 
       _ ->
         case :maps.is_key(tag, socket_opt()) do
           true ->
-            %{:socket => []}
+            %{socket: []}
 
           false ->
             case :maps.is_key(tag, ignore_opt()) do
               true ->
-                %{:ignore => []}
+                %{ignore: []}
 
               false ->
                 :maps.merge(
@@ -867,14 +864,14 @@ defmodule :m_gen_tcp_socket do
                          server_read_opts()
                        ) do
                     true ->
-                      %{:server_read => []}
+                      %{server_read: []}
 
                     false ->
                       %{}
                   end,
                   case :maps.is_key(tag, server_write_opts()) do
                     true ->
-                      %{:server_write => []}
+                      %{server_write: []}
 
                     false ->
                       %{}
@@ -887,37 +884,37 @@ defmodule :m_gen_tcp_socket do
 
   defp ignore_opt() do
     %{
-      :tcp_module => [],
-      :ip => [],
-      :backlog => [],
-      :high_msgq_watermark => [],
-      :high_watermark => [],
-      :low_msgq_watermark => [],
-      :nopush => []
+      tcp_module: [],
+      ip: [],
+      backlog: [],
+      high_msgq_watermark: [],
+      high_watermark: [],
+      low_msgq_watermark: [],
+      nopush: []
     }
   end
 
   defp socket_opt() do
     %{
-      :buffer => {:otp, :rcvbuf},
-      :debug => {:otp, :debug},
-      :fd => {:otp, :fd},
-      :bind_to_device => {:socket, :bindtodevice},
-      :dontroute => {:socket, :dontroute},
-      :keepalive => {:socket, :keepalive},
-      :linger => {:socket, :linger},
-      :low_watermark => {:socket, :rcvlowat},
-      :priority => {:socket, :priority},
-      :recbuf => {:socket, :rcvbuf},
-      :reuseaddr => {:socket, :reuseaddr},
-      :sndbuf => {:socket, :sndbuf},
-      :nodelay => {:tcp, :nodelay},
-      :recvtos => {:ip, :recvtos},
-      :recvttl => {:ip, :recvttl},
-      :tos => {:ip, :tos},
-      :ttl => {:ip, :ttl},
-      :recvtclass => {:ipv6, :recvtclass},
-      :ipv6_v6only => {:ipv6, :v6only}
+      buffer: {:otp, :rcvbuf},
+      debug: {:otp, :debug},
+      fd: {:otp, :fd},
+      bind_to_device: {:socket, :bindtodevice},
+      dontroute: {:socket, :dontroute},
+      keepalive: {:socket, :keepalive},
+      linger: {:socket, :linger},
+      low_watermark: {:socket, :rcvlowat},
+      priority: {:socket, :priority},
+      recbuf: {:socket, :rcvbuf},
+      reuseaddr: {:socket, :reuseaddr},
+      sndbuf: {:socket, :sndbuf},
+      nodelay: {:tcp, :nodelay},
+      recvtos: {:ip, :recvtos},
+      recvttl: {:ip, :recvttl},
+      tos: {:ip, :tos},
+      ttl: {:ip, :ttl},
+      recvtclass: {:ipv6, :recvtclass},
+      ipv6_v6only: {:ipv6, :v6only}
     }
   end
 
@@ -926,19 +923,19 @@ defmodule :m_gen_tcp_socket do
   end
 
   defp server_read_write_opts() do
-    %{:packet => :raw, :packet_size => 67_108_864, :show_econnreset => false}
+    %{packet: :raw, packet_size: 67_108_864, show_econnreset: false}
   end
 
   defp server_read_opts() do
     :maps.merge(
       %{
-        :active => true,
-        :mode => :list,
-        :header => 0,
-        :deliver => :term,
-        :start_opts => [],
-        :exit_on_close => true,
-        :line_delimiter => ?\n
+        active: true,
+        mode: :list,
+        header: 0,
+        deliver: :term,
+        start_opts: [],
+        exit_on_close: true,
+        line_delimiter: ?\n
       },
       server_read_write_opts()
     )
@@ -946,7 +943,7 @@ defmodule :m_gen_tcp_socket do
 
   defp server_write_opts() do
     :maps.merge(
-      %{:send_timeout => :infinity, :send_timeout_close => false, :delay_send => false},
+      %{send_timeout: :infinity, send_timeout_close: false, delay_send: false},
       server_read_write_opts()
     )
   end
@@ -1050,7 +1047,7 @@ defmodule :m_gen_tcp_socket do
         :ok = :socket.setopt(socket, {:otp, :iow}, true)
         :ok = :socket.setopt(socket, {:otp, :meta}, meta(d))
         p = r_params(socket: socket, owner: owner, owner_mon: ownerMon)
-        {:ok, :connect, {p, %{d | :buffer => <<>>}}}
+        {:ok, :connect, {p, Map.put(d, :buffer, <<>>)}}
 
       {:error, reason} ->
         {:stop, {:shutdown, reason}}
@@ -1061,7 +1058,7 @@ defmodule :m_gen_tcp_socket do
     :erlang.process_flag(:trap_exit, true)
     ownerMon = :erlang.monitor(:process, owner)
     p = r_params(owner: owner, owner_mon: ownerMon)
-    {:ok, :accept, {p, %{d | :buffer => <<>>}}}
+    {:ok, :accept, {p, Map.put(d, :buffer, <<>>)}}
   end
 
   def init(arg) do
@@ -1257,7 +1254,7 @@ defmodule :m_gen_tcp_socket do
         {:keep_state_and_data, [{:reply, from, :ok}]}
 
       _ ->
-        next_state(p, cleanup_close_read(p, %{d | :active => false}, state, :closed), :closed, [
+        next_state(p, cleanup_close_read(p, %{d | active: false}, state, :closed), :closed, [
           {:reply, from, socket_close(r_params(p, :socket))}
         ])
     end
@@ -1305,7 +1302,7 @@ defmodule :m_gen_tcp_socket do
       _ ->
         next_state(
           p,
-          cleanup_close_read(p, %{d | :active => false}, state, :closed),
+          cleanup_close_read(p, %{d | active: false}, state, :closed),
           :closed_read,
           [{:reply, from, :socket.shutdown(r_params(p, :socket), :read)}]
         )
@@ -1378,7 +1375,7 @@ defmodule :m_gen_tcp_socket do
         {:call, from},
         {:recv, _Length, _Timeout},
         _State,
-        {_P, %{:active => active} = _D}
+        {_P, %{active: active} = _D}
       )
       when active !== false do
     {:keep_state_and_data, [{:reply, from, {:error, :einval}}]}
@@ -1554,15 +1551,15 @@ defmodule :m_gen_tcp_socket do
 
   defp handle_connected(p, d, actionsR) do
     case d do
-      %{:active => false} ->
+      %{active: false} ->
         {:next_state, :connected, {p, d}, reverse(actionsR)}
 
-      %{:active => _} ->
+      %{active: _} ->
         handle_recv(p, recv_start(d), actionsR)
     end
   end
 
-  defp handle_recv_start(p, %{:packet => packet, :buffer => buffer} = d, from, length, timeout)
+  defp handle_recv_start(p, %{packet: packet, buffer: buffer} = d, from, length, timeout)
        when (packet === :raw and 0 < length) or
               (packet === 0 and 0 < length) do
     size = :erlang.iolist_size(buffer)
@@ -1577,7 +1574,7 @@ defmodule :m_gen_tcp_socket do
 
         handle_recv_deliver(
           p,
-          %{d | :recv_length => length, :recv_from => from, :buffer => newBuffer},
+          Map.merge(%{d | buffer: newBuffer}, %{recv_length: length, recv_from: from}),
           [],
           data
         )
@@ -1587,7 +1584,7 @@ defmodule :m_gen_tcp_socket do
 
         handle_recv(
           p,
-          %{d | :recv_length => n, :recv_from => from},
+          Map.merge(d, %{recv_length: n, recv_from: from}),
           [{{:timeout, :recv}, timeout, :recv}]
         )
     end
@@ -1596,16 +1593,12 @@ defmodule :m_gen_tcp_socket do
   defp handle_recv_start(p, d, from, _Length, timeout) do
     handle_recv(
       p,
-      %{d | :recv_length => 0, :recv_from => from},
+      Map.merge(d, %{recv_length: 0, recv_from: from}),
       [{{:timeout, :recv}, timeout, :recv}]
     )
   end
 
-  defp handle_recv(
-         p,
-         %{:packet => packet, :recv_length => length} = d,
-         actionsR
-       ) do
+  defp handle_recv(p, %{packet: packet, recv_length: length} = d, actionsR) do
     cond do
       0 < length ->
         handle_recv_length(p, d, actionsR, length)
@@ -1623,14 +1616,14 @@ defmodule :m_gen_tcp_socket do
 
   defp handle_recv_peek(p, d, actionsR, packet) do
     case d do
-      %{:buffer => buffer} when is_list(buffer) ->
+      %{buffer: buffer} when is_list(buffer) ->
         data = condense_buffer(buffer)
-        handle_recv_peek(p, %{d | :buffer => data}, actionsR, packet)
+        handle_recv_peek(p, %{d | buffer: data}, actionsR, packet)
 
-      %{:buffer => <<data::size(packet)-binary, _Rest::binary>>} ->
+      %{buffer: <<data::size(packet)-binary, _Rest::binary>>} ->
         handle_recv_peek(p, d, actionsR, packet, data)
 
-      %{:buffer => <<shortData::binary>>} ->
+      %{buffer: <<shortData::binary>>} ->
         n = packet - byte_size(shortData)
 
         case socket_recv_peek(r_params(p, :socket), n) do
@@ -1654,7 +1647,7 @@ defmodule :m_gen_tcp_socket do
 
   defp handle_recv_peek(p, d, actionsR, packet, data) do
     <<n::size(packet)-unit(8)-integer-big-unsigned>> = data
-    %{:packet_size => packetSize} = d
+    %{packet_size: packetSize} = d
 
     cond do
       0 < packetSize and packetSize < n ->
@@ -1667,16 +1660,16 @@ defmodule :m_gen_tcp_socket do
 
   defp handle_recv_packet(p, d, actionsR) do
     case d do
-      %{:buffer => buffer} when is_list(buffer) ->
+      %{buffer: buffer} when is_list(buffer) ->
         data = condense_buffer(buffer)
         handle_recv_decode(p, d, actionsR, data)
 
-      %{:buffer => data} when is_binary(data) ->
+      %{buffer: data} when is_binary(data) ->
         handle_recv_more(p, d, actionsR, data)
     end
   end
 
-  defp handle_recv_length(p, %{:buffer => buffer} = d, actionsR, length) do
+  defp handle_recv_length(p, %{buffer: buffer} = d, actionsR, length) do
     handle_recv_length(p, d, actionsR, length, buffer)
   end
 
@@ -1684,22 +1677,22 @@ defmodule :m_gen_tcp_socket do
        when 0 < length do
     case socket_recv(r_params(p, :socket), length) do
       {:ok, <<data::binary>>} ->
-        handle_recv_deliver(p, %{d | :buffer => <<>>}, actionsR, condense_buffer([data | buffer]))
+        handle_recv_deliver(p, %{d | buffer: <<>>}, actionsR, condense_buffer([data | buffer]))
 
       {:ok, {data, selectInfo}} ->
         n = length - byte_size(data)
 
         {:next_state, r_recv(info: selectInfo),
-         {p, %{d | :buffer => [data | buffer], :recv_length => n}}, reverse(actionsR)}
+         {p, %{d | buffer: [data | buffer], recv_length: n}}, reverse(actionsR)}
 
       {:select, selectInfo} ->
-        {:next_state, r_recv(info: selectInfo), {p, %{d | :buffer => buffer}}, reverse(actionsR)}
+        {:next_state, r_recv(info: selectInfo), {p, %{d | buffer: buffer}}, reverse(actionsR)}
 
       {:error, {reason, <<data::binary>>}} ->
-        handle_recv_error(p, %{d | :buffer => [data | buffer]}, actionsR, reason)
+        handle_recv_error(p, %{d | buffer: [data | buffer]}, actionsR, reason)
 
       {:error, reason} ->
-        handle_recv_error(p, %{d | :buffer => buffer}, actionsR, reason)
+        handle_recv_error(p, %{d | buffer: buffer}, actionsR, reason)
     end
   end
 
@@ -1732,15 +1725,15 @@ defmodule :m_gen_tcp_socket do
         end
 
       <<data::binary>> ->
-        handle_recv_deliver(p, %{d | :buffer => <<>>}, actionsR, data)
+        handle_recv_deliver(p, %{d | buffer: <<>>}, actionsR, data)
 
       _ when is_list(buffer) ->
         data = condense_buffer(buffer)
-        handle_recv_deliver(p, %{d | :buffer => <<>>}, actionsR, data)
+        handle_recv_deliver(p, %{d | buffer: <<>>}, actionsR, data)
     end
   end
 
-  defp handle_recv_decode(p, %{:packet_size => packetSize} = d, actionsR, data) do
+  defp handle_recv_decode(p, %{packet_size: packetSize} = d, actionsR, data) do
     case :erlang.decode_packet(decode_packet(d), data, [
            {:packet_size, packetSize},
            {:line_length, packetSize}
@@ -1755,7 +1748,7 @@ defmodule :m_gen_tcp_socket do
               [rest]
           end
 
-        handle_recv_deliver(p, %{d | :buffer => buffer}, actionsR, decoded)
+        handle_recv_deliver(p, %{d | buffer: buffer}, actionsR, decoded)
 
       {:more, :undefined} ->
         handle_recv_more(p, d, actionsR, data)
@@ -1767,7 +1760,7 @@ defmodule :m_gen_tcp_socket do
       {:error, reason} ->
         handle_recv_error(
           p,
-          %{d | :buffer => data},
+          %{d | buffer: data},
           actionsR,
           case reason do
             :invalid ->
@@ -1780,7 +1773,7 @@ defmodule :m_gen_tcp_socket do
     end
   end
 
-  defp handle_recv_error_decode(p, %{:packet_size => packetSize} = d, actionsR, reason, data) do
+  defp handle_recv_error_decode(p, %{packet_size: packetSize} = d, actionsR, reason, data) do
     case :erlang.decode_packet(decode_packet(d), data, [
            {:packet_size, packetSize},
            {:line_length, packetSize}
@@ -1795,15 +1788,15 @@ defmodule :m_gen_tcp_socket do
               [rest]
           end
 
-        handle_recv_error(p, %{d | :buffer => buffer}, actionsR, reason, decoded)
+        handle_recv_error(p, %{d | buffer: buffer}, actionsR, reason, decoded)
 
       {:more, _} ->
-        handle_recv_error(p, %{d | :buffer => data}, actionsR, reason)
+        handle_recv_error(p, %{d | buffer: data}, actionsR, reason)
 
       {:error, ^reason} ->
         handle_recv_error(
           p,
-          %{d | :buffer => data},
+          %{d | buffer: data},
           actionsR,
           case reason do
             :invalid ->
@@ -1823,7 +1816,7 @@ defmodule :m_gen_tcp_socket do
         handle_recv_decode(p, d, actionsR, data)
 
       {:select, selectInfo} ->
-        {:next_state, r_recv(info: selectInfo), {p, %{d | :buffer => bufferedData}},
+        {:next_state, r_recv(info: selectInfo), {p, %{d | buffer: bufferedData}},
          reverse(actionsR)}
 
       {:error, {reason, <<moreData::binary>>}} ->
@@ -1831,7 +1824,7 @@ defmodule :m_gen_tcp_socket do
         handle_recv_error_decode(p, d, actionsR, reason, data)
 
       {:error, reason} ->
-        handle_recv_error(p, %{d | :buffer => bufferedData}, actionsR, reason)
+        handle_recv_error(p, %{d | buffer: bufferedData}, actionsR, reason)
     end
   end
 
@@ -1848,7 +1841,7 @@ defmodule :m_gen_tcp_socket do
   end
 
   defp handle_recv_error(p, d, actionsR, reason) do
-    {d_1, actionsR_1} = cleanup_recv_reply(p, %{d | :buffer => <<>>}, actionsR, reason)
+    {d_1, actionsR_1} = cleanup_recv_reply(p, %{d | buffer: <<>>}, actionsR, reason)
 
     case reason do
       :closed ->
@@ -1859,7 +1852,7 @@ defmodule :m_gen_tcp_socket do
         {:next_state, :closed, {p, d_1}, reverse(actionsR_1)}
 
       :emsgsize ->
-        {:next_state, :connected, {p, recv_stop(%{d | :active => false})}, reverse(actionsR_1)}
+        {:next_state, :connected, {p, recv_stop(%{d | active: false})}, reverse(actionsR_1)}
     end
   end
 
@@ -1893,12 +1886,12 @@ defmodule :m_gen_tcp_socket do
     end
   end
 
-  defp cleanup_recv_reply(p, %{:show_econnreset => showEconnreset} = d, actionsR, reason) do
+  defp cleanup_recv_reply(p, %{show_econnreset: showEconnreset} = d, actionsR, reason) do
     case d do
-      %{:active => false} ->
+      %{active: false} ->
         :ok
 
-      %{:active => _} ->
+      %{active: _} ->
         moduleSocket = module_socket(p)
         owner = r_params(p, :owner)
 
@@ -1926,9 +1919,9 @@ defmodule :m_gen_tcp_socket do
         end
     end
 
-    {recv_stop(%{d | :active => false}),
+    {recv_stop(%{d | active: false}),
      case d do
-       %{:recv_from => from} ->
+       %{recv_from: from} ->
          reason_1 =
            case reason do
              :econnreset when showEconnreset === false ->
@@ -1939,7 +1932,8 @@ defmodule :m_gen_tcp_socket do
            end
 
          [
-           [{:reply, from, {:error, reason_1}}, {{:timeout, :recv}, :cancel}]
+           {:reply, from, {:error, reason_1}},
+           {{:timeout, :recv}, :cancel}
            | actionsR
          ]
 
@@ -1949,47 +1943,48 @@ defmodule :m_gen_tcp_socket do
   end
 
   defp recv_start(d) do
-    %{d | :recv_length => 0}
+    Map.put(d, :recv_length, 0)
   end
 
   defp recv_stop(d) do
     :maps.without([:recv_from, :recv_length], d)
   end
 
-  defp decode_packet(%{:packet => packet} = d) do
+  defp decode_packet(%{packet: packet} = d) do
     case d do
-      %{:packet => :http, :recv_httph => true} ->
+      %{packet: :http, recv_httph: true} ->
         :httph
 
-      %{:packet => :http_bin, :recv_httph => true} ->
+      %{packet: :http_bin, recv_httph: true} ->
         :httph_bin
 
-      %{:packet => ^packet} ->
+      %{packet: ^packet} ->
         packet
     end
   end
 
   defp recv_data_deliver(
          r_params(owner: owner) = p,
-         %{:mode => mode, :header => header, :deliver => deliver, :packet => packet} = d,
+         %{mode: mode, header: header, deliver: deliver, packet: packet} = d,
          actionsR,
          data
        ) do
     deliverData = deliver_data(data, mode, header, packet)
 
     case d do
-      %{:recv_from => from} ->
+      %{recv_from: from} ->
         {recv_stop(next_packet(d, packet, data)),
          [
-           [{:reply, from, {:ok, deliverData}}, {{:timeout, :recv}, :cancel}]
+           {:reply, from, {:ok, deliverData}},
+           {{:timeout, :recv}, :cancel}
            | actionsR
          ]}
 
-      %{:active => false} ->
-        d_1 = %{d | :buffer => unrecv_buffer(data, :maps.get(:buffer, d))}
+      %{active: false} ->
+        d_1 = %{d | buffer: unrecv_buffer(data, :maps.get(:buffer, d))}
         {recv_stop(next_packet(d_1, packet, data)), actionsR}
 
-      %{:active => active} ->
+      %{active: active} ->
         moduleSocket = module_socket(p)
 
         send(
@@ -2025,16 +2020,16 @@ defmodule :m_gen_tcp_socket do
       packet === :http or packet === :http_bin ->
         case data do
           {:http_request, _HttpMethod, _HttpUri, _HttpVersion} ->
-            %{d | :recv_httph => true}
+            Map.put(d, :recv_httph, true)
 
           {:http_response, _HttpVersion, _Integer, _HttpString} ->
-            %{d | :recv_httph => true}
+            Map.put(d, :recv_httph, true)
 
           {:http_header, _Integer, _HttpField, _Reserver, _Value} ->
             d
 
           :http_eoh ->
-            %{d | :recv_httph => false}
+            Map.put(d, :recv_httph, false)
 
           {:http_error, _HttpString} ->
             d
@@ -2050,23 +2045,23 @@ defmodule :m_gen_tcp_socket do
       packet === :http or packet === :http_bin ->
         case data do
           {:http_request, _HttpMethod, _HttpUri, _HttpVersion} ->
-            %{d | :recv_httph => true, :active => active}
+            Map.merge(d, %{recv_httph: true, active: active})
 
           {:http_response, _HttpVersion, _Integer, _HttpString} ->
-            %{d | :recv_httph => true, :active => active}
+            Map.merge(d, %{recv_httph: true, active: active})
 
           {:http_header, _Integer, _HttpField, _Reserver, _Value} ->
-            %{d | :active => active}
+            Map.put(d, :active, active)
 
           :http_eoh ->
-            %{d | :recv_httph => false, :active => active}
+            Map.merge(d, %{recv_httph: false, active: active})
 
           {:http_error, _HttpString} ->
-            %{d | :active => active}
+            Map.put(d, :active, active)
         end
 
       true ->
-        %{d | :active => active}
+        Map.put(d, :active, active)
     end
   end
 
@@ -2157,7 +2152,7 @@ defmodule :m_gen_tcp_socket do
     opt_1 = conv_setopt(opt)
 
     case setopt_categories(opt_1) do
-      %{:socket => _} ->
+      %{socket: _} ->
         case r_params(p, :socket) do
           :undefined ->
             {{:error, :closed}, d}
@@ -2172,22 +2167,22 @@ defmodule :m_gen_tcp_socket do
             end
         end
 
-      %{:server_write => _} when state === :closed ->
+      %{server_write: _} when state === :closed ->
         {{:error, :einval}, d}
 
-      %{:server_write => _} ->
+      %{server_write: _} ->
         state_setopts_server(p, d, state, opts, opt_1)
 
-      %{:server_read => _} when state === :closed ->
+      %{server_read: _} when state === :closed ->
         {{:error, :einval}, d}
 
-      %{:server_read => _} when state === :closed_read ->
+      %{server_read: _} when state === :closed_read ->
         {{:error, :einval}, d}
 
-      %{:server_read => _} ->
+      %{server_read: _} ->
         state_setopts_server(p, d, state, opts, opt_1)
 
-      %{:ignore => _} ->
+      %{ignore: _} ->
         state_setopts(p, d, state, opts)
 
       %{} ->
@@ -2204,19 +2199,19 @@ defmodule :m_gen_tcp_socket do
         case is_packet_option_value(value) do
           true ->
             case d do
-              %{:recv_httph => _} ->
+              %{recv_httph: _} ->
                 state_setopts(
                   p,
                   :maps.remove(
                     :recv_httph,
-                    %{d | :packet => value}
+                    Map.put(d, :packet, value)
                   ),
                   state,
                   opts
                 )
 
               %{} ->
-                state_setopts(p, %{d | :packet => value}, state, opts)
+                state_setopts(p, Map.put(d, :packet, value), state, opts)
             end
 
           false ->
@@ -2224,35 +2219,35 @@ defmodule :m_gen_tcp_socket do
         end
 
       _ ->
-        state_setopts(p, %{d | tag => value}, state, opts)
+        state_setopts(p, Map.put(d, tag, value), state, opts)
     end
   end
 
   defp state_setopts_active(p, d, state, opts, active) do
     cond do
       active === :once or active === true ->
-        state_setopts(p, %{d | :active => active}, state, opts)
+        state_setopts(p, %{d | active: active}, state, opts)
 
       active === false ->
         case d do
-          %{:active => oldActive} when is_integer(oldActive) ->
+          %{active: oldActive} when is_integer(oldActive) ->
             send(r_params(p, :owner), {:tcp_passive, module_socket(p)})
             :ok
 
-          %{:active => _OldActive} ->
+          %{active: _OldActive} ->
             :ok
         end
 
-        state_setopts(p, %{d | :active => active}, state, opts)
+        state_setopts(p, %{d | active: active}, state, opts)
 
       is_integer(active) and -32768 <= active and
           active <= 32767 ->
         n =
           case d do
-            %{:active => oldActive} when is_integer(oldActive) ->
+            %{active: oldActive} when is_integer(oldActive) ->
               oldActive + active
 
-            %{:active => _OldActive} ->
+            %{active: _OldActive} ->
               active
           end
 
@@ -2262,10 +2257,10 @@ defmodule :m_gen_tcp_socket do
 
           n <= 0 ->
             send(r_params(p, :owner), {:tcp_passive, module_socket(p)})
-            state_setopts(p, %{d | :active => false}, state, opts)
+            state_setopts(p, %{d | active: false}, state, opts)
 
           true ->
-            state_setopts(p, %{d | :active => n}, state, opts)
+            state_setopts(p, %{d | active: n}, state, opts)
         end
 
       true ->
@@ -2283,7 +2278,7 @@ defmodule :m_gen_tcp_socket do
 
   defp state_getopts(p, d, state, [tag | tags], acc) do
     case getopt_categories(tag) do
-      %{:socket => _} ->
+      %{socket: _} ->
         case r_params(p, :socket) do
           :undefined ->
             {:error, :closed}
@@ -2298,20 +2293,20 @@ defmodule :m_gen_tcp_socket do
             end
         end
 
-      %{:server_write => _} when state === :closed ->
+      %{server_write: _} when state === :closed ->
         {:error, :einval}
 
-      %{:server_write => _} ->
+      %{server_write: _} ->
         value = :maps.get(tag, d)
         state_getopts(p, d, state, tags, [{tag, value} | acc])
 
-      %{:server_read => _} when state === :closed ->
+      %{server_read: _} when state === :closed ->
         {:error, :einval}
 
-      %{:server_read => _} when state === :closed_read ->
+      %{server_read: _} when state === :closed_read ->
         {:error, :einval}
 
-      %{:server_read => _} ->
+      %{server_read: _} ->
         value = :maps.get(tag, d)
         state_getopts(p, d, state, tags, [{tag, value} | acc])
 
@@ -2388,7 +2383,7 @@ defmodule :m_gen_tcp_socket do
   end
 
   defp socket_info_counters(socket) do
-    %{:counters => counters} = :socket.info(socket)
+    %{counters: counters} = :socket.info(socket)
     counters
   end
 
@@ -2408,7 +2403,7 @@ defmodule :m_gen_tcp_socket do
         %{d | counter => n + 1}
 
       %{} ->
-        %{d | counter => 1}
+        Map.put(d, counter, 1)
     end
   end
 
@@ -2447,7 +2442,7 @@ defmodule :m_gen_tcp_socket do
   end
 
   defp reverse([a, b], l) do
-    [[b, a] | l]
+    [b, a | l]
   end
 
   defp reverse(l1, l2) do

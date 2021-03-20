@@ -1079,7 +1079,7 @@ defmodule :m_group do
     {chars, []}
   end
 
-  defp edit_line([[?\r, ?\n] | cs], chars) do
+  defp edit_line([?\r, ?\n | cs], chars) do
     {[?\n | chars], remainder_after_nl(cs)}
   end
 

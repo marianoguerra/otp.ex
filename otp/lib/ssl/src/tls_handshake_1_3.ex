@@ -1426,7 +1426,7 @@ defmodule :m_tls_handshake_1_3 do
     premaster_secret: :undefined,
     server_psk_identity: :undefined,
     cookie_iv_shard: :undefined,
-    ocsp_stapling_state: %{:ocsp_stapling => false, :ocsp_expect => :no_staple}
+    ocsp_stapling_state: %{ocsp_stapling: false, ocsp_expect: :no_staple}
   )
 
   Record.defrecord(:r_connection_env, :connection_env,
@@ -1470,7 +1470,7 @@ defmodule :m_tls_handshake_1_3 do
   )
 
   defp server_hello(msgType, sessionId, keyShare, pSK, connectionStates) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -1490,25 +1490,20 @@ defmodule :m_tls_handshake_1_3 do
 
   defp server_hello_extensions(:hello_retry_request = msgType, keyShare, _) do
     supportedVersions = r_server_hello_selected_version(selected_version: {3, 4})
-    extensions = %{:server_hello_selected_version => supportedVersions}
+    extensions = %{server_hello_selected_version: supportedVersions}
     :ssl_handshake.add_server_share(msgType, extensions, keyShare)
   end
 
   defp server_hello_extensions(msgType, keyShare, :undefined) do
     supportedVersions = r_server_hello_selected_version(selected_version: {3, 4})
-    extensions = %{:server_hello_selected_version => supportedVersions}
+    extensions = %{server_hello_selected_version: supportedVersions}
     :ssl_handshake.add_server_share(msgType, extensions, keyShare)
   end
 
   defp server_hello_extensions(msgType, keyShare, {selectedIdentity, _}) do
     supportedVersions = r_server_hello_selected_version(selected_version: {3, 4})
     preSharedKey = r_pre_shared_key_server_hello(selected_identity: selectedIdentity)
-
-    extensions = %{
-      :server_hello_selected_version => supportedVersions,
-      :pre_shared_key => preSharedKey
-    }
-
+    extensions = %{server_hello_selected_version: supportedVersions, pre_shared_key: preSharedKey}
     :ssl_handshake.add_server_share(msgType, extensions, keyShare)
   end
 
@@ -1522,7 +1517,7 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp maybe_add_cookie_extension(
-         r_state(ssl_options: %{:cookie => false}) = state,
+         r_state(ssl_options: %{cookie: false}) = state,
          serverHello
        ) do
     {state, serverHello}
@@ -1531,7 +1526,7 @@ defmodule :m_tls_handshake_1_3 do
   defp maybe_add_cookie_extension(
          r_state(
            connection_states: connectionStates,
-           ssl_options: %{:cookie => true},
+           ssl_options: %{cookie: true},
            handshake_env: r_handshake_env(tls_handshake_history: {[cH1 | _], _}) = hsEnv0
          ) = state,
          r_server_hello(extensions: extensions0) = serverHello
@@ -1543,7 +1538,7 @@ defmodule :m_tls_handshake_1_3 do
     shard = :crypto.strong_rand_bytes(32)
     cookie = :ssl_cipher.encrypt_data("cookie", messageHash, shard, iV)
     hsEnv = r_handshake_env(hsEnv0, cookie_iv_shard: {iV, shard})
-    extensions = %{extensions0 | :cookie => r_cookie(cookie: cookie)}
+    extensions = Map.put(extensions0, :cookie, r_cookie(cookie: cookie))
     {r_state(state, handshake_env: hsEnv), r_server_hello(serverHello, extensions: extensions)}
   end
 
@@ -1555,30 +1550,29 @@ defmodule :m_tls_handshake_1_3 do
          cookie,
          r_client_hello(extensions: extensions0) = clientHello
        ) do
-    extensions = %{extensions0 | :cookie => r_cookie(cookie: cookie)}
+    extensions = Map.put(extensions0, :cookie, r_cookie(cookie: cookie))
     r_client_hello(clientHello, extensions: extensions)
   end
 
-  defp validate_cookie(_Cookie, r_state(ssl_options: %{:cookie => false})) do
+  defp validate_cookie(_Cookie, r_state(ssl_options: %{cookie: false})) do
     :ok
   end
 
-  defp validate_cookie(
-         :undefined,
-         r_state(ssl_options: %{:cookie => true})
-       ) do
+  defp validate_cookie(:undefined, r_state(ssl_options: %{cookie: true})) do
     :ok
   end
 
   defp validate_cookie(
          cookie0,
          r_state(
-           ssl_options: %{:cookie => true},
+           ssl_options: %{cookie: true},
            handshake_env:
              r_handshake_env(
                tls_handshake_history:
                  {[
-                    [_CH2, _HRR, messageHash]
+                    _CH2,
+                    _HRR,
+                    messageHash
                     | _
                   ], _},
                cookie_iv_shard: {iV, shard}
@@ -1597,9 +1591,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 47,
            where: %{
-             :mfa => {:tls_handshake_1_3, :validate_cookie, 2},
-             :line => 164,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :validate_cookie, 2},
+             line: 164,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            }
          )}
     end
@@ -1623,7 +1617,7 @@ defmodule :m_tls_handshake_1_3 do
           e1
 
         maxFragEnum ->
-          %{e1 | :max_frag_enum => maxFragEnum}
+          Map.put(e1, :max_frag_enum, maxFragEnum)
       end
 
     e =
@@ -1632,7 +1626,7 @@ defmodule :m_tls_handshake_1_3 do
           e2
 
         true ->
-          %{e2 | :sni => r_sni(hostname: '')}
+          Map.put(e2, :sni, r_sni(hostname: ''))
       end
 
     r_encrypted_extensions(extensions: e)
@@ -1656,10 +1650,11 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp add_signature_algorithms(extensions, signAlgs) do
-    %{
-      extensions
-      | :signature_algorithms => r_signature_algorithms(signature_scheme_list: signAlgs)
-    }
+    Map.put(
+      extensions,
+      :signature_algorithms,
+      r_signature_algorithms(signature_scheme_list: signAlgs)
+    )
   end
 
   defp add_signature_algorithms_cert(extensions, :undefined) do
@@ -1667,11 +1662,11 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp add_signature_algorithms_cert(extensions, signAlgsCert) do
-    %{
-      extensions
-      | :signature_algorithms_cert =>
-          r_signature_algorithms_cert(signature_scheme_list: signAlgsCert)
-    }
+    Map.put(
+      extensions,
+      :signature_algorithms_cert,
+      r_signature_algorithms_cert(signature_scheme_list: signAlgsCert)
+    )
   end
 
   defp filter_tls13_algs(:undefined) do
@@ -1699,9 +1694,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 80,
            where: %{
-             :mfa => {:tls_handshake_1_3, :certificate, 5},
-             :line => 255,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :certificate, 5},
+             line: 255,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            },
            reason: {:no_suitable_certificates, error}
          )}
@@ -1724,7 +1719,7 @@ defmodule :m_tls_handshake_1_3 do
         ),
         role
       ) do
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :write
@@ -1751,10 +1746,7 @@ defmodule :m_tls_handshake_1_3 do
            handshake_env: r_handshake_env(tls_handshake_history: {messages, _})
          )
        ) do
-    %{
-      :security_parameters => secParamsR,
-      :cipher_state => r_cipher_state(finished_key: finishedKey)
-    } =
+    %{security_parameters: secParamsR, cipher_state: r_cipher_state(finished_key: finishedKey)} =
       :ssl_record.current_connection_state(
         connectionStates,
         :write
@@ -1967,7 +1959,7 @@ defmodule :m_tls_handshake_1_3 do
 
   def is_valid_binder(binder, hHistory, pSK, hash) do
     case hHistory do
-      [[clientHello2, hRR, messageHash] | _] ->
+      [clientHello2, hRR, messageHash | _] ->
         truncated = truncate_client_hello(clientHello2)
         finishedKey = calculate_finished_key(pSK, hash)
         binder == calculate_binder(finishedKey, hash, [messageHash, hRR, truncated])
@@ -2046,9 +2038,9 @@ defmodule :m_tls_handshake_1_3 do
         level: 2,
         description: 47,
         where: %{
-          :mfa => {:tls_handshake_1_3, :decode_key_update, 1},
-          :line => 496,
-          :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+          mfa: {:tls_handshake_1_3, :decode_key_update, 1},
+          line: 496,
+          file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
         },
         reason: {:request_update, n}
       )
@@ -2118,9 +2110,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 80,
            where: %{
-             :mfa => {:tls_handshake_1_3, :sign, 5},
-             :line => 558,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :sign, 5},
+             line: 558,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            },
            reason: :badarg
          )}
@@ -2148,9 +2140,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 80,
            where: %{
-             :mfa => {:tls_handshake_1_3, :verify, 6},
-             :line => 568,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :verify, 6},
+             line: 568,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            },
            reason: :badarg
          )}
@@ -2173,11 +2165,11 @@ defmodule :m_tls_handshake_1_3 do
         ) = _Hello,
         r_state(
           ssl_options: %{
-            :ciphers => serverCiphers,
-            :signature_algs => serverSignAlgs,
-            :supported_groups => serverGroups0,
-            :alpn_preferred_protocols => aLPNPreferredProtocols,
-            :honor_cipher_order => honorCipherOrder
+            ciphers: serverCiphers,
+            signature_algs: serverSignAlgs,
+            supported_groups: serverGroups0,
+            alpn_preferred_protocols: aLPNPreferredProtocols,
+            honor_cipher_order: honorCipherOrder
           }
         ) = state0
       ) do
@@ -2291,13 +2283,13 @@ defmodule :m_tls_handshake_1_3 do
         update_start_state(
           state2,
           %{
-            :cipher => cipher,
-            :key_share => keyShare,
-            :session_id => sessionId,
-            :group => group,
-            :sign_alg => selectedSignAlg,
-            :peer_public_key => clientPubKey,
-            :alpn => aLPNProtocol
+            cipher: cipher,
+            key_share: keyShare,
+            session_id: sessionId,
+            group: group,
+            sign_alg: selectedSignAlg,
+            peer_public_key: clientPubKey,
+            alpn: aLPNProtocol
           }
         )
 
@@ -2338,11 +2330,11 @@ defmodule :m_tls_handshake_1_3 do
           connection_env: r_connection_env(negotiated_version: negotiatedVersion),
           ssl_options:
             %{
-              :ciphers => clientCiphers,
-              :supported_groups => clientGroups0,
-              :use_ticket => useTicket,
-              :session_tickets => sessionTickets,
-              :log_level => logLevel
+              ciphers: clientCiphers,
+              supported_groups: clientGroups0,
+              use_ticket: useTicket,
+              session_tickets: sessionTickets,
+              log_level: logLevel
             } = sslOpts,
           session: r_session(own_certificate: cert) = session0,
           connection_states: connectionStates0
@@ -2395,10 +2387,10 @@ defmodule :m_tls_handshake_1_3 do
         update_start_state(
           state0,
           %{
-            :cipher => selectedCipherSuite,
-            :key_share => clientKeyShare,
-            :session_id => sessionId,
-            :group => selectedGroup
+            cipher: selectedCipherSuite,
+            key_share: clientKeyShare,
+            session_id: sessionId,
+            group: selectedGroup
           }
         )
 
@@ -2453,7 +2445,7 @@ defmodule :m_tls_handshake_1_3 do
       ) do
     serverPrivateKey = get_server_private_key(keyShare)
 
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -2609,10 +2601,10 @@ defmodule :m_tls_handshake_1_3 do
         r_state(
           key_share: clientKeyShare0,
           ssl_options: %{
-            :ciphers => clientCiphers,
-            :supported_groups => clientGroups0,
-            :session_tickets => sessionTickets,
-            :use_ticket => useTicket
+            ciphers: clientCiphers,
+            supported_groups: clientGroups0,
+            session_tickets: sessionTickets,
+            use_ticket: useTicket
           }
         ) = state0
       ) do
@@ -2654,17 +2646,17 @@ defmodule :m_tls_handshake_1_3 do
         update_start_state(
           state1,
           %{
-            :cipher => selectedCipherSuite,
-            :key_share => clientKeyShare0,
-            :session_id => sessionId,
-            :group => selectedGroup,
-            :peer_public_key => serverPublicKey
+            cipher: selectedCipherSuite,
+            key_share: clientKeyShare0,
+            session_id: sessionId,
+            group: selectedGroup,
+            peer_public_key: serverPublicKey
           }
         )
 
       r_state(connection_states: connectionStates) = state2
 
-      %{:security_parameters => secParamsR} =
+      %{security_parameters: secParamsR} =
         :ssl_record.pending_connection_state(
           connectionStates,
           :read
@@ -2774,9 +2766,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 47,
            where: %{
-             :mfa => {:tls_handshake_1_3, :maybe_max_fragment_length, 2},
-             :line => 1048,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :maybe_max_fragment_length, 2},
+             line: 1048,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            }
          )}
     end
@@ -2827,7 +2819,7 @@ defmodule :m_tls_handshake_1_3 do
 
   defp maybe_prepend_change_cipher_spec(
          r_state(
-           ssl_options: %{:middlebox_comp_mode => true},
+           ssl_options: %{middlebox_comp_mode: true},
            handshake_env: r_handshake_env(change_cipher_spec_sent: false) = hSEnv
          ) = state,
          bin
@@ -2844,7 +2836,7 @@ defmodule :m_tls_handshake_1_3 do
 
   defp maybe_append_change_cipher_spec(
          r_state(
-           ssl_options: %{:middlebox_comp_mode => true},
+           ssl_options: %{middlebox_comp_mode: true},
            handshake_env: r_handshake_env(change_cipher_spec_sent: false) = hSEnv
          ) = state,
          bin
@@ -2947,10 +2939,7 @@ defmodule :m_tls_handshake_1_3 do
          ),
          verifyData
        ) do
-    %{
-      :security_parameters => secParamsR,
-      :cipher_state => r_cipher_state(finished_key: finishedKey)
-    } =
+    %{security_parameters: secParamsR, cipher_state: r_cipher_state(finished_key: finishedKey)} =
       :ssl_record.current_connection_state(
         connectionStates,
         :read
@@ -2972,9 +2961,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 51,
        where: %{
-         :mfa => {:tls_handshake_1_3, :compare_verify_data, 2},
-         :line => 1190,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :compare_verify_data, 2},
+         line: 1190,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        },
        reason: :decrypt_error
      )}
@@ -3012,14 +3001,14 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp session_resumption(
-         {r_state(ssl_options: %{:session_tickets => :disabled}) = state, :negotiated},
+         {r_state(ssl_options: %{session_tickets: :disabled}) = state, :negotiated},
          _
        ) do
     {:ok, {state, :negotiated}}
   end
 
   defp session_resumption(
-         {r_state(ssl_options: %{:session_tickets => tickets}) = state, :negotiated},
+         {r_state(ssl_options: %{session_tickets: tickets}) = state, :negotiated},
          :undefined
        )
        when tickets !== :disabled do
@@ -3027,7 +3016,7 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp session_resumption(
-         {r_state(ssl_options: %{:session_tickets => tickets}) = state0, :negotiated},
+         {r_state(ssl_options: %{session_tickets: tickets}) = state0, :negotiated},
          pSK
        )
        when tickets !== :disabled do
@@ -3039,17 +3028,13 @@ defmodule :m_tls_handshake_1_3 do
     {state, :wait_finished}
   end
 
-  defp maybe_send_certificate_request(state, %{:verify => :verify_none}, _) do
+  defp maybe_send_certificate_request(state, %{verify: :verify_none}, _) do
     {state, :wait_finished}
   end
 
   defp maybe_send_certificate_request(
          state,
-         %{
-           :verify => :verify_peer,
-           :signature_algs => signAlgs,
-           :signature_algs_cert => signAlgsCert
-         },
+         %{verify: :verify_peer, signature_algs: signAlgs, signature_algs_cert: signAlgsCert},
          _
        ) do
     certificateRequest =
@@ -3129,7 +3114,7 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp maybe_send_session_ticket(
-         r_state(ssl_options: %{:session_tickets => :disabled}) = state,
+         r_state(ssl_options: %{session_tickets: :disabled}) = state,
          _
        ) do
     state
@@ -3152,7 +3137,7 @@ defmodule :m_tls_handshake_1_3 do
         trackers
       )
 
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.current_connection_state(
         connectionStates,
         :read
@@ -3174,19 +3159,19 @@ defmodule :m_tls_handshake_1_3 do
     maybe_send_session_ticket(state, n - 1)
   end
 
-  defp create_change_cipher_spec(r_state(ssl_options: %{:log_level => logLevel})) do
+  defp create_change_cipher_spec(r_state(ssl_options: %{log_level: logLevel})) do
     connectionStates = %{
-      :current_write => %{
-        :compression_state => :undefined,
-        :cipher_state => :undefined,
-        :sequence_number => 1,
-        :security_parameters =>
+      current_write: %{
+        compression_state: :undefined,
+        cipher_state: :undefined,
+        sequence_number: 1,
+        security_parameters:
           r_security_parameters(
             bulk_cipher_algorithm: 0,
             compression_algorithm: 0,
             mac_algorithm: 0
           ),
-        :mac_secret => :undefined
+        mac_secret: :undefined
       }
     }
 
@@ -3249,7 +3234,7 @@ defmodule :m_tls_handshake_1_3 do
            certificate_request_context: <<>>,
            certificate_list: []
          ),
-         r_state(ssl_options: %{:fail_if_no_peer_cert => false}) = state
+         r_state(ssl_options: %{fail_if_no_peer_cert: false}) = state
        ) do
     {:ok, {state, :wait_finished}}
   end
@@ -3259,7 +3244,7 @@ defmodule :m_tls_handshake_1_3 do
            certificate_request_context: <<>>,
            certificate_list: []
          ),
-         r_state(ssl_options: %{:fail_if_no_peer_cert => true}) = state0
+         r_state(ssl_options: %{fail_if_no_peer_cert: true}) = state0
        ) do
     state1 = calculate_traffic_secrets(state0)
     state = :ssl_record.step_encryption_state(state1)
@@ -3269,9 +3254,9 @@ defmodule :m_tls_handshake_1_3 do
         level: 2,
         description: 116,
         where: %{
-          :mfa => {:tls_handshake_1_3, :process_certificate, 2},
-          :line => 1349,
-          :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+          mfa: {:tls_handshake_1_3, :process_certificate, 2},
+          line: 1349,
+          file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
         },
         reason: :certificate_required
       ), state}}
@@ -3330,16 +3315,16 @@ defmodule :m_tls_handshake_1_3 do
          certDbHandle,
          certDbRef,
          %{
-           :server_name_indication => serverNameIndication,
-           :partial_chain => partialChain,
-           :verify_fun => verifyFun,
-           :customize_hostname_check => customizeHostnameCheck,
-           :crl_check => crlCheck,
-           :log_level => logLevel,
-           :depth => depth,
-           :ocsp_responder_certs => ocspResponderCerts,
-           :signature_algs => signAlgs,
-           :signature_algs_cert => signAlgsCert
+           server_name_indication: serverNameIndication,
+           partial_chain: partialChain,
+           verify_fun: verifyFun,
+           customize_hostname_check: customizeHostnameCheck,
+           crl_check: crlCheck,
+           log_level: logLevel,
+           depth: depth,
+           ocsp_responder_certs: ocspResponderCerts,
+           signature_algs: signAlgs,
+           signature_algs_cert: signAlgsCert
          } = sslOptions,
          cRLDbHandle,
          role,
@@ -3363,20 +3348,20 @@ defmodule :m_tls_handshake_1_3 do
         :ssl_handshake.validation_fun_and_state(
           verifyFun,
           %{
-            :role => role,
-            :certdb => certDbHandle,
-            :certdb_ref => certDbRef,
-            :server_name => serverName,
-            :customize_hostname_check => customizeHostnameCheck,
-            :crl_check => crlCheck,
-            :crl_db => cRLDbHandle,
-            :signature_algs => filter_tls13_algs(signAlgs),
-            :signature_algs_cert => filter_tls13_algs(signAlgsCert),
-            :version => {3, 4},
-            :issuer => trustedCert,
-            :cert_ext => certExt,
-            :ocsp_responder_certs => ocspResponderCerts,
-            :ocsp_state => ocspState
+            role: role,
+            certdb: certDbHandle,
+            certdb_ref: certDbRef,
+            server_name: serverName,
+            customize_hostname_check: customizeHostnameCheck,
+            crl_check: crlCheck,
+            crl_db: cRLDbHandle,
+            signature_algs: filter_tls13_algs(signAlgs),
+            signature_algs_cert: filter_tls13_algs(signAlgsCert),
+            version: {3, 4},
+            issuer: trustedCert,
+            cert_ext: certExt,
+            ocsp_responder_certs: ocspResponderCerts,
+            ocsp_state: ocspState
           },
           certPath,
           logLevel
@@ -3407,9 +3392,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 46,
            where: %{
-             :mfa => {:tls_handshake_1_3, :validate_certificate_chain, 8},
-             :line => 1435,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :validate_certificate_chain, 8},
+             line: 1435,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            },
            reason: {:failed_to_decode_certificate, asn1Reason}
          )}
@@ -3420,9 +3405,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 80,
            where: %{
-             :mfa => {:tls_handshake_1_3, :validate_certificate_chain, 8},
-             :line => 1437,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :validate_certificate_chain, 8},
+             line: 1437,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            },
            reason: {:unexpected_error, otherReason}
          )}
@@ -3473,10 +3458,10 @@ defmodule :m_tls_handshake_1_3 do
           ocspState0
 
         _ ->
-          %{ocspState0 | :ocsp_expect => :stapled}
+          Map.put(ocspState0, :ocsp_expect, :stapled)
       end
 
-    split_cert_entries(certEntries, ocspState, [derCert | chain], %{ext | id => extensions})
+    split_cert_entries(certEntries, ocspState, [derCert | chain], Map.put(ext, id, extensions))
   end
 
   defp replace_ch1_with_message_hash(
@@ -3486,13 +3471,14 @@ defmodule :m_tls_handshake_1_3 do
              r_handshake_env(
                tls_handshake_history:
                  {[
-                    [hRR, cH1]
+                    hRR,
+                    cH1
                     | hHistory
                   ], lM}
              ) = hSEnv
          ) = state0
        ) do
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -3506,7 +3492,8 @@ defmodule :m_tls_handshake_1_3 do
         r_handshake_env(hSEnv,
           tls_handshake_history:
             {[
-               [hRR, messageHash]
+               hRR,
+               messageHash
                | hHistory
              ], lM}
         )
@@ -3514,7 +3501,7 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp get_hkdf_algorithm(connectionStates) do
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -3538,7 +3525,7 @@ defmodule :m_tls_handshake_1_3 do
            handshake_env: r_handshake_env(tls_handshake_history: hHistory)
          ) = state0
        ) do
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -3568,7 +3555,7 @@ defmodule :m_tls_handshake_1_3 do
         :lists.reverse(messages)
       )
 
-    %{:cipher => cipher} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+    %{cipher: cipher} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
     {readKey, readIV} = :tls_v1.calculate_traffic_keys(hKDFAlgo, cipher, clientHSTrafficSecret)
 
     {writeKey, writeIV} =
@@ -3638,9 +3625,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 47,
            where: %{
-             :mfa => {:tls_handshake_1_3, :get_pre_shared_key, 4},
-             :line => 1563,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :get_pre_shared_key, 4},
+             line: 1563,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            }
          )}
 
@@ -3672,9 +3659,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 47,
            where: %{
-             :mfa => {:tls_handshake_1_3, :get_pre_shared_key, 4},
-             :line => 1575,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :get_pre_shared_key, 4},
+             line: 1575,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            }
          )}
 
@@ -3716,7 +3703,7 @@ defmodule :m_tls_handshake_1_3 do
            handshake_env: r_handshake_env(tls_handshake_history: hHistory)
          ) = state0
        ) do
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -3745,7 +3732,7 @@ defmodule :m_tls_handshake_1_3 do
         :lists.reverse(messages)
       )
 
-    %{:cipher => cipher} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+    %{cipher: cipher} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
 
     {readKey, readIV} =
       :tls_v1.calculate_traffic_keys(
@@ -3808,20 +3795,20 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp maybe_calculate_resumption_master_secret(
-         r_state(ssl_options: %{:session_tickets => :disabled}) = state
+         r_state(ssl_options: %{session_tickets: :disabled}) = state
        ) do
     state
   end
 
   defp maybe_calculate_resumption_master_secret(
          r_state(
-           ssl_options: %{:session_tickets => sessionTickets},
+           ssl_options: %{session_tickets: sessionTickets},
            connection_states: connectionStates,
            handshake_env: r_handshake_env(tls_handshake_history: hHistory)
          ) = state
        )
        when sessionTickets !== :disabled do
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -3848,36 +3835,35 @@ defmodule :m_tls_handshake_1_3 do
          r_state(
            connection_states:
              %{
-               :pending_read => pendingRead,
-               :pending_write => pendingWrite,
-               :current_read => currentRead,
-               :current_write => currentWrite
+               pending_read: pendingRead,
+               pending_write: pendingWrite,
+               current_read: currentRead,
+               current_write: currentWrite
              } = cS
          ) = state
        ) do
     r_state(state,
-      connection_states: %{
-        cS
-        | :pending_read => overwrite_master_secret(pendingRead),
-          :pending_write => overwrite_master_secret(pendingWrite),
-          :current_read => overwrite_master_secret(currentRead),
-          :current_write => overwrite_master_secret(currentWrite)
-      }
+      connection_states:
+        Map.merge(cS, %{
+          pending_read: overwrite_master_secret(pendingRead),
+          pending_write: overwrite_master_secret(pendingWrite),
+          current_read: overwrite_master_secret(currentRead),
+          current_write: overwrite_master_secret(currentWrite)
+        })
     )
   end
 
-  defp overwrite_master_secret(connectionState = %{:security_parameters => securityParameters0}) do
+  defp overwrite_master_secret(connectionState = %{security_parameters: securityParameters0}) do
     securityParameters =
       r_security_parameters(securityParameters0, master_secret: {:master_secret, <<0>>})
 
-    %{connectionState | :security_parameters => securityParameters}
+    Map.put(connectionState, :security_parameters, securityParameters)
   end
 
   defp update_pending_connection_states(
          r_state(
            static_env: r_static_env(role: :server),
-           connection_states:
-             cS = %{:pending_read => pendingRead0, :pending_write => pendingWrite0}
+           connection_states: cS = %{pending_read: pendingRead0, pending_write: pendingWrite0}
          ) = state,
          handshakeSecret,
          resumptionMasterSecret,
@@ -3913,15 +3899,14 @@ defmodule :m_tls_handshake_1_3 do
       )
 
     r_state(state,
-      connection_states: %{cS | :pending_read => pendingRead, :pending_write => pendingWrite}
+      connection_states: Map.merge(cS, %{pending_read: pendingRead, pending_write: pendingWrite})
     )
   end
 
   defp update_pending_connection_states(
          r_state(
            static_env: r_static_env(role: :client),
-           connection_states:
-             cS = %{:pending_read => pendingRead0, :pending_write => pendingWrite0}
+           connection_states: cS = %{pending_read: pendingRead0, pending_write: pendingWrite0}
          ) = state,
          handshakeSecret,
          resumptionMasterSecret,
@@ -3957,12 +3942,12 @@ defmodule :m_tls_handshake_1_3 do
       )
 
     r_state(state,
-      connection_states: %{cS | :pending_read => pendingRead, :pending_write => pendingWrite}
+      connection_states: Map.merge(cS, %{pending_read: pendingRead, pending_write: pendingWrite})
     )
   end
 
   defp update_connection_state(
-         connectionState = %{:security_parameters => securityParameters0},
+         connectionState = %{security_parameters: securityParameters0},
          handshakeSecret,
          resumptionMasterSecret,
          applicationTrafficSecret,
@@ -3979,11 +3964,10 @@ defmodule :m_tls_handshake_1_3 do
 
     bulkCipherAlgo = r_security_parameters(securityParameters, :bulk_cipher_algorithm)
 
-    %{
-      connectionState
-      | :security_parameters => securityParameters,
-        :cipher_state => cipher_init(bulkCipherAlgo, key, iV, finishedKey)
-    }
+    Map.merge(connectionState, %{
+      security_parameters: securityParameters,
+      cipher_state: cipher_init(bulkCipherAlgo, key, iV, finishedKey)
+    })
   end
 
   defp update_start_state(state, map) do
@@ -4022,14 +4006,14 @@ defmodule :m_tls_handshake_1_3 do
          peerPublicKey,
          aLPNProtocol
        ) do
-    %{:security_parameters => secParamsR0} =
+    %{security_parameters: secParamsR0} =
       pendingRead =
       :maps.get(
         :pending_read,
         connectionStates0
       )
 
-    %{:security_parameters => secParamsW0} =
+    %{security_parameters: secParamsW0} =
       pendingWrite =
       :maps.get(
         :pending_write,
@@ -4048,11 +4032,11 @@ defmodule :m_tls_handshake_1_3 do
         cipher
       )
 
-    connectionStates = %{
-      connectionStates0
-      | :pending_read => %{pendingRead | :security_parameters => secParamsR},
-        :pending_write => %{pendingWrite | :security_parameters => secParamsW}
-    }
+    connectionStates =
+      Map.merge(connectionStates0, %{
+        pending_read: Map.put(pendingRead, :security_parameters, secParamsR),
+        pending_write: Map.put(pendingWrite, :security_parameters, secParamsW)
+      })
 
     r_state(state,
       connection_states: connectionStates,
@@ -4074,14 +4058,14 @@ defmodule :m_tls_handshake_1_3 do
          r_state(connection_states: connectionStates0) = state,
          resumptionMasterSecret
        ) do
-    %{:security_parameters => secParamsR0} =
+    %{security_parameters: secParamsR0} =
       pendingRead =
       :maps.get(
         :pending_read,
         connectionStates0
       )
 
-    %{:security_parameters => secParamsW0} =
+    %{security_parameters: secParamsW0} =
       pendingWrite =
       :maps.get(
         :pending_write,
@@ -4094,11 +4078,11 @@ defmodule :m_tls_handshake_1_3 do
     secParamsW =
       r_security_parameters(secParamsW0, resumption_master_secret: resumptionMasterSecret)
 
-    connectionStates = %{
-      connectionStates0
-      | :pending_read => %{pendingRead | :security_parameters => secParamsR},
-        :pending_write => %{pendingWrite | :security_parameters => secParamsW}
-    }
+    connectionStates =
+      Map.merge(connectionStates0, %{
+        pending_read: Map.put(pendingRead, :security_parameters, secParamsR),
+        pending_write: Map.put(pendingWrite, :security_parameters, secParamsW)
+      })
 
     r_state(state, connection_states: connectionStates)
   end
@@ -4142,7 +4126,7 @@ defmodule :m_tls_handshake_1_3 do
   defp verify_signature_algorithm(
          r_state(
            static_env: r_static_env(role: role),
-           ssl_options: %{:signature_algs => localSignAlgs}
+           ssl_options: %{signature_algs: localSignAlgs}
          ) = state0,
          r_certificate_verify_1_3(algorithm: peerSignAlg)
        ) do
@@ -4159,9 +4143,9 @@ defmodule :m_tls_handshake_1_3 do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_handshake_1_3, :verify_signature_algorithm, 2},
-              :line => 1894,
-              :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+              mfa: {:tls_handshake_1_3, :verify_signature_algorithm, 2},
+              line: 1894,
+              file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
             },
             reason: 'CertificateVerify uses unsupported signature algorithm'
           ), state}}
@@ -4188,7 +4172,7 @@ defmodule :m_tls_handshake_1_3 do
          ) = state0,
          r_certificate_verify_1_3(algorithm: signatureScheme, signature: signature)
        ) do
-    %{:security_parameters => secParamsR} =
+    %{security_parameters: secParamsR} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :write
@@ -4214,9 +4198,9 @@ defmodule :m_tls_handshake_1_3 do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:tls_handshake_1_3, :verify_certificate_verify, 2},
-              :line => 1939,
-              :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+              mfa: {:tls_handshake_1_3, :verify_certificate_verify, 2},
+              line: 1939,
+              file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
             },
             reason: 'Failed to verify CertificateVerify'
           ), state}}
@@ -4250,9 +4234,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 71,
        where: %{
-         :mfa => {:tls_handshake_1_3, :select_common_groups, 2},
-         :line => 1966,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :select_common_groups, 2},
+         line: 1966,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        },
        reason: :no_suitable_groups
      )}
@@ -4282,9 +4266,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 47,
        where: %{
-         :mfa => {:tls_handshake_1_3, :validate_client_key_share, 2},
-         :line => 1997,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :validate_client_key_share, 2},
+         line: 1997,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        }
      )}
   end
@@ -4306,9 +4290,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 47,
        where: %{
-         :mfa => {:tls_handshake_1_3, :validate_server_key_share, 1},
-         :line => 2006,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :validate_server_key_share, 1},
+         line: 2006,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        }
      )}
   end
@@ -4330,9 +4314,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 47,
        where: %{
-         :mfa => {:tls_handshake_1_3, :validate_selected_group, 2},
-         :line => 2014,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :validate_selected_group, 2},
+         line: 2014,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        },
        reason:
          'Selected group sent by the server shall not correspond to a group which was provided in the key_share extension'
@@ -4350,9 +4334,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 47,
            where: %{
-             :mfa => {:tls_handshake_1_3, :validate_selected_group, 2},
-             :line => 2022,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :validate_selected_group, 2},
+             line: 2022,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            },
            reason:
              'Selected group sent by the server shall correspond to a group which was provided in the supported_groups extension'
@@ -4421,9 +4405,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 120,
        where: %{
-         :mfa => {:tls_handshake_1_3, :handle_alpn, 2},
-         :line => 2076,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :handle_alpn, 2},
+         line: 2076,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        }
      )}
   end
@@ -4448,9 +4432,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 71,
        where: %{
-         :mfa => {:tls_handshake_1_3, :select_cipher_suite, 3},
-         :line => 2089,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :select_cipher_suite, 3},
+         line: 2089,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        },
        reason: :no_suitable_cipher
      )}
@@ -4488,9 +4472,9 @@ defmodule :m_tls_handshake_1_3 do
            level: 2,
            description: 47,
            where: %{
-             :mfa => {:tls_handshake_1_3, :validate_cipher_suite, 2},
-             :line => 2112,
-             :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+             mfa: {:tls_handshake_1_3, :validate_cipher_suite, 2},
+             line: 2112,
+             file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
            }
          )}
     end
@@ -4510,9 +4494,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 71,
        where: %{
-         :mfa => {:tls_handshake_1_3, :select_sign_algo, 4},
-         :line => 2138,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :select_sign_algo, 4},
+         line: 2138,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        },
        reason: :no_suitable_public_key
      )}
@@ -4524,9 +4508,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 71,
        where: %{
-         :mfa => {:tls_handshake_1_3, :select_sign_algo, 4},
-         :line => 2140,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :select_sign_algo, 4},
+         line: 2140,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        },
        reason: :no_suitable_signature_algorithm
      )}
@@ -4592,9 +4576,9 @@ defmodule :m_tls_handshake_1_3 do
        level: 2,
        description: 71,
        where: %{
-         :mfa => {:tls_handshake_1_3, :do_check_cert_sign_algo, 3},
-         :line => 2195,
-         :file => 'otp/lib/ssl/src/tls_handshake_1_3.erl'
+         mfa: {:tls_handshake_1_3, :do_check_cert_sign_algo, 3},
+         line: 2195,
+         file: 'otp/lib/ssl/src/tls_handshake_1_3.erl'
        },
        reason: :no_suitable_signature_algorithm
      )}
@@ -4741,13 +4725,13 @@ defmodule :m_tls_handshake_1_3 do
     {:ok, :undefined}
   end
 
-  defp handle_pre_shared_key(r_state(ssl_options: %{:session_tickets => :disabled}), _, _) do
+  defp handle_pre_shared_key(r_state(ssl_options: %{session_tickets: :disabled}), _, _) do
     {:ok, :undefined}
   end
 
   defp handle_pre_shared_key(
          r_state(
-           ssl_options: %{:session_tickets => tickets},
+           ssl_options: %{session_tickets: tickets},
            handshake_env: r_handshake_env(tls_handshake_history: {hHistory, _}),
            static_env: r_static_env(trackers: trackers)
          ),
@@ -4761,7 +4745,7 @@ defmodule :m_tls_handshake_1_3 do
         trackers
       )
 
-    %{:prf => cipherHash} = :ssl_cipher_format.suite_bin_to_map(cipher)
+    %{prf: cipherHash} = :ssl_cipher_format.suite_bin_to_map(cipher)
     :tls_server_session_ticket.use(tracker, offeredPreSharedKeys, cipherHash, hHistory)
   end
 
@@ -4821,7 +4805,7 @@ defmodule :m_tls_handshake_1_3 do
     hello
   end
 
-  def maybe_add_binders(hello0, {[[hRR, messageHash] | _], _}, ticketData, version)
+  def maybe_add_binders(hello0, {[hRR, messageHash | _], _}, ticketData, version)
       when version === {3, 4} do
     helloBin0 =
       :tls_handshake.encode_handshake(
@@ -4864,7 +4848,7 @@ defmodule :m_tls_handshake_1_3 do
       helloBin0
 
     cH0 =
-      r_client_hello(extensions: %{:pre_shared_key => pSK0} = extensions0) =
+      r_client_hello(extensions: %{pre_shared_key: pSK0} = extensions0) =
       :tls_handshake.decode_handshake(
         {3, 4},
         type,
@@ -4874,7 +4858,7 @@ defmodule :m_tls_handshake_1_3 do
     r_pre_shared_key_client_hello(offered_psks: offeredPsks0) = pSK0
     offeredPsks = r_offered_psks(offeredPsks0, binders: [])
     pSK = r_pre_shared_key_client_hello(pSK0, offered_psks: offeredPsks)
-    extensions = %{extensions0 | :pre_shared_key => pSK}
+    extensions = Map.put(extensions0, :pre_shared_key, pSK)
     cH = r_client_hello(cH0, extensions: extensions)
 
     truncatedSize =
@@ -4921,7 +4905,7 @@ defmodule :m_tls_handshake_1_3 do
   end
 
   defp update_binders(
-         r_client_hello(extensions: %{:pre_shared_key => preSharedKey0} = extensions0) = hello,
+         r_client_hello(extensions: %{pre_shared_key: preSharedKey0} = extensions0) = hello,
          binders
        ) do
     r_pre_shared_key_client_hello(offered_psks: r_offered_psks(identities: identities)) =
@@ -4936,7 +4920,7 @@ defmodule :m_tls_handshake_1_3 do
           )
       )
 
-    extensions = %{extensions0 | :pre_shared_key => preSharedKey}
+    extensions = Map.put(extensions0, :pre_shared_key, preSharedKey)
     r_client_hello(hello, extensions: extensions)
   end
 
@@ -4944,10 +4928,10 @@ defmodule :m_tls_handshake_1_3 do
         r_state(
           ssl_options:
             %{
-              :versions => [version | _],
-              :ciphers => userSuites,
-              :session_tickets => sessionTickets,
-              :server_name_indication => sNI
+              versions: [version | _],
+              ciphers: userSuites,
+              session_tickets: sessionTickets,
+              server_name_indication: sNI
             } = sslOpts0
         ) = state0
       )
@@ -4966,19 +4950,17 @@ defmodule :m_tls_handshake_1_3 do
       [useTicket]
     )
 
-    state = r_state(state0, ssl_options: %{sslOpts0 | :use_ticket => [useTicket]})
+    state = r_state(state0, ssl_options: Map.put(sslOpts0, :use_ticket, [useTicket]))
     {[useTicket], state}
   end
 
-  def maybe_automatic_session_resumption(
-        r_state(ssl_options: %{:use_ticket => useTicket}) = state
-      ) do
+  def maybe_automatic_session_resumption(r_state(ssl_options: %{use_ticket: useTicket}) = state) do
     {useTicket, state}
   end
 
   defp cipher_hash_algos(ciphers) do
     fun = fn cipher ->
-      %{:prf => hash} = :ssl_cipher_format.suite_bin_to_map(cipher)
+      %{prf: hash} = :ssl_cipher_format.suite_bin_to_map(cipher)
       hash
     end
 
@@ -5026,13 +5008,7 @@ defmodule :m_tls_handshake_1_3 do
       :error, :badarg ->
         :error
     else
-      %{
-        :hkdf => hKDF,
-        :sni => _SNI,
-        :psk => pSK,
-        :timestamp => timestamp,
-        :ticket => newSessionTicket
-      } ->
+      %{hkdf: hKDF, sni: _SNI, psk: pSK, timestamp: timestamp, ticket: newSessionTicket} ->
         r_new_session_ticket(
           ticket_lifetime: _LifeTime,
           ticket_age_add: ageAdd,

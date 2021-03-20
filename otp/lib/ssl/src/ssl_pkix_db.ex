@@ -1046,7 +1046,10 @@ defmodule :m_ssl_pkix_db do
          [:set, :protected]
        )},
       pEMCacheName,
-      {:ets.new(:ssl_otp_crl_cache, [:set, :protected]),
+      {:ets.new(
+         :ssl_otp_crl_cache,
+         [:set, :protected]
+       ),
        :ets.new(
          :ssl_otp_crl_issuer_mapping,
          [:bag, :protected]
@@ -1120,13 +1123,13 @@ defmodule :m_ssl_pkix_db do
     {:ok, certs}
   end
 
-  def add_trusted_certs(_Pid, {:der, derList}, [[certDb, _, _] | _]) do
+  def add_trusted_certs(_Pid, {:der, derList}, [certDb, _, _ | _]) do
     newRef = make_ref()
     add_certs_from_der(derList, newRef, certDb)
     {:ok, newRef}
   end
 
-  def add_trusted_certs(_Pid, file, [[_, {refDb, fileMapDb}] | _] = db) do
+  def add_trusted_certs(_Pid, file, [_, {refDb, fileMapDb} | _] = db) do
     case lookup(file, fileMapDb) do
       [ref] ->
         ref_count(ref, refDb, 1)
@@ -1307,9 +1310,9 @@ defmodule :m_ssl_pkix_db do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:ssl_pkix_db, :decode_certs, 2},
-                :line => 313,
-                :file => 'otp/lib/ssl/src/ssl_pkix_db.erl'
+                mfa: {:ssl_pkix_db, :decode_certs, 2},
+                line: 313,
+                file: 'otp/lib/ssl/src/ssl_pkix_db.erl'
               },
               :notice,
               'SSL WARNING: Ignoring a CA cert as it could not be correctly decoded.~n'
@@ -1323,7 +1326,7 @@ defmodule :m_ssl_pkix_db do
     end
   end
 
-  defp new_trusted_cert_entry(file, [[certsDb, refsDb, _] | _]) do
+  defp new_trusted_cert_entry(file, [certsDb, refsDb, _ | _]) do
     case decode_pem_file(file) do
       {:ok, content} ->
         ref = make_ref()
@@ -1337,13 +1340,13 @@ defmodule :m_ssl_pkix_db do
     end
   end
 
-  def add_crls([[_, _, _, {_, mapping}] | _], 'http://dummy/no_distribution_point', cRLs) do
+  def add_crls([_, _, _, {_, mapping} | _], 'http://dummy/no_distribution_point', cRLs) do
     for cRL <- cRLs do
       add_crls(cRL, mapping)
     end
   end
 
-  def add_crls([[_, _, _, {cache, mapping}] | _], path, cRLs) do
+  def add_crls([_, _, _, {cache, mapping} | _], path, cRLs) do
     insert(path, cRLs, cache)
 
     for cRL <- cRLs do
@@ -1355,13 +1358,13 @@ defmodule :m_ssl_pkix_db do
     insert(crl_issuer(cRL), cRL, mapping)
   end
 
-  def remove_crls([[_, _, _, {_, mapping}] | _], {'http://dummy/no_distribution_point', cRLs}) do
+  def remove_crls([_, _, _, {_, mapping} | _], {'http://dummy/no_distribution_point', cRLs}) do
     for cRL <- cRLs do
       rm_crls(cRL, mapping)
     end
   end
 
-  def remove_crls([[_, _, _, {cache, mapping}] | _], path) do
+  def remove_crls([_, _, _, {cache, mapping} | _], path) do
     case lookup(path, cache) do
       :undefined ->
         :ok

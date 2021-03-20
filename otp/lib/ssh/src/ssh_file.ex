@@ -1177,7 +1177,10 @@ defmodule :m_ssh_file do
         sshBin =
           :erlang.iolist_to_binary([
             '\n',
-            :lists.join(',', hosts1),
+            :lists.join(
+              ',',
+              hosts1
+            ),
             ' ',
             keyType,
             ' ',
@@ -1235,16 +1238,16 @@ defmodule :m_ssh_file do
 
   defp find_key(keyType, key, [line | lines]) do
     try do
-      [[e1, e2] | es] = :binary.split(line, " ", [:global, :trim_all])
-      [[normalize_alg(e1), normalize_alg(e2)] | es]
+      [e1, e2 | es] = :binary.split(line, " ", [:global, :trim_all])
+      [normalize_alg(e1), normalize_alg(e2) | es]
     catch
       _, _ ->
         find_key(keyType, key, lines)
     else
-      [[_Options, ^keyType, ^key] | _Comment] ->
+      [_Options, ^keyType, ^key | _Comment] ->
         true
 
-      [[^keyType, ^key] | _Comment] ->
+      [^keyType, ^key | _Comment] ->
         true
 
       _ ->
@@ -1475,7 +1478,7 @@ defmodule :m_ssh_file do
 
   defp revoked_key(hosts, keyType, encKey, [<<"@revoked ", restLine::binary>> | lines]) do
     case :binary.split(restLine, " ", [:global, :trim_all]) do
-      [[patterns, ^keyType, ^encKey] | _Comment] ->
+      [patterns, ^keyType, ^encKey | _Comment] ->
         case host_match(hosts, patterns) do
           true ->
             true
@@ -1517,7 +1520,7 @@ defmodule :m_ssh_file do
     false
   end
 
-  defp line_match(hosts, keyType, encKey, [[patterns, keyType0, encKey0] | _Comment]) do
+  defp line_match(hosts, keyType, encKey, [patterns, keyType0, encKey0 | _Comment]) do
     keyType == normalize_alg(keyType0) and encKey == encKey0 and
       host_match(
         hosts,

@@ -741,7 +741,7 @@ defmodule :m_escript do
 
       r_state(
         exports_main: expMain,
-        forms_or_bin: [[fileForm2, modForm2] | forms]
+        forms_or_bin: [fileForm2, modForm2 | forms]
       ) ->
         forms2 =
           case expMain do
@@ -752,7 +752,7 @@ defmodule :m_escript do
               forms
           end
 
-        forms3 = [[fileForm2, modForm2] | forms2]
+        forms3 = [fileForm2, modForm2 | forms2]
 
         case checkOnly do
           true ->

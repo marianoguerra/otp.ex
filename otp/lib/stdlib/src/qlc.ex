@@ -367,7 +367,7 @@ defmodule :m_qlc do
             options,
             [:tmpdir, :order, :unique, :compressed, :size, :no_files]
           ), get_handle(qH)} do
-      {true, [[tmpDir, order, unique, compressed] | _], h}
+      {true, [tmpDir, order, unique, compressed | _], h}
       when h !== :badarg ->
         r_qlc_handle(
           h:
@@ -454,7 +454,7 @@ defmodule :m_qlc do
       {b1, b2} when b1 === :badarg or b2 === :badarg ->
         :erlang.error(:badarg, [qH, options])
 
-      {[[tD, order, unique, compressed] | _], h} ->
+      {[tD, order, unique, compressed | _], h} ->
         r_qlc_handle(
           h:
             r_qlc_sort(
@@ -1332,7 +1332,12 @@ defmodule :m_qlc do
      [
        abstract1(l, nElements, depth, a),
        {:call, a, {:remote, a, {:atom, a, :ets}, {:atom, a, :match_spec_compile}},
-        [abstract_term(depth(mS, depth), 1)]}
+        [
+          abstract_term(
+            depth(mS, depth),
+            1
+          )
+        ]}
      ]}
   end
 
@@ -2160,7 +2165,7 @@ defmodule :m_qlc do
     prep_sort(q, gOpt)
   end
 
-  defp prep_le([[_, _] | _] = l, gOpt) do
+  defp prep_le([_, _ | _] = l, gOpt) do
     prep = r_prepared(qh: r_qlc_list(l: l), is_cached: true)
 
     opt =
@@ -3611,7 +3616,7 @@ defmodule :m_qlc do
   defp open_file(fileName, extra, post) do
     case :file.open(
            fileName,
-           [[:read, :raw, :binary] | extra]
+           [:read, :raw, :binary | extra]
          ) do
       {:ok, fd} ->
         {fn ->
@@ -3759,10 +3764,7 @@ defmodule :m_qlc do
   defp sort_cursor_file(bTerms, tmpDir, z) do
     fName = tmp_filename(tmpDir)
 
-    case :file.open(
-           fName,
-           [[:write, :raw, :binary] | z]
-         ) do
+    case :file.open(fName, [:write, :raw, :binary | z]) do
       {:ok, fd} ->
         wFun = write_terms(fName, fd)
         wFun.(bTerms)
@@ -3826,7 +3828,8 @@ defmodule :m_qlc do
     size_bin(
       binTerms,
       [
-        [l, <<byte_size(binTerm)::size(4)-unit(8)>>]
+        l,
+        <<byte_size(binTerm)::size(4)-unit(8)>>
         | binTerm
       ]
     )
@@ -3889,7 +3892,7 @@ defmodule :m_qlc do
 
     {fn ->
        ucache(h, uT, mT, localPost)
-     end, [[p1, p2] | post], [l1, l2]}
+     end, [p1, p2 | post], [l1, l2]}
   end
 
   defp unique_cache(h, post, localPost, r_optz(unique: false, cache: :list) = optz) do
@@ -4731,7 +4734,8 @@ defmodule :m_qlc do
 
   defp same_keys1(e1_0, k1_0, [] = l1, c1, e2, c2, e2_0, l2, m) do
     [
-      [[e1_0 | e2_0], [e1_0 | e2]]
+      [e1_0 | e2_0],
+      [e1_0 | e2]
       | fn ->
           same_keys(k1_0, e1_0, l1, c1, l2, c2, m)
         end
@@ -4749,7 +4753,8 @@ defmodule :m_qlc do
 
       k1_0 < k1 ->
         [
-          [[e1_0 | e2_0], [e1_0 | e2]]
+          [e1_0 | e2_0],
+          [e1_0 | e2]
           | fn ->
               same_keys(k1_0, e1_0, l1, c1, l2, c2, m)
             end
@@ -5211,7 +5216,9 @@ defmodule :m_qlc do
 
   defp maybe_error_logger(name, why) do
     [
-      [_, _, {:qlc, :maybe_error_logger, _, _}]
+      _,
+      _,
+      {:qlc, :maybe_error_logger, _, _}
       | stacktrace
     ] = expand_stacktrace()
 

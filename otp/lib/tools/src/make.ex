@@ -348,7 +348,7 @@ defmodule :m_make do
 
     case :compile.file(
            file,
-           [[:report_errors, :report_warnings] | opts]
+           [:report_errors, :report_warnings | opts]
          ) do
       ok when is_tuple(ok) and :erlang.element(1, ok) == :ok ->
         maybe_load(:erlang.element(2, ok), load, opts)
@@ -420,7 +420,7 @@ defmodule :m_make do
 
   defp check_includes(file, includePath, objMTime) do
     {:ok, cwd} = :file.get_cwd()
-    path = [[cwd, :filename.dirname(file)] | includePath]
+    path = [cwd, :filename.dirname(file) | includePath]
 
     case :epp.open(file, path, []) do
       {:ok, epp} ->

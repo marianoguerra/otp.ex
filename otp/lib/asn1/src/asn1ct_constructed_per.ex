@@ -816,7 +816,7 @@ defmodule :m_asn1ct_constructed_per do
     end
 
     restGroup = {:group, [{:safe, emitObjSets}, {:safe, emitPack}]}
-    [[emitExt, emitOpt] | emitComp ++ [restGroup]]
+    [emitExt, emitOpt | emitComp ++ [restGroup]]
   end
 
   defp gen_dec_objsets_fun(gen, objSetInfo) do
@@ -1173,7 +1173,9 @@ defmodule :m_asn1ct_constructed_per do
 
   defp dec_objset_default(n, _, _, true) do
     emit([
-      [{:asis, n}, '(Bytes, Id) ->', :nl]
+      {:asis, n},
+      '(Bytes, Id) ->',
+      :nl
       | case :asn1ct.use_legacy_types() do
           false ->
             ['{asn1_OPENTYPE,Bytes}.', :nl, :nl]
@@ -1851,7 +1853,8 @@ defmodule :m_asn1ct_constructed_per do
 
   defp def_values(r_type(def: {:INTEGER, ns}), def__) do
     [
-      [:asn1_DEFAULT, def__]
+      :asn1_DEFAULT,
+      def__
       | case :lists.keyfind(def__, 2, ns) do
           false ->
             []

@@ -948,7 +948,7 @@ defmodule :m_prim_zip do
     {left, right} = split_iolist(iolist, pos)
     sz = :erlang.iolist_size(bin)
     r = skip_iolist(right, sz)
-    [[left, bin] | r]
+    [left, bin | r]
   end
 
   defp pwrite_binary(b, pos, bin) do

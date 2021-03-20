@@ -1633,7 +1633,7 @@ defmodule :m_xmerl_scan do
     )
   end
 
-  defp scan_pi(str = [[h1, h2, h3] | t], s0 = r_xmerl_scanner(line: l, col: c), pos, ps)
+  defp scan_pi(str = [h1, h2, h3 | t], s0 = r_xmerl_scanner(line: l, col: c), pos, ps)
        when h1 == ?x or h1 == ?X do
     :no_debug
     s = r_xmerl_scanner(s0, col: r_xmerl_scanner(s0, :col) + 3)
@@ -4720,7 +4720,7 @@ defmodule :m_xmerl_scan do
     end
   end
 
-  defp scan_char_data([[h1, h2] | _T], s, _Space, _MUD, _Acc)
+  defp scan_char_data([h1, h2 | _T], s, _Space, _MUD, _Acc)
        when (h1 == 255 and h2 == 254) or
               (h1 == 255 and h2 == 255) do
     cond do
@@ -6818,7 +6818,7 @@ defmodule :m_xmerl_scan do
           t2,
           s2,
           delim,
-          [[';', :erlang.atom_to_list(name), '&'] | acc],
+          [';', :erlang.atom_to_list(name), '&' | acc],
           pEName,
           namespace,
           pENesting
@@ -7009,7 +7009,7 @@ defmodule :m_xmerl_scan do
     rest
   end
 
-  defp pe_pop(']]>', [['[', '<!['] | rest], _S) do
+  defp pe_pop(']]>', ['[', '<![' | rest], _S) do
     rest
   end
 
@@ -7614,7 +7614,7 @@ defmodule :m_xmerl_scan do
                   [], _Fun ->
                     []
 
-                  [[sLNS, sLLoc] | rest], fun ->
+                  [sLNS, sLLoc | rest], fun ->
                     [{sLNS, sLLoc} | fun.(rest, fun)]
                 end
 
@@ -7742,9 +7742,11 @@ defmodule :m_xmerl_scan do
     {c, rest}
   end
 
-  defp utf8_2_ucs([[a, b, c, d] | rest])
-       when a &&& 248 === 240 and b &&& 192 === 128 and
-              c &&& 192 === 128 and d &&& 192 === 128 do
+  defp utf8_2_ucs([a, b, c, d | rest])
+       when a &&& 248 === 240 and
+              b &&& 192 === 128 and
+              c &&& 192 === 128 and
+              d &&& 192 === 128 do
     case (d &&& 63) ||| (c &&& 63 <<< 6) ||| (b &&& 63 <<< 12) ||| (a &&& 7 <<< 18) do
       ch when ch >= 65536 ->
         {ch, rest}
@@ -7754,10 +7756,9 @@ defmodule :m_xmerl_scan do
     end
   end
 
-  defp utf8_2_ucs([[a, b, c] | rest])
+  defp utf8_2_ucs([a, b, c | rest])
        when a &&& 240 === 224 and
-              b &&& 192 === 128 and
-              c &&& 192 === 128 do
+              b &&& 192 === 128 and c &&& 192 === 128 do
     case (c &&& 63) ||| (b &&& 63 <<< 6) ||| (a &&& 15 <<< 12) do
       ch when ch >= 2048 ->
         {ch, rest}
@@ -7767,7 +7768,7 @@ defmodule :m_xmerl_scan do
     end
   end
 
-  defp utf8_2_ucs([[a, b] | rest])
+  defp utf8_2_ucs([a, b | rest])
        when a &&& 224 === 192 and
               b &&& 192 === 128 do
     case (b &&& 63) ||| (a &&& 31 <<< 6) do

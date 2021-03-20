@@ -725,7 +725,7 @@ defmodule :m_user_drv do
   end
 
   defp put_int16(n, tail) do
-    [[n >>> 8 &&& 255, n &&& 255] | tail]
+    [n >>> 8 &&& 255, n &&& 255 | tail]
   end
 
   defp io_command({:put_chars_sync, :unicode, cs, reply}) do

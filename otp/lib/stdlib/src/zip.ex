@@ -1073,7 +1073,10 @@ defmodule :m_zip do
         compSize,
         time_to_string(mTime),
         uncompSize,
-        get_percent(compSize, uncompSize),
+        get_percent(
+          compSize,
+          uncompSize
+        ),
         fileName,
         fileComment
       ]
@@ -1902,7 +1905,7 @@ defmodule :m_zip do
     {left, right} = :erlang.split_binary(b, pos)
     sz = :erlang.iolist_size(bin)
     r = skip_bin(right, sz)
-    [[left, bin] | r]
+    [left, bin | r]
   end
 
   defp skip_bin(b, pos) when is_binary(b) do

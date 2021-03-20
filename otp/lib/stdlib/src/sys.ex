@@ -683,7 +683,7 @@ defmodule :m_sys do
         [[item | r]]
 
       [j | r] ->
-        [[j - 1, item] | r]
+        [j - 1, item | r]
     end
   end
 

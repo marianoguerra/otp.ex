@@ -137,7 +137,7 @@ defmodule :m_ordsets do
     []
   end
 
-  def intersection([[s1, s2] | ss]) do
+  def intersection([s1, s2 | ss]) do
     intersection1(intersection(s1, s2), ss)
   end
 

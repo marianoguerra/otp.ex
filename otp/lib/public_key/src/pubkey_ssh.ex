@@ -1328,20 +1328,20 @@ defmodule :m_pubkey_ssh do
 
   defp do_openssh_decode(:auth_keys = fileType, [line | lines], acc) do
     case decode_auth_keys(line) do
-      {:ssh2, {:options, [[options, keyType, base64Enc] | comment]}} ->
+      {:ssh2, {:options, [options, keyType, base64Enc | comment]}} ->
         do_openssh_decode(fileType, lines, [
           {openssh_pubkey_decode(keyType, base64Enc),
            decode_comment(comment) ++ [{:options, comma_list_decode(options)}]}
           | acc
         ])
 
-      {:ssh2, {:no_options, [[keyType, base64Enc] | comment]}} ->
+      {:ssh2, {:no_options, [keyType, base64Enc | comment]}} ->
         do_openssh_decode(fileType, lines, [
           {openssh_pubkey_decode(keyType, base64Enc), decode_comment(comment)}
           | acc
         ])
 
-      {:ssh1, {:options, [[options, bits, exponent, modulus] | comment]}} ->
+      {:ssh1, {:options, [options, bits, exponent, modulus | comment]}} ->
         do_openssh_decode(fileType, lines, [
           {ssh1_rsa_pubkey_decode(modulus, exponent),
            decode_comment(comment) ++
@@ -1349,7 +1349,7 @@ defmodule :m_pubkey_ssh do
           | acc
         ])
 
-      {:ssh1, {:no_options, [[bits, exponent, modulus] | comment]}} ->
+      {:ssh1, {:no_options, [bits, exponent, modulus | comment]}} ->
         do_openssh_decode(fileType, lines, [
           {ssh1_rsa_pubkey_decode(modulus, exponent),
            decode_comment(comment) ++ [{:bits, integer_decode(bits)}]}
@@ -1360,14 +1360,14 @@ defmodule :m_pubkey_ssh do
 
   defp do_openssh_decode(:known_hosts = fileType, [line | lines], acc) do
     case decode_known_hosts(line) do
-      {:ssh2, [[hostNames, keyType, base64Enc] | comment]} ->
+      {:ssh2, [hostNames, keyType, base64Enc | comment]} ->
         do_openssh_decode(fileType, lines, [
           {openssh_pubkey_decode(keyType, base64Enc),
            decode_comment(comment) ++ [{:hostnames, comma_list_decode(hostNames)}]}
           | acc
         ])
 
-      {:ssh1, [[hostNames, bits, exponent, modulus] | comment]} ->
+      {:ssh1, [hostNames, bits, exponent, modulus | comment]} ->
         do_openssh_decode(fileType, lines, [
           {ssh1_rsa_pubkey_decode(modulus, exponent),
            decode_comment(comment) ++
@@ -1378,7 +1378,7 @@ defmodule :m_pubkey_ssh do
   end
 
   defp do_openssh_decode(:openssh_public_key = fileType, [line | lines], acc) do
-    [[keyType, base64Enc] | comment0] = split_n(2, line, [])
+    [keyType, base64Enc | comment0] = split_n(2, line, [])
 
     knownKeyType =
       case keyType do
@@ -1828,7 +1828,7 @@ defmodule :m_pubkey_ssh do
   end
 
   defp split_lines(<<text::size(68)-binary, rest::binary>>) do
-    [[text, ?\n] | split_lines(rest)]
+    [text, ?\n | split_lines(rest)]
   end
 
   defp split_lines(bin) do
@@ -1879,11 +1879,11 @@ defmodule :m_pubkey_ssh do
   end
 
   defp decode_auth_keys_ssh2(options, next, rest) do
-    {:options, [[options, next] | split_n(1, rest, [])]}
+    {:options, [options, next | split_n(1, rest, [])]}
   end
 
   defp decode_auth_keys_ssh1(options, next, rest) do
-    {:options, [[options, next] | split_n(2, rest, [])]}
+    {:options, [options, next | split_n(2, rest, [])]}
   end
 
   defp decode_auth_keys_ssh1(first, rest) do
@@ -1904,11 +1904,11 @@ defmodule :m_pubkey_ssh do
   end
 
   defp decode_known_hosts_ssh1(hostnames, bits, rest) do
-    [[hostnames, bits] | split_n(2, rest, [])]
+    [hostnames, bits | split_n(2, rest, [])]
   end
 
   defp decode_known_hosts_ssh2(hostnames, keyType, rest) do
-    [[hostnames, keyType] | split_n(1, rest, [])]
+    [hostnames, keyType | split_n(1, rest, [])]
   end
 
   defp split_n(0, <<>>, acc) do

@@ -54,7 +54,7 @@ defmodule :m_lists do
     [b, a]
   end
 
-  def reverse([[a, b] | l]) do
+  def reverse([a, b | l]) do
     :lists.reverse(l, [b, a])
   end
 
@@ -122,11 +122,11 @@ defmodule :m_lists do
   end
 
   defp seq_loop(n, x, l) when n >= 4 do
-    seq_loop(n - 4, x - 4, [[x - 3, x - 2, x - 1, x] | l])
+    seq_loop(n - 4, x - 4, [x - 3, x - 2, x - 1, x | l])
   end
 
   defp seq_loop(n, x, l) when n >= 2 do
-    seq_loop(n - 2, x - 2, [[x - 1, x] | l])
+    seq_loop(n - 2, x - 2, [x - 1, x | l])
   end
 
   defp seq_loop(1, x, l) do
@@ -155,12 +155,12 @@ defmodule :m_lists do
     y = x - d
     z = y - d
     w = z - d
-    seq_loop(n - 4, w - d, d, [[w, z, y, x] | l])
+    seq_loop(n - 4, w - d, d, [w, z, y, x | l])
   end
 
   defp seq_loop(n, x, d, l) when n >= 2 do
     y = x - d
-    seq_loop(n - 2, y - d, d, [[y, x] | l])
+    seq_loop(n - 2, y - d, d, [y, x | l])
   end
 
   defp seq_loop(1, x, _, l) do
@@ -329,7 +329,7 @@ defmodule :m_lists do
     []
   end
 
-  def sort([[x, y] | l] = l0) when x <= y do
+  def sort([x, y | l] = l0) when x <= y do
     case l do
       [] ->
         l0
@@ -351,13 +351,13 @@ defmodule :m_lists do
     end
   end
 
-  def sort([[x, y] | l]) do
+  def sort([x, y | l]) do
     case l do
       [] ->
         [y, x]
 
       [z] when x <= z ->
-        [[y, x] | l]
+        [y, x | l]
 
       [z] when y <= z ->
         [y, z, x]
@@ -585,7 +585,7 @@ defmodule :m_lists do
       [_] ->
         l
 
-      [[x, y] | t] ->
+      [x, y | t] ->
         case {:erlang.element(i, x), :erlang.element(i, y)} do
           {eX, eY} when eX <= eY ->
             case t do
@@ -619,7 +619,7 @@ defmodule :m_lists do
               [z] ->
                 case :erlang.element(i, z) do
                   eZ when eX <= eZ ->
-                    [[y, x] | t]
+                    [y, x | t]
 
                   eZ when eY <= eZ ->
                     [y, z, x]
@@ -689,7 +689,7 @@ defmodule :m_lists do
       [_] ->
         l
 
-      [[x, y] | t] ->
+      [x, y | t] ->
         case {:erlang.element(i, x), :erlang.element(i, y)} do
           {eX, eY} when eX == eY ->
             ukeysort_1(i, x, eX, t)
@@ -817,7 +817,7 @@ defmodule :m_lists do
     l
   end
 
-  def sort(fun, [[x, y] | t]) do
+  def sort(fun, [x, y | t]) do
     case fun.(x, y) do
       true ->
         fsplit_1(y, x, fun, t, [], [])
@@ -893,7 +893,7 @@ defmodule :m_lists do
     :lists.reverse(rufmerge2_1(t1, h2, fun, t2, []), [])
   end
 
-  def usort([[x, y] | l] = l0) when x < y do
+  def usort([x, y | l] = l0) when x < y do
     case l do
       [] ->
         l0
@@ -918,13 +918,13 @@ defmodule :m_lists do
     end
   end
 
-  def usort([[x, y] | l]) when x > y do
+  def usort([x, y | l]) when x > y do
     case l do
       [] ->
         [y, x]
 
       [z] when x < z ->
-        [[y, x] | l]
+        [y, x | l]
 
       [z] when x == z ->
         [y, x]
@@ -943,7 +943,7 @@ defmodule :m_lists do
     end
   end
 
-  def usort([[x, _Y] | l]) do
+  def usort([x, _Y | l]) do
     usort_1(x, l)
   end
 
@@ -1253,7 +1253,7 @@ defmodule :m_lists do
   end
 
   defp join_prepend(sep, [h | t]) do
-    [[sep, h] | join_prepend(sep, t)]
+    [sep, h | join_prepend(sep, t)]
   end
 
   defp split_1(x, y, [z | l], r, rs) when z >= y do
@@ -1273,7 +1273,7 @@ defmodule :m_lists do
   end
 
   defp split_1(x, y, [], r, rs) do
-    rmergel([[[y, x] | r] | rs], [])
+    rmergel([[y, x | r] | rs], [])
   end
 
   defp split_1_1(x, y, [z | l], r, rs, s) when z >= y do
@@ -1285,15 +1285,15 @@ defmodule :m_lists do
   end
 
   defp split_1_1(x, y, [z | l], r, rs, s) when s <= z do
-    split_1(s, z, l, [], [[[y, x] | r] | rs])
+    split_1(s, z, l, [], [[y, x | r] | rs])
   end
 
   defp split_1_1(x, y, [z | l], r, rs, s) do
-    split_1(z, s, l, [], [[[y, x] | r] | rs])
+    split_1(z, s, l, [], [[y, x | r] | rs])
   end
 
   defp split_1_1(x, y, [], r, rs, s) do
-    rmergel([[[s], [[y, x] | r]] | rs], [])
+    rmergel([[s], [y, x | r] | rs], [])
   end
 
   defp split_2(x, y, [z | l], r, rs) when z <= y do
@@ -1313,7 +1313,7 @@ defmodule :m_lists do
   end
 
   defp split_2(x, y, [], r, rs) do
-    mergel([[[y, x] | r] | rs], [])
+    mergel([[y, x | r] | rs], [])
   end
 
   defp split_2_1(x, y, [z | l], r, rs, s) when z <= y do
@@ -1325,22 +1325,22 @@ defmodule :m_lists do
   end
 
   defp split_2_1(x, y, [z | l], r, rs, s) when s > z do
-    split_2(s, z, l, [], [[[y, x] | r] | rs])
+    split_2(s, z, l, [], [[y, x | r] | rs])
   end
 
   defp split_2_1(x, y, [z | l], r, rs, s) do
-    split_2(z, s, l, [], [[[y, x] | r] | rs])
+    split_2(z, s, l, [], [[y, x | r] | rs])
   end
 
   defp split_2_1(x, y, [], r, rs, s) do
-    mergel([[[s], [[y, x] | r]] | rs], [])
+    mergel([[s], [y, x | r] | rs], [])
   end
 
   defp mergel([[] | l], acc) do
     mergel(l, acc)
   end
 
-  defp mergel([[t1, [h2 | t2], [h3 | t3]] | l], acc) do
+  defp mergel([t1, [h2 | t2], [h3 | t3] | l], acc) do
     mergel(l, [merge3_1(t1, [], h2, t2, h3, t3) | acc])
   end
 
@@ -1364,15 +1364,15 @@ defmodule :m_lists do
     rmergel(acc, [])
   end
 
-  defp mergel([[a, []] | l], acc) do
+  defp mergel([a, [] | l], acc) do
     mergel([a | l], acc)
   end
 
-  defp mergel([[a, b, []] | l], acc) do
-    mergel([[a, b] | l], acc)
+  defp mergel([a, b, [] | l], acc) do
+    mergel([a, b | l], acc)
   end
 
-  defp rmergel([[[h3 | t3], [h2 | t2], t1] | l], acc) do
+  defp rmergel([[h3 | t3], [h2 | t2], t1 | l], acc) do
     rmergel(l, [rmerge3_1(t1, [], h2, t2, h3, t3) | acc])
   end
 
@@ -1545,7 +1545,7 @@ defmodule :m_lists do
   end
 
   defp merge2_2(t1, hdM, [h2 | t2], m, h1) when h1 <= h2 do
-    merge2_1(t1, h2, t2, [[h1, hdM] | m])
+    merge2_1(t1, h2, t2, [h1, hdM | m])
   end
 
   defp merge2_2(t1, hdM, [h2 | t2], m, h1) do
@@ -1553,7 +1553,7 @@ defmodule :m_lists do
   end
 
   defp merge2_2(t1, hdM, [], m, h1) do
-    :lists.reverse(t1, [[h1, hdM] | m])
+    :lists.reverse(t1, [h1, hdM | m])
   end
 
   defp rmerge2_1([h1 | t1], h2, t2, m) when h1 <= h2 do
@@ -1573,11 +1573,11 @@ defmodule :m_lists do
   end
 
   defp rmerge2_2(t1, hdM, [h2 | t2], m, h1) do
-    rmerge2_1(t1, h2, t2, [[h1, hdM] | m])
+    rmerge2_1(t1, h2, t2, [h1, hdM | m])
   end
 
   defp rmerge2_2(t1, hdM, [], m, h1) do
-    :lists.reverse(t1, [[h1, hdM] | m])
+    :lists.reverse(t1, [h1, hdM | m])
   end
 
   defp usplit_1(x, y, [z | l], r, rs) when z > y do
@@ -1605,7 +1605,7 @@ defmodule :m_lists do
   end
 
   defp usplit_1(x, y, [], r, rs) do
-    rumergel([[[y, x] | r] | rs], [], :asc)
+    rumergel([[y, x | r] | rs], [], :asc)
   end
 
   defp usplit_1_1(x, y, [z | l], r, rs, s) when z > y do
@@ -1625,7 +1625,7 @@ defmodule :m_lists do
   end
 
   defp usplit_1_1(x, y, [z | l], r, rs, s) when z > s do
-    usplit_1(s, z, l, [], [[[y, x] | r] | rs])
+    usplit_1(s, z, l, [], [[y, x | r] | rs])
   end
 
   defp usplit_1_1(x, y, [z | l], r, rs, s) when z == s do
@@ -1633,11 +1633,11 @@ defmodule :m_lists do
   end
 
   defp usplit_1_1(x, y, [z | l], r, rs, s) do
-    usplit_1(z, s, l, [], [[[y, x] | r] | rs])
+    usplit_1(z, s, l, [], [[y, x | r] | rs])
   end
 
   defp usplit_1_1(x, y, [], r, rs, s) do
-    rumergel([[[s], [[y, x] | r]] | rs], [], :asc)
+    rumergel([[s], [y, x | r] | rs], [], :asc)
   end
 
   defp usplit_2(x, y, [z | l], r, rs) when z < y do
@@ -1665,7 +1665,7 @@ defmodule :m_lists do
   end
 
   defp usplit_2(x, y, [], r, rs) do
-    umergel([[[y, x] | r] | rs], [], :desc)
+    umergel([[y, x | r] | rs], [], :desc)
   end
 
   defp usplit_2_1(x, y, [z | l], r, rs, s) when z < y do
@@ -1685,7 +1685,7 @@ defmodule :m_lists do
   end
 
   defp usplit_2_1(x, y, [z | l], r, rs, s) when z < s do
-    usplit_2(s, z, l, [], [[[y, x] | r] | rs])
+    usplit_2(s, z, l, [], [[y, x | r] | rs])
   end
 
   defp usplit_2_1(x, y, [z | l], r, rs, s) when z == s do
@@ -1693,11 +1693,11 @@ defmodule :m_lists do
   end
 
   defp usplit_2_1(x, y, [z | l], r, rs, s) do
-    usplit_2(z, s, l, [], [[[y, x] | r] | rs])
+    usplit_2(z, s, l, [], [[y, x | r] | rs])
   end
 
   defp usplit_2_1(x, y, [], r, rs, s) do
-    umergel([[[s], [[y, x] | r]] | rs], [], :desc)
+    umergel([[s], [y, x | r] | rs], [], :desc)
   end
 
   defp umergel(l) do
@@ -1708,7 +1708,7 @@ defmodule :m_lists do
     umergel(l, acc, o)
   end
 
-  defp umergel([[t1, [h2 | t2], [h3 | t3]] | l], acc, :asc) do
+  defp umergel([t1, [h2 | t2], [h3 | t3] | l], acc, :asc) do
     umergel(
       l,
       [umerge3_1(t1, [h2 | h3], t2, h2, [], t3, h3) | acc],
@@ -1716,7 +1716,7 @@ defmodule :m_lists do
     )
   end
 
-  defp umergel([[[h3 | t3], [h2 | t2], t1] | l], acc, :desc) do
+  defp umergel([[h3 | t3], [h2 | t2], t1 | l], acc, :desc) do
     umergel(
       l,
       [umerge3_1(t1, [h2 | h3], t2, h2, [], t3, h3) | acc],
@@ -1724,19 +1724,19 @@ defmodule :m_lists do
     )
   end
 
-  defp umergel([[a, []] | l], acc, o) do
+  defp umergel([a, [] | l], acc, o) do
     umergel([a | l], acc, o)
   end
 
-  defp umergel([[a, b, []] | l], acc, o) do
-    umergel([[a, b] | l], acc, o)
+  defp umergel([a, b, [] | l], acc, o) do
+    umergel([a, b | l], acc, o)
   end
 
-  defp umergel([[[h1 | t1], t2] | l], acc, :asc) do
+  defp umergel([[h1 | t1], t2 | l], acc, :asc) do
     umergel(l, [umerge2_2(t1, t2, [], h1) | acc], :asc)
   end
 
-  defp umergel([[t2, [h1 | t1]] | l], acc, :desc) do
+  defp umergel([t2, [h1 | t1] | l], acc, :desc) do
     umergel(l, [umerge2_2(t1, t2, [], h1) | acc], :desc)
   end
 
@@ -1756,19 +1756,19 @@ defmodule :m_lists do
     rumergel(acc, [], o)
   end
 
-  defp rumergel([[[h3 | t3], [h2 | t2], t1] | l], acc, :asc) do
+  defp rumergel([[h3 | t3], [h2 | t2], t1 | l], acc, :asc) do
     rumergel(l, [rumerge3_1(t1, t2, h2, [], t3, h3) | acc], :asc)
   end
 
-  defp rumergel([[t1, [h2 | t2], [h3 | t3]] | l], acc, :desc) do
+  defp rumergel([t1, [h2 | t2], [h3 | t3] | l], acc, :desc) do
     rumergel(l, [rumerge3_1(t1, t2, h2, [], t3, h3) | acc], :desc)
   end
 
-  defp rumergel([[[h2 | t2], t1] | l], acc, :asc) do
+  defp rumergel([[h2 | t2], t1 | l], acc, :asc) do
     rumergel(l, [rumerge2_1(t1, t2, [], h2) | acc], :asc)
   end
 
-  defp rumergel([[t1, [h2 | t2]] | l], acc, :desc) do
+  defp rumergel([t1, [h2 | t2] | l], acc, :desc) do
     rumergel(l, [rumerge2_1(t1, t2, [], h2) | acc], :desc)
   end
 
@@ -1927,7 +1927,7 @@ defmodule :m_lists do
   end
 
   defp rumerge3_2(t1, [h2 | t2], h2M, m, t3, h3, h1) do
-    rumerge3_1(t1, t2, h2, [[h1, h2M] | m], t3, h3)
+    rumerge3_1(t1, t2, h2, [h1, h2M | m], t3, h3)
   end
 
   defp rumerge3_2(t1, [], h2M, m, t3, h3, h1) when h1 == h2M do
@@ -1939,7 +1939,7 @@ defmodule :m_lists do
   end
 
   defp rumerge3_2(t1, [], h2M, m, t3, h3, h1) do
-    rumerge2_1(t1, t3, [[h1, h2M] | m], h3)
+    rumerge2_1(t1, t3, [h1, h2M | m], h3)
   end
 
   defp rumerge3_12b(t1, h1, t2, h2, m, t3, h3, h2M) when h2 <= h3 do
@@ -1983,7 +1983,7 @@ defmodule :m_lists do
   end
 
   defp rumerge3_21_3(t1, t2, h2, m, [h3 | t3], h3M, h1) do
-    rumerge3_1(t1, t2, h2, [[h1, h3M] | m], t3, h3)
+    rumerge3_1(t1, t2, h2, [h1, h3M | m], t3, h3)
   end
 
   defp rumerge3_21_3(t1, t2, h2, m, [], h3M, h1) when h1 == h3M do
@@ -1991,7 +1991,7 @@ defmodule :m_lists do
   end
 
   defp rumerge3_21_3(t1, t2, h2, m, [], h3M, h1) do
-    rumerge2_1(t1, t2, [[h1, h3M] | m], h2)
+    rumerge2_1(t1, t2, [h1, h3M | m], h2)
   end
 
   defp umerge2_1([h1 | t1], t2, m, _HdM, h2) when h1 <= h2 do
@@ -2047,7 +2047,7 @@ defmodule :m_lists do
   end
 
   defp rumerge2_2(t1, [h2 | t2], m, h2M, h1) do
-    rumerge2_1(t1, t2, [[h1, h2M] | m], h2)
+    rumerge2_1(t1, t2, [h1, h2M | m], h2)
   end
 
   defp rumerge2_2(t1, [], m, h2M, h1) when h1 == h2M do
@@ -2055,7 +2055,7 @@ defmodule :m_lists do
   end
 
   defp rumerge2_2(t1, [], m, h2M, h1) do
-    :lists.reverse(t1, [[h1, h2M] | m])
+    :lists.reverse(t1, [h1, h2M | m])
   end
 
   defp keysplit_1(i, x, eX, y, eY, [z | l], r, rs) do
@@ -2075,7 +2075,7 @@ defmodule :m_lists do
   end
 
   defp keysplit_1(i, x, _EX, y, _EY, [], r, rs) do
-    rkeymergel(i, [[[y, x] | r] | rs], [], :asc)
+    rkeymergel(i, [[y, x | r] | rs], [], :asc)
   end
 
   defp keysplit_1_1(i, x, eX, y, eY, eS, r, rs, s, [z | l]) do
@@ -2087,15 +2087,15 @@ defmodule :m_lists do
         keysplit_1_1(i, z, eZ, y, eY, eS, [x | r], rs, s, l)
 
       eZ when eS <= eZ ->
-        keysplit_1(i, s, eS, z, eZ, l, [], [[[y, x] | r] | rs])
+        keysplit_1(i, s, eS, z, eZ, l, [], [[y, x | r] | rs])
 
       eZ ->
-        keysplit_1(i, z, eZ, s, eS, l, [], [[[y, x] | r] | rs])
+        keysplit_1(i, z, eZ, s, eS, l, [], [[y, x | r] | rs])
     end
   end
 
   defp keysplit_1_1(i, x, _EX, y, _EY, _ES, r, rs, s, []) do
-    rkeymergel(i, [[[s], [[y, x] | r]] | rs], [], :asc)
+    rkeymergel(i, [[s], [y, x | r] | rs], [], :asc)
   end
 
   defp keysplit_2(i, x, eX, y, eY, [z | l], r, rs) do
@@ -2115,7 +2115,7 @@ defmodule :m_lists do
   end
 
   defp keysplit_2(i, x, _EX, y, _EY, [], r, rs) do
-    keymergel(i, [[[y, x] | r] | rs], [], :desc)
+    keymergel(i, [[y, x | r] | rs], [], :desc)
   end
 
   defp keysplit_2_1(i, x, eX, y, eY, eS, r, rs, s, [z | l]) do
@@ -2127,30 +2127,30 @@ defmodule :m_lists do
         keysplit_2_1(i, z, eZ, y, eY, eS, [x | r], rs, s, l)
 
       eZ when eS > eZ ->
-        keysplit_2(i, s, eS, z, eZ, l, [], [[[y, x] | r] | rs])
+        keysplit_2(i, s, eS, z, eZ, l, [], [[y, x | r] | rs])
 
       eZ ->
-        keysplit_2(i, z, eZ, s, eS, l, [], [[[y, x] | r] | rs])
+        keysplit_2(i, z, eZ, s, eS, l, [], [[y, x | r] | rs])
     end
   end
 
   defp keysplit_2_1(i, x, _EX, y, _EY, _ES, r, rs, s, []) do
-    keymergel(i, [[[s], [[y, x] | r]] | rs], [], :desc)
+    keymergel(i, [[s], [y, x | r] | rs], [], :desc)
   end
 
-  defp keymergel(i, [[t1, [h2 | t2], [h3 | t3]] | l], acc, o)
+  defp keymergel(i, [t1, [h2 | t2], [h3 | t3] | l], acc, o)
        when o == :asc do
     m = keymerge3_1(i, t1, [], o, :erlang.element(i, h2), h2, t2, :erlang.element(i, h3), h3, t3)
     keymergel(i, l, [m | acc], o)
   end
 
-  defp keymergel(i, [[[h3 | t3], [h2 | t2], t1] | l], acc, o)
+  defp keymergel(i, [[h3 | t3], [h2 | t2], t1 | l], acc, o)
        when o == :desc do
     m = keymerge3_1(i, t1, [], o, :erlang.element(i, h2), h2, t2, :erlang.element(i, h3), h3, t3)
     keymergel(i, l, [m | acc], o)
   end
 
-  defp keymergel(i, [[t1, [h2 | t2]] | l], acc, :asc) do
+  defp keymergel(i, [t1, [h2 | t2] | l], acc, :asc) do
     keymergel(
       i,
       l,
@@ -2162,7 +2162,7 @@ defmodule :m_lists do
     )
   end
 
-  defp keymergel(i, [[[h2 | t2], t1] | l], acc, :desc) do
+  defp keymergel(i, [[h2 | t2], t1 | l], acc, :desc) do
     keymergel(
       i,
       l,
@@ -2186,19 +2186,19 @@ defmodule :m_lists do
     rkeymergel(i, acc, [], o)
   end
 
-  defp rkeymergel(i, [[[h3 | t3], [h2 | t2], t1] | l], acc, o)
+  defp rkeymergel(i, [[h3 | t3], [h2 | t2], t1 | l], acc, o)
        when o == :asc do
     m = rkeymerge3_1(i, t1, [], o, :erlang.element(i, h2), h2, t2, :erlang.element(i, h3), h3, t3)
     rkeymergel(i, l, [m | acc], o)
   end
 
-  defp rkeymergel(i, [[t1, [h2 | t2], [h3 | t3]] | l], acc, o)
+  defp rkeymergel(i, [t1, [h2 | t2], [h3 | t3] | l], acc, o)
        when o == :desc do
     m = rkeymerge3_1(i, t1, [], o, :erlang.element(i, h2), h2, t2, :erlang.element(i, h3), h3, t3)
     rkeymergel(i, l, [m | acc], o)
   end
 
-  defp rkeymergel(i, [[[h2 | t2], t1] | l], acc, :asc) do
+  defp rkeymergel(i, [[h2 | t2], t1 | l], acc, :asc) do
     rkeymergel(
       i,
       l,
@@ -2210,7 +2210,7 @@ defmodule :m_lists do
     )
   end
 
-  defp rkeymergel(i, [[t1, [h2 | t2]] | l], acc, :desc) do
+  defp rkeymergel(i, [t1, [h2 | t2] | l], acc, :desc) do
     rkeymergel(
       i,
       l,
@@ -2415,7 +2415,7 @@ defmodule :m_lists do
   defp keymerge2_2(i, t1, e1, hdM, [h2 | t2], m, h1) do
     case :erlang.element(i, h2) do
       e2 when e1 <= e2 ->
-        keymerge2_1(i, t1, e2, h2, t2, [[h1, hdM] | m])
+        keymerge2_1(i, t1, e2, h2, t2, [h1, hdM | m])
 
       _E2 ->
         keymerge2_2(i, t1, e1, h2, t2, [hdM | m], h1)
@@ -2423,7 +2423,7 @@ defmodule :m_lists do
   end
 
   defp keymerge2_2(_I, t1, _E1, hdM, [], m, h1) do
-    :lists.reverse(t1, [[h1, hdM] | m])
+    :lists.reverse(t1, [h1, hdM | m])
   end
 
   defp rkeymerge2_1(i, [h1 | t1], e2, h2, t2, m) do
@@ -2446,12 +2446,12 @@ defmodule :m_lists do
         rkeymerge2_2(i, e1, t1, h2, t2, [hdM | m], h1)
 
       e2 ->
-        rkeymerge2_1(i, t1, e2, h2, t2, [[h1, hdM] | m])
+        rkeymerge2_1(i, t1, e2, h2, t2, [h1, hdM | m])
     end
   end
 
   defp rkeymerge2_2(_I, _E1, t1, hdM, [], m, h1) do
-    :lists.reverse(t1, [[h1, hdM] | m])
+    :lists.reverse(t1, [h1, hdM | m])
   end
 
   defp ukeysplit_1(i, x, eX, y, eY, [z | l], r, rs) do
@@ -2477,7 +2477,7 @@ defmodule :m_lists do
   end
 
   defp ukeysplit_1(i, x, _EX, y, _EY, [], r, rs) do
-    rukeymergel(i, [[[y, x] | r] | rs], [])
+    rukeymergel(i, [[y, x | r] | rs], [])
   end
 
   defp ukeysplit_1_1(i, x, eX, y, eY, [z | l], r, rs, s, eS) do
@@ -2498,15 +2498,15 @@ defmodule :m_lists do
         ukeysplit_1_1(i, x, eX, y, eY, l, r, rs, s, eS)
 
       eZ when eS < eZ ->
-        ukeysplit_1(i, s, eS, z, eZ, l, [], [[[y, x] | r] | rs])
+        ukeysplit_1(i, s, eS, z, eZ, l, [], [[y, x | r] | rs])
 
       eZ ->
-        ukeysplit_1(i, z, eZ, s, eS, l, [], [[[y, x] | r] | rs])
+        ukeysplit_1(i, z, eZ, s, eS, l, [], [[y, x | r] | rs])
     end
   end
 
   defp ukeysplit_1_1(i, x, _EX, y, _EY, [], r, rs, s, _ES) do
-    rukeymergel(i, [[[s], [[y, x] | r]] | rs], [])
+    rukeymergel(i, [[s], [y, x | r] | rs], [])
   end
 
   defp ukeysplit_2(i, y, eY, [z | l], r) do
@@ -2526,7 +2526,7 @@ defmodule :m_lists do
     [y | r]
   end
 
-  defp ukeymergel(i, [[t1, [h2 | t2], [h3 | t3]] | l], acc) do
+  defp ukeymergel(i, [t1, [h2 | t2], [h3 | t3] | l], acc) do
     m =
       ukeymerge3_1(
         i,
@@ -2545,7 +2545,7 @@ defmodule :m_lists do
     ukeymergel(i, l, [m | acc])
   end
 
-  defp ukeymergel(i, [[[h1 | t1], t2] | l], acc) do
+  defp ukeymergel(i, [[h1 | t1], t2 | l], acc) do
     ukeymergel(i, l, [
       ukeymerge2_2(i, t1, :erlang.element(i, h1), h1, t2, [])
       | acc
@@ -2564,7 +2564,7 @@ defmodule :m_lists do
     rukeymergel(i, acc, [])
   end
 
-  defp rukeymergel(i, [[[h3 | t3], [h2 | t2], t1] | l], acc) do
+  defp rukeymergel(i, [[h3 | t3], [h2 | t2], t1 | l], acc) do
     m =
       rukeymerge3_1(
         i,
@@ -2583,7 +2583,7 @@ defmodule :m_lists do
     rukeymergel(i, l, [m | acc])
   end
 
-  defp rukeymergel(i, [[[h2 | t2], t1] | l], acc) do
+  defp rukeymergel(i, [[h2 | t2], t1 | l], acc) do
     rukeymergel(i, l, [
       rukeymerge2_1(i, t1, :erlang.element(i, h2), t2, [], h2)
       | acc
@@ -2771,7 +2771,7 @@ defmodule :m_lists do
   end
 
   defp rukeymerge3_2(i, _E1, h1, t1, [], h2M, _E2M, m, e3, h3, t3) do
-    rukeymerge2_1(i, t1, e3, t3, [[h1, h2M] | m], h3)
+    rukeymerge2_1(i, t1, e3, t3, [h1, h2M | m], h3)
   end
 
   defp rukeymerge3_12b(i, e1, h1, t1, e2, h2, t2, e3, h3, t3, m, h2M)
@@ -2789,7 +2789,7 @@ defmodule :m_lists do
   end
 
   defp rukeymerge3_21b(i, _E1, h1, t1, e2, h2, t2, e3, h3, t3, m, h2M) do
-    rukeymerge3_1(i, t1, h1, t1, e2, h2, t2, [[h1, h2M] | m], e3, h3, t3)
+    rukeymerge3_1(i, t1, h1, t1, e2, h2, t2, [h1, h2M | m], e3, h3, t3)
   end
 
   defp rukeymerge3_12_3(i, e1, h1, t1, e2, h2, t2, m, e3M, h3M, [h3 | t3]) do
@@ -2823,7 +2823,7 @@ defmodule :m_lists do
         rukeymerge3_1(i, t1, h1, t1, e2, h2, t2, [h1 | m], e3, h3, t3)
 
       e3 ->
-        rukeymerge3_1(i, t1, h1, t1, e2, h2, t2, [[h1, h3M] | m], e3, h3, t3)
+        rukeymerge3_1(i, t1, h1, t1, e2, h2, t2, [h1, h3M | m], e3, h3, t3)
     end
   end
 
@@ -2833,7 +2833,7 @@ defmodule :m_lists do
   end
 
   defp rukeymerge3_21_3(i, _E1, h1, t1, e2, h2, t2, m, _E3M, h3M, []) do
-    rukeymerge2_1(i, t1, e2, t2, [[h1, h3M] | m], h2)
+    rukeymerge2_1(i, t1, e2, t2, [h1, h3M | m], h2)
   end
 
   defp ukeymerge2_1(i, [h1 | t1], e2, hdM, t2, m, h2) do
@@ -2894,7 +2894,7 @@ defmodule :m_lists do
         rukeymerge2_1(i, t1, e2, t2, [h1 | m], h2)
 
       e2 ->
-        rukeymerge2_1(i, t1, e2, t2, [[h1, h2M] | m], h2)
+        rukeymerge2_1(i, t1, e2, t2, [h1, h2M | m], h2)
     end
   end
 
@@ -2904,7 +2904,7 @@ defmodule :m_lists do
   end
 
   defp rukeymerge2_2(_I, t1, _E1, [], m, _E2M, h2M, h1) do
-    :lists.reverse(t1, [[h1, h2M] | m])
+    :lists.reverse(t1, [h1, h2M | m])
   end
 
   defp fsplit_1(y, x, fun, [z | l], r, rs) do
@@ -2927,7 +2927,7 @@ defmodule :m_lists do
   end
 
   defp fsplit_1(y, x, fun, [], r, rs) do
-    rfmergel([[[y, x] | r] | rs], [], fun, :asc)
+    rfmergel([[y, x | r] | rs], [], fun, :asc)
   end
 
   defp fsplit_1_1(y, x, fun, [z | l], r, rs, s) do
@@ -2943,17 +2943,17 @@ defmodule :m_lists do
           false ->
             case fun.(s, z) do
               true ->
-                fsplit_1(z, s, fun, l, [], [[[y, x] | r] | rs])
+                fsplit_1(z, s, fun, l, [], [[y, x | r] | rs])
 
               false ->
-                fsplit_1(s, z, fun, l, [], [[[y, x] | r] | rs])
+                fsplit_1(s, z, fun, l, [], [[y, x | r] | rs])
             end
         end
     end
   end
 
   defp fsplit_1_1(y, x, fun, [], r, rs, s) do
-    rfmergel([[[s], [[y, x] | r]] | rs], [], fun, :asc)
+    rfmergel([[s], [y, x | r] | rs], [], fun, :asc)
   end
 
   defp fsplit_2(y, x, fun, [z | l], r, rs) do
@@ -2976,7 +2976,7 @@ defmodule :m_lists do
   end
 
   defp fsplit_2(y, x, fun, [], r, rs) do
-    fmergel([[[y, x] | r] | rs], [], fun, :desc)
+    fmergel([[y, x | r] | rs], [], fun, :desc)
   end
 
   defp fsplit_2_1(y, x, fun, [z | l], r, rs, s) do
@@ -2992,24 +2992,24 @@ defmodule :m_lists do
           true ->
             case fun.(s, z) do
               false ->
-                fsplit_2(z, s, fun, l, [], [[[y, x] | r] | rs])
+                fsplit_2(z, s, fun, l, [], [[y, x | r] | rs])
 
               true ->
-                fsplit_2(s, z, fun, l, [], [[[y, x] | r] | rs])
+                fsplit_2(s, z, fun, l, [], [[y, x | r] | rs])
             end
         end
     end
   end
 
   defp fsplit_2_1(y, x, fun, [], r, rs, s) do
-    fmergel([[[s], [[y, x] | r]] | rs], [], fun, :desc)
+    fmergel([[s], [y, x | r] | rs], [], fun, :desc)
   end
 
-  defp fmergel([[t1, [h2 | t2]] | l], acc, fun, :asc) do
+  defp fmergel([t1, [h2 | t2] | l], acc, fun, :asc) do
     fmergel(l, [fmerge2_1(t1, h2, fun, t2, []) | acc], fun, :asc)
   end
 
-  defp fmergel([[[h2 | t2], t1] | l], acc, fun, :desc) do
+  defp fmergel([[h2 | t2], t1 | l], acc, fun, :desc) do
     fmergel(l, [fmerge2_1(t1, h2, fun, t2, []) | acc], fun, :desc)
   end
 
@@ -3025,11 +3025,11 @@ defmodule :m_lists do
     rfmergel(acc, [], fun, o)
   end
 
-  defp rfmergel([[[h2 | t2], t1] | l], acc, fun, :asc) do
+  defp rfmergel([[h2 | t2], t1 | l], acc, fun, :asc) do
     rfmergel(l, [rfmerge2_1(t1, h2, fun, t2, []) | acc], fun, :asc)
   end
 
-  defp rfmergel([[t1, [h2 | t2]] | l], acc, fun, :desc) do
+  defp rfmergel([t1, [h2 | t2] | l], acc, fun, :desc) do
     rfmergel(l, [rfmerge2_1(t1, h2, fun, t2, []) | acc], fun, :desc)
   end
 
@@ -3129,7 +3129,7 @@ defmodule :m_lists do
   end
 
   defp ufsplit_1(y, x, fun, [], r, rs) do
-    rufmergel([[[y, x] | r] | rs], [], fun)
+    rufmergel([[y, x | r] | rs], [], fun)
   end
 
   defp ufsplit_1_1(y, x, fun, [z | l], r, rs, s) do
@@ -3162,18 +3162,18 @@ defmodule :m_lists do
                     ufsplit_1_1(y, x, fun, l, r, rs, s)
 
                   false ->
-                    ufsplit_1(z, s, fun, l, [], [[[y, x] | r] | rs])
+                    ufsplit_1(z, s, fun, l, [], [[y, x | r] | rs])
                 end
 
               false ->
-                ufsplit_1(s, z, fun, l, [], [[[y, x] | r] | rs])
+                ufsplit_1(s, z, fun, l, [], [[y, x | r] | rs])
             end
         end
     end
   end
 
   defp ufsplit_1_1(y, x, fun, [], r, rs, s) do
-    rufmergel([[[s], [[y, x] | r]] | rs], [], fun)
+    rufmergel([[s], [y, x | r] | rs], [], fun)
   end
 
   defp ufsplit_2(y, [z | l], fun, r) do
@@ -3196,7 +3196,7 @@ defmodule :m_lists do
     [y | r]
   end
 
-  defp ufmergel([[[h1 | t1], t2] | l], acc, fun) do
+  defp ufmergel([[h1 | t1], t2 | l], acc, fun) do
     ufmergel(l, [ufmerge2_2(h1, t1, fun, t2, []) | acc], fun)
   end
 
@@ -3212,7 +3212,7 @@ defmodule :m_lists do
     rufmergel(acc, [], fun)
   end
 
-  defp rufmergel([[[h2 | t2], t1] | l], acc, fun) do
+  defp rufmergel([[h2 | t2], t1 | l], acc, fun) do
     rufmergel(l, [rufmerge2_1(t1, h2, fun, t2, []) | acc], fun)
   end
 
@@ -3289,7 +3289,7 @@ defmodule :m_lists do
             rufmerge2_1(t1, h2, fun, t2, [h1 | m])
 
           false ->
-            rufmerge2_1(t1, h2, fun, t2, [[h1, h2M] | m])
+            rufmerge2_1(t1, h2, fun, t2, [h1, h2M | m])
         end
     end
   end
@@ -3300,7 +3300,7 @@ defmodule :m_lists do
         :lists.reverse(t1, [h1 | m])
 
       false ->
-        :lists.reverse(t1, [[h1, h2M] | m])
+        :lists.reverse(t1, [h1, h2M | m])
     end
   end
 end

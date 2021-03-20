@@ -1456,16 +1456,16 @@ defmodule :m_tls_sender do
         {:call, from},
         {pid,
          %{
-           :current_write => writeState,
-           :role => role,
-           :socket => socket,
-           :socket_options => sockOpts,
-           :trackers => trackers,
-           :transport_cb => transport,
-           :negotiated_version => version,
-           :renegotiate_at => renegotiateAt,
-           :key_update_at => keyUpdateAt,
-           :log_level => logLevel
+           current_write: writeState,
+           role: role,
+           socket: socket,
+           socket_options: sockOpts,
+           trackers: trackers,
+           transport_cb: transport,
+           negotiated_version: version,
+           renegotiate_at: renegotiateAt,
+           key_update_at: keyUpdateAt,
+           log_level: logLevel
          }},
         r_data(
           connection_states: connectionStates,
@@ -1476,7 +1476,7 @@ defmodule :m_tls_sender do
 
     stateData =
       r_data(stateData0,
-        connection_states: %{connectionStates | :current_write => writeState},
+        connection_states: Map.put(connectionStates, :current_write, writeState),
         static:
           r_static(static0,
             connection_pid: pid,
@@ -1527,7 +1527,7 @@ defmodule :m_tls_sender do
   def connection(
         {:call, from},
         :renegotiate,
-        r_data(connection_states: %{:current_write => write}) = stateData
+        r_data(connection_states: %{current_write: write}) = stateData
       ) do
     {:next_state, :handshake, stateData, [{:reply, from, {:ok, write}}]}
   end
@@ -1535,7 +1535,7 @@ defmodule :m_tls_sender do
   def connection(
         {:call, from},
         :downgrade,
-        r_data(connection_states: %{:current_write => write}) = stateData
+        r_data(connection_states: %{current_write: write}) = stateData
       ) do
     {:next_state, :death_row, stateData, [{:reply, from, {:ok, write}}]}
   end
@@ -1613,7 +1613,7 @@ defmodule :m_tls_sender do
       ) do
     {:next_state, :connection,
      r_data(stateData,
-       connection_states: %{connectionStates | :current_write => writesState},
+       connection_states: Map.put(connectionStates, :current_write, writesState),
        static: r_static(static, negotiated_version: version)
      )}
   end
@@ -1674,7 +1674,7 @@ defmodule :m_tls_sender do
 
     {:next_state, :connection,
      r_data(stateData,
-       connection_states: %{connectionStates | :current_write => writeState},
+       connection_states: Map.put(connectionStates, :current_write, writeState),
        static:
          r_static(static,
            negotiated_version: version,
@@ -1779,12 +1779,8 @@ defmodule :m_tls_sender do
     :ssl_logger.log(
       :info,
       level,
-      %{:event => 'TLS sender recived unexpected info', :reason => [{:message, msg}]},
-      %{
-        :mfa => {:tls_sender, :handle_common, 3},
-        :line => 420,
-        :file => 'otp/lib/ssl/src/tls_sender.erl'
-      }
+      %{event: 'TLS sender recived unexpected info', reason: [{:message, msg}]},
+      %{mfa: {:tls_sender, :handle_common, 3}, line: 420, file: 'otp/lib/ssl/src/tls_sender.erl'}
     )
 
     :keep_state_and_data
@@ -1794,15 +1790,8 @@ defmodule :m_tls_sender do
     :ssl_logger.log(
       :error,
       level,
-      %{
-        :event => 'TLS sender recived unexpected event',
-        :reason => [{:type, type}, {:message, msg}]
-      },
-      %{
-        :mfa => {:tls_sender, :handle_common, 3},
-        :line => 424,
-        :file => 'otp/lib/ssl/src/tls_sender.erl'
-      }
+      %{event: 'TLS sender recived unexpected event', reason: [{:type, type}, {:message, msg}]},
+      %{mfa: {:tls_sender, :handle_common, 3}, line: 424, file: 'otp/lib/ssl/src/tls_sender.erl'}
     )
 
     :keep_state_and_data
@@ -2024,7 +2013,7 @@ defmodule :m_tls_sender do
 
   defp key_update_at(
          version,
-         %{:security_parameters => r_security_parameters(bulk_cipher_algorithm: cipherAlgo)},
+         %{security_parameters: r_security_parameters(bulk_cipher_algorithm: cipherAlgo)},
          keyUpdateAt
        )
        when version >= {3, 4} do
@@ -2075,7 +2064,7 @@ defmodule :m_tls_sender do
   defp time_to_rekey(
          version,
          _Data,
-         %{:current_write => %{:sequence_number => 18_446_744_073_709_551_615}},
+         %{current_write: %{sequence_number: 18_446_744_073_709_551_615}},
          _,
          _,
          _
@@ -2108,14 +2097,7 @@ defmodule :m_tls_sender do
     end
   end
 
-  defp time_to_rekey(
-         _,
-         _Data,
-         %{:current_write => %{:sequence_number => num}},
-         renegotiateAt,
-         _,
-         _
-       ) do
+  defp time_to_rekey(_, _Data, %{current_write: %{sequence_number: num}}, renegotiateAt, _, _) do
     is_time_to_renegotiate(num, renegotiateAt)
   end
 

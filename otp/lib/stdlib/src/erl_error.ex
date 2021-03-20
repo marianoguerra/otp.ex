@@ -201,11 +201,7 @@ defmodule :m_erl_error do
 
   defp explain_reason(:function_clause, :error = cl, [{m, f, as, loc}], pF, s, enc, cL) do
     str = "no function clause matching "
-
-    [
-      [format_errstr_call(str, cl, {m, f}, as, pF, s, enc, cL), ?\s]
-      | location(loc)
-    ]
+    [format_errstr_call(str, cl, {m, f}, as, pF, s, enc, cL), ?\s | location(loc)]
   end
 
   defp explain_reason(:if_clause, :error, [], _PF, _S, _Enc, _CL) do
@@ -409,7 +405,7 @@ defmodule :m_erl_error do
 
           :no ->
             mFs = mf_to_string(forMForFun, arity, enc)
-            i1 = :string.length([[pre1, errStr] | mFs])
+            i1 = :string.length([pre1, errStr | mFs])
             s1 = pp_arguments(pF, as, i1, enc, cL)
             s2 = pp_arguments(pF, as, :string.length([pre1 | mFs]), enc, cL)
             s3 = pp_arguments(pF, [:a2345, :b2345], i1, enc, cL)
@@ -442,20 +438,20 @@ defmodule :m_erl_error do
 
     case count_nl(s1) > 0 do
       true ->
-        [[s1, pre1, opS, pre1] | s2]
+        [s1, pre1, opS, pre1 | s2]
 
       false ->
         opS2 = :io_lib.fwrite(" ~s ", [op])
-        size1 = :erlang.iolist_size([[errStr, pre] | opS2])
+        size1 = :erlang.iolist_size([errStr, pre | opS2])
         size2 = size(enc, s1)
         {s2_2, _} = pF.(a2, size1 + size2 + 1, cL1)
 
         case count_nl(s2) < count_nl(s2_2) do
           true ->
-            [[s1, pre1, opS, pre1] | s2]
+            [s1, pre1, opS, pre1 | s2]
 
           false ->
-            [[s1, opS2] | s2_2]
+            [s1, opS2 | s2_2]
         end
     end
   end
@@ -540,7 +536,7 @@ defmodule :m_erl_error do
 
             case count_nl(s2) < n1 do
               true ->
-                [[?\n, s, n_spaces(pre1Sz)] | s2]
+                [?\n, s, n_spaces(pre1Sz) | s2]
 
               false ->
                 s1

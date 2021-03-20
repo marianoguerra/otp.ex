@@ -65,7 +65,7 @@ defmodule :m_beam_ssa_bool do
       opt_function(f)
     catch
       class, error ->
-        %{:func_info => {_, name, arity}} = anno
+        %{func_info: {_, name, arity}} = anno
         :io.fwrite('Function: ~w/~w\n', [name, arity])
         :erlang.raise(class, error, __STACKTRACE__)
     end
@@ -93,7 +93,7 @@ defmodule :m_beam_ssa_bool do
 
   defp pre_opt(blocks, count) do
     top = :beam_ssa.rpo(blocks)
-    sub0 = %{:uses => {:uses, blocks}}
+    sub0 = %{uses: {:uses, blocks}}
     sub1 = get_phi_info(top, blocks, sub0)
     sub = :maps.remove(:uses, sub1)
     reached = :cerl_sets.from_list([hd(top)])
@@ -127,7 +127,7 @@ defmodule :m_beam_ssa_bool do
          _From,
          sub
        ) do
-    %{sub | bool => :"=:="}
+    Map.put(sub, bool, :"=:=")
   end
 
   defp get_phi_info_instr(r_b_set(op: :phi, dst: dst, args: args), from, sub0) do
@@ -148,7 +148,7 @@ defmodule :m_beam_ssa_bool do
         foldl(
           fn
             {r_b_var() = v, _}, a ->
-              %{a | v => {:true_or_any, from}}
+              Map.put(a, v, {:true_or_any, from})
 
             _, a ->
               a
@@ -179,7 +179,7 @@ defmodule :m_beam_ssa_bool do
 
       {:uses, blocks} ->
         uses = :beam_ssa.uses(blocks)
-        get_phi_info_single_use(var, %{sub | :uses => uses})
+        get_phi_info_single_use(var, Map.put(sub, :uses, uses))
     end
   end
 
@@ -246,7 +246,7 @@ defmodule :m_beam_ssa_bool do
     case all_same(args) do
       true ->
         {arg, _} = hd(args)
-        sub = %{sub0 | dst => arg}
+        sub = Map.put(sub0, dst, arg)
         pre_opt_is(is, reached, sub, acc)
 
       false ->
@@ -257,10 +257,10 @@ defmodule :m_beam_ssa_bool do
             i =
               r_b_set(i0,
                 args: args,
-                anno: %{anno | :boolean_phi => true}
+                anno: Map.put(anno, :boolean_phi, true)
               )
 
-            sub = %{sub0 | dst => i}
+            sub = Map.put(sub0, dst, i)
             pre_opt_is(is, reached, sub, [i | acc])
 
           false ->
@@ -284,7 +284,7 @@ defmodule :m_beam_ssa_bool do
 
     case pre_is_safe_bool(arg, sub0) do
       true ->
-        sub = %{sub0 | dst => r_b_literal(val: true)}
+        sub = Map.put(sub0, dst, r_b_literal(val: true))
         pre_opt_is(is, reached, sub, acc)
 
       false ->
@@ -300,16 +300,16 @@ defmodule :m_beam_ssa_bool do
       true ->
         case pre_eval_op(i, sub0) do
           :none ->
-            sub = %{sub0 | dst => i}
+            sub = Map.put(sub0, dst, i)
             pre_opt_is(is, reached, sub, [i | acc])
 
           r_b_var() = var ->
             [r_b_set(op: {:succeeded, _}, dst: succDst, args: [^dst])] = is
-            sub = %{sub0 | dst => var, succDst => r_b_literal(val: true)}
+            sub = Map.merge(sub0, %{dst => var, succDst => r_b_literal(val: true)})
             pre_opt_is([], reached, sub, acc)
 
           r_b_literal() = lit ->
-            sub = %{sub0 | dst => lit}
+            sub = Map.put(sub0, dst, lit)
             pre_opt_is(is, reached, sub, acc)
         end
 
@@ -634,7 +634,7 @@ defmodule :m_beam_ssa_bool do
         last: oneway_br(root)
       )
 
-    blocks = %{blocks3 | dom => domBlk}
+    blocks = Map.put(blocks3, dom, domBlk)
     {blocks, r_st(st, ldefs: %{})}
   end
 
@@ -816,7 +816,7 @@ defmodule :m_beam_ssa_bool do
 
   defp build_mapping([{l, blk} | bs], map0, g0, st0) do
     {vtx, st} = new_label(st0)
-    map = %{map0 | l => vtx}
+    map = Map.put(map0, l, vtx)
 
     label =
       case blk do
@@ -837,7 +837,7 @@ defmodule :m_beam_ssa_bool do
 
   defp add_external_vertices([v | vs], map0, g0) do
     g = :beam_digraph.add_vertex(g0, v, {:external, %{}})
-    map = %{map0 | v => v}
+    map = Map.put(map0, v, v)
     add_external_vertices(vs, map, g)
   end
 
@@ -1031,7 +1031,7 @@ defmodule :m_beam_ssa_bool do
       {[_], [_]} ->
         case {:beam_digraph.vertex(g, fail), :beam_digraph.in_edges(g, fail)} do
           {{:external, bs0}, [_]} ->
-            bs = %{bs0 | bool => r_b_literal(val: false)}
+            bs = Map.put(bs0, bool, r_b_literal(val: false))
             :beam_digraph.add_vertex(g, fail, {:external, bs})
 
           _ ->
@@ -1366,8 +1366,8 @@ defmodule :m_beam_ssa_bool do
 
         case eval_bif(bif, args) do
           :none ->
-            case {eval_instr(succ, g, %{bs | dst => true__}),
-                  eval_instr(fail, g, %{bs | dst => false__})} do
+            case {eval_instr(succ, g, Map.put(bs, dst, true__)),
+                  eval_instr(fail, g, Map.put(bs, dst, false__))} do
               {same, same} ->
                 same
 
@@ -1376,10 +1376,10 @@ defmodule :m_beam_ssa_bool do
             end
 
           true ->
-            eval_instr(succ, g, %{bs | dst => true__})
+            eval_instr(succ, g, Map.put(bs, dst, true__))
 
           false ->
-            eval_instr(fail, g, %{bs | dst => false__})
+            eval_instr(fail, g, Map.put(bs, dst, false__))
         end
 
       {:br, _} ->
@@ -1440,7 +1440,7 @@ defmodule :m_beam_ssa_bool do
       r_b_set(dst: dst) = i ->
         do_ensure_init_instr(i, varMap0, initMaps0)
         outVs = :beam_digraph.out_neighbours(g, vtx)
-        varMap = %{varMap0 | dst => :set}
+        varMap = Map.put(varMap0, dst, :set)
         initMaps = %{initMaps0 | vtx => varMap}
         ensure_init_successors(outVs, g, varMap, initMaps)
 
@@ -1540,7 +1540,7 @@ defmodule :m_beam_ssa_bool do
         ensure_init_successors(vs, g, vars0, initMaps)
 
       %{} ->
-        initMaps = %{initMaps0 | to => vars0}
+        initMaps = Map.put(initMaps0, to, vars0)
         ensure_init_successors(vs, g, vars0, initMaps)
     end
   end
@@ -1587,7 +1587,7 @@ defmodule :m_beam_ssa_bool do
   defp digraph_to_ssa([l | ls], g, blocks0, seen0) do
     seen1 = :cerl_sets.add_element(l, seen0)
     {blk, successors0} = digraph_to_ssa_blk(l, g, blocks0, [])
-    blocks1 = %{blocks0 | l => blk}
+    blocks1 = Map.put(blocks0, l, blk)
 
     successors =
       for s <- successors0,

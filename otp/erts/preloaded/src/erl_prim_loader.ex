@@ -264,12 +264,12 @@ defmodule :m_erl_prim_loader do
           try do
             send(
               :logger,
-              {:log, :error, %{:label => {:erl_prim_loader, :file_error}, :report => report},
+              {:log, :error, %{label: {:erl_prim_loader, :file_error}, report: report},
                %{
-                 :pid => self(),
-                 :gl => :erlang.group_leader(),
-                 :time => :os.system_time(:microsecond),
-                 :error_logger => %{:tag => :error_report, :type => :std_error}
+                 pid: self(),
+                 gl: :erlang.group_leader(),
+                 time: :os.system_time(:microsecond),
+                 error_logger: %{tag: :error_report, type: :std_error}
                }}
             )
           catch
@@ -906,7 +906,15 @@ defmodule :m_erl_prim_loader do
     receive do
       {:udp, ^u, iP, _Port,
        [
-         [?E, ?B, ?O, ?O, ?T, ?R, priority, t1, t0]
+         ?E,
+         ?B,
+         ?O,
+         ?O,
+         ?T,
+         ?R,
+         priority,
+         t1,
+         t0
          | _Version
        ]} ->
         elem = {priority, iP, t1 * 256 + t0}
@@ -1309,8 +1317,7 @@ defmodule :m_erl_prim_loader do
                     {true, {status, [name | names]}}
                 end
 
-              [['', revName] | dC]
-              when dC === dirComponents ->
+              ['', revName | dC] when dC === dirComponents ->
                 name = reverse(revName)
                 {true, {status, [name | names]}}
 
@@ -1597,7 +1604,7 @@ defmodule :m_erl_prim_loader do
         case :erlang.system_info(:os_type) do
           {:win32, _} ->
             case file do
-              [[_, ?:] | _] ->
+              [_, ?: | _] ->
                 false
 
               _ ->
@@ -1678,7 +1685,7 @@ defmodule :m_erl_prim_loader do
   end
 
   defp keyins(x, i, [y | t]) when x < :erlang.element(i, y) do
-    [[x, y] | t]
+    [x, y | t]
   end
 
   defp keyins(x, i, [y | t]) do
@@ -1717,7 +1724,7 @@ defmodule :m_erl_prim_loader do
     [b, a]
   end
 
-  defp reverse([[a, b] | l]) do
+  defp reverse([a, b | l]) do
     :lists.reverse(l, [b, a])
   end
 
@@ -1904,18 +1911,18 @@ defmodule :m_erl_prim_loader do
     end
   end
 
-  defp absname_vr([?/ | nameRest], [[drive, ?:] | _]) do
-    [[drive, ?:] | nameRest]
+  defp absname_vr([?/ | nameRest], [drive, ?: | _]) do
+    [drive, ?: | nameRest]
   end
 
   defp absname_vr(
-         [[drive, ?:] | nameRest],
-         [[drive, ?:] | _] = cwd
+         [drive, ?: | nameRest],
+         [drive, ?: | _] = cwd
        ) do
     cwd ++ '/' ++ nameRest
   end
 
-  defp absname_vr([[drive, ?:] | nameRest], _) do
+  defp absname_vr([drive, ?: | nameRest], _) do
     case :prim_file.get_cwd([drive, ?:]) do
       {:ok, driveCwd} ->
         driveCwd ++ '/' ++ nameRest
@@ -1959,22 +1966,22 @@ defmodule :m_erl_prim_loader do
       [atom | rest] when is_atom(atom) ->
         win32_pathtype(:erlang.atom_to_list(atom) ++ rest)
 
-      [[char, list] | rest] when is_list(list) ->
+      [char, list | rest] when is_list(list) ->
         win32_pathtype([char | list ++ rest])
 
-      [[?/, ?/] | _] ->
+      [?/, ?/ | _] ->
         :absolute
 
       [?/ | _] ->
         :volumerelative
 
-      [[c1, c2, list] | rest] when is_list(list) ->
-        win32_pathtype([[c1, c2] | list ++ rest])
+      [c1, c2, list | rest] when is_list(list) ->
+        win32_pathtype([c1, c2 | list ++ rest])
 
-      [[_Letter, ?:, ?/] | _] ->
+      [_Letter, ?:, ?/ | _] ->
         :absolute
 
-      [[_Letter, ?:] | _] ->
+      [_Letter, ?: | _] ->
         :volumerelative
 
       _ ->

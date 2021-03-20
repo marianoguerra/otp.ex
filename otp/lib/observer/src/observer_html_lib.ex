@@ -789,8 +789,8 @@ defmodule :m_observer_html_lib do
     remove_lgt_1(:lists.flatten(deep))
   end
 
-  defp remove_lgt_1([[?<, ?<] | rest]) do
-    [[?>, ?>] | binStr] = :lists.reverse(rest)
+  defp remove_lgt_1([?<, ?< | rest]) do
+    [?>, ?> | binStr] = :lists.reverse(rest)
     replace_lgt(:lists.reverse(binStr))
   end
 

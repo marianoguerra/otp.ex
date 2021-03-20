@@ -41,27 +41,27 @@ defmodule :m_beam_ssa do
   )
 
   def add_anno(key, val, r_b_function(anno: anno) = bl) do
-    r_b_function(bl, anno: %{anno | key => val})
+    r_b_function(bl, anno: Map.put(anno, key, val))
   end
 
   def add_anno(key, val, r_b_blk(anno: anno) = bl) do
-    r_b_blk(bl, anno: %{anno | key => val})
+    r_b_blk(bl, anno: Map.put(anno, key, val))
   end
 
   def add_anno(key, val, r_b_set(anno: anno) = bl) do
-    r_b_set(bl, anno: %{anno | key => val})
+    r_b_set(bl, anno: Map.put(anno, key, val))
   end
 
   def add_anno(key, val, r_b_br(anno: anno) = bl) do
-    r_b_br(bl, anno: %{anno | key => val})
+    r_b_br(bl, anno: Map.put(anno, key, val))
   end
 
   def add_anno(key, val, r_b_ret(anno: anno) = bl) do
-    r_b_ret(bl, anno: %{anno | key => val})
+    r_b_ret(bl, anno: Map.put(anno, key, val))
   end
 
   def add_anno(key, val, r_b_switch(anno: anno) = bl) do
-    r_b_switch(bl, anno: %{anno | key => val})
+    r_b_switch(bl, anno: Map.put(anno, key, val))
   end
 
   def get_anno(key, construct) do
@@ -552,7 +552,7 @@ defmodule :m_beam_ssa do
     fold_instrs_rpo(
       fn
         r_b_set(dst: var) = i, acc ->
-          %{acc | var => i}
+          Map.put(acc, var, i)
 
         _Terminator, acc ->
           acc
@@ -707,7 +707,7 @@ defmodule :m_beam_ssa do
       end
 
     dom = [l | dom_intersection(domPreds, df)]
-    dominators_1(ls, df, %{doms | l => dom})
+    dominators_1(ls, df, Map.put(doms, l, dom))
   end
 
   defp dominators_1([], _Df, doms) do
@@ -842,7 +842,7 @@ defmodule :m_beam_ssa do
       end
 
     successors = successors(blk)
-    [{l, blk} | fix_phis(bs, %{s | l => successors})]
+    [{l, blk} | fix_phis(bs, Map.put(s, l, successors))]
   end
 
   defp fix_phis([], _) do
@@ -1054,7 +1054,7 @@ defmodule :m_beam_ssa do
         br = r_b_br(bool: r_b_literal(val: true), succ: newLbl, fail: newLbl)
         befBlk = r_b_blk(blk, is: bef, last: br)
         newBlk = r_b_blk(blk, is: aft)
-        blocks1 = %{blocks0 | l => befBlk, newLbl => newBlk}
+        blocks1 = Map.put(%{blocks0 | l => befBlk}, newLbl, newBlk)
         successors = successors(newBlk)
         blocks = update_phi_labels(successors, l, newLbl, blocks1)
         split_blocks_1([newLbl | ls], p, blocks, count)
@@ -1113,7 +1113,7 @@ defmodule :m_beam_ssa do
   end
 
   defp used_args([r_b_remote(mod: mod, name: name) | as]) do
-    used_args([[mod, name] | as])
+    used_args([mod, name | as])
   end
 
   defp used_args([_ | as]) do
@@ -1188,7 +1188,8 @@ defmodule :m_beam_ssa do
   defp merge_fix_succeeded([_ | _] = is0, r_b_blk()) do
     case reverse(is0) do
       [
-        [r_b_set(op: {:succeeded, :guard}, args: [dst]), r_b_set(dst: dst)]
+        r_b_set(op: {:succeeded, :guard}, args: [dst]),
+        r_b_set(dst: dst)
         | is
       ] ->
         reverse(is)

@@ -162,7 +162,7 @@ defmodule :m_pg do
       {mRef, remoteGroups} ->
         join_remote(scope, group, pidOrPids)
         newRemoteGroups = join_remote_map(group, pidOrPids, remoteGroups)
-        {:noreply, r_state(state, nodes: %{nodes | peer => {mRef, newRemoteGroups}})}
+        {:noreply, r_state(state, nodes: Map.put(nodes, peer, {mRef, newRemoteGroups}))}
 
       [] ->
         {:noreply, state}
@@ -188,24 +188,24 @@ defmodule :m_pg do
                   acc
 
                 existing when is_pid(pidOrPids) ->
-                  %{
-                    acc
-                    | group =>
-                        :lists.delete(
-                          pidOrPids,
-                          existing
-                        )
-                  }
+                  Map.put(
+                    acc,
+                    group,
+                    :lists.delete(
+                      pidOrPids,
+                      existing
+                    )
+                  )
 
                 existing ->
-                  %{acc | group => existing -- pidOrPids}
+                  Map.put(acc, group, existing -- pidOrPids)
               end
             end,
             remoteMap,
             groups
           )
 
-        {:noreply, r_state(state, nodes: %{nodes | peer => {mRef, newRemoteMap}})}
+        {:noreply, r_state(state, nodes: Map.put(nodes, peer, {mRef, newRemoteMap}))}
 
       [] ->
         {:noreply, state}
@@ -228,7 +228,7 @@ defmodule :m_pg do
       false ->
         mRef = :erlang.monitor(:process, peer)
         :erlang.send(peer, {:discover, self()}, [:noconnect])
-        {:noreply, r_state(state, nodes: %{nodes | peer => {mRef, %{}}})}
+        {:noreply, r_state(state, nodes: Map.put(nodes, peer, {mRef, %{}}))}
     end
   end
 
@@ -332,7 +332,7 @@ defmodule :m_pg do
       end
 
     _ = sync_groups(scope, remoteGroups, groups)
-    %{nodes | peer => {mRef, :maps.from_list(groups)}}
+    Map.put(nodes, peer, {mRef, :maps.from_list(groups)})
   end
 
   defp sync_groups(scope, remoteGroups, []) do
@@ -376,7 +376,7 @@ defmodule :m_pg do
 
       :error ->
         mRef = :erlang.monitor(:process, pid)
-        %{monitors | pid => {mRef, [group]}}
+        Map.put(monitors, pid, {mRef, [group]})
     end
   end
 

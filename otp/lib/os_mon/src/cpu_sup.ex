@@ -792,7 +792,7 @@ defmodule :m_cpu_sup do
     d3 <<< 24 ||| d2 <<< 16 ||| d1 <<< 8 ||| d0
   end
 
-  defp port_receive_uint32(_Port, _Timeout, [[_, _, _, _] | g]) do
+  defp port_receive_uint32(_Port, _Timeout, [_, _, _, _ | g]) do
     exit({:port_garbage, g})
   end
 
@@ -811,12 +811,7 @@ defmodule :m_cpu_sup do
 
   defp port_receive_util(port, timeout) do
     receive do
-      {^port,
-       {:data,
-        [
-          [nP3, nP2, nP1, nP0, nE3, nE2, nE1, nE0]
-          | cpuData
-        ]}} ->
+      {^port, {:data, [nP3, nP2, nP1, nP0, nE3, nE2, nE1, nE0 | cpuData]}} ->
         port_receive_cpu_util(
           nP3 <<< 24 ||| nP2 <<< 16 ||| nP1 <<< 8 ||| nP0,
           nE3 <<< 24 ||| nE2 <<< 16 ||| nE1 <<< 8 ||| nE0,
@@ -850,7 +845,14 @@ defmodule :m_cpu_sup do
   end
 
   defp port_receive_cpu_util_entries(nE, cU, [
-         [cID3, cID2, cID1, cID0, val3, val2, val1, val0]
+         cID3,
+         cID2,
+         cID1,
+         cID0,
+         val3,
+         val2,
+         val1,
+         val0
          | cpuData
        ]) do
     tagId = cID3 <<< 24 ||| cID2 <<< 16 ||| cID1 <<< 8 ||| cID0

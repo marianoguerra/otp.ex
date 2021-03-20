@@ -1800,7 +1800,7 @@ defmodule :m_dbg do
   end
 
   defp transform_flags([:m | tail], acc) do
-    transform_flags(tail, [[:send, :receive] | acc])
+    transform_flags(tail, [:send, :receive | acc])
   end
 
   defp transform_flags([:s | tail], acc) do
@@ -2574,7 +2574,7 @@ defmodule :m_dbg do
     wrap_sortfix_2(tail, n, :lists.reverse([f1 | r]), tail)
   end
 
-  defp wrap_sortfix_1([[_F1, _F2] | _], _N, _R, _Files) do
+  defp wrap_sortfix_1([_F1, _F2 | _], _N, _R, _Files) do
     exit(:inconsistent_wrap_file_trace_set)
   end
 
@@ -2591,7 +2591,7 @@ defmodule :m_dbg do
     wrap_sortfix_2(tail, n, r, files)
   end
 
-  defp wrap_sortfix_2([[{_C1, _}, {_C2, _}] | _], _N, _R, _Files) do
+  defp wrap_sortfix_2([{_C1, _}, {_C2, _} | _], _N, _R, _Files) do
     exit(:inconsistent_wrap_file_trace_set)
   end
 

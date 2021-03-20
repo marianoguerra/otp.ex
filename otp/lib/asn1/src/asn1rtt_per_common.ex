@@ -319,13 +319,13 @@ defmodule :m_asn1rtt_per_common do
     idlist =
       cond do
         first < 40 ->
-          [[0, first] | rest]
+          [0, first | rest]
 
         first < 80 ->
-          [[1, first - 40] | rest]
+          [1, first - 40 | rest]
 
         true ->
-          [[2, first - 80] | rest]
+          [2, first - 80 | rest]
       end
 
     :erlang.list_to_tuple(idlist)
@@ -776,7 +776,8 @@ defmodule :m_asn1rtt_per_common do
     case bin do
       <<b::size(segSz)-bitstring, t::bitstring>> ->
         [
-          [<<3::size(2), n::size(6)>>, b]
+          <<3::size(2), n::size(6)>>,
+          b
           | encode_fragmented_1(t, unit, n)
         ]
 
@@ -794,7 +795,7 @@ defmodule :m_asn1rtt_per_common do
     end
   end
 
-  defp e_object_identifier([[e1, e2] | tail])
+  defp e_object_identifier([e1, e2 | tail])
        when (e1 >= 0 and e1 < 2 and
                e2 < 40) or
               e1 === 2 do
@@ -802,7 +803,7 @@ defmodule :m_asn1rtt_per_common do
     e_object_elements([head | tail], [])
   end
 
-  defp e_object_identifier([[_, _] | _Tail] = oid) do
+  defp e_object_identifier([_, _ | _Tail] = oid) do
     exit({:error, {:asn1, {:illegal_value, oid}}})
   end
 

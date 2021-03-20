@@ -112,7 +112,7 @@ defmodule :m_beam_ssa_codegen do
   end
 
   defp function(r_b_function(anno: anno, bs: blocks), atomMod, st0) do
-    %{:func_info => {_, name, arity}} = anno
+    %{func_info: {_, name, arity}} = anno
 
     try do
       assert_exception_block(blocks)
@@ -121,7 +121,7 @@ defmodule :m_beam_ssa_codegen do
       {fi, st2} = new_label(st1)
       {entry, st3} = local_func_label(name, arity, st2)
       {ult, st4} = new_label(st3)
-      labels = %{r_cg(st4, :labels) | 0 => entry, 1 => 0}
+      labels = Map.merge(r_cg(st4, :labels), %{0 => entry, 1 => 0})
 
       st5 =
         r_cg(st4,
@@ -134,7 +134,10 @@ defmodule :m_beam_ssa_codegen do
 
       asm =
         [{:label, fi}, line(anno), {:func_info, atomMod, {:atom, name}, arity}] ++
-          add_parameter_annos(body, anno) ++ [{:label, ult}, :if_end]
+          add_parameter_annos(
+            body,
+            anno
+          ) ++ [{:label, ult}, :if_end]
 
       func = {:function, name, arity, entry, asm}
       {func, st}
@@ -240,10 +243,10 @@ defmodule :m_beam_ssa_codegen do
               %{cnts | s => c + 1}
 
             %{} when s === next ->
-              %{cnts | s => 1}
+              Map.put(cnts, s, 1)
 
             %{} ->
-              %{cnts | s => 42}
+              Map.put(cnts, s, 42)
           end
         end,
         counts0,
@@ -319,7 +322,7 @@ defmodule :m_beam_ssa_codegen do
           0
       end
 
-    i = r_cg_set(i0, anno: %{anno | :alloc => alloc})
+    i = r_cg_set(i0, anno: Map.put(anno, :alloc, alloc))
     need_heap_is(is, r_need(), [i | acc])
   end
 
@@ -357,7 +360,7 @@ defmodule :m_beam_ssa_codegen do
 
       [_ | _] = alloc ->
         case reverse(is) do
-          [[r_cg_set(op: :succeeded), r_cg_set(op: :bs_init)] | _] ->
+          [r_cg_set(op: :succeeded), r_cg_set(op: :bs_init) | _] ->
             {[], n}
 
           [r_cg_set(op: :bs_put) | _] ->
@@ -654,7 +657,7 @@ defmodule :m_beam_ssa_codegen do
         prefer_xregs_successors(ls, copies0, map)
 
       %{} ->
-        map = %{map0 | l => copies0}
+        map = Map.put(map0, l, copies0)
         prefer_xregs_successors(ls, copies0, map)
     end
   end
@@ -685,7 +688,7 @@ defmodule :m_beam_ssa_codegen do
           copies1
 
         [_, _] ->
-          %{copies1 | dst => src}
+          Map.put(copies1, dst, src)
       end
 
     prefer_xregs_is(is, st, copies, [i | acc])
@@ -735,7 +738,7 @@ defmodule :m_beam_ssa_codegen do
     r_cg_switch(i, arg: arg)
   end
 
-  defp prefer_xregs_prune(r_cg_set(anno: %{:clobbers => true}), _, _) do
+  defp prefer_xregs_prune(r_cg_set(anno: %{clobbers: true}), _, _) do
     %{}
   end
 
@@ -823,7 +826,7 @@ defmodule :m_beam_ssa_codegen do
 
     live1 = liveness_terminator(last0, live0)
     {is, live} = liveness_is(reverse(is0), regs, live1, [])
-    liveMap = %{liveMap0 | l => live}
+    liveMap = Map.put(liveMap0, l, live)
     blk = r_cg_blk(blk0, is: is)
     liveness(bs, liveMap, regs, [{l, blk} | acc])
   end
@@ -894,7 +897,7 @@ defmodule :m_beam_ssa_codegen do
   end
 
   defp liveness_args([r_b_remote(mod: mod, name: name) | as], live) do
-    liveness_args([[mod, name] | as], live)
+    liveness_args([mod, name | as], live)
   end
 
   defp liveness_args([a | as], live) do
@@ -915,7 +918,7 @@ defmodule :m_beam_ssa_codegen do
     case need_live_anno(op) do
       true ->
         numLive = num_live(live, regs)
-        anno = %{r_cg_set(i, :anno) | :live => numLive}
+        anno = Map.put(r_cg_set(i, :anno), :live, numLive)
         r_cg_set(i, anno: anno)
 
       false ->
@@ -933,7 +936,7 @@ defmodule :m_beam_ssa_codegen do
             v
           end
 
-        anno = %{r_cg_set(i, :anno) | :live_yregs => liveYregs}
+        anno = Map.put(r_cg_set(i, :anno), :live_yregs, liveYregs)
         r_cg_set(i, anno: anno)
 
       false ->
@@ -943,7 +946,7 @@ defmodule :m_beam_ssa_codegen do
 
   defp liveness_clobber(r_cg_set(anno: anno), live, regs) do
     case anno do
-      %{:clobbers => true} ->
+      %{clobbers: true} ->
         for r <- live, is_yreg(r, regs) do
           r
         end
@@ -998,7 +1001,7 @@ defmodule :m_beam_ssa_codegen do
     x
   end
 
-  defp get_live(r_cg_set(anno: %{:live => live})) do
+  defp get_live(r_cg_set(anno: %{live: live})) do
     live
   end
 
@@ -1063,7 +1066,7 @@ defmodule :m_beam_ssa_codegen do
   end
 
   defp def_is([r_cg_alloc(anno: anno0) = i0 | is], regs, def__, acc) do
-    i = r_cg_alloc(i0, anno: %{anno0 | :def_yregs => def__})
+    i = r_cg_alloc(i0, anno: Map.put(anno0, :def_yregs, def__))
     def_is(is, regs, def__, [i | acc])
   end
 
@@ -1099,7 +1102,7 @@ defmodule :m_beam_ssa_codegen do
   end
 
   defp def_is([r_cg_set(anno: anno0, op: :call, dst: dst) = i0 | is], regs, def0, acc) do
-    %{:live_yregs => liveYregVars} = anno0
+    %{live_yregs: liveYregVars} = anno0
 
     liveRegs =
       :gb_sets.from_list(
@@ -1116,7 +1119,7 @@ defmodule :m_beam_ssa_codegen do
         k
       end
 
-    anno = %{anno0 | :def_yregs => def0, :kill_yregs => kill}
+    anno = Map.merge(anno0, %{def_yregs: def0, kill_yregs: kill})
     i = r_cg_set(i0, anno: anno)
     def1 = :ordsets.subtract(def0, kill)
     def__ = def_add_yreg(dst, def1, regs)
@@ -1137,7 +1140,7 @@ defmodule :m_beam_ssa_codegen do
     i =
       case is_gc_bif(bif, args) or not :erl_bifs.is_safe(:erlang, bif, arity) do
         true ->
-          r_cg_set(i0, anno: %{anno0 | :def_yregs => def0})
+          r_cg_set(i0, anno: Map.put(anno0, :def_yregs, def0))
 
         false ->
           i0
@@ -1151,7 +1154,7 @@ defmodule :m_beam_ssa_codegen do
     i =
       case need_y_init(i0) do
         true ->
-          r_cg_set(i0, anno: %{anno0 | :def_yregs => def0})
+          r_cg_set(i0, anno: Map.put(anno0, :def_yregs, def0))
 
         false ->
           i0
@@ -1191,7 +1194,7 @@ defmodule :m_beam_ssa_codegen do
         def_successors(ss, def0, %{defMap | s => def__})
 
       %{} ->
-        def_successors(ss, def0, %{defMap | s => def0})
+        def_successors(ss, def0, Map.put(defMap, s, def0))
     end
   end
 
@@ -1199,7 +1202,7 @@ defmodule :m_beam_ssa_codegen do
     defMap
   end
 
-  defp need_y_init(r_cg_set(anno: %{:clobbers => clobbers})) do
+  defp need_y_init(r_cg_set(anno: %{clobbers: clobbers})) do
     clobbers
   end
 
@@ -1324,7 +1327,7 @@ defmodule :m_beam_ssa_codegen do
 
   defp opt_allocate_is([r_cg_set(anno: anno) | is]) do
     case anno do
-      %{:def_yregs => yregs} ->
+      %{def_yregs: yregs} ->
         yregs
 
       %{} ->
@@ -1333,7 +1336,7 @@ defmodule :m_beam_ssa_codegen do
   end
 
   defp opt_allocate_is([
-         r_cg_alloc(anno: %{:def_yregs => yregs}, stack: :none)
+         r_cg_alloc(anno: %{def_yregs: yregs}, stack: :none)
          | _
        ]) do
     yregs
@@ -1348,15 +1351,13 @@ defmodule :m_beam_ssa_codegen do
   end
 
   defp fix_wait_timeout([
-         [
-           {l1, r_cg_blk(is: is0, last: r_cg_br(bool: r_b_var(), succ: l2)) = blk1},
-           {l2, r_cg_blk(is: [], last: r_cg_br(bool: r_b_var()) = br) = blk2}
-         ]
+         {l1, r_cg_blk(is: is0, last: r_cg_br(bool: r_b_var(), succ: l2)) = blk1},
+         {l2, r_cg_blk(is: [], last: r_cg_br(bool: r_b_var()) = br) = blk2}
          | bs
        ]) do
     case fix_wait_timeout_is(is0, []) do
       :no ->
-        [[{l1, blk1}, {l2, blk2}] | fix_wait_timeout(bs)]
+        [{l1, blk1}, {l2, blk2} | fix_wait_timeout(bs)]
 
       {:yes, is} ->
         [
@@ -1394,7 +1395,7 @@ defmodule :m_beam_ssa_codegen do
 
   defp cg_linear(
          [
-           {l, r_cg_blk(anno: %{:recv_set => l} = anno0) = b0}
+           {l, r_cg_blk(anno: %{recv_set: l} = anno0) = b0}
            | bs
          ],
          st0
@@ -1549,7 +1550,7 @@ defmodule :m_beam_ssa_codegen do
     end
   end
 
-  defp cg_block([r_cg_set(anno: %{:recv_mark => l} = anno0) = i0 | t], context, st0) do
+  defp cg_block([r_cg_set(anno: %{recv_mark: l} = anno0) = i0 | t], context, st0) do
     anno = :maps.remove(:recv_mark, anno0)
     i = r_cg_set(i0, anno: anno)
     {is, st1} = cg_block([i | t], context, st0)
@@ -1753,7 +1754,13 @@ defmodule :m_beam_ssa_codegen do
   end
 
   defp cg_block(
-         [r_cg_set(op: :bs_get) = set, r_cg_set(op: :succeeded, dst: bool)],
+         [
+           r_cg_set(op: :bs_get) = set,
+           r_cg_set(
+             op: :succeeded,
+             dst: bool
+           )
+         ],
          {bool, fail},
          st
        ) do
@@ -1829,12 +1836,28 @@ defmodule :m_beam_ssa_codegen do
     {[{:catch_end, reg} | copy({:x, 0}, dst) ++ is0], st}
   end
 
-  defp cg_block([r_cg_set(op: :call) = i, r_cg_set(op: :succeeded, dst: bool)], {bool, _Fail}, st) do
+  defp cg_block(
+         [
+           r_cg_set(op: :call) = i,
+           r_cg_set(
+             op: :succeeded,
+             dst: bool
+           )
+         ],
+         {bool, _Fail},
+         st
+       ) do
     cg_block([i], :none, st)
   end
 
   defp cg_block(
-         [r_cg_set(op: :match_fail) = i, r_cg_set(op: :succeeded, dst: bool)],
+         [
+           r_cg_set(op: :match_fail) = i,
+           r_cg_set(
+             op: :succeeded,
+             dst: bool
+           )
+         ],
          {bool, _Fail},
          st
        ) do
@@ -1955,7 +1978,7 @@ defmodule :m_beam_ssa_codegen do
 
     is1 =
       case anno do
-        %{:result_type => type} ->
+        %{result_type: type} ->
           info = {:var_info, dst, [{:fun_type, type}]}
           is0 ++ [{:%, info}]
 
@@ -2328,7 +2351,8 @@ defmodule :m_beam_ssa_codegen do
 
   defp opt_call_moves_1(
          [
-           [{:move, src, {:x, _} = tmp} = m1, {:init_yregs, {:list, yregs}} = init]
+           {:move, src, {:x, _} = tmp} = m1,
+           {:init_yregs, {:list, yregs}} = init
            | is
          ],
          arity
@@ -2344,13 +2368,14 @@ defmodule :m_beam_ssa_codegen do
         end
 
       _ ->
-        [[m1, init] | is]
+        [m1, init | is]
     end
   end
 
   defp opt_call_moves_1(
          [
-           [{:move, src, {:x, _} = tmp} = m1, {:move, tmp, dst} = m2]
+           {:move, src, {:x, _} = tmp} = m1,
+           {:move, tmp, dst} = m2
            | is
          ],
          arity
@@ -2486,7 +2511,7 @@ defmodule :m_beam_ssa_codegen do
     is = setup_args(args, anno, context, st) ++ line ++ call
 
     case anno do
-      %{:result_type => type} ->
+      %{result_type: type} ->
         info = {:var_info, dst, [{:type, type}]}
         {is ++ [{:%, info}], st}
 
@@ -2530,14 +2555,14 @@ defmodule :m_beam_ssa_codegen do
   end
 
   defp cg_call(r_cg_set(anno: anno, op: :call, dst: dst0, args: args0), where, context, st) do
-    [[dst, func] | args] = beam_args([dst0 | args0], st)
+    [dst, func | args] = beam_args([dst0 | args0], st)
     line = call_line(where, func, anno)
     arity = length(args)
     call = build_call(:call_fun, arity, func, context, dst)
     is = setup_args(args ++ [func], anno, context, st) ++ line ++ call
 
     case anno do
-      %{:result_type => type} ->
+      %{result_type: type} ->
         info = {:var_info, dst, [{:type, type}]}
         {is ++ [{:%, info}], st}
 
@@ -2710,7 +2735,7 @@ defmodule :m_beam_ssa_codegen do
     [{:bs_get_position, ctx, dst, live}]
   end
 
-  defp cg_instr(:put_map, [[{:atom, :assoc}, srcMap] | ss], dst, set) do
+  defp cg_instr(:put_map, [{:atom, :assoc}, srcMap | ss], dst, set) do
     live = get_live(set)
     [{:put_map_assoc, {:f, 0}, srcMap, dst, live, {:list, ss}}]
   end
@@ -2877,7 +2902,7 @@ defmodule :m_beam_ssa_codegen do
     [{:loop_rec, fail, {:x, 0}} | copy({:x, 0}, dst)]
   end
 
-  defp cg_test(:put_map, fail, [[{:atom, :exact}, srcMap] | ss], dst, r_cg_set(anno: anno) = set) do
+  defp cg_test(:put_map, fail, [{:atom, :exact}, srcMap | ss], dst, r_cg_set(anno: anno) = set) do
     live = get_live(set)
     [line(anno), {:put_map_exact, fail, srcMap, dst, live, {:list, ss}}]
   end
@@ -2958,7 +2983,7 @@ defmodule :m_beam_ssa_codegen do
     end
   end
 
-  defp field_flags(flags, r_cg_set(anno: %{:location => {file, line}})) do
+  defp field_flags(flags, r_cg_set(anno: %{location: {file, line}})) do
     {:field_flags, [{:anno, [line, {:file, file}]} | flags]}
   end
 
@@ -2968,7 +2993,7 @@ defmodule :m_beam_ssa_codegen do
 
   defp cg_bs_put(
          fail,
-         [[{:atom, type}, {:literal, flags}] | args]
+         [{:atom, type}, {:literal, flags} | args]
        ) do
     op =
       case type do
@@ -3138,7 +3163,7 @@ defmodule :m_beam_ssa_codegen do
 
     is =
       case anno do
-        %{:frame_size => size} ->
+        %{frame_size: size} ->
           alloc = r_cg_alloc(stack: size)
           [alloc | is1]
 
@@ -3163,7 +3188,7 @@ defmodule :m_beam_ssa_codegen do
     anno =
       case :beam_ssa.clobbers_xregs(i) do
         true ->
-          %{anno0 | :clobbers => true}
+          Map.put(anno0, :clobbers, true)
 
         false ->
           anno0
@@ -3182,7 +3207,7 @@ defmodule :m_beam_ssa_codegen do
   defp translate_terminator(r_b_ret(anno: anno, arg: arg)) do
     dealloc =
       case anno do
-        %{:deallocate => n} ->
+        %{deallocate: n} ->
           n
 
         %{} ->
@@ -3308,7 +3333,7 @@ defmodule :m_beam_ssa_codegen do
     order_moves(moves)
   end
 
-  defp kill_yregs(%{:kill_yregs => kill}, r_cg(regs: regs)) do
+  defp kill_yregs(%{kill_yregs: kill}, r_cg(regs: regs)) do
     case :ordsets.from_list(
            for v <- kill do
              :erlang.map_get(v, regs)
@@ -3480,7 +3505,7 @@ defmodule :m_beam_ssa_codegen do
 
       %{} ->
         {lbl, st} = new_label(st0)
-        labels = %{labels0 | l => lbl}
+        labels = Map.put(labels0, l, lbl)
         {lbl, r_cg(st, labels: labels)}
     end
   end
@@ -3496,7 +3521,7 @@ defmodule :m_beam_ssa_codegen do
 
       _ ->
         {label, st} = new_label(st0)
-        {label, r_cg(st, functable: %{map | key => label})}
+        {label, r_cg(st, functable: Map.put(map, key, label))}
     end
   end
 
@@ -3583,7 +3608,7 @@ defmodule :m_beam_ssa_codegen do
     [line(anno)]
   end
 
-  defp line(%{:location => {file, line}}) do
+  defp line(%{location: {file, line}}) do
     {:line, [{:location, file, line}]}
   end
 

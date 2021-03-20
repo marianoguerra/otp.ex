@@ -1308,7 +1308,7 @@ defmodule :m_dialyzer_cl do
     remove_duplicate_warnings(warnings1, [])
   end
 
-  defp remove_duplicate_warnings([[duplicate, duplicate] | left], acc) do
+  defp remove_duplicate_warnings([duplicate, duplicate | left], acc) do
     remove_duplicate_warnings([duplicate | left], acc)
   end
 

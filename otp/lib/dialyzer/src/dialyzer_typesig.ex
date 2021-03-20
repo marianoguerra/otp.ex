@@ -161,7 +161,7 @@ defmodule :m_dialyzer_typesig do
         unitVal = :cerl.int_val(:cerl.bitstr_unit(tree))
         val = :cerl.bitstr_val(tree)
         {state1, [sizeType, valType]} = traverse_list([size,
-                                                         val],
+                                                           val],
                                                         definedVars, state)
         {state2, typeConstr,
            binValTypeConstr} = (case (:cerl.bitstr_bitsize(tree)) do
@@ -265,7 +265,7 @@ defmodule :m_dialyzer_typesig do
                                 end,
                                   [consVar])
             state2 = state__store_conj_lists([hdVar, tlVar,
-                                                consVar],
+                                                         consVar],
                                                :sub, [hdType, tlType, consType],
                                                state1)
             {state2, consVar}
@@ -538,7 +538,7 @@ defmodule :m_dialyzer_typesig do
                                   end
                              end
                    valType = mk_fun_var(typeFun,
-                                          [[keyVar, mapVar] | shadowKeys])
+                                          [keyVar, mapVar | shadowKeys])
                    {state__store_conj(valVar, :sub, valType, accState),
                       [keyVar | shadowKeys]}
               end
@@ -712,11 +712,11 @@ defmodule :m_dialyzer_typesig do
     case (state__is_in_guard(state)) do
       true ->
         conj1 = mk_conj_constraint_list([argBodyCs,
-                                           mk_constraint(bodyVar, :eq,
-                                                           treeVar)])
+                                             mk_constraint(bodyVar, :eq,
+                                                             treeVar)])
         disj = mk_disj_constraint_list([conj1,
-                                          mk_constraint(handlerVar, :eq,
-                                                          treeVar)])
+                                            mk_constraint(handlerVar, :eq,
+                                                            treeVar)])
         newState1 = state__new_constraint_context(handlerState)
         conj2 = mk_conj_constraint_list([oldCs, disj])
         newState2 = state__store_conj(conj2, newState1)
@@ -726,26 +726,26 @@ defmodule :m_dialyzer_typesig do
                                        t_is_none(handlerVar)}) do
                                 {false, false} ->
                                   conj1 = mk_conj_constraint_list([argBodyCs,
-                                                                     mk_constraint(treeVar,
-                                                                                     :eq,
-                                                                                     bodyVar)])
+                                                                       mk_constraint(treeVar,
+                                                                                       :eq,
+                                                                                       bodyVar)])
                                   conj2 = mk_conj_constraint_list([handlerCs,
-                                                                     mk_constraint(treeVar,
-                                                                                     :eq,
-                                                                                     handlerVar)])
+                                                                       mk_constraint(treeVar,
+                                                                                       :eq,
+                                                                                       handlerVar)])
                                   disj = mk_disj_constraint_list([conj1, conj2])
                                   {disj, treeVar}
                                 {false, true} ->
                                   {mk_conj_constraint_list([argBodyCs,
-                                                              mk_constraint(treeVar,
-                                                                              :eq,
-                                                                              bodyVar)]),
+                                                                mk_constraint(treeVar,
+                                                                                :eq,
+                                                                                bodyVar)]),
                                      bodyVar}
                                 {true, false} ->
                                   {mk_conj_constraint_list([handlerCs,
-                                                              mk_constraint(treeVar,
-                                                                              :eq,
-                                                                              handlerVar)]),
+                                                                mk_constraint(treeVar,
+                                                                                :eq,
+                                                                                handlerVar)]),
                                      handlerVar}
                                 {true, true} ->
                                   :ok
@@ -882,7 +882,7 @@ defmodule :m_dialyzer_typesig do
                                                                 state1)
                                tmpC = mk_constraint(topVar, :eq, actionVar)
                                actionCs = mk_conj_constraint_list([state__cs(state2),
-                                                                     tmpC])
+                                                                       tmpC])
                                {[actionCs | cList], state2}
                              catch
                                :error ->
@@ -1234,7 +1234,7 @@ defmodule :m_dialyzer_typesig do
       :cons ->
         {[hd, tl],
            map1} = get_safe_underapprox_1([:cerl.cons_hd(pat),
-                                             :cerl.cons_tl(pat)],
+                                               :cerl.cons_tl(pat)],
                                             [], map)
         case (t_is_any(tl)) do
           true ->
@@ -1285,7 +1285,7 @@ defmodule :m_dialyzer_typesig do
         end
         sortedPairs = :lists.sort(:lists.zip(keys, vals))
         squashDuplicates = fn squashDuplicates
-                           [[{k, first}, {k, second}] | list] ->
+                           [{k, first}, {k, second} | list] ->
                              case (t_is_none(inf = t_inf(first, second))) do
                                true ->
                                  throw(:dont_know)
@@ -1344,7 +1344,7 @@ defmodule :m_dialyzer_typesig do
                                    state__is_in_guard(state))
     state6 = state__new_constraint_context(state5)
     state__store_conj(mk_conj_constraint_list([oldCs,
-                                                 newCs]),
+                                                   newCs]),
                         state6)
   end
 
@@ -1388,8 +1388,8 @@ defmodule :m_dialyzer_typesig do
     arg2FunVar = argFun.(arg1, 1)
     mk_conj_constraint_list([mk_constraint(dst, :sub,
                                              returnType),
-                               mk_constraint(arg1, :sub, arg1FunVar),
-                               mk_constraint(arg2, :sub, arg2FunVar)])
+                                 mk_constraint(arg1, :sub, arg1FunVar),
+                                     mk_constraint(arg2, :sub, arg2FunVar)])
   end
 
   defp get_bif_constr({:erlang, op, 2}, dst, [arg1, arg2] = args,
@@ -1468,8 +1468,8 @@ defmodule :m_dialyzer_typesig do
                           args)
     mk_conj_constraint_list([mk_constraint(dst, :sub,
                                              dstVar),
-                               mk_constraint(arg1, :sub, arg1Var),
-                               mk_constraint(arg2, :sub, arg2Var)])
+                                 mk_constraint(arg1, :sub, arg1Var),
+                                     mk_constraint(arg2, :sub, arg2Var)])
   end
 
   defp get_bif_constr({:erlang, :"++", 2}, dst, [hd, tl] = args,
@@ -1522,11 +1522,10 @@ defmodule :m_dialyzer_typesig do
                             end,
                               args)
     cs = mk_constraints(args, :sub, argTypes)
-    mk_conj_constraint_list([[mk_constraint(dst, :sub,
-                                              returnType),
-                                mk_constraint(hd, :sub, hdVar),
-                                mk_constraint(tl, :sub, tlVar)] |
-                                 cs])
+    mk_conj_constraint_list([mk_constraint(dst, :sub,
+                                             returnType),
+                                 mk_constraint(hd, :sub, hdVar),
+                                     mk_constraint(tl, :sub, tlVar) | cs])
   end
 
   defp get_bif_constr({:erlang, :is_atom, 1}, dst, [arg], state) do
@@ -1577,8 +1576,8 @@ defmodule :m_dialyzer_typesig do
     argV = mk_fun_var(argFun, [dst, arity])
     mk_conj_constraint_list([mk_constraint(dst, :sub,
                                              t_boolean()),
-                               mk_constraint(arity, :sub, t_integer()),
-                               mk_constraint(fun, :sub, argV)])
+                                 mk_constraint(arity, :sub, t_integer()),
+                                     mk_constraint(fun, :sub, argV)])
   end
 
   defp get_bif_constr({:erlang, :is_integer, 1}, dst, [arg], state) do
@@ -1628,8 +1627,8 @@ defmodule :m_dialyzer_typesig do
              end
     dstV = mk_fun_var(dstFun, args)
     mk_conj_constraint_list([mk_constraint(dst, :sub, dstV),
-                               mk_constraint(tag, :sub, t_atom()),
-                               mk_constraint(var, :sub, argV)])
+                                 mk_constraint(tag, :sub, t_atom()),
+                                     mk_constraint(var, :sub, argV)])
   end
 
   defp get_bif_constr({:erlang, :is_record, 3}, dst,
@@ -1681,9 +1680,9 @@ defmodule :m_dialyzer_typesig do
              end
     dstV = mk_fun_var(dstFun, args)
     mk_conj_constraint_list([mk_constraint(dst, :sub, dstV),
-                               mk_constraint(arity, :sub, t_integer()),
-                               mk_constraint(tag, :sub, t_atom()),
-                               mk_constraint(var, :sub, argV)])
+                                 mk_constraint(arity, :sub, t_integer()),
+                                     mk_constraint(tag, :sub, t_atom()),
+                                         mk_constraint(var, :sub, argV)])
   end
 
   defp get_bif_constr({:erlang, :is_tuple, 1}, dst, [arg], state) do
@@ -1742,8 +1741,8 @@ defmodule :m_dialyzer_typesig do
     argV2 = mk_fun_var(argFun.(arg1), [arg1, dst])
     dstV = mk_fun_var(dstFun, args)
     mk_conj_constraint_list([mk_constraint(dst, :sub, dstV),
-                               mk_constraint(arg1, :sub, argV1),
-                               mk_constraint(arg2, :sub, argV2)])
+                                 mk_constraint(arg1, :sub, argV1),
+                                     mk_constraint(arg2, :sub, argV2)])
   end
 
   defp get_bif_constr({:erlang, :or, 2}, dst, [arg1, arg2] = args,
@@ -1810,8 +1809,8 @@ defmodule :m_dialyzer_typesig do
                                                     false__) |
                                         constrs])
     mk_conj_constraint_list([mk_constraint(dst, :sub, dstV),
-                               mk_constraint(arg1, :sub, argV1),
-                               mk_constraint(arg2, :sub, argV2), disj])
+                                 mk_constraint(arg1, :sub, argV1),
+                                     mk_constraint(arg2, :sub, argV2), disj])
   end
 
   defp get_bif_constr({:erlang, :not, 1}, dst, [arg] = args,
@@ -1837,7 +1836,7 @@ defmodule :m_dialyzer_typesig do
     argV = mk_fun_var(fun.(dst), [dst])
     dstV = mk_fun_var(fun.(arg), args)
     mk_conj_constraint_list([mk_constraint(arg, :sub, argV),
-                               mk_constraint(dst, :sub, dstV)])
+                                 mk_constraint(dst, :sub, dstV)])
   end
 
   defp get_bif_constr({:erlang, :"=:=", 2}, dst, [arg1, arg2] = args,
@@ -1880,8 +1879,8 @@ defmodule :m_dialyzer_typesig do
     argV2 = mk_fun_var(argFun.(arg2, arg1), dstArgs)
     dstV = mk_fun_var(dstFun, args)
     mk_conj_constraint_list([mk_constraint(dst, :sub, dstV),
-                               mk_constraint(arg1, :sub, argV1),
-                               mk_constraint(arg2, :sub, argV2)])
+                                 mk_constraint(arg1, :sub, argV1),
+                                     mk_constraint(arg2, :sub, argV2)])
   end
 
   defp get_bif_constr({:erlang, :"==", 2}, dst, [arg1, arg2] = args,
@@ -1932,8 +1931,8 @@ defmodule :m_dialyzer_typesig do
     argV1 = mk_fun_var(argFun.(arg2, arg1), argL)
     argV2 = mk_fun_var(argFun.(arg1, arg2), argL)
     mk_conj_constraint_list([mk_constraint(dst, :sub, dstV),
-                               mk_constraint(arg1, :sub, argV1),
-                               mk_constraint(arg2, :sub, argV2)])
+                                 mk_constraint(arg1, :sub, argV1),
+                                     mk_constraint(arg2, :sub, argV2)])
   end
 
   defp get_bif_constr({:erlang, :element, 2} = _BIF, dst, args,
@@ -2073,7 +2072,7 @@ defmodule :m_dialyzer_typesig do
              end
     dstV = mk_fun_var(dstFun, [arg])
     mk_conj_constraint_list([mk_constraint(dst, :sub, dstV),
-                               mk_constraint(arg, :sub, argV)])
+                                 mk_constraint(arg, :sub, argV)])
   end
 
   defp solve([fun], state) do
@@ -3737,7 +3736,7 @@ defmodule :m_dialyzer_typesig do
     false
   end
 
-  defp combine_conj_lists([[list1, list2] | left], prefix) do
+  defp combine_conj_lists([list1, list2 | left], prefix) do
     newList = (for l1 <- list1, l2 <- list2 do
                  mk_conj_constraint_list([l1, l2])
                end)
@@ -3753,7 +3752,7 @@ defmodule :m_dialyzer_typesig do
   defp combine_conj_lists([list], prefix) do
     for l <- list do
       mk_conj_constraint_list([mk_conj_constraint_list(prefix),
-                                 l])
+                                   l])
     end
   end
 

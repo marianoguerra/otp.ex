@@ -622,7 +622,7 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_29(_S, cat, ss, stack, t, ts, tzr) do
-    [[_, _, _, _] | nss] = ss
+    [_, _, _, _ | nss] = ss
     newStack = yeccpars2_29_(stack)
     yeccgoto_rule(hd(nss), cat, nss, newStack, t, ts, tzr)
   end
@@ -659,13 +659,13 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_34(_S, cat, ss, stack, t, ts, tzr) do
-    [[_, _] | nss] = ss
+    [_, _ | nss] = ss
     newStack = yeccpars2_34_(stack)
     yeccgoto_declaration(hd(nss), cat, nss, newStack, t, ts, tzr)
   end
 
   defp yeccpars2_35(_S, cat, ss, stack, t, ts, tzr) do
-    [[_, _] | nss] = ss
+    [_, _ | nss] = ss
     newStack = yeccpars2_35_(stack)
     yeccgoto_declaration(hd(nss), cat, nss, newStack, t, ts, tzr)
   end
@@ -795,7 +795,7 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_13_(__Stack0) do
-    [[__2, __1] | __Stack] = __Stack0
+    [__2, __1 | __Stack] = __Stack0
 
     [
       [__1 | __2]
@@ -804,7 +804,7 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_16_(__Stack0) do
-    [[__2, __1] | __Stack] = __Stack0
+    [__2, __1 | __Stack] = __Stack0
 
     [
       {:erlang_code, __2}
@@ -858,7 +858,7 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_28_(__Stack0) do
-    [[__2, __1] | __Stack] = __Stack0
+    [__2, __1 | __Stack] = __Stack0
 
     [
       [__1 | __2]
@@ -867,7 +867,7 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_29_(__Stack0) do
-    [[__5, __4, __3, __2, __1] | __Stack] = __Stack0
+    [__5, __4, __3, __2, __1 | __Stack] = __Stack0
 
     [
       {:rule, [__1 | __3], __4}
@@ -885,7 +885,7 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_33_(__Stack0) do
-    [[__2, __1] | __Stack] = __Stack0
+    [__2, __1 | __Stack] = __Stack0
 
     [
       [__1 | __2]
@@ -894,7 +894,7 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_34_(__Stack0) do
-    [[__3, __2, __1] | __Stack] = __Stack0
+    [__3, __2, __1 | __Stack] = __Stack0
 
     [
       {__1, __2}
@@ -903,7 +903,7 @@ defmodule :m_yeccparser do
   end
 
   defp yeccpars2_35_(__Stack0) do
-    [[__3, __2, __1] | __Stack] = __Stack0
+    [__3, __2, __1 | __Stack] = __Stack0
 
     [
       {__1, __2}

@@ -1489,16 +1489,16 @@ defmodule :m_ssh_transport do
       strVersion = trim_tail(version)
 
       case :string.tokens(version, '-') do
-        [[_, '2.0'] | _] ->
+        [_, '2.0' | _] ->
           {{2, 0}, strVersion}
 
-        [[_, '1.99'] | _] ->
+        [_, '1.99' | _] ->
           {{2, 0}, strVersion}
 
-        [[_, '1.3'] | _] ->
+        [_, '1.3' | _] ->
           {{1, 3}, strVersion}
 
-        [[_, '1.5'] | _] ->
+        [_, '1.5' | _] ->
           {{1, 5}, strVersion}
       end
     catch
@@ -2328,7 +2328,7 @@ defmodule :m_ssh_transport do
     {:ed_pub, alg, pub}
   end
 
-  def extract_public_key(%{:engine => _, :key_id => _, :algorithm => alg} = m) do
+  def extract_public_key(%{engine: _, key_id: _, algorithm: alg} = m) do
     case {alg, :crypto.privkey_to_pubkey(alg, m)} do
       {:rsa, [e, n]} ->
         r_RSAPublicKey(modulus: n, publicExponent: e)
@@ -3212,11 +3212,11 @@ defmodule :m_ssh_transport do
     payload
   end
 
-  def sign(sigData, hashAlg, %{:algorithm => :dss} = key) do
+  def sign(sigData, hashAlg, %{algorithm: :dss} = key) do
     mk_dss_sig(:crypto.sign(:dss, hashAlg, sigData, key))
   end
 
-  def sign(sigData, hashAlg, %{:algorithm => sigAlg} = key) do
+  def sign(sigData, hashAlg, %{algorithm: sigAlg} = key) do
     :crypto.sign(sigAlg, hashAlg, sigData, key)
   end
 
@@ -3976,7 +3976,7 @@ defmodule :m_ssh_transport do
       :ssh_bits.mpint(k)::binary>>
   end
 
-  def valid_key_sha_alg(_, %{:engine => _, :key_id => _}, _Alg) do
+  def valid_key_sha_alg(_, %{engine: _, key_id: _}, _Alg) do
     true
   end
 

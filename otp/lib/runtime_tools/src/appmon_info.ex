@@ -820,7 +820,14 @@ defmodule :m_appmon_info do
     {:ok,
      :io_lib.format(
        'Node: ~p, Port: ~p~n~p~n~n',
-       [node(), :erlang.element(2, :erlang.port_info(pid, :id)), info]
+       [
+         node(),
+         :erlang.element(
+           2,
+           :erlang.port_info(pid, :id)
+         ),
+         info
+       ]
      )}
   end
 

@@ -439,7 +439,10 @@ defmodule :m_observer_tv_table do
              end},
             {:onGetItemAttr,
              fn _, item ->
-               get_attr(holder, item)
+               get_attr(
+                 holder,
+                 item
+               )
              end}
           ]
         )
@@ -1594,7 +1597,8 @@ defmodule :m_observer_tv_table do
 
   defp format_tuple(tuple, i, max) when i < max do
     [
-      [format(:erlang.element(i, tuple)), ?,]
+      format(:erlang.element(i, tuple)),
+      ?,
       | format_tuple(tuple, i + 1, max)
     ]
   end
@@ -1626,7 +1630,7 @@ defmodule :m_observer_tv_table do
   end
 
   defp make_list([head | tail]) when is_list(tail) do
-    [[format(head), ?,] | make_list(tail)]
+    [format(head), ?, | make_list(tail)]
   end
 
   defp make_list([head | tail]) do
@@ -1634,31 +1638,31 @@ defmodule :m_observer_tv_table do
   end
 
   defp map_printable_list([?\n | cs]) do
-    [[?\\, ?n] | map_printable_list(cs)]
+    [?\\, ?n | map_printable_list(cs)]
   end
 
   defp map_printable_list([?\r | cs]) do
-    [[?\\, ?r] | map_printable_list(cs)]
+    [?\\, ?r | map_printable_list(cs)]
   end
 
   defp map_printable_list([?\t | cs]) do
-    [[?\\, ?t] | map_printable_list(cs)]
+    [?\\, ?t | map_printable_list(cs)]
   end
 
   defp map_printable_list([?\v | cs]) do
-    [[?\\, ?v] | map_printable_list(cs)]
+    [?\\, ?v | map_printable_list(cs)]
   end
 
   defp map_printable_list([?\b | cs]) do
-    [[?\\, ?b] | map_printable_list(cs)]
+    [?\\, ?b | map_printable_list(cs)]
   end
 
   defp map_printable_list([?\f | cs]) do
-    [[?\\, ?f] | map_printable_list(cs)]
+    [?\\, ?f | map_printable_list(cs)]
   end
 
   defp map_printable_list([?\e | cs]) do
-    [[?\\, ?e] | map_printable_list(cs)]
+    [?\\, ?e | map_printable_list(cs)]
   end
 
   defp map_printable_list([]) do

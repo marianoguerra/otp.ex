@@ -216,7 +216,7 @@ defmodule :m_erl_eval do
   def expr({:fun, _Line, {:function, mod0, name0, arity0}},
            bs0, lf, ef, rBs) do
     {[mod, name, arity], bs} = expr_list([mod0, name0,
-                                            arity0],
+                                                    arity0],
                                            bs0, lf, ef)
     f = :erlang.make_fun(mod, name, arity)
     ret_expr(f, bs, rBs)
@@ -309,34 +309,40 @@ defmodule :m_erl_eval do
            16 ->
              fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p ->
                   eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                              p],
+                                                                          p],
                              info)
              end
            17 ->
              fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q ->
                   eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                              p, q],
+                                                                          p, q],
                              info)
              end
            18 ->
              fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q,
                   r ->
                   eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                              p, q, r],
+                                                                          p, q,
+                                                                                 r],
                              info)
              end
            19 ->
              fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r,
                   s ->
                   eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                              p, q, r, s],
+                                                                          p, q,
+                                                                                 r,
+                                                                                     s],
                              info)
              end
            20 ->
              fn a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r,
                   s, t ->
                   eval_fun([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
-                              p, q, r, s, t],
+                                                                          p, q,
+                                                                                 r,
+                                                                                     s,
+                                                                                         t],
                              info)
              end
            _Other ->
@@ -437,35 +443,38 @@ defmodule :m_erl_eval do
              fn rF
              a, b, c, d, e, f, g, h, i, j, k, l, m, n ->
                eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                 n],
+                                                                       n],
                                 rF, info)
              end
            15 ->
              fn rF
              a, b, c, d, e, f, g, h, i, j, k, l, m, n, o ->
                eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                 n, o],
+                                                                       n, o],
                                 rF, info)
              end
            16 ->
              fn rF
              a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p ->
                eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                 n, o, p],
+                                                                       n, o, p],
                                 rF, info)
              end
            17 ->
              fn rF
              a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q ->
                eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                 n, o, p, q],
+                                                                       n, o, p,
+                                                                                 q],
                                 rF, info)
              end
            18 ->
              fn rF
              a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r ->
                eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                 n, o, p, q, r],
+                                                                       n, o, p,
+                                                                                 q,
+                                                                                     r],
                                 rF, info)
              end
            19 ->
@@ -473,7 +482,10 @@ defmodule :m_erl_eval do
              a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r,
                s ->
                eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                 n, o, p, q, r, s],
+                                                                       n, o, p,
+                                                                                 q,
+                                                                                     r,
+                                                                                         s],
                                 rF, info)
              end
            20 ->
@@ -481,7 +493,11 @@ defmodule :m_erl_eval do
              a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s,
                t ->
                eval_named_fun([a, b, c, d, e, f, g, h, i, j, k, l, m,
-                                 n, o, p, q, r, s, t],
+                                                                       n, o, p,
+                                                                                 q,
+                                                                                     r,
+                                                                                         s,
+                                                                                             t],
                                 rF, info)
              end
            _Other ->
@@ -763,7 +779,7 @@ defmodule :m_erl_eval do
 
   defp local_func(func, as0, bs0, {:value, f, eas}, ef, rBs) do
     fun = fn name, args ->
-               apply(f, [[name, args] | eas])
+               apply(f, [name, args | eas])
           end
     local_func(func, as0, bs0, {:value, fun}, ef, rBs)
   end
@@ -773,7 +789,7 @@ defmodule :m_erl_eval do
   end
 
   defp local_func(func, as, bs, {:eval, f, eas}, _Ef, rBs) do
-    local_func2(apply(f, [[func, as, bs] | eas]), rBs)
+    local_func2(apply(f, [func, as, bs | eas]), rBs)
   end
 
   defp local_func(func, as0, bs0, {m, f}, ef, rBs) do
@@ -782,7 +798,7 @@ defmodule :m_erl_eval do
   end
 
   defp local_func(func, as, _Bs, {m, f, eas}, _Ef, rBs) do
-    local_func2(apply(m, f, [[func, as] | eas]), rBs)
+    local_func2(apply(m, f, [func, as | eas]), rBs)
   end
 
   defp local_func(func, as0, _Bs0, :none, _Ef, _RBs) do
@@ -1807,34 +1823,44 @@ defmodule :m_erl_eval do
     {{:string, newAnno, string}, newTs}
   end
 
-  defp unscannable([[{:"#", a1}, {:var, a2, :Fun}, {:"<", a3},
-              {:atom, a4, _}, {:".", a5}, {:float, a6, _}, {:">", a7}] |
-               ts]) do
+  defp unscannable([{:"#", a1}, {:var, a2, :Fun}, {:"<", a3}, {:atom,
+                                                    a4, _},
+                                                     {:".", a5}, {:float, a6, _},
+                                                                   {:">", a7} |
+                                                                       ts]) do
     {[a1, a2, a3, a4, a5, a6, a7], ts, :function}
   end
 
-  defp unscannable([[{:"#", a1}, {:var, a2, :Fun}, {:"<", a3},
-              {:atom, a4, _}, {:".", a5}, {:atom, a6, _}, {:".", a7},
-              {:integer, a8, _}, {:">", a9}] |
-               ts]) do
+  defp unscannable([{:"#", a1}, {:var, a2, :Fun}, {:"<", a3}, {:atom,
+                                                    a4, _},
+                                                     {:".", a5}, {:atom, a6, _},
+                                                                   {:".", a7},
+                                                                       {:integer,
+                                                                          a8,
+                                                                          _},
+                                                                           {:">",
+                                                                              a9} |
+                                                                               ts]) do
     {[a1, a2, a3, a4, a5, a6, a7, a8, a9], ts, :function}
   end
 
-  defp unscannable([[{:"<", a1}, {:float, a2, _}, {:".", a3},
-              {:integer, a4, _}, {:">", a5}] |
-               ts]) do
+  defp unscannable([{:"<", a1}, {:float, a2, _}, {:".", a3}, {:integer,
+                                                   a4, _},
+                                                    {:">", a5} | ts]) do
     {[a1, a2, a3, a4, a5], ts, :pid}
   end
 
-  defp unscannable([[{:"#", a1}, {:var, a2, :Port}, {:"<", a3},
-              {:float, a4, _}, {:">", a5}] |
-               ts]) do
+  defp unscannable([{:"#", a1}, {:var, a2, :Port}, {:"<", a3}, {:float,
+                                                     a4, _},
+                                                      {:">", a5} | ts]) do
     {[a1, a2, a3, a4, a5], ts, :port}
   end
 
-  defp unscannable([[{:"#", a1}, {:var, a2, :Ref}, {:"<", a3},
-              {:float, a4, _}, {:".", a5}, {:float, a6, _}, {:">", a7}] |
-               ts]) do
+  defp unscannable([{:"#", a1}, {:var, a2, :Ref}, {:"<", a3}, {:float,
+                                                    a4, _},
+                                                     {:".", a5}, {:float, a6, _},
+                                                                   {:">", a7} |
+                                                                       ts]) do
     {[a1, a2, a3, a4, a5, a6, a7], ts, :reference}
   end
 
@@ -1882,7 +1908,7 @@ defmodule :m_erl_eval do
 
   defp new_var(i) do
     :erlang.list_to_atom(:lists.concat([:__ExtendedParseExprs_,
-                                          i, :__]))
+                                            i, :__]))
   end
 
   defp reset_token_anno(tokens) do
@@ -1922,9 +1948,8 @@ defmodule :m_erl_eval do
 
   defp function(s) do
     {:ok,
-       [[_, _, _, {:atom, _, module}, _, {:atom, _, function},
-           _, {:integer, _, arity}] |
-            _],
+       [_, _, _, {:atom, _, module}, _, {:atom, _, function},
+                                            _, {:integer, _, arity} | _],
        _} = :erl_scan.string(s)
     :erlang.make_fun(module, function, arity)
   end
@@ -1974,7 +1999,7 @@ defmodule :m_erl_eval do
           term ->
             {:ok, term}
         end
-      {:ok, [[_, expr] | _], _Bindings} ->
+      {:ok, [_, expr | _], _Bindings} ->
         loc = :erl_anno.location(:erlang.element(2, expr))
         {:error, {loc, :erl_eval, 'bad term'}}
       {:error, _} = error ->

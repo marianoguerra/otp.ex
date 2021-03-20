@@ -2,7 +2,7 @@ defmodule :m_logger_filters do
   use Bitwise
 
   def domain(
-        %{:meta => meta} = logEvent,
+        %{meta: meta} = logEvent,
         {action, compare, matchDomain}
       )
       when (action == :log or action == :stop) and
@@ -15,7 +15,7 @@ defmodule :m_logger_filters do
     :erlang.error(:badarg, [logEvent, extra])
   end
 
-  def level(%{:level => l1} = logEvent, {action, op, l2})
+  def level(%{level: l1} = logEvent, {action, op, l2})
       when (action == :log or action == :stop) and
              (op == :neq or op == :eq or op == :lt or op == :gt or op == :lteq or op == :gteq) and
              (l2 === :emergency or l2 === :alert or l2 === :critical or l2 === :error or
@@ -45,19 +45,19 @@ defmodule :m_logger_filters do
     :erlang.error(:badarg, [logEvent, action])
   end
 
-  defp filter_domain(:super, %{:domain => domain}, matchDomain, onMatch) do
+  defp filter_domain(:super, %{domain: domain}, matchDomain, onMatch) do
     is_prefix(domain, matchDomain, onMatch)
   end
 
-  defp filter_domain(:sub, %{:domain => domain}, matchDomain, onMatch) do
+  defp filter_domain(:sub, %{domain: domain}, matchDomain, onMatch) do
     is_prefix(matchDomain, domain, onMatch)
   end
 
-  defp filter_domain(:equal, %{:domain => domain}, domain, onMatch) do
+  defp filter_domain(:equal, %{domain: domain}, domain, onMatch) do
     onMatch
   end
 
-  defp filter_domain(:not_equal, %{:domain => domain}, matchDomain, onMatch)
+  defp filter_domain(:not_equal, %{domain: domain}, matchDomain, onMatch)
        when domain !== matchDomain do
     onMatch
   end
@@ -107,7 +107,7 @@ defmodule :m_logger_filters do
   end
 
   defp filter_progress(
-         %{:msg => {:report, %{:label => {_, :progress}}}},
+         %{msg: {:report, %{label: {_, :progress}}}},
          onMatch
        ) do
     onMatch
@@ -117,7 +117,7 @@ defmodule :m_logger_filters do
     :ignore
   end
 
-  defp filter_remote_gl(%{:meta => %{:gl => gL}}, onMatch)
+  defp filter_remote_gl(%{meta: %{gl: gL}}, onMatch)
        when node(gL) !== node() do
     onMatch
   end

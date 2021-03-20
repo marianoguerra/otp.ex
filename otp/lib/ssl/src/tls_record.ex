@@ -1306,10 +1306,10 @@ defmodule :m_tls_record do
       )
 
     %{
-      :current_read => current,
-      :pending_read => pending,
-      :current_write => current,
-      :pending_write => pending
+      current_read: current,
+      pending_read: pending,
+      current_write: current,
+      pending_write: pending
     }
   end
 
@@ -1336,10 +1336,10 @@ defmodule :m_tls_record do
         frag,
         version,
         %{
-          :current_write => %{
-            :beast_mitigation => beastMitigation,
-            :max_fragment_length => maxFragmentLength,
-            :security_parameters => r_security_parameters(bulk_cipher_algorithm: bCA)
+          current_write: %{
+            beast_mitigation: beastMitigation,
+            max_fragment_length: maxFragmentLength,
+            security_parameters: r_security_parameters(bulk_cipher_algorithm: bCA)
           }
         } = connectionStates
       ) do
@@ -1396,10 +1396,10 @@ defmodule :m_tls_record do
         data,
         version,
         %{
-          :current_write => %{
-            :beast_mitigation => beastMitigation,
-            :max_fragment_length => maxFragmentLength,
-            :security_parameters => r_security_parameters(bulk_cipher_algorithm: bCA)
+          current_write: %{
+            beast_mitigation: beastMitigation,
+            max_fragment_length: maxFragmentLength,
+            security_parameters: r_security_parameters(bulk_cipher_algorithm: bCA)
           }
         } = connectionStates
       ) do
@@ -1427,14 +1427,14 @@ defmodule :m_tls_record do
         _,
         cipherTextRecord,
         %{
-          :current_read => %{
-            :sequence_number => seq,
-            :security_parameters =>
+          current_read: %{
+            sequence_number: seq,
+            security_parameters:
               r_security_parameters(
                 cipher_type: 2,
                 bulk_cipher_algorithm: bulkCipherAlgo
               ),
-            :cipher_state => cipherS0
+            cipher_state: cipherS0
           }
         } = connectionStates0,
         _
@@ -1459,8 +1459,8 @@ defmodule :m_tls_record do
          ) do
       plainFragment when is_binary(plainFragment) ->
         %{
-          :current_read =>
-            %{:security_parameters => secParams, :compression_state => compressionS0} = readState0
+          current_read:
+            %{security_parameters: secParams, compression_state: compressionS0} = readState0
         } = connectionStates0
 
         {plain, compressionS} =
@@ -1470,15 +1470,16 @@ defmodule :m_tls_record do
             compressionS0
           )
 
-        connectionStates = %{
-          connectionStates0
-          | :current_read => %{
-              readState0
-              | :cipher_state => cipherS,
-                :sequence_number => seq + 1,
-                :compression_state => compressionS
-            }
-        }
+        connectionStates =
+          Map.put(
+            connectionStates0,
+            :current_read,
+            Map.merge(readState0, %{
+              cipher_state: cipherS,
+              sequence_number: seq + 1,
+              compression_state: compressionS
+            })
+          )
 
         {r_ssl_tls(cipherTextRecord, fragment: plain), connectionStates}
 
@@ -1493,7 +1494,7 @@ defmodule :m_tls_record do
           version: version,
           fragment: cipherFragment
         ) = cipherTextRecord,
-        %{:current_read => readState0} = connnectionStates0,
+        %{current_read: readState0} = connnectionStates0,
         paddingCheck
       ) do
     case :ssl_record.decipher(version, cipherFragment, readState0, paddingCheck) do
@@ -1509,9 +1510,9 @@ defmodule :m_tls_record do
         case :ssl_record.is_correct_mac(mac, macHash) do
           true ->
             %{
-              :sequence_number => seq,
-              :compression_state => compressionS0,
-              :security_parameters => r_security_parameters(compression_algorithm: compAlg)
+              sequence_number: seq,
+              compression_state: compressionS0,
+              security_parameters: r_security_parameters(compression_algorithm: compAlg)
             } = readState0
 
             {plain, compressionS1} =
@@ -1521,14 +1522,15 @@ defmodule :m_tls_record do
                 compressionS0
               )
 
-            connnectionStates = %{
-              connnectionStates0
-              | :current_read => %{
-                  readState1
-                  | :sequence_number => seq + 1,
-                    :compression_state => compressionS1
-                }
-            }
+            connnectionStates =
+              Map.put(
+                connnectionStates0,
+                :current_read,
+                Map.merge(readState1, %{
+                  sequence_number: seq + 1,
+                  compression_state: compressionS1
+                })
+              )
 
             {r_ssl_tls(cipherTextRecord, fragment: plain), connnectionStates}
 
@@ -1537,9 +1539,9 @@ defmodule :m_tls_record do
               level: 2,
               description: 20,
               where: %{
-                :mfa => {:tls_record, :decode_cipher_text, 4},
-                :line => 242,
-                :file => 'otp/lib/ssl/src/tls_record.erl'
+                mfa: {:tls_record, :decode_cipher_text, 4},
+                line: 242,
+                file: 'otp/lib/ssl/src/tls_record.erl'
               }
             )
         end
@@ -1864,16 +1866,16 @@ defmodule :m_tls_record do
 
   defp initial_connection_state(connectionEnd, beastMitigation) do
     %{
-      :security_parameters => :ssl_record.initial_security_params(connectionEnd),
-      :sequence_number => 0,
-      :beast_mitigation => beastMitigation,
-      :compression_state => :undefined,
-      :cipher_state => :undefined,
-      :mac_secret => :undefined,
-      :secure_renegotiation => :undefined,
-      :client_verify_data => :undefined,
-      :server_verify_data => :undefined,
-      :max_fragment_length => :undefined
+      security_parameters: :ssl_record.initial_security_params(connectionEnd),
+      sequence_number: 0,
+      beast_mitigation: beastMitigation,
+      compression_state: :undefined,
+      cipher_state: :undefined,
+      mac_secret: :undefined,
+      secure_renegotiation: :undefined,
+      client_verify_data: :undefined,
+      server_verify_data: :undefined,
+      max_fragment_length: :undefined
     }
   end
 
@@ -2080,9 +2082,9 @@ defmodule :m_tls_record do
           level: 2,
           description: 10,
           where: %{
-            :mfa => {:tls_record, :validate_tls_records_type, 8},
-            :line => 539,
-            :file => 'otp/lib/ssl/src/tls_record.erl'
+            mfa: {:tls_record, :validate_tls_records_type, 8},
+            line: 539,
+            file: 'otp/lib/ssl/src/tls_record.erl'
           },
           reason: {:unsupported_record_type, type}
         )
@@ -2123,9 +2125,9 @@ defmodule :m_tls_record do
               level: 2,
               description: 20,
               where: %{
-                :mfa => {:tls_record, :validate_tls_record_version, 8},
-                :line => 552,
-                :file => 'otp/lib/ssl/src/tls_record.erl'
+                mfa: {:tls_record, :validate_tls_record_version, 8},
+                line: 552,
+                file: 'otp/lib/ssl/src/tls_record.erl'
               },
               reason: {:unsupported_version, version}
             )
@@ -2142,9 +2144,9 @@ defmodule :m_tls_record do
           level: 2,
           description: 20,
           where: %{
-            :mfa => {:tls_record, :validate_tls_record_version, 8},
-            :line => 560,
-            :file => 'otp/lib/ssl/src/tls_record.erl'
+            mfa: {:tls_record, :validate_tls_record_version, 8},
+            line: 560,
+            file: 'otp/lib/ssl/src/tls_record.erl'
           },
           reason: {:unsupported_version, version}
         )
@@ -2168,7 +2170,7 @@ defmodule :m_tls_record do
          versions,
          {_, size0, _} = q0,
          maxFragLen,
-         %{:log_level => logLevel} = sslOpts,
+         %{log_level: logLevel} = sslOpts,
          acc,
          type,
          version,
@@ -2211,9 +2213,9 @@ defmodule :m_tls_record do
           level: 2,
           description: 22,
           where: %{
-            :mfa => {:tls_record, :validate_tls_record_length, 8},
-            :line => 588,
-            :file => 'otp/lib/ssl/src/tls_record.erl'
+            mfa: {:tls_record, :validate_tls_record_length, 8},
+            line: 588,
+            file: 'otp/lib/ssl/src/tls_record.erl'
           }
         )
     end
@@ -2239,7 +2241,7 @@ defmodule :m_tls_record do
       [bin3, bin2, bin1] ->
         binary_from_front(splitSize, [bin1, bin2, bin3], size, [], acc)
 
-      [[_, _, _] | _] ->
+      [_, _, _ | _] ->
         binary_from_front(splitSize, :lists.reverse(rear), size, [], acc)
     end
   end
@@ -2303,11 +2305,7 @@ defmodule :m_tls_record do
          version,
          data,
          %{
-           :current_write => %{
-             :compression_state => compS,
-             :cipher_state => cipherS,
-             :sequence_number => seq
-           }
+           current_write: %{compression_state: compS, cipher_state: cipherS, sequence_number: seq}
          } = connectionStates
        ) do
     encode_fragments(type, version, data, connectionStates, compS, cipherS, seq, [])
@@ -2317,7 +2315,7 @@ defmodule :m_tls_record do
          _Type,
          _Version,
          [],
-         %{:current_write => writeS} = cS,
+         %{current_write: writeS} = cS,
          compS,
          cipherS,
          seq,
@@ -2326,11 +2324,11 @@ defmodule :m_tls_record do
     {:lists.reverse(cipherFragments),
      %{
        cS
-       | :current_write => %{
+       | current_write: %{
            writeS
-           | :compression_state => compS,
-             :cipher_state => cipherS,
-             :sequence_number => seq
+           | compression_state: compS,
+             cipher_state: cipherS,
+             sequence_number: seq
          }
      }}
   end
@@ -2340,8 +2338,8 @@ defmodule :m_tls_record do
          version,
          [text | data],
          %{
-           :current_write => %{
-             :security_parameters =>
+           current_write: %{
+             security_parameters:
                r_security_parameters(
                  cipher_type: 2,
                  bulk_cipher_algorithm: bCAlg,
@@ -2382,13 +2380,13 @@ defmodule :m_tls_record do
          version,
          [text | data],
          %{
-           :current_write => %{
-             :security_parameters =>
+           current_write: %{
+             security_parameters:
                r_security_parameters(
                  compression_algorithm: compAlg,
                  mac_algorithm: macAlgorithm
                ) = secPars,
-             :mac_secret => macSecret
+             mac_secret: macSecret
            }
          } = cS,
          compS0,

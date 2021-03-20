@@ -333,14 +333,16 @@ defmodule :m_asn1ct do
 
   defp set_passes() do
     [
-      [{:pass, :scan_parse, &set_scan_parse_pass/1}, {:pass, :merge, &merge_pass/1}]
+      {:pass, :scan_parse, &set_scan_parse_pass/1},
+      {:pass, :merge, &merge_pass/1}
       | common_passes()
     ]
   end
 
   defp single_passes() do
     [
-      [{:pass, :scan, &scan_pass/1}, {:pass, :parse, &parse_pass/1}]
+      {:pass, :scan, &scan_pass/1},
+      {:pass, :parse, &parse_pass/1}
       | common_passes()
     ]
   end
@@ -2093,7 +2095,9 @@ defmodule :m_asn1ct do
 
     options ++
       [
-        [:errors, {:cwd, cwd}, {:outdir, outdir}]
+        :errors,
+        {:cwd, cwd},
+        {:outdir, outdir}
         | :lists.map(
             fn dir ->
               {:i, dir}
@@ -2590,7 +2594,7 @@ defmodule :m_asn1ct do
             [command, tag] when is_atom(command) ->
               [[command, tag, compAcc] | acc]
 
-            [[l1, _L2] | ^rest] when is_list(l1) ->
+            [l1, _L2 | ^rest] when is_list(l1) ->
               case :lists.reverse(tagCommand) do
                 [atom | comms] when is_atom(atom) ->
                   [

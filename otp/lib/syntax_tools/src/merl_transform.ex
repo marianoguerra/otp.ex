@@ -90,11 +90,19 @@ defmodule :m_merl_transform do
                   end},
                  {:merl.quote(99, 'subst'),
                   fn [] ->
-                    expand_template(f, as, t)
+                    expand_template(
+                      f,
+                      as,
+                      t
+                    )
                   end},
                  {:merl.quote(100, 'match'),
                   fn [] ->
-                    expand_template(f, as, t)
+                    expand_template(
+                      f,
+                      as,
+                      t
+                    )
                   end},
                  fn ->
                    t

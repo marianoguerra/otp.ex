@@ -121,14 +121,9 @@ defmodule :m_beam_ssa_bsm do
   defp analyze_module(r_b_module(body: fs)) do
     foldl(
       fn r_b_function(args: parameters) = f, i ->
-        funcInfo = %{
-          :has_bsm_ops => has_bsm_ops(f),
-          :parameters => parameters,
-          :parameter_info => %{}
-        }
-
+        funcInfo = %{has_bsm_ops: has_bsm_ops(f), parameters: parameters, parameter_info: %{}}
         funcId = get_fa(f)
-        %{i | funcId => funcInfo}
+        Map.put(i, funcId, funcInfo)
       end,
       %{},
       fs
@@ -266,7 +261,7 @@ defmodule :m_beam_ssa_bsm do
 
   defp assert_match_context(r_b_var() = var, defs) do
     case :maps.find(var, defs) do
-      {:ok, r_b_set(op: :bs_match, args: [[_, r_b_var() = ctx] | _])} ->
+      {:ok, r_b_set(op: :bs_match, args: [_, r_b_var() = ctx | _])} ->
         assert_match_context(ctx, defs)
 
       {:ok, r_b_set(op: :bs_start_match)} ->
@@ -289,7 +284,7 @@ defmodule :m_beam_ssa_bsm do
 
   defp context_chain_of(r_b_var() = var, defs) do
     case :maps.find(var, defs) do
-      {:ok, r_b_set(op: :bs_match, args: [[_, r_b_var() = ctx] | _])} ->
+      {:ok, r_b_set(op: :bs_match, args: [_, r_b_var() = ctx | _])} ->
         [ctx | context_chain_of(ctx, defs)]
 
       {:ok, r_b_set(op: :bs_get_tail, args: [ctx])} ->
@@ -314,7 +309,7 @@ defmodule :m_beam_ssa_bsm do
       r_b_set(op: :bs_extract, args: [r_b_var() = ctx0]) ->
         r_b_set(
           op: :bs_match,
-          args: [[_, r_b_var() = ctx] | _]
+          args: [_, r_b_var() = ctx | _]
         ) = :maps.get(ctx0, defs)
 
         ctx
@@ -636,7 +631,7 @@ defmodule :m_beam_ssa_bsm do
     case priorCtxs do
       [ctx | _] ->
         renames0 = r_cm(state0, :renames)
-        renames = %{renames0 | bool => r_b_literal(val: true), dstCtx => ctx}
+        renames = Map.merge(renames0, %{bool => r_b_literal(val: true), dstCtx => ctx})
         {acc, r_cm(state0, renames: renames)}
 
       [] ->
@@ -674,7 +669,7 @@ defmodule :m_beam_ssa_bsm do
         cm_combine_tail_1(bool, dstCtx, new, renames0)
 
       %{} ->
-        renames = %{renames0 | bool => r_b_literal(val: true), dstCtx => srcCtx}
+        renames = Map.merge(renames0, %{bool => r_b_literal(val: true), dstCtx => srcCtx})
         {srcCtx, renames}
     end
   end
@@ -878,11 +873,11 @@ defmodule :m_beam_ssa_bsm do
   end
 
   defp aca_cs_build_brs([1 = lbl | path], counter, acc) do
-    aca_cs_build_brs(path, counter, %{acc | lbl => lbl})
+    aca_cs_build_brs(path, counter, Map.put(acc, lbl, lbl))
   end
 
   defp aca_cs_build_brs([lbl | path], counter0, acc) do
-    aca_cs_build_brs(path, counter0 + 1, %{acc | lbl => counter0})
+    aca_cs_build_brs(path, counter0 + 1, Map.put(acc, lbl, counter0))
   end
 
   defp aca_cs_build_brs([], counter, acc) do
@@ -1135,7 +1130,7 @@ defmodule :m_beam_ssa_bsm do
 
           k, :suitable_for_reuse, acc ->
             info = :maps.get(k, acc, [])
-            %{acc | k => [:accepts_match_context | info]}
+            Map.put(acc, k, [:accepts_match_context | info])
 
           _K, _V, acc ->
             acc

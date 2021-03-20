@@ -62,14 +62,14 @@ defmodule :m_asn1ct_tok do
     :io_lib.format('~p', [other])
   end
 
-  defp tokenise(stream, [[?&, h] | t], lno, r)
+  defp tokenise(stream, [?&, h | t], lno, r)
        when ?A <= h and
               h <= ?Z do
     {x, t1} = get_name(t, [h])
     tokenise(stream, t1, lno, [{:typefieldreference, lno, x} | r])
   end
 
-  defp tokenise(stream, [[?&, h] | t], lno, r)
+  defp tokenise(stream, [?&, h | t], lno, r)
        when ?a <= h and
               h <= ?z do
     {x, t1} = get_name(t, [h])
@@ -80,7 +80,7 @@ defmodule :m_asn1ct_tok do
     tokenise(stream, skip_comment(t), lno, r)
   end
 
-  defp tokenise(stream, [[?-, h] | t], lno, r)
+  defp tokenise(stream, [?-, h | t], lno, r)
        when ?0 <= h and
               h <= ?9 do
     {x, t1} = get_number(t, [h])
@@ -213,10 +213,10 @@ defmodule :m_asn1ct_tok do
     throw({:error, :missing_quote_at_eof})
   end
 
-  defp get_name([[?-, char] | t] = t0, acc) do
+  defp get_name([?-, char | t] = t0, acc) do
     case isalnum(char) do
       true ->
-        get_name(t, [[char, ?-] | acc])
+        get_name(t, [char, ?- | acc])
 
       false ->
         {:erlang.list_to_atom(:lists.reverse(acc)), t0}

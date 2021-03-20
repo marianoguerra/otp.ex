@@ -543,7 +543,23 @@ defmodule :m_edoc_doclet do
       {:table, [{:width, '100%'}, {:border, 0}],
        :lists.append(
          for {path, app} <- apps do
-           [{:tr, [{:td, [], [{:a, [{:href, app_ref(path, app)}, {:target, '_top'}], [app]}]}]}]
+           [
+             {:tr,
+              [
+                {:td, [],
+                 [
+                   {:a,
+                    [
+                      {:href,
+                       app_ref(
+                         path,
+                         app
+                       )},
+                      {:target, '_top'}
+                    ], [app]}
+                 ]}
+              ]}
+           ]
          end
        )},
       '\n'

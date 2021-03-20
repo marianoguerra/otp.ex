@@ -23,10 +23,7 @@ defmodule :m_beam_a do
     end
   end
 
-  defp rename_instrs([
-         [{:test, :is_eq_exact, _, [dst, src]} = test, {:move, src, dst}]
-         | is
-       ]) do
+  defp rename_instrs([{:test, :is_eq_exact, _, [dst, src]} = test, {:move, src, dst} | is]) do
     rename_instrs([test | is])
   end
 
@@ -39,31 +36,37 @@ defmodule :m_beam_a do
 
   defp rename_instrs([{:apply_last, a, n} | is]) do
     [
-      [{:apply, a}, {:deallocate, n}, :return]
+      {:apply, a},
+      {:deallocate, n},
+      :return
       | rename_instrs(is)
     ]
   end
 
   defp rename_instrs([{:call_last, a, f, n} | is]) do
     [
-      [{:call, a, f}, {:deallocate, n}, :return]
+      {:call, a, f},
+      {:deallocate, n},
+      :return
       | rename_instrs(is)
     ]
   end
 
   defp rename_instrs([{:call_ext_last, a, f, n} | is]) do
     [
-      [{:call_ext, a, f}, {:deallocate, n}, :return]
+      {:call_ext, a, f},
+      {:deallocate, n},
+      :return
       | rename_instrs(is)
     ]
   end
 
   defp rename_instrs([{:call_only, a, f} | is]) do
-    [[{:call, a, f}, :return] | rename_instrs(is)]
+    [{:call, a, f}, :return | rename_instrs(is)]
   end
 
   defp rename_instrs([{:call_ext_only, a, f} | is]) do
-    [[{:call_ext, a, f}, :return] | rename_instrs(is)]
+    [{:call_ext, a, f}, :return | rename_instrs(is)]
   end
 
   defp rename_instrs([{:"%live", _} | is]) do
@@ -73,16 +76,10 @@ defmodule :m_beam_a do
   defp rename_instrs([{:get_list, s, d1, d2} | is]) do
     cond do
       d1 === s ->
-        [
-          [{:get_tl, s, d2}, {:get_hd, s, d1}]
-          | rename_instrs(is)
-        ]
+        [{:get_tl, s, d2}, {:get_hd, s, d1} | rename_instrs(is)]
 
       true ->
-        [
-          [{:get_hd, s, d1}, {:get_tl, s, d2}]
-          | rename_instrs(is)
-        ]
+        [{:get_hd, s, d1}, {:get_tl, s, d2} | rename_instrs(is)]
     end
   end
 
@@ -188,7 +185,7 @@ defmodule :m_beam_a do
     i
   end
 
-  defp coalesce_consecutive_labels([[{:label, l} = lbl, {:label, alias}] | is], replace, acc) do
+  defp coalesce_consecutive_labels([{:label, l} = lbl, {:label, alias} | is], replace, acc) do
     coalesce_consecutive_labels([lbl | is], [{alias, l} | replace], acc)
   end
 

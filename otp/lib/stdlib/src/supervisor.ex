@@ -89,7 +89,7 @@ defmodule :m_supervisor do
         mod
 
       _ ->
-        [[_Header, _Data, {:data, [{'State', state}]}] | _] = misc
+        [_Header, _Data, {:data, [{'State', state}]} | _] = misc
         r_state(state, :module)
     end
   end
@@ -170,14 +170,14 @@ defmodule :m_supervisor do
             true ->
               :erlang.apply(:logger, :macro_log, [
                 %{
-                  :mfa => {:supervisor, :start_children, 2},
-                  :line => 363,
-                  :file => 'otp/lib/stdlib/src/supervisor.erl'
+                  mfa: {:supervisor, :start_children, 2},
+                  line: 363,
+                  file: 'otp/lib/stdlib/src/supervisor.erl'
                 },
                 :error,
                 %{
-                  :label => {:supervisor, :start_error},
-                  :report => [
+                  label: {:supervisor, :start_error},
+                  report: [
                     {:supervisor, supName},
                     {:errorContext, :start_error},
                     {:reason, reason},
@@ -185,13 +185,13 @@ defmodule :m_supervisor do
                   ]
                 },
                 %{
-                  :domain => [:otp, :sasl],
-                  :report_cb => &:supervisor.format_log/2,
-                  :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-                  :error_logger => %{
-                    :tag => :error_report,
-                    :type => :supervisor_report,
-                    :report_cb => &:supervisor.format_log/1
+                  domain: [:otp, :sasl],
+                  report_cb: &:supervisor.format_log/2,
+                  logger_formatter: %{title: 'SUPERVISOR REPORT'},
+                  error_logger: %{
+                    tag: :error_report,
+                    type: :supervisor_report,
+                    report_cb: &:supervisor.format_log/1
                   }
                 }
               ])
@@ -496,14 +496,14 @@ defmodule :m_supervisor do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:supervisor, :handle_info, 2},
-            :line => 588,
-            :file => 'otp/lib/stdlib/src/supervisor.erl'
+            mfa: {:supervisor, :handle_info, 2},
+            line: 588,
+            file: 'otp/lib/stdlib/src/supervisor.erl'
           },
           :error,
           'Supervisor received unexpected message: ~tp~n',
           [msg],
-          %{:domain => [:otp], :error_logger => %{:tag => :error}}
+          %{domain: [:otp], error_logger: %{tag: :error}}
         ])
 
       false ->
@@ -585,7 +585,7 @@ defmodule :m_supervisor do
   defp update_chsp(r_child(id: id) = oldChild, newDb) do
     case :maps.find(id, newDb) do
       {:ok, child} ->
-        {:ok, %{newDb | id => r_child(child, pid: r_child(oldChild, :pid))}}
+        {:ok, Map.put(newDb, id, r_child(child, pid: r_child(oldChild, :pid)))}
 
       :error ->
         false
@@ -634,14 +634,14 @@ defmodule :m_supervisor do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:supervisor, :do_restart, 3},
-            :line => 707,
-            :file => 'otp/lib/stdlib/src/supervisor.erl'
+            mfa: {:supervisor, :do_restart, 3},
+            line: 707,
+            file: 'otp/lib/stdlib/src/supervisor.erl'
           },
           :error,
           %{
-            :label => {:supervisor, :child_terminated},
-            :report => [
+            label: {:supervisor, :child_terminated},
+            report: [
               {:supervisor, r_state(state, :name)},
               {:errorContext, :child_terminated},
               {:reason, reason},
@@ -649,13 +649,13 @@ defmodule :m_supervisor do
             ]
           },
           %{
-            :domain => [:otp, :sasl],
-            :report_cb => &:supervisor.format_log/2,
-            :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-            :error_logger => %{
-              :tag => :error_report,
-              :type => :supervisor_report,
-              :report_cb => &:supervisor.format_log/1
+            domain: [:otp, :sasl],
+            report_cb: &:supervisor.format_log/2,
+            logger_formatter: %{title: 'SUPERVISOR REPORT'},
+            error_logger: %{
+              tag: :error_report,
+              type: :supervisor_report,
+              report_cb: &:supervisor.format_log/1
             }
           }
         ])
@@ -688,14 +688,14 @@ defmodule :m_supervisor do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:supervisor, :do_restart, 3},
-            :line => 719,
-            :file => 'otp/lib/stdlib/src/supervisor.erl'
+            mfa: {:supervisor, :do_restart, 3},
+            line: 719,
+            file: 'otp/lib/stdlib/src/supervisor.erl'
           },
           :error,
           %{
-            :label => {:supervisor, :child_terminated},
-            :report => [
+            label: {:supervisor, :child_terminated},
+            report: [
               {:supervisor, r_state(state, :name)},
               {:errorContext, :child_terminated},
               {:reason, reason},
@@ -703,13 +703,13 @@ defmodule :m_supervisor do
             ]
           },
           %{
-            :domain => [:otp, :sasl],
-            :report_cb => &:supervisor.format_log/2,
-            :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-            :error_logger => %{
-              :tag => :error_report,
-              :type => :supervisor_report,
-              :report_cb => &:supervisor.format_log/1
+            domain: [:otp, :sasl],
+            report_cb: &:supervisor.format_log/2,
+            logger_formatter: %{title: 'SUPERVISOR REPORT'},
+            error_logger: %{
+              tag: :error_report,
+              type: :supervisor_report,
+              report_cb: &:supervisor.format_log/1
             }
           }
         ])
@@ -727,14 +727,14 @@ defmodule :m_supervisor do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:supervisor, :do_restart, 3},
-            :line => 722,
-            :file => 'otp/lib/stdlib/src/supervisor.erl'
+            mfa: {:supervisor, :do_restart, 3},
+            line: 722,
+            file: 'otp/lib/stdlib/src/supervisor.erl'
           },
           :error,
           %{
-            :label => {:supervisor, :child_terminated},
-            :report => [
+            label: {:supervisor, :child_terminated},
+            report: [
               {:supervisor, r_state(state, :name)},
               {:errorContext, :child_terminated},
               {:reason, reason},
@@ -742,13 +742,13 @@ defmodule :m_supervisor do
             ]
           },
           %{
-            :domain => [:otp, :sasl],
-            :report_cb => &:supervisor.format_log/2,
-            :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-            :error_logger => %{
-              :tag => :error_report,
-              :type => :supervisor_report,
-              :report_cb => &:supervisor.format_log/1
+            domain: [:otp, :sasl],
+            report_cb: &:supervisor.format_log/2,
+            logger_formatter: %{title: 'SUPERVISOR REPORT'},
+            error_logger: %{
+              tag: :error_report,
+              type: :supervisor_report,
+              report_cb: &:supervisor.format_log/1
             }
           }
         ])
@@ -778,14 +778,14 @@ defmodule :m_supervisor do
           true ->
             :erlang.apply(:logger, :macro_log, [
               %{
-                :mfa => {:supervisor, :restart, 2},
-                :line => 742,
-                :file => 'otp/lib/stdlib/src/supervisor.erl'
+                mfa: {:supervisor, :restart, 2},
+                line: 742,
+                file: 'otp/lib/stdlib/src/supervisor.erl'
               },
               :error,
               %{
-                :label => {:supervisor, :shutdown},
-                :report => [
+                label: {:supervisor, :shutdown},
+                report: [
                   {:supervisor, r_state(state, :name)},
                   {:errorContext, :shutdown},
                   {:reason, :reached_max_restart_intensity},
@@ -793,13 +793,13 @@ defmodule :m_supervisor do
                 ]
               },
               %{
-                :domain => [:otp, :sasl],
-                :report_cb => &:supervisor.format_log/2,
-                :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-                :error_logger => %{
-                  :tag => :error_report,
-                  :type => :supervisor_report,
-                  :report_cb => &:supervisor.format_log/1
+                domain: [:otp, :sasl],
+                report_cb: &:supervisor.format_log/2,
+                logger_formatter: %{title: 'SUPERVISOR REPORT'},
+                error_logger: %{
+                  tag: :error_report,
+                  type: :supervisor_report,
+                  report_cb: &:supervisor.format_log/1
                 }
               }
             ])
@@ -846,14 +846,14 @@ defmodule :m_supervisor do
           true ->
             :erlang.apply(:logger, :macro_log, [
               %{
-                :mfa => {:supervisor, :restart, 3},
-                :line => 769,
-                :file => 'otp/lib/stdlib/src/supervisor.erl'
+                mfa: {:supervisor, :restart, 3},
+                line: 769,
+                file: 'otp/lib/stdlib/src/supervisor.erl'
               },
               :error,
               %{
-                :label => {:supervisor, :start_error},
-                :report => [
+                label: {:supervisor, :start_error},
+                report: [
                   {:supervisor, r_state(nState, :name)},
                   {:errorContext, :start_error},
                   {:reason, error},
@@ -861,13 +861,13 @@ defmodule :m_supervisor do
                 ]
               },
               %{
-                :domain => [:otp, :sasl],
-                :report_cb => &:supervisor.format_log/2,
-                :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-                :error_logger => %{
-                  :tag => :error_report,
-                  :type => :supervisor_report,
-                  :report_cb => &:supervisor.format_log/1
+                domain: [:otp, :sasl],
+                report_cb: &:supervisor.format_log/2,
+                logger_formatter: %{title: 'SUPERVISOR REPORT'},
+                error_logger: %{
+                  tag: :error_report,
+                  type: :supervisor_report,
+                  report_cb: &:supervisor.format_log/1
                 }
               }
             ])
@@ -899,14 +899,14 @@ defmodule :m_supervisor do
           true ->
             :erlang.apply(:logger, :macro_log, [
               %{
-                :mfa => {:supervisor, :restart, 3},
-                :line => 783,
-                :file => 'otp/lib/stdlib/src/supervisor.erl'
+                mfa: {:supervisor, :restart, 3},
+                line: 783,
+                file: 'otp/lib/stdlib/src/supervisor.erl'
               },
               :error,
               %{
-                :label => {:supervisor, :start_error},
-                :report => [
+                label: {:supervisor, :start_error},
+                report: [
                   {:supervisor, r_state(state, :name)},
                   {:errorContext, :start_error},
                   {:reason, reason},
@@ -914,13 +914,13 @@ defmodule :m_supervisor do
                 ]
               },
               %{
-                :domain => [:otp, :sasl],
-                :report_cb => &:supervisor.format_log/2,
-                :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-                :error_logger => %{
-                  :tag => :error_report,
-                  :type => :supervisor_report,
-                  :report_cb => &:supervisor.format_log/1
+                domain: [:otp, :sasl],
+                report_cb: &:supervisor.format_log/2,
+                logger_formatter: %{title: 'SUPERVISOR REPORT'},
+                error_logger: %{
+                  tag: :error_report,
+                  type: :supervisor_report,
+                  report_cb: &:supervisor.format_log/1
                 }
               }
             ])
@@ -1020,14 +1020,14 @@ defmodule :m_supervisor do
           true ->
             :erlang.apply(:logger, :macro_log, [
               %{
-                :mfa => {:supervisor, :do_terminate, 2},
-                :line => 844,
-                :file => 'otp/lib/stdlib/src/supervisor.erl'
+                mfa: {:supervisor, :do_terminate, 2},
+                line: 844,
+                file: 'otp/lib/stdlib/src/supervisor.erl'
               },
               :error,
               %{
-                :label => {:supervisor, :shutdown_error},
-                :report => [
+                label: {:supervisor, :shutdown_error},
+                report: [
                   {:supervisor, supName},
                   {:errorContext, :shutdown_error},
                   {:reason, otherReason},
@@ -1035,13 +1035,13 @@ defmodule :m_supervisor do
                 ]
               },
               %{
-                :domain => [:otp, :sasl],
-                :report_cb => &:supervisor.format_log/2,
-                :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-                :error_logger => %{
-                  :tag => :error_report,
-                  :type => :supervisor_report,
-                  :report_cb => &:supervisor.format_log/1
+                domain: [:otp, :sasl],
+                report_cb: &:supervisor.format_log/2,
+                logger_formatter: %{title: 'SUPERVISOR REPORT'},
+                error_logger: %{
+                  tag: :error_report,
+                  type: :supervisor_report,
+                  report_cb: &:supervisor.format_log/1
                 }
               }
             ])
@@ -1166,14 +1166,14 @@ defmodule :m_supervisor do
           true ->
             :erlang.apply(:logger, :macro_log, [
               %{
-                :mfa => {:supervisor, :terminate_dynamic_children, 1},
-                :line => 948,
-                :file => 'otp/lib/stdlib/src/supervisor.erl'
+                mfa: {:supervisor, :terminate_dynamic_children, 1},
+                line: 948,
+                file: 'otp/lib/stdlib/src/supervisor.erl'
               },
               :error,
               %{
-                :label => {:supervisor, :shutdown_error},
-                :report => [
+                label: {:supervisor, :shutdown_error},
+                report: [
                   {:supervisor, r_state(state, :name)},
                   {:errorContext, :shutdown_error},
                   {:reason, reason},
@@ -1181,13 +1181,13 @@ defmodule :m_supervisor do
                 ]
               },
               %{
-                :domain => [:otp, :sasl],
-                :report_cb => &:supervisor.format_log/2,
-                :logger_formatter => %{:title => 'SUPERVISOR REPORT'},
-                :error_logger => %{
-                  :tag => :error_report,
-                  :type => :supervisor_report,
-                  :report_cb => &:supervisor.format_log/1
+                domain: [:otp, :sasl],
+                report_cb: &:supervisor.format_log/2,
+                logger_formatter: %{title: 'SUPERVISOR REPORT'},
+                error_logger: %{
+                  tag: :error_report,
+                  type: :supervisor_report,
+                  report_cb: &:supervisor.format_log/1
                 }
               }
             ])
@@ -1316,7 +1316,7 @@ defmodule :m_supervisor do
          r_child(id: id) = child,
          r_state(children: {ids, db}) = state
        ) do
-    r_state(state, children: {[id | ids], %{db | id => child}})
+    r_state(state, children: {[id | ids], Map.put(db, id, child)})
   end
 
   defp del_child(r_child(pid: pid), state)
@@ -1342,7 +1342,7 @@ defmodule :m_supervisor do
         {:lists.delete(id, ids), :maps.remove(id, db)}
 
       child ->
-        {ids, %{db | id => r_child(child, pid: :undefined)}}
+        {ids, Map.put(db, id, r_child(child, pid: :undefined))}
     end
   end
 
@@ -1350,7 +1350,7 @@ defmodule :m_supervisor do
     {idsAfter, idsBefore} = split_ids(id, ids, [])
     dbBefore = :maps.with(idsBefore, db)
     %{^id => ch} = dbAfter = :maps.with(idsAfter, db)
-    {{idsAfter, %{dbAfter | id => r_child(ch, pid: :undefined)}}, {idsBefore, dbBefore}}
+    {{idsAfter, Map.put(dbAfter, id, r_child(ch, pid: :undefined))}, {idsBefore, dbBefore}}
   end
 
   defp split_ids(id, [id | ids], after__) do
@@ -1472,7 +1472,7 @@ defmodule :m_supervisor do
   defp children_map(fun, [id | ids], db, acc) do
     case fun.(id, :maps.get(id, db)) do
       {:update, child} ->
-        children_map(fun, ids, %{db | id => child}, [id | acc])
+        children_map(fun, ids, Map.put(db, id, child), [id | acc])
 
       :remove ->
         children_map(fun, ids, :maps.remove(id, db), acc)
@@ -1520,7 +1520,7 @@ defmodule :m_supervisor do
       thrown ->
         thrown
     else
-      %{:strategy => strategy, :intensity => maxIntensity, :period => period} ->
+      %{strategy: strategy, intensity: maxIntensity, period: period} ->
         {:ok, r_state(state, strategy: strategy, intensity: maxIntensity, period: period)}
     end
   end
@@ -1528,23 +1528,21 @@ defmodule :m_supervisor do
   defp check_flags(supFlags) when is_map(supFlags) do
     do_check_flags(
       :maps.merge(
-        %{:strategy => :one_for_one, :intensity => 1, :period => 5},
+        %{strategy: :one_for_one, intensity: 1, period: 5},
         supFlags
       )
     )
   end
 
   defp check_flags({strategy, maxIntensity, period}) do
-    check_flags(%{:strategy => strategy, :intensity => maxIntensity, :period => period})
+    check_flags(%{strategy: strategy, intensity: maxIntensity, period: period})
   end
 
   defp check_flags(what) do
     throw({:invalid_type, what})
   end
 
-  defp do_check_flags(
-         %{:strategy => strategy, :intensity => maxIntensity, :period => period} = flags
-       ) do
+  defp do_check_flags(%{strategy: strategy, intensity: maxIntensity, period: period} = flags) do
     validStrategy(strategy)
     validIntensity(maxIntensity)
     validPeriod(period)
@@ -1609,7 +1607,7 @@ defmodule :m_supervisor do
             {:duplicate_child_name, id}
 
           false ->
-            check_startspec(t, [id | ids], %{db | id => child})
+            check_startspec(t, [id | ids], Map.put(db, id, child))
         end
 
       error ->
@@ -1625,7 +1623,7 @@ defmodule :m_supervisor do
     try do
       do_check_childspec(
         :maps.merge(
-          %{:restart => :permanent, :type => :worker},
+          %{restart: :permanent, type: :worker},
           childSpec
         )
       )
@@ -1638,12 +1636,12 @@ defmodule :m_supervisor do
 
   defp check_childspec({id, func, restartType, shutdown, childType, mods}) do
     check_childspec(%{
-      :id => id,
-      :start => func,
-      :restart => restartType,
-      :shutdown => shutdown,
-      :type => childType,
-      :modules => mods
+      id: id,
+      start: func,
+      restart: restartType,
+      shutdown: shutdown,
+      type: childType,
+      modules: mods
     })
   end
 
@@ -1651,10 +1649,10 @@ defmodule :m_supervisor do
     {:invalid_child_spec, x}
   end
 
-  defp do_check_childspec(%{:restart => restartType, :type => childType} = childSpec) do
+  defp do_check_childspec(%{restart: restartType, type: childType} = childSpec) do
     id =
       case childSpec do
-        %{:id => i} ->
+        %{id: i} ->
           i
 
         _ ->
@@ -1663,7 +1661,7 @@ defmodule :m_supervisor do
 
     func =
       case childSpec do
-        %{:start => f} ->
+        %{start: f} ->
           f
 
         _ ->
@@ -1677,13 +1675,13 @@ defmodule :m_supervisor do
 
     shutdown =
       case childSpec do
-        %{:shutdown => s} ->
+        %{shutdown: s} ->
           s
 
-        %{:type => :worker} ->
+        %{type: :worker} ->
           5000
 
-        %{:type => :supervisor} ->
+        %{type: :supervisor} ->
           :infinity
       end
 
@@ -1691,7 +1689,7 @@ defmodule :m_supervisor do
 
     mods =
       case childSpec do
-        %{:modules => ms} ->
+        %{modules: ms} ->
           ms
 
         _ ->
@@ -1806,12 +1804,12 @@ defmodule :m_supervisor do
          )
        ) do
     %{
-      :id => id,
-      :start => func,
-      :restart => restartType,
-      :shutdown => shutdown,
-      :type => childType,
-      :modules => mods
+      id: id,
+      start: func,
+      restart: restartType,
+      shutdown: shutdown,
+      type: childType,
+      modules: mods
     }
   end
 
@@ -1877,23 +1875,23 @@ defmodule :m_supervisor do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:supervisor, :report_progress, 2},
-            :line => 1433,
-            :file => 'otp/lib/stdlib/src/supervisor.erl'
+            mfa: {:supervisor, :report_progress, 2},
+            line: 1433,
+            file: 'otp/lib/stdlib/src/supervisor.erl'
           },
           :info,
           %{
-            :label => {:supervisor, :progress},
-            :report => [{:supervisor, supName}, {:started, extract_child(child)}]
+            label: {:supervisor, :progress},
+            report: [{:supervisor, supName}, {:started, extract_child(child)}]
           },
           %{
-            :domain => [:otp, :sasl],
-            :report_cb => &:supervisor.format_log/2,
-            :logger_formatter => %{:title => 'PROGRESS REPORT'},
-            :error_logger => %{
-              :tag => :info_report,
-              :type => :progress,
-              :report_cb => &:supervisor.format_log/1
+            domain: [:otp, :sasl],
+            report_cb: &:supervisor.format_log/2,
+            logger_formatter: %{title: 'PROGRESS REPORT'},
+            error_logger: %{
+              tag: :info_report,
+              type: :progress,
+              report_cb: &:supervisor.format_log/1
             }
           }
         ])
@@ -1905,13 +1903,7 @@ defmodule :m_supervisor do
 
   def format_log(logReport) do
     depth = :error_logger.get_format_depth()
-
-    formatOpts = %{
-      :chars_limit => :unlimited,
-      :depth => depth,
-      :single_line => false,
-      :encoding => :utf8
-    }
+    formatOpts = %{chars_limit: :unlimited, depth: depth, single_line: false, encoding: :utf8}
 
     format_log_multi(
       limit_report(logReport, depth),
@@ -1925,18 +1917,18 @@ defmodule :m_supervisor do
 
   defp limit_report(
          %{
-           :label => {:supervisor, :progress},
-           :report => [{:supervisor, _} = supervisor, {:started, child}]
+           label: {:supervisor, :progress},
+           report: [{:supervisor, _} = supervisor, {:started, child}]
          } = logReport,
          depth
        ) do
-    %{logReport | :report => [supervisor, {:started, limit_child_report(child, depth)}]}
+    Map.put(logReport, :report, [supervisor, {:started, limit_child_report(child, depth)}])
   end
 
   defp limit_report(
          %{
-           :label => {:supervisor, _Error},
-           :report => [
+           label: {:supervisor, _Error},
+           report: [
              {:supervisor, _} = supervisor,
              {:errorContext, ctxt},
              {:reason, reason},
@@ -1945,15 +1937,16 @@ defmodule :m_supervisor do
          } = logReport,
          depth
        ) do
-    %{
-      logReport
-      | :report => [
-          supervisor,
-          {:errorContext, :io_lib.limit_term(ctxt, depth)},
-          {:reason, :io_lib.limit_term(reason, depth)},
-          {:offender, limit_child_report(child, depth)}
-        ]
-    }
+    Map.put(logReport, :report, [
+      supervisor,
+      {:errorContext, :io_lib.limit_term(ctxt, depth)},
+      {:reason, :io_lib.limit_term(reason, depth)},
+      {:offender,
+       limit_child_report(
+         child,
+         depth
+       )}
+    ])
   end
 
   defp limit_child_report(report, depth) do
@@ -1961,21 +1954,15 @@ defmodule :m_supervisor do
   end
 
   def format_log(report, formatOpts0) do
-    default = %{
-      :chars_limit => :unlimited,
-      :depth => :unlimited,
-      :single_line => false,
-      :encoding => :utf8
-    }
-
+    default = %{chars_limit: :unlimited, depth: :unlimited, single_line: false, encoding: :utf8}
     formatOpts = :maps.merge(default, formatOpts0)
 
     ioOpts =
       case formatOpts do
-        %{:chars_limit => :unlimited} ->
+        %{chars_limit: :unlimited} ->
           []
 
-        %{:chars_limit => limit} ->
+        %{chars_limit: limit} ->
           [{:chars_limit, limit}]
       end
 
@@ -1984,11 +1971,8 @@ defmodule :m_supervisor do
   end
 
   defp format_log_single(
-         %{
-           :label => {:supervisor, :progress},
-           :report => [{:supervisor, supName}, {:started, child}]
-         },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{label: {:supervisor, :progress}, report: [{:supervisor, supName}, {:started, child}]},
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     {childFormat, childArgs} = format_child_log_single(child, 'Started:')
@@ -2008,15 +1992,15 @@ defmodule :m_supervisor do
 
   defp format_log_single(
          %{
-           :label => {:supervisor, _Error},
-           :report => [
+           label: {:supervisor, _Error},
+           report: [
              {:supervisor, supName},
              {:errorContext, ctxt},
              {:reason, reason},
              {:offender, child}
            ]
          },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = :lists.append(['Supervisor: ', p, '. Context: ', p, '. Reason: ', p, '.'])
@@ -2039,11 +2023,8 @@ defmodule :m_supervisor do
   end
 
   defp format_log_multi(
-         %{
-           :label => {:supervisor, :progress},
-           :report => [{:supervisor, supName}, {:started, child}]
-         },
-         %{:depth => depth} = formatOpts
+         %{label: {:supervisor, :progress}, report: [{:supervisor, supName}, {:started, child}]},
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = :lists.append(['    supervisor: ', p, '~n', '    started: ', p, '~n'])
@@ -2062,15 +2043,15 @@ defmodule :m_supervisor do
 
   defp format_log_multi(
          %{
-           :label => {:supervisor, _Error},
-           :report => [
+           label: {:supervisor, _Error},
+           report: [
              {:supervisor, supName},
              {:errorContext, ctxt},
              {:reason, reason},
              {:offender, child}
            ]
          },
-         %{:depth => depth} = formatOpts
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
 
@@ -2116,7 +2097,7 @@ defmodule :m_supervisor do
     end
   end
 
-  defp p(%{:single_line => single, :depth => depth, :encoding => enc}) do
+  defp p(%{single_line: single, depth: depth, encoding: enc}) do
     '~' ++ single(single) ++ mod(enc) ++ p(depth)
   end
 
@@ -2163,10 +2144,10 @@ defmodule :m_supervisor do
   defp dyn_store(pid, args, r_state(dynamics: {kind, db}) = state) do
     case kind do
       :mapsets ->
-        r_state(state, dynamics: {:mapsets, %{db | pid => []}})
+        r_state(state, dynamics: {:mapsets, Map.put(db, pid, [])})
 
       :maps ->
-        r_state(state, dynamics: {:maps, %{db | pid => args}})
+        r_state(state, dynamics: {:maps, Map.put(db, pid, args)})
     end
   end
 

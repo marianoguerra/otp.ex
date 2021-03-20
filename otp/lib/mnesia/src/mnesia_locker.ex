@@ -1743,11 +1743,19 @@ defmodule :m_mnesia_locker do
 
   defp pid_to_pid_info(pid) when is_pid(pid) do
     [
-      [131, 103, 100, nNL1, nNL0]
+      131,
+      103,
+      100,
+      nNL1,
+      nNL0
       | rest
     ] = :erlang.binary_to_list(:erlang.term_to_binary(pid))
 
-    [n3, n2, n1, n0, s3, s2, s1, s0, creation] = drop(bytes2int(nNL1, nNL0), rest)
+    [n3, n2, n1, n0, s3, s2, s1, s0, creation] =
+      drop(
+        bytes2int(nNL1, nNL0),
+        rest
+      )
 
     r_pid_info(
       serial: bytes2int(s3, s2, s1, s0),

@@ -77,7 +77,7 @@ defmodule :m_beam_ssa_lint do
       []
     catch
       reason ->
-        %{:func_info => mFA} = r_b_function(f, :anno)
+        %{func_info: mFA} = r_b_function(f, :anno)
         [{mFA, reason}]
 
       class, error ->
@@ -139,7 +139,7 @@ defmodule :m_beam_ssa_lint do
         throw({:redefined_variable, dst, old, i})
 
       _ ->
-        vvars_assert_unique_1(is, %{defined | dst => i})
+        vvars_assert_unique_1(is, Map.put(defined, dst, i))
     end
   end
 
@@ -297,10 +297,7 @@ defmodule :m_beam_ssa_lint do
   end
 
   defp vvars_block_1(
-         [
-           [r_b_set(op: {:succeeded, :guard}, args: args) = i, _]
-           | _
-         ],
+         [r_b_set(op: {:succeeded, :guard}, args: args) = i, _ | _],
          _Terminator,
          state
        ) do
@@ -450,11 +447,11 @@ defmodule :m_beam_ssa_lint do
     case branches0 do
       %{^to => lblDefVars} ->
         mergedVars = vvars_merge_branches(defVars, lblDefVars)
-        branches = %{branches0 | to => mergedVars, {from, to} => defVars}
+        branches = Map.merge(branches0, %{to => mergedVars, {from, to} => defVars})
         r_vvars(state, branch_def_vars: branches)
 
       _ ->
-        branches = %{branches0 | to => defVars, {from, to} => defVars}
+        branches = Map.merge(branches0, %{to => defVars, {from, to} => defVars})
         r_vvars(state, branch_def_vars: branches)
     end
   end

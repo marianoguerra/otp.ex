@@ -71,11 +71,7 @@ defmodule :m_ttb_et do
 
     {caller, newAcc} =
       case :dict.find(pid, acc) do
-        {:ok,
-         [
-           [r_event(label: :return_from) = retFrom, r_event(label: :return_to) = retTo]
-           | rets
-         ]} ->
+        {:ok, [r_event(label: :return_from) = retFrom, r_event(label: :return_to) = retTo | rets]} ->
           retToCont = r_event(retTo, :contents)
           c = get_mfarity(retToCont)
           newRetTo = r_event(retTo, contents: retToCont ++ [{:return_from, mFA}])

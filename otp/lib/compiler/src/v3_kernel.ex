@@ -604,10 +604,11 @@ defmodule :m_v3_kernel do
   defp expr(r_c_call(anno: a, module: m0, name: f0, args: cargs), sub, st0) do
     ar = length(cargs)
 
-    {[[m, f] | kargs], ap, st1} =
+    {[m, f | kargs], ap, st1} =
       atomic_list(
         [
-          [m0, f0]
+          m0,
+          f0
           | cargs
         ],
         sub,
@@ -865,7 +866,7 @@ defmodule :m_v3_kernel do
           :assoc
       end
 
-    used1 = %{used0 | k => {op, k0, v}}
+    used1 = Map.put(used0, k, {op, k0, v})
     map_remove_dup_keys(es0, used1)
   end
 
@@ -881,7 +882,7 @@ defmodule :m_v3_kernel do
           :exact
       end
 
-    used1 = %{used0 | k => {op, k0, v}}
+    used1 = Map.put(used0, k, {op, k0, v})
     map_remove_dup_keys(es0, used1)
   end
 
@@ -1358,7 +1359,7 @@ defmodule :m_v3_kernel do
 
   defp bimap_set(key, val, {map0, invMap0}) do
     invMap = bm_update_inv_lookup(key, val, map0, invMap0)
-    map = %{map0 | key => val}
+    map = Map.put(map0, key, val)
     {map, invMap}
   end
 
@@ -1370,7 +1371,7 @@ defmodule :m_v3_kernel do
         %{invMap | val => :ordsets.add_element(key, keys)}
 
       %{} ->
-        %{invMap | val => [key]}
+        Map.put(invMap, val, [key])
     end
   end
 
@@ -1397,10 +1398,10 @@ defmodule :m_v3_kernel do
   defp bimap_rename(key, val, {map0, invMap0})
        when :erlang.is_map_key(key, invMap0) do
     keys = :erlang.map_get(key, invMap0)
-    map1 = %{map0 | key => val}
+    map1 = Map.put(map0, key, val)
     map = bimap_update_lookup(keys, val, map1)
     invMap1 = :maps.remove(key, invMap0)
-    invMap = %{invMap1 | val => :ordsets.add_element(key, keys)}
+    invMap = Map.put(invMap1, val, :ordsets.add_element(key, keys))
     {map, invMap}
   end
 
@@ -1878,7 +1879,7 @@ defmodule :m_v3_kernel do
 
     case reverse(ttcAcc) do
       [{:k_binary, _} = bin | ttcs] ->
-        [[bin, literals] | ttcs]
+        [bin, literals | ttcs]
 
       ttcs ->
         [literals | ttcs]
@@ -2130,7 +2131,7 @@ defmodule :m_v3_kernel do
     )
   end
 
-  defp partition_intersection(:k_map, [u | _] = us, [[_, _] | _] = cs0, st0) do
+  defp partition_intersection(:k_map, [u | _] = us, [_, _ | _] = cs0, st0) do
     ps =
       for c <- cs0 do
         clause_val(c)
@@ -2145,7 +2146,7 @@ defmodule :m_v3_kernel do
           map(
             fn r_iclause(pats: [arg | args]) = c ->
               {arg1, arg2} = partition_keys(arg, ks)
-              r_iclause(c, pats: [[arg1, arg2] | args])
+              r_iclause(c, pats: [arg1, arg2 | args])
             end,
             cs0
           )
@@ -2253,7 +2254,7 @@ defmodule :m_v3_kernel do
         group_values(cs, %{acc | val => [c | gcs]})
 
       %{} ->
-        group_values(cs, %{acc | val => [c]})
+        group_values(cs, Map.put(acc, val, [c]))
     end
   end
 
@@ -2366,7 +2367,7 @@ defmodule :m_v3_kernel do
           head =
             case arg_arg(arg) do
               r_k_cons(hd: h, tl: t) ->
-                [[h, t] | as]
+                [h, t | as]
 
               r_k_tuple(es: es) ->
                 es ++ as
@@ -2378,7 +2379,7 @@ defmodule :m_v3_kernel do
                 [s | as]
 
               r_k_bin_seg(seg: s, next: n) ->
-                [[s, n] | as]
+                [s, n | as]
 
               r_k_bin_int(next: n) ->
                 [n | as]
@@ -3080,7 +3081,7 @@ defmodule :m_v3_kernel do
 
   defp store_free(f, a, free, r_kern(free: freeMap0) = st) do
     key = {f, a}
-    freeMap = %{freeMap0 | key => free}
+    freeMap = Map.put(freeMap0, key, free)
     r_kern(st, free: freeMap)
   end
 

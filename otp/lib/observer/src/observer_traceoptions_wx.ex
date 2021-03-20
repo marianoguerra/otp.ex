@@ -1045,7 +1045,8 @@ defmodule :m_observer_traceoptions_wx do
     case :wxDialog.showModal(dialog) do
       5100 ->
         res = [
-          [{:window, :wxCheckBox.getValue(winB)}, {:shell, :wxCheckBox.getValue(shellB)}]
+          {:window, :wxCheckBox.getValue(winB)},
+          {:shell, :wxCheckBox.getValue(shellB)}
           | getFileOpts.()
         ]
 

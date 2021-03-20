@@ -993,7 +993,15 @@ defmodule :m_dialyzer_dataflow do
         case is_opaque_type_test_problem(fun, args, newArgTypes, state) do
           {:yes, arg, argType} ->
             {:opaque_type_test,
-             [:erlang.atom_to_list(f), argStrings, format_arg(arg), format_type(argType, state)]}
+             [
+               :erlang.atom_to_list(f),
+               argStrings,
+               format_arg(arg),
+               format_type(
+                 argType,
+                 state
+               )
+             ]}
 
           :no ->
             sigArgs = t_fun_args(sig)
@@ -1036,8 +1044,14 @@ defmodule :m_dialyzer_dataflow do
                            argStrings,
                            argNs,
                            failReason,
-                           format_sig_args(sig, state),
-                           format_type(t_fun_range(sig), state),
+                           format_sig_args(
+                             sig,
+                             state
+                           ),
+                           format_type(
+                             t_fun_range(sig),
+                             state
+                           ),
                            contractInfo
                          ]}
 
@@ -1054,8 +1068,14 @@ defmodule :m_dialyzer_dataflow do
            argStrings,
            argNs,
            failReason,
-           format_sig_args(sig, state),
-           format_type(t_fun_range(sig), state),
+           format_sig_args(
+             sig,
+             state
+           ),
+           format_type(
+             t_fun_range(sig),
+             state
+           ),
            contractInfo
          ]}
     end
@@ -1279,13 +1299,27 @@ defmodule :m_dialyzer_dataflow do
               case t_is_none(sizeType) do
                 true ->
                   {{:bin_construction,
-                    ['size', format_cerl(size), format_cerl(tree), format_type(sizeType0, state2)]},
-                   size}
+                    [
+                      'size',
+                      format_cerl(size),
+                      format_cerl(tree),
+                      format_type(
+                        sizeType0,
+                        state2
+                      )
+                    ]}, size}
 
                 false ->
                   {{:bin_construction,
-                    ['value', format_cerl(val), format_cerl(tree), format_type(valType0, state2)]},
-                   val}
+                    [
+                      'value',
+                      format_cerl(val),
+                      format_cerl(tree),
+                      format_type(
+                        valType0,
+                        state2
+                      )
+                    ]}, val}
               end
 
             state3 = state__add_warning(state2, :warn_bin_construction, offending, msg)
@@ -1334,8 +1368,8 @@ defmodule :m_dialyzer_dataflow do
     m = :cerl.call_module(tree)
     f = :cerl.call_name(tree)
     args = :cerl.call_args(tree)
-    mFAList = [[m, f] | args]
-    {state1, map1, [[mType0, fType0] | as]} = traverse_list(mFAList, map, state)
+    mFAList = [m, f | args]
+    {state1, map1, [mType0, fType0 | as]} = traverse_list(mFAList, map, state)
     opaques = r_state(state, :opaques)
     mType = t_inf(t_module(), mType0, opaques)
     fType = t_inf(t_atom(), fType0, opaques)
@@ -1343,7 +1377,7 @@ defmodule :m_dialyzer_dataflow do
     mOpaque = t_is_none(mType) and not t_is_none(mType0)
     fOpaque = t_is_none(fType) and not t_is_none(fType0)
 
-    case any_none([[mType, fType] | as]) do
+    case any_none([mType, fType | as]) do
       true ->
         state2 =
           cond do
@@ -1359,8 +1393,14 @@ defmodule :m_dialyzer_dataflow do
                        format_cerl(f),
                        format_args(args, as, state1),
                        mS,
-                       format_type(t_module(), state1),
-                       format_type(mType0, state1)
+                       format_type(
+                         t_module(),
+                         state1
+                       ),
+                       format_type(
+                         mType0,
+                         state1
+                       )
                      ]}
 
                   state__add_warning(state1, :warn_failing_call, tree, msg)
@@ -1373,7 +1413,10 @@ defmodule :m_dialyzer_dataflow do
                        format_cerl(f),
                        format_args(args, as, state1),
                        mS,
-                       format_type(mType0, state1)
+                       format_type(
+                         mType0,
+                         state1
+                       )
                      ]}
 
                   state__add_warning(state1, :warn_failing_call, tree, msg)
@@ -1391,8 +1434,14 @@ defmodule :m_dialyzer_dataflow do
                        fS,
                        format_args(args, as, state1),
                        fS,
-                       format_type(t_atom(), state1),
-                       format_type(fType0, state1)
+                       format_type(
+                         t_atom(),
+                         state1
+                       ),
+                       format_type(
+                         fType0,
+                         state1
+                       )
                      ]}
 
                   state__add_warning(state1, :warn_failing_call, tree, msg)
@@ -1405,7 +1454,10 @@ defmodule :m_dialyzer_dataflow do
                        fS,
                        format_args(args, as, state1),
                        fS,
-                       format_type(fType0, state1)
+                       format_type(
+                         fType0,
+                         state1
+                       )
                      ]}
 
                   state__add_warning(state1, :warn_failing_call, tree, msg)
@@ -1815,7 +1867,14 @@ defmodule :m_dialyzer_dataflow do
                           {:error, :bind, errorPat, errorType, _} ->
                             msg =
                               {:record_constr,
-                               [tagVal, format_patterns(errorPat), format_type(errorType, state1)]}
+                               [
+                                 tagVal,
+                                 format_patterns(errorPat),
+                                 format_type(
+                                   errorType,
+                                   state1
+                                 )
+                               ]}
 
                             state2 = state__add_warning(state1, :warn_matching, tree, msg)
                             {state2, map1, t_none()}
@@ -2165,12 +2224,21 @@ defmodule :m_dialyzer_dataflow do
                         ]
 
                       :record ->
-                        [patString, format_type(type, state1)]
+                        [
+                          patString,
+                          format_type(
+                            type,
+                            state1
+                          )
+                        ]
 
                       :opaque ->
                         [
                           patString,
-                          format_type(type, state1),
+                          format_type(
+                            type,
+                            state1
+                          ),
                           format_type(
                             opaqueTerm,
                             state1
@@ -4067,7 +4135,11 @@ defmodule :m_dialyzer_dataflow do
           [
             format_args_1([arg1], [argType1], state),
             :erlang.atom_to_list(f),
-            format_args_1([arg2], [argType2], state)
+            format_args_1(
+              [arg2],
+              [argType2],
+              state
+            )
           ] ++ xInfo
 
         false ->

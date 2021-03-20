@@ -801,15 +801,61 @@ defmodule :m_erl_lint do
       {:bif_clash, bool_option(:warn_bif_clash, :nowarn_bif_clash, true, opts)},
       {:unused_record, bool_option(:warn_unused_record, :nowarn_unused_record, true, opts)},
       {:deprecated_function,
-       bool_option(:warn_deprecated_function, :nowarn_deprecated_function, true, opts)},
-      {:deprecated_type, bool_option(:warn_deprecated_type, :nowarn_deprecated_type, true, opts)},
-      {:obsolete_guard, bool_option(:warn_obsolete_guard, :nowarn_obsolete_guard, true, opts)},
-      {:untyped_record, bool_option(:warn_untyped_record, :nowarn_untyped_record, false, opts)},
-      {:missing_spec, bool_option(:warn_missing_spec, :nowarn_missing_spec, false, opts)},
+       bool_option(
+         :warn_deprecated_function,
+         :nowarn_deprecated_function,
+         true,
+         opts
+       )},
+      {:deprecated_type,
+       bool_option(
+         :warn_deprecated_type,
+         :nowarn_deprecated_type,
+         true,
+         opts
+       )},
+      {:obsolete_guard,
+       bool_option(
+         :warn_obsolete_guard,
+         :nowarn_obsolete_guard,
+         true,
+         opts
+       )},
+      {:untyped_record,
+       bool_option(
+         :warn_untyped_record,
+         :nowarn_untyped_record,
+         false,
+         opts
+       )},
+      {:missing_spec,
+       bool_option(
+         :warn_missing_spec,
+         :nowarn_missing_spec,
+         false,
+         opts
+       )},
       {:missing_spec_all,
-       bool_option(:warn_missing_spec_all, :nowarn_missing_spec_all, false, opts)},
-      {:removed, bool_option(:warn_removed, :nowarn_removed, true, opts)},
-      {:nif_inline, bool_option(:warn_nif_inline, :nowarn_nif_inline, true, opts)}
+       bool_option(
+         :warn_missing_spec_all,
+         :nowarn_missing_spec_all,
+         false,
+         opts
+       )},
+      {:removed,
+       bool_option(
+         :warn_removed,
+         :nowarn_removed,
+         true,
+         opts
+       )},
+      {:nif_inline,
+       bool_option(
+         :warn_nif_inline,
+         :nowarn_nif_inline,
+         true,
+         opts
+       )}
     ]
 
     enabled1 =
@@ -2303,7 +2349,7 @@ defmodule :m_erl_lint do
       r_lint(on_load: [{_, _}]) ->
         add_error(line, {:bad_on_load_arity, fa}, st)
 
-      r_lint(on_load: [[_, _] | _]) ->
+      r_lint(on_load: [_, _ | _]) ->
         add_error(line, :multiple_on_loads, st)
     end
   end
@@ -3851,7 +3897,7 @@ defmodule :m_erl_lint do
           st2
       end
 
-    expr_list([[m, f] | as], vt, st3)
+    expr_list([m, f | as], vt, st3)
   end
 
   defp expr({:call, line, {:atom, la, f}, as}, vt, st0) do
@@ -6243,7 +6289,7 @@ defmodule :m_erl_lint do
     end
   end
 
-  defp extract_sequence(1, [[?-, c] | fmt], need)
+  defp extract_sequence(1, [?-, c | fmt], need)
        when c >= ?0 and
               c <= ?9 do
     extract_sequence_digits(1, fmt, need)
@@ -6255,7 +6301,7 @@ defmodule :m_erl_lint do
     extract_sequence_digits(1, fmt, need)
   end
 
-  defp extract_sequence(1, [[?-, ?*] | fmt], need) do
+  defp extract_sequence(1, [?-, ?* | fmt], need) do
     extract_sequence(2, fmt, [:int | need])
   end
 
@@ -6267,13 +6313,13 @@ defmodule :m_erl_lint do
     extract_sequence(2, fmt, need)
   end
 
-  defp extract_sequence(2, [[?., c] | fmt], need)
+  defp extract_sequence(2, [?., c | fmt], need)
        when c >= ?0 and
               c <= ?9 do
     extract_sequence_digits(2, fmt, need)
   end
 
-  defp extract_sequence(2, [[?., ?*] | fmt], need) do
+  defp extract_sequence(2, [?., ?* | fmt], need) do
     extract_sequence(3, fmt, [:int | need])
   end
 
@@ -6285,11 +6331,11 @@ defmodule :m_erl_lint do
     extract_sequence(4, fmt, need)
   end
 
-  defp extract_sequence(3, [[?., ?*] | fmt], need) do
+  defp extract_sequence(3, [?., ?* | fmt], need) do
     extract_sequence(4, fmt, [:int | need])
   end
 
-  defp extract_sequence(3, [[?., _] | fmt], need) do
+  defp extract_sequence(3, [?., _ | fmt], need) do
     extract_sequence(4, fmt, need)
   end
 
@@ -6297,59 +6343,59 @@ defmodule :m_erl_lint do
     extract_sequence(4, fmt, need)
   end
 
-  defp extract_sequence(4, [[?t, ?l] | fmt], need) do
-    extract_sequence(4, [[?l, ?t] | fmt], need)
+  defp extract_sequence(4, [?t, ?l | fmt], need) do
+    extract_sequence(4, [?l, ?t | fmt], need)
   end
 
-  defp extract_sequence(4, [[?t, ?c] | fmt], need) do
+  defp extract_sequence(4, [?t, ?c | fmt], need) do
     extract_sequence(5, [?c | fmt], need)
   end
 
-  defp extract_sequence(4, [[?t, ?s] | fmt], need) do
+  defp extract_sequence(4, [?t, ?s | fmt], need) do
     extract_sequence(5, [?s | fmt], need)
   end
 
-  defp extract_sequence(4, [[?t, ?p] | fmt], need) do
+  defp extract_sequence(4, [?t, ?p | fmt], need) do
     extract_sequence(5, [?p | fmt], need)
   end
 
-  defp extract_sequence(4, [[?t, ?P] | fmt], need) do
+  defp extract_sequence(4, [?t, ?P | fmt], need) do
     extract_sequence(5, [?P | fmt], need)
   end
 
-  defp extract_sequence(4, [[?t, ?w] | fmt], need) do
+  defp extract_sequence(4, [?t, ?w | fmt], need) do
     extract_sequence(5, [?w | fmt], need)
   end
 
-  defp extract_sequence(4, [[?t, ?W] | fmt], need) do
+  defp extract_sequence(4, [?t, ?W | fmt], need) do
     extract_sequence(5, [?W | fmt], need)
   end
 
-  defp extract_sequence(4, [[?t, c] | _Fmt], _Need) do
+  defp extract_sequence(4, [?t, c | _Fmt], _Need) do
     {:error, 'invalid control ~t' ++ [c]}
   end
 
-  defp extract_sequence(4, [[?l, ?p] | fmt], need) do
+  defp extract_sequence(4, [?l, ?p | fmt], need) do
     extract_sequence(5, [?p | fmt], need)
   end
 
-  defp extract_sequence(4, [[?l, ?t, ?p] | fmt], need) do
+  defp extract_sequence(4, [?l, ?t, ?p | fmt], need) do
     extract_sequence(5, [?p | fmt], need)
   end
 
-  defp extract_sequence(4, [[?l, ?P] | fmt], need) do
+  defp extract_sequence(4, [?l, ?P | fmt], need) do
     extract_sequence(5, [?P | fmt], need)
   end
 
-  defp extract_sequence(4, [[?l, ?t, ?P] | fmt], need) do
+  defp extract_sequence(4, [?l, ?t, ?P | fmt], need) do
     extract_sequence(5, [?P | fmt], need)
   end
 
-  defp extract_sequence(4, [[?l, ?t, c] | _Fmt], _Need) do
+  defp extract_sequence(4, [?l, ?t, c | _Fmt], _Need) do
     {:error, 'invalid control ~lt' ++ [c]}
   end
 
-  defp extract_sequence(4, [[?l, c] | _Fmt], _Need) do
+  defp extract_sequence(4, [?l, c | _Fmt], _Need) do
     {:error, 'invalid control ~l' ++ [c]}
   end
 
@@ -6414,11 +6460,11 @@ defmodule :m_erl_lint do
   end
 
   defp control_type(?W, need) do
-    [[:int, :term] | need]
+    [:int, :term | need]
   end
 
   defp control_type(?P, need) do
-    [[:int, :term] | need]
+    [:int, :term | need]
   end
 
   defp control_type(?b, need) do
@@ -6430,11 +6476,11 @@ defmodule :m_erl_lint do
   end
 
   defp control_type(?x, need) do
-    [[:string, :term] | need]
+    [:string, :term | need]
   end
 
   defp control_type(?X, need) do
-    [[:string, :term] | need]
+    [:string, :term | need]
   end
 
   defp control_type(?+, need) do

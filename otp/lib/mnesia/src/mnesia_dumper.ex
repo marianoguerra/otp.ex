@@ -944,7 +944,10 @@ defmodule :m_mnesia_dumper do
         etsProps = :proplists.get_value(:ets, storageProps, [])
 
         args = [
-          [{:keypos, 2}, :public, :named_table, type]
+          {:keypos, 2},
+          :public,
+          :named_table,
+          type
           | etsProps
         ]
 
@@ -954,7 +957,10 @@ defmodule :m_mnesia_dumper do
         etsProps = :proplists.get_value(:ets, storageProps, [])
 
         args = [
-          [{:keypos, 2}, :public, :named_table, type]
+          {:keypos, 2},
+          :public,
+          :named_table,
+          type
           | etsProps
         ]
 
@@ -977,12 +983,14 @@ defmodule :m_mnesia_dumper do
         detsProps = :proplists.get_value(:dets, storageProps, [])
 
         args = [
-          [
-            {:file, :mnesia_lib.tab2dat(tab)},
-            {:type, :mnesia_lib.disk_type(tab, type)},
-            {:keypos, 2},
-            {:repair, :mnesia_monitor.get_env(:auto_repair)}
-          ]
+          {:file, :mnesia_lib.tab2dat(tab)},
+          {:type,
+           :mnesia_lib.disk_type(
+             tab,
+             type
+           )},
+          {:keypos, 2},
+          {:repair, :mnesia_monitor.get_env(:auto_repair)}
           | detsProps
         ]
 
@@ -1456,12 +1464,14 @@ defmodule :m_mnesia_dumper do
 
   defp try_create_disc_only_copy(:disc_only_copies, tab, cs, detsProps) do
     args = [
-      [
-        {:file, :mnesia_lib.tab2dat(tab)},
-        {:type, :mnesia_lib.disk_type(tab, r_cstruct(cs, :type))},
-        {:keypos, 2},
-        {:repair, :mnesia_monitor.get_env(:auto_repair)}
-      ]
+      {:file, :mnesia_lib.tab2dat(tab)},
+      {:type,
+       :mnesia_lib.disk_type(
+         tab,
+         r_cstruct(cs, :type)
+       )},
+      {:keypos, 2},
+      {:repair, :mnesia_monitor.get_env(:auto_repair)}
       | detsProps
     ]
 
@@ -1511,12 +1521,14 @@ defmodule :m_mnesia_dumper do
                 fname = prepare_open(tab, updateInPlace)
 
                 args = [
-                  [
-                    {:file, fname},
-                    {:keypos, 2},
-                    {:repair, :mnesia_monitor.get_env(:auto_repair)},
-                    {:type, :mnesia_lib.disk_type(tab, type)}
-                  ]
+                  {:file, fname},
+                  {:keypos, 2},
+                  {:repair, :mnesia_monitor.get_env(:auto_repair)},
+                  {:type,
+                   :mnesia_lib.disk_type(
+                     tab,
+                     type
+                   )}
                   | detsProps
                 ]
 

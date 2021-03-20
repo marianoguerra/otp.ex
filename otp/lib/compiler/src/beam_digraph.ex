@@ -16,7 +16,7 @@ defmodule :m_beam_digraph do
     r_dg(in_es: inEsMap0, out_es: outEsMap0, vs: vs0) = dg
     inEsMap = init_edge_map(v, inEsMap0)
     outEsMap = init_edge_map(v, outEsMap0)
-    vs = %{vs0 | v => label}
+    vs = Map.put(vs0, v, label)
     r_dg(dg, vs: vs, in_es: inEsMap, out_es: outEsMap)
   end
 
@@ -26,7 +26,7 @@ defmodule :m_beam_digraph do
         esMap
 
       false ->
-        %{esMap | v => :ordsets.new()}
+        Map.put(esMap, v, :ordsets.new())
     end
   end
 
@@ -196,12 +196,12 @@ defmodule :m_beam_digraph do
 
   defp sc_1([v | vs], g, roots0, components) when not :erlang.is_map_key(v, roots0) do
     {roots, component} = sc_2([v], g, v, roots0, [])
-    sc_1(vs, g, roots, %{components | v => component})
+    sc_1(vs, g, roots, Map.put(components, v, component))
   end
 
   defp sc_1([v | vs], g, roots, components0) do
     root = :erlang.map_get(v, roots)
-    components = %{components0 | v => :erlang.map_get(root, components0)}
+    components = Map.put(components0, v, :erlang.map_get(root, components0))
     sc_1(vs, g, roots, components)
   end
 
@@ -210,7 +210,7 @@ defmodule :m_beam_digraph do
   end
 
   defp sc_2([v | vs], g, root, roots, acc) when not :erlang.is_map_key(v, roots) do
-    sc_2(in_neighbours(g, v) ++ vs, g, root, %{roots | v => root}, [v | acc])
+    sc_2(in_neighbours(g, v) ++ vs, g, root, Map.put(roots, v, root), [v | acc])
   end
 
   defp sc_2([_V | vs], g, root, roots, acc) do

@@ -57,7 +57,8 @@ defmodule :m_beam_ssa_share do
       r_b_br(succ: same, fail: same) = last ->
         case reverse(is0) do
           [
-            [r_b_set(op: {:succeeded, kind}, args: [dst]), r_b_set(dst: dst)]
+            r_b_set(op: {:succeeded, kind}, args: [dst]),
+            r_b_set(dst: dst)
             | is
           ] ->
             :guard = kind
@@ -93,7 +94,7 @@ defmodule :m_beam_ssa_share do
       r_b_function(f, bs: blocks)
     catch
       class, error ->
-        %{:func_info => {_, name, arity}} = anno
+        %{func_info: {_, name, arity}} = anno
         :io.fwrite('Function: ~w/~w\n', [name, arity])
         :erlang.raise(class, error, __STACKTRACE__)
     end
@@ -266,7 +267,7 @@ defmodule :m_beam_ssa_share do
         share_switch_1(t, blocks, %{map | can => [{next, res} | ls]})
 
       %{} ->
-        share_switch_1(t, blocks, %{map | can => [{next, res}]})
+        share_switch_1(t, blocks, Map.put(map, can, [{next, res}]))
     end
   end
 
@@ -329,7 +330,7 @@ defmodule :m_beam_ssa_share do
       end
 
     var = {:var, map_size(varMap0)}
-    varMap = %{varMap0 | dst => var}
+    varMap = Map.put(varMap0, dst, var)
 
     lineAnno =
       case op do

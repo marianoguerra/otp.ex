@@ -232,8 +232,21 @@ defmodule :m_docgen_otp_specs do
     [
       r_xmlText(value: '\n' ++ :lists.duplicate(2, ?\s)),
       {:name, [atom(get_attrval(:name, e))]},
-      r_xmlText(value: '\n' ++ :lists.duplicate(2, ?\s)),
-      {:arity, [get_attrval(:arity, e)]}
+      r_xmlText(
+        value:
+          '\n' ++
+            :lists.duplicate(
+              2,
+              ?\s
+            )
+      ),
+      {:arity,
+       [
+         get_attrval(
+           :arity,
+           e
+         )
+       ]}
     ]
   end
 
@@ -319,7 +332,14 @@ defmodule :m_docgen_otp_specs do
     [
       r_xmlText(value: '\n' ++ :lists.duplicate(2, ?\s)),
       {:name, [atom(get_attrval(:name, e))]},
-      r_xmlText(value: '\n' ++ :lists.duplicate(2, ?\s)),
+      r_xmlText(
+        value:
+          '\n' ++
+            :lists.duplicate(
+              2,
+              ?\s
+            )
+      ),
       {:n_vars, [:erlang.integer_to_list(length(args))]}
     ]
   end
@@ -344,7 +364,10 @@ defmodule :m_docgen_otp_specs do
       end
 
     [r_xmlText(value: '\n' ++ :lists.duplicate(6, ?\s)), {:typehead, typeHead}] ++
-      local_type_defs(lDefs, [])
+      local_type_defs(
+        lDefs,
+        []
+      )
   end
 
   defp local_type_defs([], _) do
@@ -432,7 +455,8 @@ defmodule :m_docgen_otp_specs do
       {:string,
        nS ++
          typeS ++
-         for _ <- [:EFE_DUMMY_GEN], l === [] do
+         for _ <- [:EFE_DUMMY_GEN],
+             l === [] do
            last
          end}
     ]
@@ -1200,7 +1224,16 @@ defmodule :m_docgen_otp_specs do
   end
 
   defp ot_field(r_xmlElement(content: es)) do
-    {:type, 0, :field_type, [ot_type(get_elem(:atom, es)), ot_utype(get_elem(:type, es))]}
+    {:type, 0, :field_type,
+     [
+       ot_type(get_elem(:atom, es)),
+       ot_utype(
+         get_elem(
+           :type,
+           es
+         )
+       )
+     ]}
   end
 
   defp ot_abstype(es) do

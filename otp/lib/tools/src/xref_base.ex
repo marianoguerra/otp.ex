@@ -573,7 +573,7 @@ defmodule :m_xref_base do
 
     case :xref_utils.options(
            options,
-           [[:user, :predefined] | validOptions]
+           [:user, :predefined | validOptions]
          ) do
       {[user, predef, [oV]], []} ->
         case do_set_up(state, oV) do
@@ -1875,7 +1875,11 @@ defmodule :m_xref_base do
       mod_DF_1,
       mod_DF_2,
       mod_DF_3
-    ] = make_families(modDictList, 19)
+    ] =
+      make_families(
+        modDictList,
+        19
+      )
 
     {xC_1, xU, xPredefined} = do_set_up_1(xC)
     lC_1 = user_family(union_of_family(lC))
@@ -2719,12 +2723,7 @@ defmodule :m_xref_base do
   defp mod_info(xMod) do
     r_xref_mod(name: m, app_name: appName, builtins: builtIns, dir: dir, info: info) = xMod
     app = sup_info(appName)
-
-    {m,
-     [
-       [{:application, app}, {:builtins, builtIns}, {:directory, dir}]
-       | info
-     ]}
+    {m, [{:application, app}, {:builtins, builtIns}, {:directory, dir} | info]}
   end
 
   defp app_info({appName, modSums}, s) do
@@ -2734,7 +2733,9 @@ defmodule :m_xref_base do
 
     {appName,
      [
-       [{:directory, dir}, {:release, release}, {:version, vsn}]
+       {:directory, dir},
+       {:release, release},
+       {:version, vsn}
        | modSums
      ]}
   end
@@ -2746,7 +2747,8 @@ defmodule :m_xref_base do
 
     {relName,
      [
-       [{:directory, dir}, {:no_applications, noApps}]
+       {:directory, dir},
+       {:no_applications, noApps}
        | modSums
      ]}
   end

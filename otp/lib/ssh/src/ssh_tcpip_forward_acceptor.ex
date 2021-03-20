@@ -106,7 +106,9 @@ defmodule :m_ssh_tcpip_forward_acceptor do
         case :gen_tcp.listen(
                listenPort,
                [
-                 [:binary, {:reuseaddr, true}, {:active, false}]
+                 :binary,
+                 {:reuseaddr, true},
+                 {:active, false}
                  | opts
                ]
              ) do

@@ -856,7 +856,7 @@ defmodule :m_dets_v9 do
         slot = db_hash(key, head)
         from1 = from + size2
         [addr | aL] = :erlang.element(lSize, cache)
-        nCache = :erlang.setelement(lSize, cache, [[addr + size2, slotObjs] | aL])
+        nCache = :erlang.setelement(lSize, cache, [addr + size2, slotObjs | aL])
 
         nSegBs = [
           <<slot::size(32), size::size(32), addr::size(32), lSize::size(8)>>
@@ -1250,7 +1250,7 @@ defmodule :m_dets_v9 do
       | segBs
     ]
 
-    nCache = :erlang.setelement(lSize, cache, [[addr + bSz, bin] | l])
+    nCache = :erlang.setelement(lSize, cache, [addr + bSz, bin | l])
     make_slots(bins, nCache, nSegBs, nASz)
   end
 
@@ -1349,7 +1349,7 @@ defmodule :m_dets_v9 do
   defp write_segment_file(bins, bases, head, ws, segAddr, sS, pos, bSize, addrToBe, lSize) do
     addr = addrToBe + :erlang.element(lSize, bases)
     noZeros = pos - segAddr
-    nWs = [[ws, :dets_utils.make_zeros(noZeros)] | <<bSize::size(32), addr::size(32)>>]
+    nWs = [ws, :dets_utils.make_zeros(noZeros) | <<bSize::size(32), addr::size(32)>>]
     nSegAddr = segAddr + noZeros + 2 * 4
     write_segment_file(bins, bases, head, nWs, nSegAddr, sS)
   end
@@ -1625,11 +1625,7 @@ defmodule :m_dets_v9 do
     lSize = sz2pos(bSize)
     size2 = 1 <<< (lSize - 1)
     pad = <<0::size(size2 - bSize)-unit(8)>>
-
-    binObject = [
-      [<<bSize::size(32), 305_419_896::size(32)>>, bins]
-      | pad
-    ]
+    binObject = [<<bSize::size(32), 305_419_896::size(32)>>, bins | pad]
 
     cache1 =
       cond do
@@ -1680,13 +1676,13 @@ defmodule :m_dets_v9 do
 
   defp prep_set_slot([{_, k1, _Seq, _T1, bT1} | l], _K, bT, sz, noKeys, noObjs, ws) do
     bSize = byte_size(bT) + 4
-    nWs = [[ws, <<bSize::size(32)>>] | bT]
+    nWs = [ws, <<bSize::size(32)>> | bT]
     prep_set_slot(l, k1, bT1, sz + bSize, noKeys + 1, noObjs + 1, nWs)
   end
 
   defp prep_set_slot([], _K, bT, sz, noKeys, noObjs, ws) do
     bSize = byte_size(bT) + 4
-    {[[ws, <<bSize::size(32)>>] | bT], sz + bSize, noKeys + 1, noObjs + 1}
+    {[ws, <<bSize::size(32)>> | bT], sz + bSize, noKeys + 1, noObjs + 1}
   end
 
   defp segment_file(sizeT, head, fileData, segEnd) do
@@ -2095,7 +2091,7 @@ defmodule :m_dets_v9 do
           <<flBase::size(32)>>
       end
 
-    [[h1, digH, mD5, base] | <<0::size(124)-unit(8)>>]
+    [h1, digH, mD5, base | <<0::size(124)-unit(8)>>]
   end
 
   defp free_lists_to_file(h) do
@@ -2126,7 +2122,7 @@ defmodule :m_dets_v9 do
 
         size = n1 * 4 + 4 + 8
         header = <<size::size(32), 61_591_023::size(32), pos::size(32)>>
-        nW = [[w, header] | l1]
+        nW = [w, header | l1]
 
         case more do
           :no_more ->
@@ -2213,7 +2209,7 @@ defmodule :m_dets_v9 do
        )
        when size >= 16 and a < a1 and a1 < a2 and a2 < a3 and
               a3 < a4 do
-    bin_to_tree1(t, size - 16, a4, [[a4, a3, a2, a1] | l])
+    bin_to_tree1(t, size - 16, a4, [a4, a3, a2, a1 | l])
   end
 
   defp bin_to_tree1(<<a1::size(32), t::binary>>, size, a, l)
@@ -2378,7 +2374,7 @@ defmodule :m_dets_v9 do
     {head1, binFS, binTS, wsB} = re_hash_slots(bins, l, head, z, [], [], [])
     wPos1 = pos1 - 2 * 4 * length(l)
     wPos2 = pos2 - 2 * 4 * length(l)
-    toWrite = [[{wPos1, binFS}, {wPos2, binTS}] | wsB]
+    toWrite = [{wPos1, binFS}, {wPos2, binTS} | wsB]
     :dets_utils.pwrite(head1, toWrite)
   end
 
@@ -3229,7 +3225,7 @@ defmodule :m_dets_v9 do
 
           true ->
             nSz = sz + 4
-            {lU, [[ws, <<nSz::size(32)>>] | ws1], nSz, newNo}
+            {lU, [ws, <<nSz::size(32)>> | ws1], nSz, newNo}
         end
     end
   end

@@ -694,7 +694,10 @@ defmodule :m_ssh_client_channel do
       ) do
     [
       'Server Channel call returned:\n',
-      :io_lib.format('~p~n', [:ssh_dbg.reduce_state(ret, r_state())])
+      :io_lib.format(
+        '~p~n',
+        [:ssh_dbg.reduce_state(ret, r_state())]
+      )
     ]
   end
 
@@ -711,7 +714,10 @@ defmodule :m_ssh_client_channel do
       ) do
     [
       'Server Channel cast returned:\n',
-      :io_lib.format('~p~n', [:ssh_dbg.reduce_state(ret, r_state())])
+      :io_lib.format(
+        '~p~n',
+        [:ssh_dbg.reduce_state(ret, r_state())]
+      )
     ]
   end
 
@@ -728,7 +734,10 @@ defmodule :m_ssh_client_channel do
       ) do
     [
       'Server Channel info returned:\n',
-      :io_lib.format('~p~n', [:ssh_dbg.reduce_state(ret, r_state())])
+      :io_lib.format(
+        '~p~n',
+        [:ssh_dbg.reduce_state(ret, r_state())]
+      )
     ]
   end
 

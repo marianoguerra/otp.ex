@@ -625,7 +625,7 @@ defmodule :m_erl_pp do
   end
 
   defp pname([a | as]) do
-    [[write(a), ?.] | pname(as)]
+    [write(a), ?. | pname(as)]
   end
 
   defp pname(a) when is_atom(a) do
@@ -1043,7 +1043,7 @@ defmodule :m_erl_pp do
 
     cond do
       types !== :default ->
-        [[sChars, ?/] | bit_elem_types(types)]
+        [sChars, ?/ | bit_elem_types(types)]
 
       true ->
         sChars
@@ -1055,14 +1055,17 @@ defmodule :m_erl_pp do
   end
 
   defp bit_elem_types([t | rest]) do
-    [[bit_elem_type(t), ?-] | bit_elem_types(rest)]
+    [bit_elem_type(t), ?- | bit_elem_types(rest)]
   end
 
   defp bit_elem_type({a, b}) do
     [
       lexpr(:erl_parse.abstract(a), options(:none)),
       ?:,
-      lexpr(:erl_parse.abstract(b), options(:none))
+      lexpr(
+        :erl_parse.abstract(b),
+        options(:none)
+      )
     ]
   end
 
@@ -1422,7 +1425,7 @@ defmodule :m_erl_pp do
   end
 
   defp f({:ehook, hookExpr, precedence, {mod, func, eas} = modFuncEas}, i, _ST, _WT, _PP) do
-    chars = apply(mod, func, [[hookExpr, i, precedence, modFuncEas] | eas])
+    chars = apply(mod, func, [hookExpr, i, precedence, modFuncEas | eas])
     {chars, indentation(chars, i)}
   end
 
@@ -1552,7 +1555,7 @@ defmodule :m_erl_pp do
             a1 =
               cond do
                 nSepChars > 0 ->
-                  [[chars, ?\s] | a]
+                  [chars, ?\s | a]
 
                 true ->
                   [chars | a]
@@ -1561,12 +1564,12 @@ defmodule :m_erl_pp do
             maybe_sep1(charsSizeL, items, i0, i1, sep, nSepChars, sz0 + size1, a1, pP)
 
           true ->
-            a1 = [[chars, sep] | a]
+            a1 = [chars, sep | a]
             maybe_sep1(charsSizeL, items, i0, i0 + size, sep, nSepChars, size1, a1, pP)
         end
 
       _ ->
-        a1 = [[chars, sep] | a]
+        a1 = [chars, sep | a]
         maybe_sep1(charsSizeL, items, i0, r_pp(pP, :linewidth) + 1, sep, nSepChars, 0, a1, pP)
     end
   end

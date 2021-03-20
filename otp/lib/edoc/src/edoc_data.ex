@@ -90,19 +90,17 @@ defmodule :m_edoc_data do
            opts
          ) ++
          [
-           [
-             {:typedecls,
-              types(
-                allTags,
-                env
-              )},
-             {:functions,
-              functions(
-                functions,
-                env,
-                opts
-              )}
-           ]
+           {:typedecls,
+            types(
+              allTags,
+              env
+            )},
+           {:functions,
+            functions(
+              functions,
+              env,
+              opts
+            )}
            | callbacks(
                functions,
                module,
@@ -292,7 +290,13 @@ defmodule :m_edoc_data do
           false ->
             'no'
         end},
-       {:label, :edoc_refs.to_label(:edoc_refs.function(n, a))}
+       {:label,
+        :edoc_refs.to_label(
+          :edoc_refs.function(
+            n,
+            a
+          )
+        )}
      ],
      :lists.append(
        for clause <-

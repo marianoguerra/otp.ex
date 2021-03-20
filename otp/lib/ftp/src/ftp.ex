@@ -1376,10 +1376,13 @@ defmodule :m_ftp do
            timeout: timeout
          ) = state
        ) do
-    [
-      [_, portStr]
-      | _
-    ] = :lists.reverse(:string.tokens(lines, '|'))
+    [_, portStr | _] =
+      :lists.reverse(
+        :string.tokens(
+          lines,
+          '|'
+        )
+      )
 
     {:ok, {iP, _}} = peername(cSock)
 
@@ -1474,10 +1477,13 @@ defmodule :m_ftp do
            ftp_extension: true
          ) = state
        ) do
-    [
-      [_, portStr]
-      | _
-    ] = :lists.reverse(:string.tokens(lines, '|'))
+    [_, portStr | _] =
+      :lists.reverse(
+        :string.tokens(
+          lines,
+          '|'
+        )
+      )
 
     {:ok, {iP, _}} = peername(cSock)
     :"n/a"
@@ -1992,8 +1998,16 @@ defmodule :m_ftp do
           :gen_tcp.listen(
             0,
             [
-              [{:ip, iP}, {:active, false}, :inet6, :binary, {:packet, 0}]
-              | :lists.keydelete(:ip, 1, sockOpts)
+              {:ip, iP},
+              {:active, false},
+              :inet6,
+              :binary,
+              {:packet, 0}
+              | :lists.keydelete(
+                  :ip,
+                  1,
+                  sockOpts
+                )
             ]
           )
 
@@ -2011,8 +2025,15 @@ defmodule :m_ftp do
           :gen_tcp.listen(
             0,
             [
-              [{:ip, iP}, {:active, false}, :binary, {:packet, 0}]
-              | :lists.keydelete(:ip, 1, sockOpts)
+              {:ip, iP},
+              {:active, false},
+              :binary,
+              {:packet, 0}
+              | :lists.keydelete(
+                  :ip,
+                  1,
+                  sockOpts
+                )
             ]
           )
 
@@ -2104,7 +2125,10 @@ defmodule :m_ftp do
 
   defp connect2(host, port, ipFam, sockOpts, timeout) do
     opts = [
-      [ipFam, :binary, {:packet, 0}, {:active, false}]
+      ipFam,
+      :binary,
+      {:packet, 0},
+      {:active, false}
       | sockOpts
     ]
 

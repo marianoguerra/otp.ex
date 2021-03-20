@@ -1305,7 +1305,7 @@ defmodule :m_ssl_certificate do
   def validate(
         _,
         {:extension, r_Extension(extnID: {2, 5, 29, 37}, extnValue: keyUse)},
-        userState = %{:role => role}
+        userState = %{role: role}
       ) do
     case is_valid_extkey_usage(keyUse, role) do
       true ->
@@ -1343,11 +1343,7 @@ defmodule :m_ssl_certificate do
   def validate(
         cert,
         :valid_peer,
-        userState = %{
-          :role => :client,
-          :server_name => hostname,
-          :customize_hostname_check => customize
-        }
+        userState = %{role: :client, server_name: hostname, customize_hostname_check: customize}
       )
       when hostname !== :disable do
     case verify_hostname(hostname, customize, cert, userState) do
@@ -1719,24 +1715,24 @@ defmodule :m_ssl_certificate do
     end
   end
 
-  defp verify_cert_extensions(cert, %{:cert_ext => certExts} = userState) do
+  defp verify_cert_extensions(cert, %{cert_ext: certExts} = userState) do
     id = :public_key.pkix_subject_id(cert)
     extensions = :maps.get(id, certExts, [])
     verify_cert_extensions(cert, userState, extensions, %{})
   end
 
   defp verify_cert_extensions(cert, userState, [], _) do
-    {:valid, %{userState | :issuer => cert}}
+    {:valid, Map.put(userState, :issuer, cert)}
   end
 
   defp verify_cert_extensions(
          cert,
-         %{:ocsp_responder_certs => responderCerts, :ocsp_state => oscpState, :issuer => issuer} =
+         %{ocsp_responder_certs: responderCerts, ocsp_state: oscpState, issuer: issuer} =
            userState,
          [r_certificate_status(response: ocspResponsDer) | exts],
          context
        ) do
-    %{:ocsp_nonce => nonce} = oscpState
+    %{ocsp_nonce: nonce} = oscpState
 
     case :public_key.pkix_ocsp_validate(cert, issuer, ocspResponsDer, responderCerts, nonce) do
       :valid ->
@@ -1751,18 +1747,18 @@ defmodule :m_ssl_certificate do
     verify_cert_extensions(cert, userState, exts, context)
   end
 
-  defp verify_sign(_, %{:version => {_, minor}}) when minor < 3 do
+  defp verify_sign(_, %{version: {_, minor}}) when minor < 3 do
     true
   end
 
   defp verify_sign(
          cert,
-         %{:signature_algs => signAlgs, :signature_algs_cert => :undefined}
+         %{signature_algs: signAlgs, signature_algs_cert: :undefined}
        ) do
     is_supported_signature_algorithm(cert, signAlgs)
   end
 
-  defp verify_sign(cert, %{:signature_algs_cert => signAlgs}) do
+  defp verify_sign(cert, %{signature_algs_cert: signAlgs}) do
     is_supported_signature_algorithm(cert, signAlgs)
   end
 

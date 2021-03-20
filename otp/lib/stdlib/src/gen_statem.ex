@@ -82,7 +82,7 @@ defmodule :m_gen_statem do
   Record.defrecord(:r_state, :state,
     state_data: {:undefined, :undefined},
     postponed: [],
-    timers: %{:t0q => []},
+    timers: %{t0q: []},
     hibernate: false
   )
 
@@ -516,26 +516,30 @@ defmodule :m_gen_statem do
           sysState,
           parent,
           debug,
-          {r_params(name: name, modules: modules) = p,
-           r_state(postponed: postponed, timers: timers) = s}
+          {r_params(
+             name: name,
+             modules: modules
+           ) = p,
+           r_state(
+             postponed: postponed,
+             timers: timers
+           ) = s}
         ]
       ) do
     header = :gen.format_status_header('Status for state machine', name)
     log = :sys.get_log(debug)
 
     [
-      [
-        {:header, header},
-        {:data,
-         [
-           {'Status', sysState},
-           {'Parent', parent},
-           {'Modules', modules},
-           {'Time-outs', list_timeouts(timers)},
-           {'Logged Events', log},
-           {'Postponed', postponed}
-         ]}
-      ]
+      {:header, header},
+      {:data,
+       [
+         {'Status', sysState},
+         {'Parent', parent},
+         {'Modules', modules},
+         {'Time-outs', list_timeouts(timers)},
+         {'Logged Events', log},
+         {'Postponed', postponed}
+       ]}
       | case format_status(opt, pDict, update_parent(p, parent), s) do
           l when is_list(l) ->
             l
@@ -2408,7 +2412,7 @@ defmodule :m_gen_statem do
          postponed
        ) do
     case timers do
-      %{:timeout => {timerRef, _TimeoutMsg}} ->
+      %{timeout: {timerRef, _TimeoutMsg}} ->
         loop_next_events(
           p,
           debug,
@@ -2479,14 +2483,14 @@ defmodule :m_gen_statem do
           p,
           debug,
           s,
-          [[e1, e2] | events],
+          [e1, e2 | events],
           nextState_NewData,
           nextEventsR,
           hibernate,
           timeoutsR
         )
 
-      [[_, _] | _] ->
+      [_, _ | _] ->
         loop_state_change(
           p,
           debug,
@@ -2511,7 +2515,7 @@ defmodule :m_gen_statem do
          timeoutsR
        ) do
     case timers do
-      %{:state_timeout => {timerRef, _TimeoutMsg}} ->
+      %{state_timeout: {timerRef, _TimeoutMsg}} ->
         loop_next_events(
           p,
           debug,
@@ -2528,7 +2532,7 @@ defmodule :m_gen_statem do
           )
         )
 
-      %{:timeout => {timerRef, _TimeoutMsg}} ->
+      %{timeout: {timerRef, _TimeoutMsg}} ->
         loop_next_events(
           p,
           debug,
@@ -2642,13 +2646,13 @@ defmodule :m_gen_statem do
         loop_done(p, debug, s_1, events, nextEventsR)
 
       [_ | _] ->
-        %{:t0q => t0Q} = timers
+        %{t0q: t0Q} = timers
 
         s_1 =
           r_state(s,
             state_data: nextState_NewData,
             postponed: postponed,
-            timers: %{timers | :t0q => t0Q ++ timeoutEvents},
+            timers: %{timers | t0q: t0Q ++ timeoutEvents},
             hibernate: hibernate
           )
 
@@ -2924,11 +2928,11 @@ defmodule :m_gen_statem do
          timeoutMsg
        ) do
     case timers do
-      %{^timeoutType => {0, _OldTimeoutMsg}, :t0q => t0Q} ->
+      %{^timeoutType => {0, _OldTimeoutMsg}, t0q: t0Q} ->
         timers_1 = %{
           timers
           | timeoutType => {0, timeoutMsg},
-            :t0q => :lists.delete(timeoutType, t0Q)
+            t0q: :lists.delete(timeoutType, t0Q)
         }
 
         loop_timeouts(
@@ -2942,7 +2946,7 @@ defmodule :m_gen_statem do
           timeoutsR,
           postponed,
           timers_1,
-          %{seen | timeoutType => true},
+          Map.put(seen, timeoutType, true),
           timeoutEvents
         )
 
@@ -2961,12 +2965,12 @@ defmodule :m_gen_statem do
           timeoutsR,
           postponed,
           timers_1,
-          %{seen | timeoutType => true},
+          Map.put(seen, timeoutType, true),
           timeoutEvents
         )
 
       %{} ->
-        timers_1 = %{timers | timeoutType => {timerRef, timeoutMsg}}
+        timers_1 = Map.put(timers, timeoutType, {timerRef, timeoutMsg})
 
         loop_timeouts(
           p,
@@ -2979,7 +2983,7 @@ defmodule :m_gen_statem do
           timeoutsR,
           postponed,
           timers_1,
-          %{seen | timeoutType => true},
+          Map.put(seen, timeoutType, true),
           timeoutEvents
         )
     end
@@ -3015,7 +3019,7 @@ defmodule :m_gen_statem do
           timeoutsR,
           postponed,
           timers_1,
-          %{seen | timeoutType => true},
+          Map.put(seen, timeoutType, true),
           timeoutEvents
         )
 
@@ -3031,7 +3035,7 @@ defmodule :m_gen_statem do
           timeoutsR,
           postponed,
           timers,
-          %{seen | timeoutType => true},
+          Map.put(seen, timeoutType, true),
           timeoutEvents
         )
     end
@@ -3068,12 +3072,12 @@ defmodule :m_gen_statem do
           timeoutsR,
           postponed,
           timers_1,
-          %{seen | timeoutType => true},
+          Map.put(seen, timeoutType, true),
           timeoutEvents
         )
 
       %{} ->
-        timers_1 = %{timers | timeoutType => {0, timeoutMsg}}
+        timers_1 = Map.put(timers, timeoutType, {0, timeoutMsg})
         timeoutEvents_1 = [timeoutType | timeoutEvents]
 
         loop_timeouts(
@@ -3087,7 +3091,7 @@ defmodule :m_gen_statem do
           timeoutsR,
           postponed,
           timers_1,
-          %{seen | timeoutType => true},
+          Map.put(seen, timeoutType, true),
           timeoutEvents_1
         )
     end
@@ -3102,9 +3106,9 @@ defmodule :m_gen_statem do
         loop_done(p, debug, s, [e1 | events])
 
       [e2, e1] ->
-        loop_done(p, debug, s, [[e1, e2] | events])
+        loop_done(p, debug, s, [e1, e2 | events])
 
-      [[_, _] | _] ->
+      [_, _ | _] ->
         loop_done(p, debug, s, :lists.reverse(nextEventsR, events))
     end
   end
@@ -3113,7 +3117,7 @@ defmodule :m_gen_statem do
     case q do
       [] ->
         case r_state(s, :timers) do
-          %{:t0q => [timeoutType | _]} = timers ->
+          %{t0q: [timeoutType | _]} = timers ->
             %{^timeoutType => {0 = timerRef, timeoutMsg}} = timers
             timers_1 = cancel_timer(timeoutType, timerRef, timers)
             s_1 = r_state(s, timers: timers_1)
@@ -3300,29 +3304,29 @@ defmodule :m_gen_statem do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:gen_statem, :error_info, 7},
-            :line => 2382,
-            :file => 'otp/lib/stdlib/src/gen_statem.erl'
+            mfa: {:gen_statem, :error_info, 7},
+            line: 2382,
+            file: 'otp/lib/stdlib/src/gen_statem.erl'
           },
           :error,
           %{
-            :label => {:gen_statem, :terminate},
-            :name => name,
-            :queue => q,
-            :postponed => postponed,
-            :modules => modules,
-            :callback_mode => callbackMode,
-            :state_enter => stateEnter,
-            :state => format_status(:terminate, :erlang.get(), p, s),
-            :timeouts => list_timeouts(timers),
-            :log => log,
-            :reason => {class, reason, stacktrace},
-            :client_info => client_stacktrace(q)
+            label: {:gen_statem, :terminate},
+            name: name,
+            queue: q,
+            postponed: postponed,
+            modules: modules,
+            callback_mode: callbackMode,
+            state_enter: stateEnter,
+            state: format_status(:terminate, :erlang.get(), p, s),
+            timeouts: list_timeouts(timers),
+            log: log,
+            reason: {class, reason, stacktrace},
+            client_info: client_stacktrace(q)
           },
           %{
-            :domain => [:otp],
-            :report_cb => &:gen_statem.format_log/2,
-            :error_logger => %{:tag => :error, :report_cb => &:gen_statem.format_log/1}
+            domain: [:otp],
+            report_cb: &:gen_statem.format_log/2,
+            error_logger: %{tag: :error, report_cb: &:gen_statem.format_log/1}
           }
         ])
 
@@ -3364,13 +3368,7 @@ defmodule :m_gen_statem do
 
   def format_log(report) do
     depth = :error_logger.get_format_depth()
-
-    formatOpts = %{
-      :chars_limit => :unlimited,
-      :depth => depth,
-      :single_line => false,
-      :encoding => :utf8
-    }
+    formatOpts = %{chars_limit: :unlimited, depth: depth, single_line: false, encoding: :utf8}
 
     format_log_multi(
       limit_report(report, depth),
@@ -3384,63 +3382,61 @@ defmodule :m_gen_statem do
 
   defp limit_report(
          %{
-           :label => {:gen_statem, :terminate},
-           :queue => q,
-           :postponed => postponed,
-           :modules => modules,
-           :state => fmtData,
-           :timeouts => timeouts,
-           :log => log,
-           :reason => {class, reason, stacktrace},
-           :client_info => clientInfo
+           label: {:gen_statem, :terminate},
+           queue: q,
+           postponed: postponed,
+           modules: modules,
+           state: fmtData,
+           timeouts: timeouts,
+           log: log,
+           reason: {class, reason, stacktrace},
+           client_info: clientInfo
          } = report,
          depth
        ) do
-    %{
-      report
-      | :queue =>
-          case q do
-            [event | events] ->
-              [
-                :io_lib.limit_term(event, depth)
-                | :io_lib.limit_term(events, depth)
-              ]
+    Map.merge(report, %{
+      queue:
+        case q do
+          [event | events] ->
+            [
+              :io_lib.limit_term(event, depth)
+              | :io_lib.limit_term(events, depth)
+            ]
 
-            _ ->
-              []
-          end,
-        :postponed =>
-          case postponed do
-            [] ->
-              []
+          _ ->
+            []
+        end,
+      postponed:
+        case postponed do
+          [] ->
+            []
 
-            _ ->
-              :io_lib.limit_term(postponed, depth)
-          end,
-        :modules => :io_lib.limit_term(modules, depth),
-        :state => :io_lib.limit_term(fmtData, depth),
-        :timeouts =>
-          case timeouts do
-            {0, _} ->
-              timeouts
+          _ ->
+            :io_lib.limit_term(postponed, depth)
+        end,
+      modules: :io_lib.limit_term(modules, depth),
+      state: :io_lib.limit_term(fmtData, depth),
+      timeouts:
+        case timeouts do
+          {0, _} ->
+            timeouts
 
-            _ ->
-              :io_lib.limit_term(timeouts, depth)
-          end,
-        :log =>
-          case log do
-            [] ->
-              []
+          _ ->
+            :io_lib.limit_term(timeouts, depth)
+        end,
+      log:
+        case log do
+          [] ->
+            []
 
-            _ ->
-              for t <- log do
-                :io_lib.limit_term(t, depth)
-              end
-          end,
-        :reason =>
-          {class, :io_lib.limit_term(reason, depth), :io_lib.limit_term(stacktrace, depth)},
-        :client_info => limit_client_info(clientInfo, depth)
-    }
+          _ ->
+            for t <- log do
+              :io_lib.limit_term(t, depth)
+            end
+        end,
+      reason: {class, :io_lib.limit_term(reason, depth), :io_lib.limit_term(stacktrace, depth)},
+      client_info: limit_client_info(clientInfo, depth)
+    })
   end
 
   defp limit_client_info({pid, {name, stacktrace}}, depth) do
@@ -3452,21 +3448,15 @@ defmodule :m_gen_statem do
   end
 
   def format_log(report, formatOpts0) do
-    default = %{
-      :chars_limit => :unlimited,
-      :depth => :unlimited,
-      :single_line => false,
-      :encoding => :utf8
-    }
-
+    default = %{chars_limit: :unlimited, depth: :unlimited, single_line: false, encoding: :utf8}
     formatOpts = :maps.merge(default, formatOpts0)
 
     ioOpts =
       case formatOpts do
-        %{:chars_limit => :unlimited} ->
+        %{chars_limit: :unlimited} ->
           []
 
-        %{:chars_limit => limit} ->
+        %{chars_limit: limit} ->
           [{:chars_limit, limit}]
       end
 
@@ -3476,15 +3466,15 @@ defmodule :m_gen_statem do
 
   defp format_log_single(
          %{
-           :label => {:gen_statem, :terminate},
-           :name => name,
-           :queue => q,
-           :state => fmtData,
-           :log => log,
-           :reason => {class, reason, stacktrace},
-           :client_info => clientInfo
+           label: {:gen_statem, :terminate},
+           name: name,
+           queue: q,
+           state: fmtData,
+           log: log,
+           reason: {class, reason, stacktrace},
+           client_info: clientInfo
          },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     {fixedReason, fixedStacktrace} = fix_reason(class, reason, stacktrace)
@@ -3570,20 +3560,20 @@ defmodule :m_gen_statem do
 
   defp format_log_multi(
          %{
-           :label => {:gen_statem, :terminate},
-           :name => name,
-           :queue => q,
-           :postponed => postponed,
-           :modules => modules,
-           :callback_mode => callbackMode,
-           :state_enter => stateEnter,
-           :state => fmtData,
-           :timeouts => timeouts,
-           :log => log,
-           :reason => {class, reason, stacktrace},
-           :client_info => clientInfo
+           label: {:gen_statem, :terminate},
+           name: name,
+           queue: q,
+           postponed: postponed,
+           modules: modules,
+           callback_mode: callbackMode,
+           state_enter: stateEnter,
+           state: fmtData,
+           timeouts: timeouts,
+           log: log,
+           reason: {class, reason, stacktrace},
+           client_info: clientInfo
          },
-         %{:depth => depth} = formatOpts
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     {fixedReason, fixedStacktrace} = fix_reason(class, reason, stacktrace)
@@ -3625,7 +3615,11 @@ defmodule :m_gen_statem do
         p,
         '~n',
         case q do
-          [[_, _] | _] ->
+          [
+            _,
+            _
+            | _
+          ] ->
             '** Queued = ' ++ p ++ '~n'
 
           _ ->
@@ -3674,7 +3668,13 @@ defmodule :m_gen_statem do
       ] ++
         [fmtData, class, fixedReason, modules, cBMode] ++
         case q do
-          [_ | [_ | _] = events] ->
+          [
+            _
+            | [
+                _
+                | _
+              ] = events
+          ] ->
             [events]
 
           _ ->
@@ -3814,7 +3814,7 @@ defmodule :m_gen_statem do
     {format, args}
   end
 
-  defp p(%{:single_line => single, :depth => depth, :encoding => enc}) do
+  defp p(%{single_line: single, depth: depth, encoding: enc}) do
     '~' ++ single(single) ++ mod(enc) ++ p(depth)
   end
 

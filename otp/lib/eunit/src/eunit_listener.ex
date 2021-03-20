@@ -164,13 +164,13 @@ defmodule :m_eunit_listener do
   end
 
   defp handle_end(:group, id, data0, {count, data1}, st) do
-    data = [[{:id, id}, {:size, count}] | data0 ++ data1]
+    data = [{:id, id}, {:size, count} | data0 ++ data1]
     :ok
     call(:handle_end, [:group, data, r_state(st, :state)], st)
   end
 
   defp handle_end(:test, id, data0, {status, data1}, st) do
-    data = [[{:id, id}, {:status, status}] | data0 ++ data1]
+    data = [{:id, id}, {:status, status} | data0 ++ data1]
     :ok
 
     st1 =
@@ -189,7 +189,7 @@ defmodule :m_eunit_listener do
   end
 
   defp handle_cancel(:group, id, data0, reason, st) do
-    data = [[{:id, id}, {:reason, reason}] | data0]
+    data = [{:id, id}, {:reason, reason} | data0]
     :ok
 
     call(
@@ -200,7 +200,7 @@ defmodule :m_eunit_listener do
   end
 
   defp handle_cancel(:test, id, data0, reason, st) do
-    data = [[{:id, id}, {:reason, reason}] | data0]
+    data = [{:id, id}, {:reason, reason} | data0]
     :ok
 
     call(

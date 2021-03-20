@@ -457,13 +457,13 @@ defmodule :m_xref_reader do
       {1, [{:tuple, _, [m, f]} | r]} ->
         eval_args(m, f, list2term([]), line, s1, argsList, r)
 
-      {2, [[node, {:tuple, _, [m, f]}] | r]} ->
+      {2, [node, {:tuple, _, [m, f]} | r]} ->
         eval_args(m, f, list2term([]), line, s1, argsList, [node | r])
 
-      {3, [[m, f, argsTerm] | r]} ->
+      {3, [m, f, argsTerm | r]} ->
         eval_args(m, f, argsTerm, line, s1, argsList, r)
 
-      {4, [[node, m, f, argsTerm] | r]} ->
+      {4, [node, m, f, argsTerm | r]} ->
         eval_args(m, f, argsTerm, line, s1, argsList, [node | r])
 
       {:debug4, [m, f, argsTerm, _]} ->
@@ -571,7 +571,7 @@ defmodule :m_xref_reader do
     {funArg, args}
   end
 
-  defp fun_args(2, [[_Node, funArg] | args]) do
+  defp fun_args(2, [_Node, funArg | args]) do
     {funArg, args}
   end
 

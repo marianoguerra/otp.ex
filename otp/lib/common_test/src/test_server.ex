@@ -638,7 +638,7 @@ defmodule :m_test_server do
               loc = rewrite_loc_item(loc0)
               handle_tc_exit(what, r_st(st0, last_known_loc: [loc]))
 
-            {what, [[details, loc0 = {_M, _F, a, [{:file, _} | _]}] | _]}
+            {what, [details, loc0 = {_M, _F, a, [{:file, _} | _]} | _]}
             when is_integer(a) ->
               loc = rewrite_loc_item(loc0)
 
@@ -1137,7 +1137,7 @@ defmodule :m_test_server do
          func,
          conf,
          pid,
-         {{:framework_error, fwError}, {fwMod, fwFunc, [[a1, a2] | _]} = fwMFA},
+         {{:framework_error, fwError}, {fwMod, fwFunc, [a1, a2 | _]} = fwMFA},
          _,
          sendTo
        ) do
@@ -1260,7 +1260,7 @@ defmodule :m_test_server do
          conf,
          pid,
          fwError,
-         {fwMod, fwFunc = :init_tc, [[mod, {:init_per_testcase, func} = iPTC] | _]}
+         {fwMod, fwFunc = :init_tc, [mod, {:init_per_testcase, func} = iPTC | _]}
        ) do
     skip = {:auto_skip, {:failed, {fwMod, fwFunc, fwError}}}
 
@@ -1285,7 +1285,7 @@ defmodule :m_test_server do
          conf,
          pid,
          fwError,
-         {fwMod, fwFunc = :end_tc, [[mod, {:init_per_testcase, func}] | _]}
+         {fwMod, fwFunc = :end_tc, [mod, {:init_per_testcase, func} | _]}
        ) do
     skip = {:auto_skip, {:failed, {fwMod, fwFunc, fwError}}}
 
@@ -1309,7 +1309,7 @@ defmodule :m_test_server do
          conf,
          pid,
          fwError,
-         {fwMod, fwFunc = :init_tc, [[mod, {:end_per_testcase, func}] | _]}
+         {fwMod, fwFunc = :init_tc, [mod, {:end_per_testcase, func} | _]}
        ) do
     {retVal, loc} =
       case {:proplists.get_value(
@@ -1345,7 +1345,7 @@ defmodule :m_test_server do
          conf,
          pid,
          fwError,
-         {fwMod, fwFunc = :end_tc, [[mod, {:end_per_testcase, func}] | _]}
+         {fwMod, fwFunc = :end_tc, [mod, {:end_per_testcase, func} | _]}
        ) do
     {retVal, report, loc} =
       case {:proplists.get_value(:tc_status, conf),
@@ -1683,7 +1683,8 @@ defmodule :m_test_server do
             line = get_loc()
 
             conf = [
-              [{:tc_status, {:skipped, reason}}, {:save_config, saveCfg}]
+              {:tc_status, {:skipped, reason}},
+              {:save_config, saveCfg}
               | hd(args)
             ]
 
@@ -1742,13 +1743,15 @@ defmodule :m_test_server do
                   fw_error_notify(mod, func, newConf1, tCError, loc)
 
                   {[
-                     [{:tc_status, {:failed, tCError}}, {:tc_fail_loc, loc}]
+                     {:tc_status, {:failed, tCError}},
+                     {:tc_fail_loc, loc}
                      | newConf1
                    ], return, {:error, tCError}}
 
                 saveCfg = {:save_config, _} ->
                   {[
-                     [{:tc_status, :ok}, saveCfg]
+                     {:tc_status, :ok},
+                     saveCfg
                      | newConf1
                    ], return, :ok}
 
@@ -1756,7 +1759,8 @@ defmodule :m_test_server do
                   skip = {:skip, why}
 
                   {[
-                     [{:tc_status, {:skipped, why}}, {:save_config, saveCfg}]
+                     {:tc_status, {:skipped, why}},
+                     {:save_config, saveCfg}
                      | newConf1
                    ], skip, skip}
 

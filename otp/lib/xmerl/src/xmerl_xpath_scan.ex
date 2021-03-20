@@ -261,7 +261,7 @@ defmodule :m_xmerl_xpath_scan do
     scan_number(str)
   end
 
-  defp scan_token(str = [[?., h] | _], a)
+  defp scan_token(str = [?., h | _], a)
        when h >= ?0 and
               h <= ?9 do
     scan_number(str, a)
@@ -422,7 +422,7 @@ defmodule :m_xmerl_xpath_scan do
     scan_literal(t, delim, [h | acc])
   end
 
-  defp scan_name([[h1, h2] | t]) when h1 == ?: or h1 == ?_ do
+  defp scan_name([h1, h2 | t]) when h1 == ?: or h1 == ?_ do
     cond do
       h2 == 32 or h2 == 13 or h2 == 10 or h2 == 9 ->
         exit({:invalid_name, [h1, h2, :...]})

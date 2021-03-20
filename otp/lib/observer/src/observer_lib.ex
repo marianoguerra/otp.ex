@@ -409,7 +409,7 @@ defmodule :m_observer_lib do
     {true, intv}
   end
 
-  def start_timer(%{:interval => intv}, _Def) do
+  def start_timer(%{interval: intv}, _Def) do
     setup_timer(true, {false, intv})
   end
 
@@ -445,7 +445,7 @@ defmodule :m_observer_lib do
   end
 
   def timer_config({_, interval}) do
-    %{:interval => interval}
+    %{interval: interval}
   end
 
   def timer_config(%{} = config) do

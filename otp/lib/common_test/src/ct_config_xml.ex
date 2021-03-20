@@ -77,7 +77,7 @@ defmodule :m_ct_config_xml do
 
   defp tag(
          {:endElement, _Uri, _Name, _QName},
-         [[entity, {prevEntityTag, prevEntityValue}] | tags]
+         [entity, {prevEntityTag, prevEntityValue} | tags]
        ) do
     newHead = {prevEntityTag, [entity | prevEntityValue]}
     [newHead | tags]

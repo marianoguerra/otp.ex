@@ -210,17 +210,17 @@ defmodule :m_dbg_icmd do
   def eval(meta, {mod, cmd, sP}) do
     cmd2 =
       case :lists.reverse(cmd) do
-        [[10, ?.] | _] ->
+        [10, ?. | _] ->
           cmd
 
         [10 | t] ->
-          :lists.reverse([[10, ?.] | t])
+          :lists.reverse([10, ?. | t])
 
         [?. | t] ->
-          :lists.reverse([[10, ?.] | t])
+          :lists.reverse([10, ?. | t])
 
         t ->
-          :lists.reverse([[10, ?.] | t])
+          :lists.reverse([10, ?. | t])
       end
 
     send(meta, {:user, {:eval, {self(), mod, cmd2, sP}}})

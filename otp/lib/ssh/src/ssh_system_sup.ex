@@ -107,7 +107,7 @@ defmodule :m_ssh_system_sup do
   end
 
   def init([:server, address, port, profile, options]) do
-    supFlags = %{:strategy => :one_for_one, :intensity => 0, :period => 3600}
+    supFlags = %{strategy: :one_for_one, intensity: 0, period: 3600}
 
     childSpecs =
       case :ssh_options.get_value(
@@ -123,10 +123,10 @@ defmodule :m_ssh_system_sup do
         :undefined ->
           [
             %{
-              :id => id(:ssh_acceptor_sup, address, port, profile),
-              :start => {:ssh_acceptor_sup, :start_link, [address, port, profile, options]},
-              :restart => :transient,
-              :type => :supervisor
+              id: id(:ssh_acceptor_sup, address, port, profile),
+              start: {:ssh_acceptor_sup, :start_link, [address, port, profile, options]},
+              restart: :transient,
+              type: :supervisor
             }
           ]
 
@@ -138,7 +138,7 @@ defmodule :m_ssh_system_sup do
   end
 
   def init([:client, _Address, _Port, _Profile, _Options]) do
-    supFlags = %{:strategy => :one_for_one, :intensity => 0, :period => 3600}
+    supFlags = %{strategy: :one_for_one, intensity: 0, period: 3600}
     childSpecs = []
     {:ok, {supFlags, childSpecs}}
   end
@@ -201,10 +201,15 @@ defmodule :m_ssh_system_sup do
 
   def get_options(sup, address, port, profile) do
     try do
-      {:ok, %{:start => {:ssh_acceptor_sup, :start_link, [^address, ^port, ^profile, options]}}} =
+      {:ok, %{start: {:ssh_acceptor_sup, :start_link, [^address, ^port, ^profile, options]}}} =
         :supervisor.get_childspec(
           sup,
-          id(:ssh_acceptor_sup, address, port, profile)
+          id(
+            :ssh_acceptor_sup,
+            address,
+            port,
+            profile
+          )
         )
 
       {:ok, options}
@@ -239,10 +244,10 @@ defmodule :m_ssh_system_sup do
 
   def start_subsystem(systemSup, role, address, port, profile, options) do
     subsystemSpec = %{
-      :id => make_ref(),
-      :start => {:ssh_subsystem_sup, :start_link, [role, address, port, profile, options]},
-      :restart => :temporary,
-      :type => :supervisor
+      id: make_ref(),
+      start: {:ssh_subsystem_sup, :start_link, [role, address, port, profile, options]},
+      restart: :temporary,
+      type: :supervisor
     }
 
     :supervisor.start_child(systemSup, subsystemSpec)

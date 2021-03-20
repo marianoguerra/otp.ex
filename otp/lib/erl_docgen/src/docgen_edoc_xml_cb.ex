@@ -239,7 +239,9 @@ defmodule :m_docgen_edoc_xml_cb do
             '\n',
             {:section,
              [
-               [{:title, ['DATA TYPES']}, {:marker, [{:id, 'types'}], []}, '\n']
+               {:title, ['DATA TYPES']},
+               {:marker, [{:id, 'types'}], []},
+               '\n'
                | types(types1)
              ]}
           ]
@@ -310,7 +312,7 @@ defmodule :m_docgen_edoc_xml_cb do
     descEs = get_content(:description, es)
     fullDescEs = get_content(:fullDescription, descEs)
     sections = chapter_ify(fullDescEs, :first)
-    {:chapter, [['\n', header, '\n'] | sections]}
+    {:chapter, ['\n', header, '\n' | sections]}
   end
 
   defp chapter_ify([], _) do
@@ -321,7 +323,7 @@ defmodule :m_docgen_edoc_xml_cb do
     case find_next(:h3, es) do
       {^es, []} ->
         subSections = subchapter_ify(es, :first)
-        [{:section, [['\n', {:title, ['Overview']}, '\n'] | subSections]}]
+        [{:section, ['\n', {:title, ['Overview']}, '\n' | subSections]}]
 
       {firstEs, restEs} ->
         otp_xmlify(firstEs) ++ chapter_ify(restEs, :next)
@@ -335,10 +337,7 @@ defmodule :m_docgen_edoc_xml_cb do
 
     [
       {:section,
-       [
-         ['\n', {:marker, [{:id, marker}], []}, '\n', {:title, [title]}, '\n']
-         | subSections
-       ]}
+       ['\n', {:marker, [{:id, marker}], []}, '\n', {:title, [title]}, '\n' | subSections]}
       | chapter_ify(restEs, :next)
     ]
   end
@@ -358,11 +357,7 @@ defmodule :m_docgen_edoc_xml_cb do
     {marker, title} = chapter_title(e)
 
     [
-      {:section,
-       [
-         ['\n', {:marker, [{:id, marker}], []}, '\n', {:title, [title]}, '\n']
-         | elements
-       ]}
+      {:section, ['\n', {:marker, [{:id, marker}], []}, '\n', {:title, [title]}, '\n' | elements]}
       | subchapter_ify(restEs, :next)
     ]
   end
@@ -408,22 +403,22 @@ defmodule :m_docgen_edoc_xml_cb do
     otp_xmlify_fix(es, [])
   end
 
-  defp otp_xmlify_fix([[r_xmlText(value: '\n \n' ++ _) = e1, e2] | es], res) do
+  defp otp_xmlify_fix([r_xmlText(value: '\n \n' ++ _) = e1, e2 | es], res) do
     case is_paragraph(e2) do
       false ->
         {p, after__} = find_p_ending(es, [])
-        otp_xmlify_fix(after__, [[{:p, [e2 | p]}, e1] | res])
+        otp_xmlify_fix(after__, [{:p, [e2 | p]}, e1 | res])
 
       true ->
         otp_xmlify_fix([e2 | es], [e1 | res])
     end
   end
 
-  defp otp_xmlify_fix([[r_xmlText(value: '\n\n') = e1, e2] | es], res) do
+  defp otp_xmlify_fix([r_xmlText(value: '\n\n') = e1, e2 | es], res) do
     case is_paragraph(e2) do
       false ->
         {p, after__} = find_p_ending(es, [])
-        otp_xmlify_fix(after__, [[{:p, [e2 | p]}, e1] | res])
+        otp_xmlify_fix(after__, [{:p, [e2 | p]}, e1 | res])
 
       true ->
         otp_xmlify_fix([e2 | es], [e1 | res])
@@ -480,12 +475,12 @@ defmodule :m_docgen_edoc_xml_cb do
 
               false ->
                 pnew = {:p, :lists.reverse(content)}
-                otp_xmlify_psplit(es, [], [[e, pnew] | res])
+                otp_xmlify_psplit(es, [], [e, pnew | res])
             end
 
           _ ->
             pnew = {:p, :lists.reverse(content)}
-            otp_xmlify_psplit(es, [], [[e, pnew] | res])
+            otp_xmlify_psplit(es, [], [e, pnew | res])
         end
 
       true ->
@@ -848,7 +843,7 @@ defmodule :m_docgen_edoc_xml_cb do
 
   defp otp_xmlify_dl([r_xmlElement(name: :dt) = e | es], dT) do
     dD = r_xmlElement(dT, name: :dd, attributes: [], content: [])
-    [[dD, e] | otp_xmlify_dl(es, e)]
+    [dD, e | otp_xmlify_dl(es, e)]
   end
 
   defp otp_xmlify_dl([e | es], dT) do
@@ -1636,7 +1631,15 @@ defmodule :m_docgen_edoc_xml_cb do
   end
 
   defp t_record([e | es]) do
-    ['#', get_attrval(:value, e), '{' ++ seq(&t_field/1, es) ++ '}']
+    [
+      '#',
+      get_attrval(:value, e),
+      '{' ++
+        seq(
+          &t_field/1,
+          es
+        ) ++ '}'
+    ]
   end
 
   defp t_field(r_xmlElement(name: :field, content: [atom, type])) do

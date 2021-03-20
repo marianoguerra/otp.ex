@@ -44,7 +44,7 @@ defmodule :m_beam_dict do
 
       _ ->
         nextIndex = :maps.size(atoms) + 1
-        {nextIndex, r_asm(dict, atoms: %{atoms | atom => nextIndex})}
+        {nextIndex, r_asm(dict, atoms: Map.put(atoms, atom, nextIndex))}
     end
   end
 
@@ -123,7 +123,7 @@ defmodule :m_beam_dict do
 
       %{} ->
         index = oldIndex
-        wrappers = %{wrappers0 | lbl => index}
+        wrappers = Map.put(wrappers0, lbl, index)
         lambdas = [{lbl, {index, lbl, numFree}} | lambdas0]
 
         {oldIndex,
@@ -143,7 +143,7 @@ defmodule :m_beam_dict do
         {index, dict}
 
       %{} ->
-        tab = %{tab0 | lit => nextIndex}
+        tab = Map.put(tab0, lit, nextIndex)
         {nextIndex, r_asm(dict, literals: tab, next_literal: nextIndex + 1)}
     end
   end
@@ -168,7 +168,7 @@ defmodule :m_beam_dict do
 
         {index,
          r_asm(dict1,
-           lines: %{lines | key => index},
+           lines: Map.put(lines, key, index),
            num_lines: n + 1
          )}
     end
@@ -185,7 +185,7 @@ defmodule :m_beam_dict do
 
       _ ->
         index = :maps.size(fnames)
-        {index, r_asm(dict, fnames: %{fnames | name => index})}
+        {index, r_asm(dict, fnames: Map.put(fnames, name, index))}
     end
   end
 

@@ -5,7 +5,7 @@ defmodule :m_user do
     start_port([:eof, :binary])
   end
 
-  def start([[mod, fun] | args]) do
+  def start([mod, fun | args]) do
     pid = apply(mod, fun, args)
 
     id =
@@ -598,7 +598,7 @@ defmodule :m_user do
             case is_cr_at(x, bin) do
               true ->
                 <<d::size(x)-binary, _::binary>> = bin
-                get_line_doit(prompt, port, :queue.tail(q), [[<<?\r>>, d] | accu], enc)
+                get_line_doit(prompt, port, :queue.tail(q), [<<?\r>>, d | accu], enc)
 
               false ->
                 get_line_doit(prompt, port, :queue.tail(q), [bin | accu], enc)

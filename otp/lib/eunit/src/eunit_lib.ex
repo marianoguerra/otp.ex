@@ -31,7 +31,14 @@ defmodule :m_eunit_lib do
       true ->
         :io_lib.format(
           '~ts**~w:~ts',
-          [format_stacktrace(trace), class, format_term(term, depth)]
+          [
+            format_stacktrace(trace),
+            class,
+            format_term(
+              term,
+              depth
+            )
+          ]
         )
 
       false ->
@@ -441,7 +448,7 @@ defmodule :m_eunit_lib do
   defp dlist_next([x | xs], ys) when is_list(x) do
     case is_nonempty_string(x) do
       true ->
-        [[x, xs] | ys]
+        [x, xs | ys]
 
       false ->
         dlist_next(x, [xs | ys])
@@ -449,7 +456,7 @@ defmodule :m_eunit_lib do
   end
 
   defp dlist_next([x | xs], ys) do
-    [[x, xs] | ys]
+    [x, xs | ys]
   end
 
   defp dlist_next([], xs) do
@@ -717,7 +724,12 @@ defmodule :m_eunit_lib do
            (fn ->
               __T = :erlang.is_process_alive(self())
 
-              case is_string(:lists.seq(0, 255)) do
+              case is_string(
+                     :lists.seq(
+                       0,
+                       255
+                     )
+                   ) do
                 ^__T ->
                   :ok
 
@@ -881,7 +893,7 @@ defmodule :m_eunit_lib do
       end)
   end
 
-  def uniq([[x, x] | xs]) do
+  def uniq([x, x | xs]) do
     uniq([x | xs])
   end
 
@@ -1040,7 +1052,7 @@ defmodule :m_eunit_lib do
     end
   end
 
-  defp normalize([[?\r, ?\n] | cs]) do
+  defp normalize([?\r, ?\n | cs]) do
     [?\n | normalize(cs)]
   end
 
@@ -1580,7 +1592,11 @@ defmodule :m_eunit_lib do
             (fn ->
                __T = :erlang.is_process_alive(self())
 
-               case [] === trie_store([], :gb_trees.empty()) do
+               case [] ===
+                      trie_store(
+                        [],
+                        :gb_trees.empty()
+                      ) do
                  ^__T ->
                    :ok
 
@@ -1621,23 +1637,47 @@ defmodule :m_eunit_lib do
           end},
          {605,
           fn ->
-            :exact = trie_match([1], trie_store([1], trie_new()))
+            :exact =
+              trie_match(
+                [1],
+                trie_store(
+                  [1],
+                  trie_new()
+                )
+              )
           end},
          {606,
           fn ->
             :prefix =
               trie_match(
                 [1, 2],
-                trie_store([1], trie_new())
+                trie_store(
+                  [1],
+                  trie_new()
+                )
               )
           end},
          {607,
           fn ->
-            :no = trie_match([1], trie_store([1, 2], trie_new()))
+            :no =
+              trie_match(
+                [1],
+                trie_store(
+                  [1, 2],
+                  trie_new()
+                )
+              )
           end},
          {608,
           fn ->
-            :no = trie_match([1, 3], trie_store([1, 2], trie_new()))
+            :no =
+              trie_match(
+                [1, 3],
+                trie_store(
+                  [1, 2],
+                  trie_new()
+                )
+              )
           end},
          {609,
           fn ->
@@ -1655,7 +1695,10 @@ defmodule :m_eunit_lib do
             :prefix =
               trie_match(
                 [1, 2, 3, 4, 5],
-                trie_store([1, 2, 3], trie_new())
+                trie_store(
+                  [1, 2, 3],
+                  trie_new()
+                )
               )
           end},
          {613,
@@ -1663,7 +1706,10 @@ defmodule :m_eunit_lib do
             :no =
               trie_match(
                 [1, 2, 2, 4, 5],
-                trie_store([1, 2, 3], trie_new())
+                trie_store(
+                  [1, 2, 3],
+                  trie_new()
+                )
               )
           end}
        ]},
@@ -1695,23 +1741,43 @@ defmodule :m_eunit_lib do
             end},
            {627,
             fn ->
-              :exact = trie_match([1, 3, 2], t)
+              :exact =
+                trie_match(
+                  [1, 3, 2],
+                  t
+                )
             end},
            {628,
             fn ->
-              :no = trie_match([1, 2, 2], t)
+              :no =
+                trie_match(
+                  [1, 2, 2],
+                  t
+                )
             end},
            {629,
             fn ->
-              :no = trie_match([1, 3, 3], t)
+              :no =
+                trie_match(
+                  [1, 3, 3],
+                  t
+                )
             end},
            {630,
             fn ->
-              :prefix = trie_match([1, 2, 3, 4], t)
+              :prefix =
+                trie_match(
+                  [1, 2, 3, 4],
+                  t
+                )
             end},
            {631,
             fn ->
-              :prefix = trie_match([1, 3, 2, 1], t)
+              :prefix =
+                trie_match(
+                  [1, 3, 2, 1],
+                  t
+                )
             end}
          ]
        end},
@@ -1742,7 +1808,11 @@ defmodule :m_eunit_lib do
             end},
            {642,
             fn ->
-              :prefix = trie_match([1, 2, 3, 4], t)
+              :prefix =
+                trie_match(
+                  [1, 2, 3, 4],
+                  t
+                )
             end}
          ]
        end}

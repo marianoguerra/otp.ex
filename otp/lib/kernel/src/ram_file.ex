@@ -533,7 +533,7 @@ defmodule :m_ram_file do
     {:ok, i32(x1, x2, x3, x4)}
   end
 
-  defp translate_response(2, [[x1, x2, x3, x4] | data]) do
+  defp translate_response(2, [x1, x2, x3, x4 | data]) do
     {:ok, {i32(x1, x2, x3, x4), data}}
   end
 

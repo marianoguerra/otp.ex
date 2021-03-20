@@ -1384,7 +1384,7 @@ defmodule :m_ssl_handshake do
   end
 
   def server_hello(sessionId, version, connectionStates, extensions) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -1431,9 +1431,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 80,
           where: %{
-            :mfa => {:ssl_handshake, :certificate, 4},
-            :line => 150,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :certificate, 4},
+            line: 150,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: {:server_has_no_suitable_certificates, error}
         )
@@ -1462,9 +1462,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 43,
           where: %{
-            :mfa => {:ssl_handshake, :client_certificate_verify, 6},
-            :line => 170,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :client_certificate_verify, 6},
+            line: 170,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :fixed_diffie_hellman_prohibited
         )
@@ -1710,24 +1710,20 @@ defmodule :m_ssl_handshake do
         certDbHandle,
         certDbRef,
         %{
-          :server_name_indication => serverNameIndication,
-          :partial_chain => partialChain,
-          :verify_fun => verifyFun,
-          :customize_hostname_check => customizeHostnameCheck,
-          :crl_check => crlCheck,
-          :log_level => level,
-          :signature_algs => signAlgos,
-          :depth => depth
+          server_name_indication: serverNameIndication,
+          partial_chain: partialChain,
+          verify_fun: verifyFun,
+          customize_hostname_check: customizeHostnameCheck,
+          crl_check: crlCheck,
+          log_level: level,
+          signature_algs: signAlgos,
+          depth: depth
         } = opts,
         cRLDbHandle,
         role,
         host,
         version,
-        %{
-          :cert_ext => certExt,
-          :ocsp_responder_certs => ocspResponderCerts,
-          :ocsp_state => ocspState
-        }
+        %{cert_ext: certExt, ocsp_responder_certs: ocspResponderCerts, ocsp_state: ocspState}
       ) do
     serverName = server_name(serverNameIndication, host, role)
     [peerCert | chainCerts] = aSN1Certs
@@ -1745,20 +1741,20 @@ defmodule :m_ssl_handshake do
         validation_fun_and_state(
           verifyFun,
           %{
-            :role => role,
-            :certdb => certDbHandle,
-            :certdb_ref => certDbRef,
-            :server_name => serverName,
-            :customize_hostname_check => customizeHostnameCheck,
-            :signature_algs => signAlgos,
-            :signature_algs_cert => :undefined,
-            :version => version,
-            :crl_check => crlCheck,
-            :crl_db => cRLDbHandle,
-            :cert_ext => certExt,
-            :issuer => trustedCert,
-            :ocsp_responder_certs => ocspResponderCerts,
-            :ocsp_state => ocspState
+            role: role,
+            certdb: certDbHandle,
+            certdb_ref: certDbRef,
+            server_name: serverName,
+            customize_hostname_check: customizeHostnameCheck,
+            signature_algs: signAlgos,
+            signature_algs_cert: :undefined,
+            version: version,
+            crl_check: crlCheck,
+            crl_db: cRLDbHandle,
+            cert_ext: certExt,
+            issuer: trustedCert,
+            ocsp_responder_certs: ocspResponderCerts,
+            ocsp_state: ocspState
           },
           certPath,
           level
@@ -1787,9 +1783,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 46,
           where: %{
-            :mfa => {:ssl_handshake, :certify, 9},
-            :line => 391,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :certify, 9},
+            line: 391,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: {:failed_to_decode_certificate, asn1Reason}
         )
@@ -1799,9 +1795,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 80,
           where: %{
-            :mfa => {:ssl_handshake, :certify, 9},
-            :line => 393,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :certify, 9},
+            line: 393,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: {:unexpected_error, otherReason}
         )
@@ -1813,9 +1809,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 40,
       where: %{
-        :mfa => {:ssl_handshake, :certificate_verify, 6},
-        :line => 402,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :certificate_verify, 6},
+        line: 402,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       },
       reason: :invalid_certificate_verify_message
     )
@@ -1840,9 +1836,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 42,
           where: %{
-            :mfa => {:ssl_handshake, :certificate_verify, 6},
-            :line => 411,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :certificate_verify, 6},
+            line: 411,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           }
         )
     end
@@ -1928,7 +1924,7 @@ defmodule :m_ssl_handshake do
   end
 
   def master_secret(version, r_session(master_secret: mastersecret), connectionStates, role) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -1942,9 +1938,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 40,
           where: %{
-            :mfa => {:ssl_handshake, :master_secret, 4},
-            :line => 465,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :master_secret, 4},
+            line: 465,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :key_calculation_failure
         )
@@ -1952,7 +1948,7 @@ defmodule :m_ssl_handshake do
   end
 
   def master_secret(version, premasterSecret, connectionStates, role) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -1978,9 +1974,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 40,
           where: %{
-            :mfa => {:ssl_handshake, :master_secret, 4},
-            :line => 481,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :master_secret, 4},
+            line: 481,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :master_secret_calculation_failure
         )
@@ -2014,9 +2010,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 51,
           where: %{
-            :mfa => {:ssl_handshake, :verify_connection, 6},
-            :line => 511,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :verify_connection, 6},
+            line: 511,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           }
         )
     end
@@ -2037,7 +2033,7 @@ defmodule :m_ssl_handshake do
         version,
         pubKeyInfo
       ) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates,
         :read
@@ -2789,9 +2785,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_handshake, :decode_handshake, 3},
-          :line => 916,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :decode_handshake, 3},
+          line: 916,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         },
         reason: {:unknown_or_malformed_handshake, message}
       )
@@ -2953,7 +2949,7 @@ defmodule :m_ssl_handshake do
         sessIdTracker,
         r_session(ecc: eCCCurve0) = session,
         version,
-        %{:ciphers => userSuites, :honor_cipher_order => honorCipherOrder} = sslOpts,
+        %{ciphers: userSuites, honor_cipher_order: honorCipherOrder} = sslOpts,
         cert
       ) do
     {sessionId, resumed} =
@@ -3005,9 +3001,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 47,
             where: %{
-              :mfa => {:ssl_handshake, :premaster_secret, 3},
-              :line => 1077,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :premaster_secret, 3},
+              line: 1077,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
@@ -3024,9 +3020,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 47,
             where: %{
-              :mfa => {:ssl_handshake, :premaster_secret, 3},
-              :line => 1084,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :premaster_secret, 3},
+              line: 1084,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
@@ -3047,9 +3043,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 47,
             where: %{
-              :mfa => {:ssl_handshake, :premaster_secret, 3},
-              :line => 1093,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :premaster_secret, 3},
+              line: 1093,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
@@ -3095,9 +3091,9 @@ defmodule :m_ssl_handshake do
                 level: 2,
                 description: 47,
                 where: %{
-                  :mfa => {:ssl_handshake, :premaster_secret, 3},
-                  :line => 1105,
-                  :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+                  mfa: {:ssl_handshake, :premaster_secret, 3},
+                  line: 1105,
+                  file: 'otp/lib/ssl/src/ssl_handshake.erl'
                 }
               )
             )
@@ -3112,9 +3108,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 47,
             where: %{
-              :mfa => {:ssl_handshake, :premaster_secret, 3},
-              :line => 1108,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :premaster_secret, 3},
+              line: 1108,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
@@ -3215,16 +3211,16 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 51,
             where: %{
-              :mfa => {:ssl_handshake, :premaster_secret, 2},
-              :line => 1154,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :premaster_secret, 2},
+              line: 1154,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
     end
   end
 
-  def premaster_secret(encSecret, %{:algorithm => :rsa} = engine) do
+  def premaster_secret(encSecret, %{algorithm: :rsa} = engine) do
     try do
       :crypto.private_decrypt(:rsa, encSecret, :maps.remove(:algorithm, engine), [
         {:rsa_pad, :rsa_pkcs1_padding}
@@ -3236,9 +3232,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 51,
             where: %{
-              :mfa => {:ssl_handshake, :premaster_secret, 2},
-              :line => 1161,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :premaster_secret, 2},
+              line: 1161,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
@@ -3272,10 +3268,10 @@ defmodule :m_ssl_handshake do
   defp add_tls12_extensions(
          _Version,
          %{
-           :alpn_advertised_protocols => alpnAdvertisedProtocols,
-           :next_protocol_selector => nextProtocolSelector,
-           :server_name_indication => serverNameIndication,
-           :max_fragment_length => maxFragmentLength
+           alpn_advertised_protocols: alpnAdvertisedProtocols,
+           next_protocol_selector: nextProtocolSelector,
+           server_name_indication: serverNameIndication,
+           max_fragment_length: maxFragmentLength
          } = sslOpts,
          connectionStates,
          renegotiation
@@ -3283,38 +3279,37 @@ defmodule :m_ssl_handshake do
     sRP = srp_user(sslOpts)
 
     %{
-      :renegotiation_info =>
+      renegotiation_info:
         renegotiation_info(:tls_record, :client, connectionStates, renegotiation),
-      :srp => sRP,
-      :alpn => encode_alpn(alpnAdvertisedProtocols, renegotiation),
-      :next_protocol_negotiation =>
+      srp: sRP,
+      alpn: encode_alpn(alpnAdvertisedProtocols, renegotiation),
+      next_protocol_negotiation:
         encode_client_protocol_negotiation(
           nextProtocolSelector,
           renegotiation
         ),
-      :sni => sni(serverNameIndication),
-      :max_frag_enum => max_frag_enum(maxFragmentLength)
+      sni: sni(serverNameIndication),
+      max_frag_enum: max_frag_enum(maxFragmentLength)
     }
   end
 
   defp add_common_extensions({3, 4}, helloExtensions, _CipherSuites, %{
-         :eccs => supportedECCs,
-         :supported_groups => groups,
-         :signature_algs => signatureSchemes
+         eccs: supportedECCs,
+         supported_groups: groups,
+         signature_algs: signatureSchemes
        }) do
     {ecPointFormats, _} = client_ecc_extensions(supportedECCs)
 
-    %{
-      helloExtensions
-      | :ec_point_formats => ecPointFormats,
-        :elliptic_curves => groups,
-        :signature_algs => signature_algs_ext(signatureSchemes)
-    }
+    Map.merge(helloExtensions, %{
+      ec_point_formats: ecPointFormats,
+      elliptic_curves: groups,
+      signature_algs: signature_algs_ext(signatureSchemes)
+    })
   end
 
   defp add_common_extensions(version, helloExtensions, cipherSuites, %{
-         :eccs => supportedECCs,
-         :signature_algs => supportedHashSigns
+         eccs: supportedECCs,
+         signature_algs: supportedHashSigns
        }) do
     {ecPointFormats, ellipticCurves} =
       case advertises_ec_ciphers(
@@ -3330,26 +3325,29 @@ defmodule :m_ssl_handshake do
           {:undefined, :undefined}
       end
 
-    %{
-      helloExtensions
-      | :ec_point_formats => ecPointFormats,
-        :elliptic_curves => ellipticCurves,
-        :signature_algs => available_signature_algs(supportedHashSigns, version)
-    }
+    Map.merge(helloExtensions, %{
+      ec_point_formats: ecPointFormats,
+      elliptic_curves: ellipticCurves,
+      signature_algs:
+        available_signature_algs(
+          supportedHashSigns,
+          version
+        )
+    })
   end
 
   defp maybe_add_tls13_extensions(
          {3, 4},
          helloExtensions0,
-         %{:signature_algs_cert => signatureSchemes, :versions => supportedVersions},
+         %{signature_algs_cert: signatureSchemes, versions: supportedVersions},
          keyShare,
          ticketData
        ) do
-    helloExtensions1 = %{
-      helloExtensions0
-      | :client_hello_versions => r_client_hello_versions(versions: supportedVersions),
-        :signature_algs_cert => signature_algs_cert(signatureSchemes)
-    }
+    helloExtensions1 =
+      Map.merge(helloExtensions0, %{
+        client_hello_versions: r_client_hello_versions(versions: supportedVersions),
+        signature_algs_cert: signature_algs_cert(signatureSchemes)
+      })
 
     helloExtensions =
       maybe_add_key_share(
@@ -3366,7 +3364,7 @@ defmodule :m_ssl_handshake do
 
   defp maybe_add_certificate_status_request(
          _Version,
-         %{:ocsp_stapling => false},
+         %{ocsp_stapling: false},
          _OcspNonce,
          helloExtensions
        ) do
@@ -3375,7 +3373,7 @@ defmodule :m_ssl_handshake do
 
   defp maybe_add_certificate_status_request(
          _Version,
-         %{:ocsp_stapling => true, :ocsp_responder_certs => ocspResponderCerts},
+         %{ocsp_stapling: true, ocsp_responder_certs: ocspResponderCerts},
          ocspNonce,
          helloExtensions
        ) do
@@ -3389,7 +3387,7 @@ defmodule :m_ssl_handshake do
       )
 
     certStatusReqExtn = r_certificate_status_request(status_type: 1, request: req)
-    %{helloExtensions | :status_request => certStatusReqExtn}
+    Map.put(helloExtensions, :status_request, certStatusReqExtn)
   end
 
   defp get_ocsp_responder_list(responderCerts) do
@@ -3423,7 +3421,7 @@ defmodule :m_ssl_handshake do
         clientShares0
       )
 
-    %{helloExtensions | :key_share => r_key_share_client_hello(client_shares: clientShares)}
+    Map.put(helloExtensions, :key_share, r_key_share_client_hello(client_shares: clientShares))
   end
 
   defp maybe_add_pre_shared_key(helloExtensions, :undefined) do
@@ -3433,18 +3431,17 @@ defmodule :m_ssl_handshake do
   defp maybe_add_pre_shared_key(helloExtensions, ticketData) do
     {identities, binders} = get_identities_binders(ticketData)
 
-    %{
-      helloExtensions
-      | :pre_shared_key =>
-          r_pre_shared_key_client_hello(
-            offered_psks:
-              r_offered_psks(
-                identities: identities,
-                binders: binders
-              )
-          ),
-        :psk_key_exchange_modes => r_psk_key_exchange_modes(ke_modes: [:psk_ke, :psk_dhe_ke])
-    }
+    Map.merge(helloExtensions, %{
+      pre_shared_key:
+        r_pre_shared_key_client_hello(
+          offered_psks:
+            r_offered_psks(
+              identities: identities,
+              binders: binders
+            )
+        ),
+      psk_key_exchange_modes: r_psk_key_exchange_modes(ke_modes: [:psk_ke, :psk_dhe_ke])
+    })
   end
 
   defp get_identities_binders(ticketData) do
@@ -3468,7 +3465,7 @@ defmodule :m_ssl_handshake do
   def add_server_share(:server_hello, extensions, keyShare) do
     r_key_share_server_hello(server_share: serverShare0) = keyShare
     serverShare = kse_remove_private_key(serverShare0)
-    %{extensions | :key_share => r_key_share_server_hello(server_share: serverShare)}
+    Map.put(extensions, :key_share, r_key_share_server_hello(server_share: serverShare))
   end
 
   def add_server_share(
@@ -3476,17 +3473,17 @@ defmodule :m_ssl_handshake do
         extensions,
         r_key_share_server_hello(server_share: r_key_share_entry(group: group))
       ) do
-    %{extensions | :key_share => r_key_share_hello_retry_request(selected_group: group)}
+    Map.put(extensions, :key_share, r_key_share_hello_retry_request(selected_group: group))
   end
 
   def add_alpn(extensions, aLPN0) do
     aLPN = encode_alpn([aLPN0], false)
-    %{extensions | :alpn => aLPN}
+    Map.put(extensions, :alpn, aLPN)
   end
 
   def add_selected_version(extensions) do
     supportedVersions = r_server_hello_selected_version(selected_version: {3, 4})
-    %{extensions | :server_hello_selected_version => supportedVersions}
+    Map.put(extensions, :server_hello_selected_version, supportedVersions)
   end
 
   defp kse_remove_private_key(
@@ -3530,8 +3527,8 @@ defmodule :m_ssl_handshake do
         exts,
         version,
         %{
-          :secure_renegotiate => secureRenegotation,
-          :alpn_preferred_protocols => aLPNPreferredProtocols
+          secure_renegotiate: secureRenegotation,
+          alpn_preferred_protocols: aLPNPreferredProtocols
         } = opts,
         r_session(
           cipher_suite: negotiatedCipherSuite,
@@ -3585,11 +3582,16 @@ defmodule :m_ssl_handshake do
           maxFragEnum
       end
 
-    serverHelloExtensions = %{
-      empty
-      | :renegotiation_info =>
-          renegotiation_info(recordCB, :server, connectionStates, renegotiation),
-        :ec_point_formats =>
+    serverHelloExtensions =
+      Map.merge(empty, %{
+        renegotiation_info:
+          renegotiation_info(
+            recordCB,
+            :server,
+            connectionStates,
+            renegotiation
+          ),
+        ec_point_formats:
           server_ecc_extension(
             version,
             :maps.get(
@@ -3598,8 +3600,8 @@ defmodule :m_ssl_handshake do
               :undefined
             )
           ),
-        :max_frag_enum => serverMaxFragEnum
-    }
+        max_frag_enum: serverMaxFragEnum
+      })
 
     aLPN = :maps.get(:alpn, exts, :undefined)
 
@@ -3613,7 +3615,14 @@ defmodule :m_ssl_handshake do
           )
 
         {session, connectionStates, protocol,
-         %{serverHelloExtensions | :alpn => encode_alpn([protocol], renegotiation)}}
+         Map.put(
+           serverHelloExtensions,
+           :alpn,
+           encode_alpn(
+             [protocol],
+             renegotiation
+           )
+         )}
 
       true ->
         nextProtocolNegotiation = :maps.get(:next_protocol_negotiation, exts, :undefined)
@@ -3626,11 +3635,11 @@ defmodule :m_ssl_handshake do
           )
 
         {session, connectionStates, :undefined,
-         %{
-           serverHelloExtensions
-           | :next_protocol_negotiation =>
-               encode_protocols_advertised_on_server(protocolsToAdvertise)
-         }}
+         Map.put(
+           serverHelloExtensions,
+           :next_protocol_negotiation,
+           encode_protocols_advertised_on_server(protocolsToAdvertise)
+         )}
     end
   end
 
@@ -3642,9 +3651,9 @@ defmodule :m_ssl_handshake do
         exts,
         version,
         %{
-          :secure_renegotiate => secureRenegotation,
-          :next_protocol_selector => nextProtoSelector,
-          :ocsp_stapling => stapling
+          secure_renegotiate: secureRenegotation,
+          next_protocol_selector: nextProtoSelector,
+          ocsp_stapling: stapling
         },
         connectionStates0,
         renegotiation,
@@ -3672,7 +3681,7 @@ defmodule :m_ssl_handshake do
     cond do
       isNew ->
         serverMaxFragEnum = :maps.get(:max_frag_enum, exts, :undefined)
-        %{:current_write => %{:max_fragment_length => connMaxFragLen}} = connectionStates
+        %{current_write: %{max_fragment_length: connMaxFragLen}} = connectionStates
         clientMaxFragEnum = max_frag_enum(connMaxFragLen)
 
         cond do
@@ -3685,9 +3694,9 @@ defmodule :m_ssl_handshake do
                 level: 2,
                 description: 47,
                 where: %{
-                  :mfa => {:ssl_handshake, :handle_server_hello_extensions, 10},
-                  :line => 1460,
-                  :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+                  mfa: {:ssl_handshake, :handle_server_hello_extensions, 10},
+                  line: 1460,
+                  file: 'otp/lib/ssl/src/ssl_handshake.erl'
                 }
               )
             )
@@ -3724,9 +3733,9 @@ defmodule :m_ssl_handshake do
               level: 2,
               description: 40,
               where: %{
-                :mfa => {:ssl_handshake, :handle_server_hello_extensions, 10},
-                :line => 1485,
-                :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+                mfa: {:ssl_handshake, :handle_server_hello_extensions, 10},
+                line: 1485,
+                file: 'otp/lib/ssl/src/ssl_handshake.erl'
               },
               reason: reason
             )
@@ -3736,9 +3745,9 @@ defmodule :m_ssl_handshake do
               level: 2,
               description: 40,
               where: %{
-                :mfa => {:ssl_handshake, :handle_server_hello_extensions, 10},
-                :line => 1487,
-                :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+                mfa: {:ssl_handshake, :handle_server_hello_extensions, 10},
+                line: 1487,
+                file: 'otp/lib/ssl/src/ssl_handshake.erl'
               },
               reason: :no_protocols_in_server_hello
             )
@@ -3748,9 +3757,9 @@ defmodule :m_ssl_handshake do
               level: 2,
               description: 40,
               where: %{
-                :mfa => {:ssl_handshake, :handle_server_hello_extensions, 10},
-                :line => 1489,
-                :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+                mfa: {:ssl_handshake, :handle_server_hello_extensions, 10},
+                line: 1489,
+                file: 'otp/lib/ssl/src/ssl_handshake.erl'
               },
               reason: :too_many_protocols_in_server_hello
             )
@@ -3835,9 +3844,9 @@ defmodule :m_ssl_handshake do
               level: 2,
               description: 71,
               where: %{
-                :mfa => {:ssl_handshake, :select_hashsign, 5},
-                :line => 1565,
-                :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+                mfa: {:ssl_handshake, :select_hashsign, 5},
+                line: 1565,
+                file: 'otp/lib/ssl/src/ssl_handshake.erl'
               },
               reason: :no_suitable_signature_algorithm
             )
@@ -3851,9 +3860,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 71,
           where: %{
-            :mfa => {:ssl_handshake, :select_hashsign, 5},
-            :line => 1570,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :select_hashsign, 5},
+            line: 1570,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :no_suitable_signature_algorithm
         )
@@ -3917,9 +3926,9 @@ defmodule :m_ssl_handshake do
               level: 2,
               description: 71,
               where: %{
-                :mfa => {:ssl_handshake, :select_hashsign, 4},
-                :line => 1606,
-                :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+                mfa: {:ssl_handshake, :select_hashsign, 4},
+                line: 1606,
+                file: 'otp/lib/ssl/src/ssl_handshake.erl'
               },
               reason: :no_suitable_signature_algorithm
             )
@@ -3933,9 +3942,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 71,
           where: %{
-            :mfa => {:ssl_handshake, :select_hashsign, 4},
-            :line => 1611,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :select_hashsign, 4},
+            line: 1611,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :no_suitable_signature_algorithm
         )
@@ -3955,9 +3964,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 71,
           where: %{
-            :mfa => {:ssl_handshake, :select_hashsign, 4},
-            :line => 1622,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :select_hashsign, 4},
+            line: 1622,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :no_suitable_signature_algorithm
         )
@@ -4023,7 +4032,7 @@ defmodule :m_ssl_handshake do
     {:sha, :dsa}
   end
 
-  defp srp_user(%{:srp_identity => {userName, _}}) do
+  defp srp_user(%{srp_identity: {userName, _}}) do
     r_srp(username: userName)
   end
 
@@ -4118,19 +4127,19 @@ defmodule :m_ssl_handshake do
   defp handle_ocsp_extension(true = stapling, extensions) do
     case :maps.get(:status_request, extensions, false) do
       :undefined ->
-        %{:ocsp_stapling => stapling, :ocsp_expect => :staple}
+        %{ocsp_stapling: stapling, ocsp_expect: :staple}
 
       false ->
-        %{:ocsp_stapling => stapling, :ocsp_expect => :no_staple}
+        %{ocsp_stapling: stapling, ocsp_expect: :no_staple}
 
       _Else ->
         r_alert(
           level: 2,
           description: 40,
           where: %{
-            :mfa => {:ssl_handshake, :handle_ocsp_extension, 2},
-            :line => 1746,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :handle_ocsp_extension, 2},
+            line: 1746,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :status_request_not_empty
         )
@@ -4140,16 +4149,16 @@ defmodule :m_ssl_handshake do
   defp handle_ocsp_extension(false = stapling, extensions) do
     case :maps.get(:status_request, extensions, false) do
       false ->
-        %{:ocsp_stapling => stapling, :ocsp_expect => :no_staple}
+        %{ocsp_stapling: stapling, ocsp_expect: :no_staple}
 
       _Else ->
         r_alert(
           level: 2,
           description: 40,
           where: %{
-            :mfa => {:ssl_handshake, :handle_ocsp_extension, 2},
-            :line => 1754,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :handle_ocsp_extension, 2},
+            line: 1754,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :unexpected_status_request
         )
@@ -4353,7 +4362,7 @@ defmodule :m_ssl_handshake do
   defp handle_incomplete_chain(
          peerCert,
          chain0,
-         %{:partial_chain => partialChain} = opts,
+         %{partial_chain: partialChain} = opts,
          options,
          certDbHandle,
          certsDbRef,
@@ -4391,7 +4400,7 @@ defmodule :m_ssl_handshake do
   defp handle_unordered_chain(
          peerCert,
          chain0,
-         %{:partial_chain => partialChain},
+         %{partial_chain: partialChain},
          options,
          certDbHandle,
          certsDbRef,
@@ -4425,9 +4434,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 45,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1938,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1938,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       }
     )
   end
@@ -4437,9 +4446,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 42,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1940,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1940,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       }
     )
   end
@@ -4449,9 +4458,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 42,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1942,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1942,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       }
     )
   end
@@ -4461,9 +4470,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 42,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1944,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1944,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       }
     )
   end
@@ -4473,9 +4482,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 43,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1946,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1946,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       }
     )
   end
@@ -4485,9 +4494,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 44,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1948,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1948,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       }
     )
   end
@@ -4498,9 +4507,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 42,
         where: %{
-          :mfa => {:ssl_handshake, :path_validation_alert, 1},
-          :line => 1950,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :path_validation_alert, 1},
+          line: 1950,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         }
       )
 
@@ -4512,9 +4521,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 42,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1953,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1953,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       }
     )
   end
@@ -4524,9 +4533,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 48,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1955,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1955,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       }
     )
   end
@@ -4536,9 +4545,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 40,
       where: %{
-        :mfa => {:ssl_handshake, :path_validation_alert, 1},
-        :line => 1957,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :path_validation_alert, 1},
+        line: 1957,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       },
       reason: reason
     )
@@ -4554,9 +4563,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:ssl_handshake, :digitally_signed, 5},
-              :line => 1965,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :digitally_signed, 5},
+              line: 1965,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             },
             reason: bad_key(privateKey)
           )
@@ -4567,24 +4576,24 @@ defmodule :m_ssl_handshake do
     end
   end
 
-  defp do_digitally_signed({3, minor}, hash, _, %{:algorithm => :rsa} = engine, :rsa)
+  defp do_digitally_signed({3, minor}, hash, _, %{algorithm: :rsa} = engine, :rsa)
        when minor <= 2 do
     :crypto.private_encrypt(:rsa, hash, :maps.remove(:algorithm, engine), :rsa_pkcs1_padding)
   end
 
-  defp do_digitally_signed({3, minor}, hash, hashAlgo, %{:algorithm => alg} = engine, signAlgo)
+  defp do_digitally_signed({3, minor}, hash, hashAlgo, %{algorithm: alg} = engine, signAlgo)
        when minor > 3 do
     options = signature_options(signAlgo, hashAlgo)
     :crypto.sign(alg, hashAlgo, hash, :maps.remove(:algorithm, engine), options)
   end
 
-  defp do_digitally_signed({3, minor}, hash, hashAlgo, %{:algorithm => alg} = engine, signAlgo)
+  defp do_digitally_signed({3, minor}, hash, hashAlgo, %{algorithm: alg} = engine, signAlgo)
        when minor > 3 do
     options = signature_options(signAlgo, hashAlgo)
     :crypto.sign(alg, hashAlgo, hash, :maps.remove(:algorithm, engine), options)
   end
 
-  defp do_digitally_signed({3, 3}, hash, hashAlgo, %{:algorithm => alg} = engine, signAlgo) do
+  defp do_digitally_signed({3, 3}, hash, hashAlgo, %{algorithm: alg} = engine, signAlgo) do
     options = signature_options(signAlgo, hashAlgo)
     :crypto.sign(alg, hashAlgo, {:digest, hash}, :maps.remove(:algorithm, engine), options)
   end
@@ -4654,17 +4663,17 @@ defmodule :m_ssl_handshake do
     :unacceptable_ecdsa_key
   end
 
-  defp bad_key(%{:algorithm => :rsa}) do
+  defp bad_key(%{algorithm: :rsa}) do
     :unacceptable_rsa_key
   end
 
-  defp bad_key(%{:algorithm => :ecdsa}) do
+  defp bad_key(%{algorithm: :ecdsa}) do
     :unacceptable_ecdsa_key
   end
 
   defp cert_status_check(
          _,
-         %{:ocsp_state => %{:ocsp_stapling => true, :ocsp_expect => :stapled}},
+         %{ocsp_state: %{ocsp_stapling: true, ocsp_expect: :stapled}},
          _VerifyResult,
          _,
          _
@@ -4674,7 +4683,7 @@ defmodule :m_ssl_handshake do
 
   defp cert_status_check(
          otpCert,
-         %{:ocsp_state => %{:ocsp_stapling => false}} = sslState,
+         %{ocsp_state: %{ocsp_stapling: false}} = sslState,
          verifyResult,
          certPath,
          logLevel
@@ -4684,8 +4693,7 @@ defmodule :m_ssl_handshake do
 
   defp cert_status_check(
          otpCert,
-         %{:ocsp_state => %{:ocsp_stapling => :best_effort, :ocsp_expect => :undetermined}} =
-           sslState,
+         %{ocsp_state: %{ocsp_stapling: :best_effort, ocsp_expect: :undetermined}} = sslState,
          verifyResult,
          certPath,
          logLevel
@@ -4693,21 +4701,21 @@ defmodule :m_ssl_handshake do
     maybe_check_crl(otpCert, sslState, verifyResult, certPath, logLevel)
   end
 
-  defp maybe_check_crl(_, %{:crl_check => false}, _, _, _) do
+  defp maybe_check_crl(_, %{crl_check: false}, _, _, _) do
     :valid
   end
 
-  defp maybe_check_crl(_, %{:crl_check => :peer}, _, :valid, _) do
+  defp maybe_check_crl(_, %{crl_check: :peer}, _, :valid, _) do
     :valid
   end
 
   defp maybe_check_crl(
          otpCert,
          %{
-           :crl_check => check,
-           :certdb => certDbHandle,
-           :certdb_ref => certDbRef,
-           :crl_db => {callback, cRLDbHandle}
+           crl_check: check,
+           certdb: certDbHandle,
+           certdb_ref: certDbRef,
+           crl_db: {callback, cRLDbHandle}
          },
          _,
          certPath,
@@ -4868,9 +4876,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:ssl_handshake, :encrypted_premaster_secret, 2},
-              :line => 2150,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :encrypted_premaster_secret, 2},
+              line: 2150,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             },
             reason: :premaster_encryption_failed
           )
@@ -4983,7 +4991,7 @@ defmodule :m_ssl_handshake do
   defp hello_security_parameters(
          :client,
          version,
-         %{:security_parameters => secParams},
+         %{security_parameters: secParams},
          cipherSuite,
          random,
          compression
@@ -4999,7 +5007,7 @@ defmodule :m_ssl_handshake do
   defp hello_security_parameters(
          :server,
          version,
-         %{:security_parameters => secParams},
+         %{security_parameters: secParams},
          cipherSuite,
          random,
          compression
@@ -5539,9 +5547,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_handshake, :dec_server_key, 3},
-          :line => 2541,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :dec_server_key, 3},
+          line: 2541,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         },
         reason: {:unknown_or_malformed_key_exchange, keyExchange}
       )
@@ -5562,9 +5570,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 43,
         where: %{
-          :mfa => {:ssl_handshake, :dec_client_key, 3},
-          :line => 2548,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :dec_client_key, 3},
+          line: 2548,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         },
         reason: :empty_dh_public
       )
@@ -5585,9 +5593,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 43,
         where: %{
-          :mfa => {:ssl_handshake, :dec_client_key, 3},
-          :line => 2553,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :dec_client_key, 3},
+          line: 2553,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         },
         reason: :empty_dh_public
       )
@@ -5726,9 +5734,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_handshake, :dec_server_key_signature, 3},
-          :line => 2615,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :dec_server_key_signature, 3},
+          line: 2615,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         },
         reason: :failed_to_decrypt_server_key_sign
       )
@@ -5813,7 +5821,7 @@ defmodule :m_ssl_handshake do
        )
        when len + 2 === extLen do
     aLPN = r_alpn(extension_data: extensionData)
-    decode_extensions(rest, version, messageType, %{acc | :alpn => aLPN})
+    decode_extensions(rest, version, messageType, Map.put(acc, :alpn, aLPN))
   end
 
   defp decode_extensions(
@@ -5824,7 +5832,7 @@ defmodule :m_ssl_handshake do
          acc
        ) do
     nextP = r_next_protocol_negotiation(extension_data: extensionData)
-    decode_extensions(rest, version, messageType, %{acc | :next_protocol_negotiation => nextP})
+    decode_extensions(rest, version, messageType, Map.put(acc, :next_protocol_negotiation, nextP))
   end
 
   defp decode_extensions(
@@ -5845,10 +5853,16 @@ defmodule :m_ssl_handshake do
           verifyInfo
       end
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :renegotiation_info => r_renegotiation_info(renegotiated_connection: renegotiateInfo)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :renegotiation_info,
+        r_renegotiation_info(renegotiated_connection: renegotiateInfo)
+      )
+    )
   end
 
   defp decode_extensions(
@@ -5859,7 +5873,7 @@ defmodule :m_ssl_handshake do
          acc
        )
        when len == sRPLen + 1 do
-    decode_extensions(rest, version, messageType, %{acc | :srp => r_srp(username: sRP)})
+    decode_extensions(rest, version, messageType, Map.put(acc, :srp, r_srp(username: sRP)))
   end
 
   defp decode_extensions(
@@ -5879,10 +5893,12 @@ defmodule :m_ssl_handshake do
         {:ssl_cipher.hash_algorithm(hash), :ssl_cipher.sign_algorithm(sign)}
       end
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :signature_algs => r_hash_sign_algos(hash_sign_algos: hashSignAlgos)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(acc, :signature_algs, r_hash_sign_algos(hash_sign_algos: hashSignAlgos))
+    )
   end
 
   defp decode_extensions(
@@ -5914,10 +5930,12 @@ defmodule :m_ssl_handshake do
         end
       )
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :signature_algs => r_signature_algorithms(signature_scheme_list: signSchemes)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(acc, :signature_algs, r_signature_algorithms(signature_scheme_list: signSchemes))
+    )
   end
 
   defp decode_extensions(
@@ -5948,10 +5966,16 @@ defmodule :m_ssl_handshake do
         end
       )
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :signature_algs_cert => r_signature_algorithms_cert(signature_scheme_list: signSchemes)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :signature_algs_cert,
+        r_signature_algorithms_cert(signature_scheme_list: signSchemes)
+      )
+    )
   end
 
   defp decode_extensions(
@@ -5982,10 +6006,12 @@ defmodule :m_ssl_handshake do
         end
       )
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :elliptic_curves => r_elliptic_curves(elliptic_curve_list: ellipticCurves)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(acc, :elliptic_curves, r_elliptic_curves(elliptic_curve_list: ellipticCurves))
+    )
   end
 
   defp decode_extensions(
@@ -6016,10 +6042,12 @@ defmodule :m_ssl_handshake do
         end
       )
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :elliptic_curves => r_supported_groups(supported_groups: supportedGroups)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(acc, :elliptic_curves, r_supported_groups(supported_groups: supportedGroups))
+    )
   end
 
   defp decode_extensions(
@@ -6032,10 +6060,12 @@ defmodule :m_ssl_handshake do
     <<_::size(8)-unsigned-big-integer, eCPointFormatList::binary>> = extData
     eCPointFormats = :erlang.binary_to_list(eCPointFormatList)
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :ec_point_formats => r_ec_point_formats(ec_point_format_list: eCPointFormats)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(acc, :ec_point_formats, r_ec_point_formats(ec_point_format_list: eCPointFormats))
+    )
   end
 
   defp decode_extensions(
@@ -6045,7 +6075,7 @@ defmodule :m_ssl_handshake do
          acc
        )
        when len == 0 do
-    decode_extensions(rest, version, messageType, %{acc | :sni => r_sni(hostname: '')})
+    decode_extensions(rest, version, messageType, Map.put(acc, :sni, r_sni(hostname: '')))
   end
 
   defp decode_extensions(
@@ -6056,7 +6086,7 @@ defmodule :m_ssl_handshake do
          acc
        ) do
     <<_::size(16)-unsigned-big-integer, nameList::binary>> = extData
-    decode_extensions(rest, version, messageType, %{acc | :sni => dec_sni(nameList)})
+    decode_extensions(rest, version, messageType, Map.put(acc, :sni, dec_sni(nameList)))
   end
 
   defp decode_extensions(
@@ -6066,10 +6096,12 @@ defmodule :m_ssl_handshake do
          messageType,
          acc
        ) do
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :max_frag_enum => r_max_frag_enum(enum: maxFragEnum)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(acc, :max_frag_enum, r_max_frag_enum(enum: maxFragEnum))
+    )
   end
 
   defp decode_extensions(
@@ -6082,10 +6114,16 @@ defmodule :m_ssl_handshake do
        when len > 2 do
     <<_::size(8)-unsigned-big-integer, versions::binary>> = extData
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :client_hello_versions => r_client_hello_versions(versions: decode_versions(versions))
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :client_hello_versions,
+        r_client_hello_versions(versions: decode_versions(versions))
+      )
+    )
   end
 
   defp decode_extensions(
@@ -6096,11 +6134,16 @@ defmodule :m_ssl_handshake do
          acc
        )
        when len === 2 and selectedVersion === 772 do
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :server_hello_selected_version =>
-          r_server_hello_selected_version(selected_version: {3, 4})
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :server_hello_selected_version,
+        r_server_hello_selected_version(selected_version: {3, 4})
+      )
+    )
   end
 
   defp decode_extensions(
@@ -6112,10 +6155,16 @@ defmodule :m_ssl_handshake do
        ) do
     <<_::size(16)-unsigned-big-integer, clientShares::binary>> = extData
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :key_share => r_key_share_client_hello(client_shares: decode_client_shares(clientShares))
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :key_share,
+        r_key_share_client_hello(client_shares: decode_client_shares(clientShares))
+      )
+    )
   end
 
   defp decode_extensions(
@@ -6128,17 +6177,22 @@ defmodule :m_ssl_handshake do
     <<group::size(16)-unsigned-big-integer, keyLen::size(16)-unsigned-big-integer,
       keyExchange::size(keyLen)-binary>> = extData
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :key_share =>
-          r_key_share_server_hello(
-            server_share:
-              r_key_share_entry(
-                group: :tls_v1.enum_to_group(group),
-                key_exchange: keyExchange
-              )
-          )
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :key_share,
+        r_key_share_server_hello(
+          server_share:
+            r_key_share_entry(
+              group: :tls_v1.enum_to_group(group),
+              key_exchange: keyExchange
+            )
+        )
+      )
+    )
   end
 
   defp decode_extensions(
@@ -6150,11 +6204,16 @@ defmodule :m_ssl_handshake do
        ) do
     <<group::size(16)-unsigned-big-integer>> = extData
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :key_share =>
-          r_key_share_hello_retry_request(selected_group: :tls_v1.enum_to_group(group))
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :key_share,
+        r_key_share_hello_retry_request(selected_group: :tls_v1.enum_to_group(group))
+      )
+    )
   end
 
   defp decode_extensions(
@@ -6166,11 +6225,16 @@ defmodule :m_ssl_handshake do
        ) do
     <<pLen::size(8)-unsigned-big-integer, kEModes::size(pLen)-binary>> = extData
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :psk_key_exchange_modes =>
-          r_psk_key_exchange_modes(ke_modes: decode_psk_key_exchange_modes(kEModes))
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :psk_key_exchange_modes,
+        r_psk_key_exchange_modes(ke_modes: decode_psk_key_exchange_modes(kEModes))
+      )
+    )
   end
 
   defp decode_extensions(
@@ -6183,17 +6247,22 @@ defmodule :m_ssl_handshake do
     <<idLen::size(16)-unsigned-big-integer, identities::size(idLen)-binary,
       bLen::size(16)-unsigned-big-integer, binders::size(bLen)-binary>> = extData
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :pre_shared_key =>
-          r_pre_shared_key_client_hello(
-            offered_psks:
-              r_offered_psks(
-                identities: decode_psk_identities(identities),
-                binders: decode_psk_binders(binders)
-              )
-          )
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(
+        acc,
+        :pre_shared_key,
+        r_pre_shared_key_client_hello(
+          offered_psks:
+            r_offered_psks(
+              identities: decode_psk_identities(identities),
+              binders: decode_psk_binders(binders)
+            )
+        )
+      )
+    )
   end
 
   defp decode_extensions(
@@ -6205,10 +6274,12 @@ defmodule :m_ssl_handshake do
        ) do
     <<identity::size(16)-unsigned-big-integer>> = extData
 
-    decode_extensions(rest, version, messageType, %{
-      acc
-      | :pre_shared_key => r_pre_shared_key_server_hello(selected_identity: identity)
-    })
+    decode_extensions(
+      rest,
+      version,
+      messageType,
+      Map.put(acc, :pre_shared_key, r_pre_shared_key_server_hello(selected_identity: identity))
+    )
   end
 
   defp decode_extensions(
@@ -6220,7 +6291,7 @@ defmodule :m_ssl_handshake do
          acc
        )
        when len == cookieLen + 2 do
-    decode_extensions(rest, version, messageType, %{acc | :cookie => r_cookie(cookie: cookie)})
+    decode_extensions(rest, version, messageType, Map.put(acc, :cookie, r_cookie(cookie: cookie)))
   end
 
   defp decode_extensions(
@@ -6231,7 +6302,7 @@ defmodule :m_ssl_handshake do
          acc
        )
        when len === 0 do
-    decode_extensions(rest, version, messageType, %{acc | :status_request => :undefined})
+    decode_extensions(rest, version, messageType, Map.put(acc, :status_request, :undefined))
   end
 
   defp decode_extensions(
@@ -6244,10 +6315,12 @@ defmodule :m_ssl_handshake do
     case certStatus do
       <<1::size(8)-unsigned-big-integer, oCSPLen::size(24)-unsigned-big-integer,
         aSN1OCSPResponse::size(oCSPLen)-binary>> ->
-        decode_extensions(rest, version, messageType, %{
-          acc
-          | :status_request => r_certificate_status(response: aSN1OCSPResponse)
-        })
+        decode_extensions(
+          rest,
+          version,
+          messageType,
+          Map.put(acc, :status_request, r_certificate_status(response: aSN1OCSPResponse))
+        )
 
       _Other ->
         decode_extensions(rest, version, messageType, acc)
@@ -6580,9 +6653,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 47,
             where: %{
-              :mfa => {:ssl_handshake, :psk_secret, 2},
-              :line => 3090,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :psk_secret, 2},
+              line: 3090,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
@@ -6607,9 +6680,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 47,
             where: %{
-              :mfa => {:ssl_handshake, :psk_secret, 3},
-              :line => 3102,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :psk_secret, 3},
+              line: 3102,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
@@ -6631,7 +6704,7 @@ defmodule :m_ssl_handshake do
 
   defp filter_hashsigns(
          [suite | suites],
-         [%{:key_exchange => keyExchange} | algos],
+         [%{key_exchange: keyExchange} | algos],
          hashSigns,
          version,
          acc
@@ -6643,7 +6716,7 @@ defmodule :m_ssl_handshake do
 
   defp filter_hashsigns(
          [suite | suites],
-         [%{:key_exchange => keyExchange} | algos],
+         [%{key_exchange: keyExchange} | algos],
          hashSigns,
          version,
          acc
@@ -6656,7 +6729,7 @@ defmodule :m_ssl_handshake do
 
   defp filter_hashsigns(
          [suite | suites],
-         [%{:key_exchange => keyExchange} | algos],
+         [%{key_exchange: keyExchange} | algos],
          hashSigns,
          version,
          acc
@@ -6668,7 +6741,7 @@ defmodule :m_ssl_handshake do
 
   defp filter_hashsigns(
          [suite | suites],
-         [%{:key_exchange => keyExchange} | algos],
+         [%{key_exchange: keyExchange} | algos],
          hashSigns,
          verion,
          acc
@@ -6681,7 +6754,7 @@ defmodule :m_ssl_handshake do
 
   defp filter_hashsigns(
          [suite | suites],
-         [%{:key_exchange => keyExchange} | algos],
+         [%{key_exchange: keyExchange} | algos],
          hashSigns,
          version,
          acc
@@ -6708,7 +6781,7 @@ defmodule :m_ssl_handshake do
       :ssl_cipher.filter_suites(
         suites,
         %{
-          :key_exchange_filters => [
+          key_exchange_filters: [
             fn
               :ecdh_ecdsa ->
                 true
@@ -6723,9 +6796,9 @@ defmodule :m_ssl_handshake do
                 false
             end
           ],
-          :cipher_filters => [],
-          :mac_filters => [],
-          :prf_filters => []
+          cipher_filters: [],
+          mac_filters: [],
+          prf_filters: []
         }
       )
 
@@ -6778,9 +6851,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_handshake, :handle_alpn_extension, 2},
-          :line => 3188,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :handle_alpn_extension, 2},
+          line: 3188,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         },
         reason: reason
       )
@@ -6793,9 +6866,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 120,
         where: %{
-          :mfa => {:ssl_handshake, :handle_alpn_extension, 2},
-          :line => 3190,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :handle_alpn_extension, 2},
+          line: 3190,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         }
       )
     )
@@ -6823,9 +6896,9 @@ defmodule :m_ssl_handshake do
         level: 2,
         description: 47,
         where: %{
-          :mfa => {:ssl_handshake, :handle_mfl_extension, 1},
-          :line => 3200,
-          :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+          mfa: {:ssl_handshake, :handle_mfl_extension, 1},
+          line: 3200,
+          file: 'otp/lib/ssl/src/ssl_handshake.erl'
         }
       )
     )
@@ -6860,9 +6933,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:ssl_handshake, :handle_next_protocol, 3},
-              :line => 3215,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :handle_next_protocol, 3},
+              line: 3215,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             },
             reason: :unexpected_next_protocol_extension
           )
@@ -6885,7 +6958,7 @@ defmodule :m_ssl_handshake do
   end
 
   defp handle_next_protocol_on_server(r_next_protocol_negotiation(extension_data: <<>>), false, %{
-         :next_protocols_advertised => protocols
+         next_protocols_advertised: protocols
        }) do
     protocols
   end
@@ -6895,9 +6968,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 40,
       where: %{
-        :mfa => {:ssl_handshake, :handle_next_protocol_on_server, 3},
-        :line => 3235,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :handle_next_protocol_on_server, 3},
+        line: 3235,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       },
       reason: :unexpected_next_protocol_extension
     )
@@ -6912,9 +6985,9 @@ defmodule :m_ssl_handshake do
       level: 2,
       description: 40,
       where: %{
-        :mfa => {:ssl_handshake, :select_next_protocol, 2},
-        :line => 3241,
-        :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+        mfa: {:ssl_handshake, :select_next_protocol, 2},
+        line: 3241,
+        file: 'otp/lib/ssl/src/ssl_handshake.erl'
       },
       reason: reason
     )
@@ -6927,9 +7000,9 @@ defmodule :m_ssl_handshake do
           level: 2,
           description: 40,
           where: %{
-            :mfa => {:ssl_handshake, :select_next_protocol, 2},
-            :line => 3245,
-            :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+            mfa: {:ssl_handshake, :select_next_protocol, 2},
+            line: 3245,
+            file: 'otp/lib/ssl/src/ssl_handshake.erl'
           },
           reason: :no_next_protocol
         )
@@ -7118,23 +7191,23 @@ defmodule :m_ssl_handshake do
     false
   end
 
-  defp advertises_ec_ciphers([%{:key_exchange => :ecdh_ecdsa} | _]) do
+  defp advertises_ec_ciphers([%{key_exchange: :ecdh_ecdsa} | _]) do
     true
   end
 
-  defp advertises_ec_ciphers([%{:key_exchange => :ecdhe_ecdsa} | _]) do
+  defp advertises_ec_ciphers([%{key_exchange: :ecdhe_ecdsa} | _]) do
     true
   end
 
-  defp advertises_ec_ciphers([%{:key_exchange => :ecdh_rsa} | _]) do
+  defp advertises_ec_ciphers([%{key_exchange: :ecdh_rsa} | _]) do
     true
   end
 
-  defp advertises_ec_ciphers([%{:key_exchange => :ecdhe_rsa} | _]) do
+  defp advertises_ec_ciphers([%{key_exchange: :ecdhe_rsa} | _]) do
     true
   end
 
-  defp advertises_ec_ciphers([%{:key_exchange => :ecdh_anon} | _]) do
+  defp advertises_ec_ciphers([%{key_exchange: :ecdh_anon} | _]) do
     true
   end
 
@@ -7340,9 +7413,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:ssl_handshake, :handle_renegotiation_info, 8},
-              :line => 3489,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :handle_renegotiation_info, 8},
+              line: 3489,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             },
             reason: :client_renegotiation
           )
@@ -7370,9 +7443,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:ssl_handshake, :handle_renegotiation_info, 8},
-              :line => 3496,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :handle_renegotiation_info, 8},
+              line: 3496,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             },
             reason: {:server_renegotiation, :empty_renegotiation_info_scsv}
           )
@@ -7397,9 +7470,9 @@ defmodule :m_ssl_handshake do
                 level: 2,
                 description: 40,
                 where: %{
-                  :mfa => {:ssl_handshake, :handle_renegotiation_info, 8},
-                  :line => 3504,
-                  :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+                  mfa: {:ssl_handshake, :handle_renegotiation_info, 8},
+                  line: 3504,
+                  file: 'otp/lib/ssl/src/ssl_handshake.erl'
                 },
                 reason: :server_renegotiation
               )
@@ -7441,9 +7514,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:ssl_handshake, :handle_renegotiation_info, 8},
-              :line => 3513,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :handle_renegotiation_info, 8},
+              line: 3513,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             },
             reason: {:server_renegotiation, :empty_renegotiation_info_scsv}
           )
@@ -7468,9 +7541,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 40,
             where: %{
-              :mfa => {:ssl_handshake, :handle_renegotiation_info, 3},
-              :line => 3522,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :handle_renegotiation_info, 3},
+              line: 3522,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             },
             reason: :already_secure
           )
@@ -7482,9 +7555,9 @@ defmodule :m_ssl_handshake do
             level: 2,
             description: 100,
             where: %{
-              :mfa => {:ssl_handshake, :handle_renegotiation_info, 3},
-              :line => 3524,
-              :file => 'otp/lib/ssl/src/ssl_handshake.erl'
+              mfa: {:ssl_handshake, :handle_renegotiation_info, 3},
+              line: 3524,
+              file: 'otp/lib/ssl/src/ssl_handshake.erl'
             }
           )
         )
@@ -7500,7 +7573,7 @@ defmodule :m_ssl_handshake do
 
   defp cert_curve(cert, eCCCurve0, cipherSuite) do
     case :ssl_cipher_format.suite_bin_to_map(cipherSuite) do
-      %{:key_exchange => kex}
+      %{key_exchange: kex}
       when kex == :ecdh_ecdsa or
              kex == :ecdh_rsa ->
         otpCert = :public_key.pkix_decode_cert(cert, :otp)
@@ -7523,59 +7596,59 @@ defmodule :m_ssl_handshake do
 
   def empty_extensions({3, 4}, :client_hello) do
     %{
-      :sni => :undefined,
-      :elliptic_curves => :undefined,
-      :signature_algs => :undefined,
-      :alpn => :undefined,
-      :key_share => :undefined,
-      :pre_shared_key => :undefined,
-      :psk_key_exchange_modes => :undefined,
-      :cookie => :undefined,
-      :client_hello_versions => :undefined,
-      :signature_algs_cert => :undefined
+      sni: :undefined,
+      elliptic_curves: :undefined,
+      signature_algs: :undefined,
+      alpn: :undefined,
+      key_share: :undefined,
+      pre_shared_key: :undefined,
+      psk_key_exchange_modes: :undefined,
+      cookie: :undefined,
+      client_hello_versions: :undefined,
+      signature_algs_cert: :undefined
     }
   end
 
   def empty_extensions({3, 3}, :client_hello) do
     ext = empty_extensions({3, 2}, :client_hello)
-    %{ext | :signature_algs => :undefined}
+    Map.put(ext, :signature_algs, :undefined)
   end
 
   def empty_extensions(_, :client_hello) do
     %{
-      :renegotiation_info => :undefined,
-      :alpn => :undefined,
-      :next_protocol_negotiation => :undefined,
-      :srp => :undefined,
-      :ec_point_formats => :undefined,
-      :elliptic_curves => :undefined,
-      :sni => :undefined
+      renegotiation_info: :undefined,
+      alpn: :undefined,
+      next_protocol_negotiation: :undefined,
+      srp: :undefined,
+      ec_point_formats: :undefined,
+      elliptic_curves: :undefined,
+      sni: :undefined
     }
   end
 
   def empty_extensions({3, 4}, :server_hello) do
     %{
-      :server_hello_selected_version => :undefined,
-      :key_share => :undefined,
-      :pre_shared_key => :undefined
+      server_hello_selected_version: :undefined,
+      key_share: :undefined,
+      pre_shared_key: :undefined
     }
   end
 
   def empty_extensions({3, 4}, :hello_retry_request) do
     %{
-      :server_hello_selected_version => :undefined,
-      :key_share => :undefined,
-      :pre_shared_key => :undefined,
-      :cookie => :undefined
+      server_hello_selected_version: :undefined,
+      key_share: :undefined,
+      pre_shared_key: :undefined,
+      cookie: :undefined
     }
   end
 
   def empty_extensions(_, :server_hello) do
     %{
-      :renegotiation_info => :undefined,
-      :alpn => :undefined,
-      :next_protocol_negotiation => :undefined,
-      :ec_point_formats => :undefined
+      renegotiation_info: :undefined,
+      alpn: :undefined,
+      next_protocol_negotiation: :undefined,
+      ec_point_formats: :undefined
     }
   end
 

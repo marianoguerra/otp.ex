@@ -17,8 +17,16 @@ defmodule :m_mnesia_kernel_sup do
       worker_spec(:mnesia_tm, :timer.seconds(30), procLib),
       worker_spec(:mnesia_rpc, :timer.seconds(3), [:gen_server]),
       supervisor_spec(:mnesia_checkpoint_sup),
-      worker_spec(:mnesia_controller, :timer.seconds(3), [:gen_server]),
-      worker_spec(:mnesia_late_loader, :timer.seconds(3), procLib)
+      worker_spec(
+        :mnesia_controller,
+        :timer.seconds(3),
+        [:gen_server]
+      ),
+      worker_spec(
+        :mnesia_late_loader,
+        :timer.seconds(3),
+        procLib
+      )
     ]
 
     {:ok, {flags, workers}}

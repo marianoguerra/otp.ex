@@ -1322,7 +1322,7 @@ defmodule :m_ssl_connection do
     premaster_secret: :undefined,
     server_psk_identity: :undefined,
     cookie_iv_shard: :undefined,
-    ocsp_stapling_state: %{:ocsp_stapling => false, :ocsp_expect => :no_staple}
+    ocsp_stapling_state: %{ocsp_stapling: false, ocsp_expect: :no_staple}
   )
 
   Record.defrecord(:r_connection_env, :connection_env,
@@ -1512,10 +1512,7 @@ defmodule :m_ssl_connection do
     call(connectionPid, :renegotiate)
   end
 
-  def internal_renegotiation(
-        connectionPid,
-        %{:current_write => writeState}
-      ) do
+  def internal_renegotiation(connectionPid, %{current_write: writeState}) do
     :gen_statem.cast(
       connectionPid,
       {:internal_renegotiate, writeState}
@@ -1542,7 +1539,7 @@ defmodule :m_ssl_connection do
         stateName,
         r_state(
           static_env: r_static_env(role: role, protocol_cb: connection),
-          ssl_options: %{:log_level => logLevel}
+          ssl_options: %{log_level: logLevel}
         ) = state
       ) do
     try do
@@ -1634,7 +1631,7 @@ defmodule :m_ssl_connection do
               protocol_cb: connection
             ),
           connection_env: r_connection_env(user_application: {_Mon, pid}),
-          ssl_options: %{:log_level => logLevel},
+          ssl_options: %{log_level: logLevel},
           start_or_recv_from: from,
           session: session,
           socket_options: opts
@@ -1683,7 +1680,7 @@ defmodule :m_ssl_connection do
         r_state(
           static_env: r_static_env(role: role, protocol_cb: connection),
           handshake_env: r_handshake_env(renegotiation: {true, :internal}),
-          ssl_options: %{:log_level => logLevel}
+          ssl_options: %{log_level: logLevel}
         ) = state
       ) do
     alert = r_alert(alert0, role: opposite_role(role))
@@ -1698,7 +1695,7 @@ defmodule :m_ssl_connection do
         r_state(
           static_env: r_static_env(role: role, protocol_cb: connection),
           handshake_env: r_handshake_env(renegotiation: {true, from}) = hsEnv,
-          ssl_options: %{:log_level => logLevel}
+          ssl_options: %{log_level: logLevel}
         ) = state0
       ) do
     log_alert(
@@ -1729,7 +1726,7 @@ defmodule :m_ssl_connection do
         r_state(
           static_env: r_static_env(role: role, protocol_cb: connection),
           handshake_env: r_handshake_env(renegotiation: {true, from}) = hsEnv,
-          ssl_options: %{:log_level => logLevel}
+          ssl_options: %{log_level: logLevel}
         ) = state0
       ) do
     log_alert(
@@ -1758,7 +1755,7 @@ defmodule :m_ssl_connection do
         stateName,
         r_state(
           static_env: r_static_env(role: role, protocol_cb: connection),
-          ssl_options: %{:log_level => logLevel}
+          ssl_options: %{log_level: logLevel}
         ) = state
       ) do
     log_alert(
@@ -1956,7 +1953,8 @@ defmodule :m_ssl_connection do
           byte_size(bin0) < bufferSize0 ->
             bin =
               :erlang.iolist_to_binary([
-                [bin0, front0]
+                bin0,
+                front0
                 | :lists.reverse(rear0)
               ])
 
@@ -2028,7 +2026,8 @@ defmodule :m_ssl_connection do
 
         buffer =
           :erlang.iolist_to_binary([
-            [bin0, front0]
+            bin0,
+            front0
             | :lists.reverse(rear0)
           ])
 
@@ -2216,7 +2215,7 @@ defmodule :m_ssl_connection do
       [bin3, bin2, bin1] ->
         iovec_from_front(size, [bin1, bin2, bin3], [], acc)
 
-      [[_, _, _] | _] = ^rear ->
+      [_, _, _ | _] = ^rear ->
         iovec_from_front(size, :lists.reverse(rear), [], acc)
     end
   end
@@ -2271,7 +2270,7 @@ defmodule :m_ssl_connection do
           connection_env: r_connection_env(negotiated_version: reqVersion) = cEnv
         ) = state0
       ) do
-    %{:key_exchange => keyAlgorithm} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+    %{key_exchange: keyAlgorithm} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
 
     premasterSecret =
       make_premaster_secret(
@@ -2325,14 +2324,14 @@ defmodule :m_ssl_connection do
       ) do
     {:ok,
      %{
-       :cert_db_ref => ref,
-       :cert_db_handle => certDbHandle,
-       :fileref_db_handle => fileRefHandle,
-       :session_cache => cacheHandle,
-       :crl_db_info => cRLDbHandle,
-       :private_key => key,
-       :dh_params => dHParams,
-       :own_certificate => ownCert
+       cert_db_ref: ref,
+       cert_db_handle: certDbHandle,
+       fileref_db_handle: fileRefHandle,
+       session_cache: cacheHandle,
+       crl_db_info: cRLDbHandle,
+       private_key: key,
+       dh_params: dHParams,
+       own_certificate: ownCert
      }} =
       :ssl_config.init(
         opts,
@@ -2446,9 +2445,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 90,
         where: %{
-          :mfa => {:ssl_connection, :user_hello, 4},
-          :line => 881,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :user_hello, 4},
+          line: 881,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         },
         reason: :user_canceled
       ),
@@ -2468,7 +2467,7 @@ defmodule :m_ssl_connection do
         ) = state0,
         _Connection
       ) do
-    options = :ssl.handle_options(newOptions, role, %{options0 | :handshake => :full})
+    options = :ssl.handle_options(newOptions, role, Map.put(options0, :handshake, :full))
     state = ssl_config(options, role, state0)
 
     {:next_state, :hello, r_state(state, start_or_recv_from: from),
@@ -2662,11 +2661,8 @@ defmodule :m_ssl_connection do
       r_state(state,
         handshake_env:
           r_handshake_env(hsEnv,
-            ocsp_stapling_state: %{
-              ocspState
-              | :ocsp_expect => :stapled,
-                :ocsp_response => certStatus
-            }
+            ocsp_stapling_state:
+              Map.merge(ocspState, %{ocsp_expect: :stapled, ocsp_response: certStatus})
           )
       )
     )
@@ -2686,7 +2682,9 @@ defmodule :m_ssl_connection do
       :no_record,
       r_state(state,
         handshake_env:
-          r_handshake_env(hsEnv, ocsp_stapling_state: %{ocspState | :ocsp_expect => :undetermined})
+          r_handshake_env(hsEnv,
+            ocsp_stapling_state: Map.put(ocspState, :ocsp_expect, :undetermined)
+          )
       ),
       [{:postpone, true}]
     )
@@ -2710,7 +2708,7 @@ defmodule :m_ssl_connection do
         r_state(
           static_env: r_static_env(role: :server),
           connection_env: r_connection_env(negotiated_version: version),
-          ssl_options: %{:verify => :verify_peer, :fail_if_no_peer_cert => true}
+          ssl_options: %{verify: :verify_peer, fail_if_no_peer_cert: true}
         ) = state,
         _
       ) do
@@ -2719,9 +2717,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_connection, :certify, 4},
-          :line => 1013,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :certify, 4},
+          line: 1013,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         },
         reason: :no_client_certificate_provided
       )
@@ -2734,7 +2732,7 @@ defmodule :m_ssl_connection do
         r_certificate(asn1_certificates: []),
         r_state(
           static_env: r_static_env(role: :server),
-          ssl_options: %{:verify => :verify_peer, :fail_if_no_peer_cert => false}
+          ssl_options: %{verify: :verify_peer, fail_if_no_peer_cert: false}
         ) = state0,
         connection
       ) do
@@ -2751,7 +2749,7 @@ defmodule :m_ssl_connection do
         r_state(
           static_env: r_static_env(role: :server),
           connection_env: r_connection_env(negotiated_version: version),
-          ssl_options: %{:verify => :verify_none}
+          ssl_options: %{verify: :verify_none}
         ) = state,
         _
       ) do
@@ -2760,9 +2758,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 10,
         where: %{
-          :mfa => {:ssl_connection, :certify, 4},
-          :line => 1026,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :certify, 4},
+          line: 1026,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         },
         reason: :unrequested_certificate
       )
@@ -2773,7 +2771,7 @@ defmodule :m_ssl_connection do
   def certify(
         :internal,
         r_certificate(),
-        r_state(handshake_env: r_handshake_env(ocsp_stapling_state: %{:ocsp_expect => :staple})) =
+        r_state(handshake_env: r_handshake_env(ocsp_stapling_state: %{ocsp_expect: :staple})) =
           state,
         connection
       ) do
@@ -2792,8 +2790,7 @@ defmodule :m_ssl_connection do
               cert_db_ref: certDbRef,
               crl_db: cRLDbInfo
             ),
-          handshake_env:
-            r_handshake_env(ocsp_stapling_state: %{:ocsp_expect => status} = ocspState),
+          handshake_env: r_handshake_env(ocsp_stapling_state: %{ocsp_expect: status} = ocspState),
           connection_env: r_connection_env(negotiated_version: version),
           ssl_options: opts
         ) = state,
@@ -2897,9 +2894,9 @@ defmodule :m_ssl_connection do
                 level: 2,
                 description: 51,
                 where: %{
-                  :mfa => {:ssl_connection, :certify, 4},
-                  :line => 1093,
-                  :file => 'otp/lib/ssl/src/ssl_connection.erl'
+                  mfa: {:ssl_connection, :certify, 4},
+                  line: 1093,
+                  file: 'otp/lib/ssl/src/ssl_connection.erl'
                 }
               ),
               version,
@@ -2930,9 +2927,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_connection, :certify, 4},
-          :line => 1110,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :certify, 4},
+          line: 1110,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         }
       ),
       version,
@@ -2965,7 +2962,7 @@ defmodule :m_ssl_connection do
           handshake_env: hsEnv,
           connection_env: r_connection_env(negotiated_version: version),
           session: r_session(own_certificate: cert),
-          ssl_options: %{:signature_algs => supportedHashSigns}
+          ssl_options: %{signature_algs: supportedHashSigns}
         ) = state,
         connection
       ) do
@@ -3003,7 +3000,7 @@ defmodule :m_ssl_connection do
               premaster_secret: :undefined,
               server_psk_identity: pSKIdentity
             ) = hsEnv,
-          ssl_options: %{:user_lookup_fun => pSKLookup}
+          ssl_options: %{user_lookup_fun: pSKLookup}
         ) = state0,
         connection
       )
@@ -3041,7 +3038,7 @@ defmodule :m_ssl_connection do
               server_psk_identity: pSKIdentity
             ) = hsEnv,
           session: r_session(master_secret: :undefined),
-          ssl_options: %{:user_lookup_fun => pSKLookup}
+          ssl_options: %{user_lookup_fun: pSKLookup}
         ) = state0,
         connection
       )
@@ -3135,7 +3132,7 @@ defmodule :m_ssl_connection do
         r_state(
           static_env: r_static_env(role: :server),
           client_certificate_requested: true,
-          ssl_options: %{:fail_if_no_peer_cert => true}
+          ssl_options: %{fail_if_no_peer_cert: true}
         ) = state,
         connection
       ) do
@@ -3241,9 +3238,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 10,
         where: %{
-          :mfa => {:ssl_connection, :cipher, 4},
-          :line => 1264,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :cipher, 4},
+          line: 1264,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         }
       ),
       version,
@@ -3468,7 +3465,7 @@ defmodule :m_ssl_connection do
     connection.renegotiate(
       r_state(state,
         handshake_env: r_handshake_env(hsEnv, renegotiation: {true, :internal}),
-        connection_states: %{connectionStates | :current_write => writeState}
+        connection_states: Map.put(connectionStates, :current_write, writeState)
       ),
       []
     )
@@ -3477,11 +3474,8 @@ defmodule :m_ssl_connection do
   def connection(
         :cast,
         {:dist_handshake_complete, dHandle},
-        r_state(
-          ssl_options: %{:erl_dist => true},
-          connection_env: cEnv,
-          socket_options: sockOpts
-        ) = state0,
+        r_state(ssl_options: %{erl_dist: true}, connection_env: cEnv, socket_options: sockOpts) =
+          state0,
         connection
       ) do
     :erlang.process_flag(:priority, :normal)
@@ -3591,9 +3585,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_connection, :handle_common_event, 5},
-          :line => 1410,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :handle_common_event, 5},
+          line: 1410,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         }
       ),
       version,
@@ -3650,9 +3644,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 10,
         where: %{
-          :mfa => {:ssl_connection, :handle_common_event, 5},
-          :line => 1425,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :handle_common_event, 5},
+          line: 1425,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         },
         reason: {:unexpected_msg, {type, msg}}
       )
@@ -3697,9 +3691,9 @@ defmodule :m_ssl_connection do
           level: 1,
           description: 0,
           where: %{
-            :mfa => {:ssl_connection, :handle_call, 5},
-            :line => 1442,
-            :file => 'otp/lib/ssl/src/ssl_connection.erl'
+            mfa: {:ssl_connection, :handle_call, 5},
+            line: 1442,
+            file: 'otp/lib/ssl/src/ssl_connection.erl'
           }
         ),
         stateName,
@@ -3840,7 +3834,7 @@ defmodule :m_ssl_connection do
          ),
          _
        ) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.current_connection_state(
         connectionStates,
         :read
@@ -3941,9 +3935,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 0,
         where: %{
-          :mfa => {:ssl_connection, :handle_info, 3},
-          :line => 1558,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :handle_info, 3},
+          line: 1558,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         }
       ),
       role,
@@ -3959,20 +3953,17 @@ defmodule :m_ssl_connection do
          stateName,
          r_state(
            static_env: r_static_env(role: role, socket: socket, error_tag: errorTag),
-           ssl_options: %{:log_level => level}
+           ssl_options: %{log_level: level}
          ) = state
        ) do
     :ssl_logger.log(
       :info,
       level,
+      %{description: 'Socket error', reason: [{:error_tag, errorTag}, {:description, reason}]},
       %{
-        :description => 'Socket error',
-        :reason => [{:error_tag, errorTag}, {:description, reason}]
-      },
-      %{
-        :mfa => {:ssl_connection, :handle_info, 3},
-        :line => 1567,
-        :file => 'otp/lib/ssl/src/ssl_connection.erl'
+        mfa: {:ssl_connection, :handle_info, 3},
+        line: 1567,
+        file: 'otp/lib/ssl/src/ssl_connection.erl'
       }
     )
 
@@ -3981,9 +3972,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 0,
         where: %{
-          :mfa => {:ssl_connection, :handle_info, 3},
-          :line => 1568,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :handle_info, 3},
+          line: 1568,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         },
         reason: {:transport_error, reason}
       )
@@ -3997,7 +3988,7 @@ defmodule :m_ssl_connection do
          _,
          r_state(
            connection_env: r_connection_env(user_application: {monitorRef, _Pid}),
-           ssl_options: %{:erl_dist => true}
+           ssl_options: %{erl_dist: true}
          )
        ) do
     {:stop, {:shutdown, reason}}
@@ -4049,20 +4040,20 @@ defmodule :m_ssl_connection do
          stateName,
          r_state(
            static_env: r_static_env(socket: socket, error_tag: errorTag),
-           ssl_options: %{:log_level => level}
+           ssl_options: %{log_level: level}
          ) = state
        ) do
     :ssl_logger.log(
       :notice,
       level,
       %{
-        :description => 'Unexpected INFO message',
-        :reason => [{:message, msg}, {:socket, socket}, {:error_tag, errorTag}]
+        description: 'Unexpected INFO message',
+        reason: [{:message, msg}, {:socket, socket}, {:error_tag, errorTag}]
       },
       %{
-        :mfa => {:ssl_connection, :handle_info, 3},
-        :line => 1600,
-        :file => 'otp/lib/ssl/src/ssl_connection.erl'
+        mfa: {:ssl_connection, :handle_info, 3},
+        line: 1600,
+        file: 'otp/lib/ssl/src/ssl_connection.erl'
       }
     )
 
@@ -4127,7 +4118,7 @@ defmodule :m_ssl_connection do
           static_env:
             r_static_env(protocol_cb: connection, transport_cb: transport, socket: socket),
           connection_states: connectionStates,
-          ssl_options: %{:padding_check => check}
+          ssl_options: %{padding_check: check}
         ) = state
       ) do
     handle_trusted_certs_db(state)
@@ -4167,16 +4158,16 @@ defmodule :m_ssl_connection do
   def format_status(:terminate, [_, stateName, state]) do
     sslOptions = r_state(state, :ssl_options)
 
-    newOptions = %{
-      sslOptions
-      | :password => '***',
-        :cert => '***',
-        :cacerts => '***',
-        :key => '***',
-        :dh => '***',
-        :psk_identity => '***',
-        :srp_identity => '***'
-    }
+    newOptions =
+      Map.merge(sslOptions, %{
+        password: '***',
+        cert: '***',
+        cacerts: '***',
+        key: '***',
+        dh: '***',
+        psk_identity: '***',
+        srp_identity: '***'
+      })
 
     [
       {:data,
@@ -4224,13 +4215,13 @@ defmodule :m_ssl_connection do
                srp_username: srpUsername,
                ecc: eCCCurve
              ) = session,
-           connection_states: %{:current_write => currentWrite},
+           connection_states: %{current_write: currentWrite},
            connection_env: r_connection_env(negotiated_version: {_, _} = version),
            ssl_options: opts
          )
        ) do
     recordCB = record_cb(connection)
-    cipherSuiteDef = %{:key_exchange => kexAlg} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+    cipherSuiteDef = %{key_exchange: kexAlg} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
 
     isNamedCurveSuite =
       :lists.member(
@@ -4257,22 +4248,20 @@ defmodule :m_ssl_connection do
       end
 
     [
-      [
-        {:protocol, recordCB.protocol_version(version)},
-        {:session_id, sessionId},
-        {:session_data, :erlang.term_to_binary(session)},
-        {:session_resumption, resumption},
-        {:selected_cipher_suite, cipherSuiteDef},
-        {:sni_hostname, sNIHostname},
-        {:srp_username, srpUsername}
-      ]
+      {:protocol, recordCB.protocol_version(version)},
+      {:session_id, sessionId},
+      {:session_data, :erlang.term_to_binary(session)},
+      {:session_resumption, resumption},
+      {:selected_cipher_suite, cipherSuiteDef},
+      {:sni_hostname, sNIHostname},
+      {:srp_username, srpUsername}
       | curveInfo
     ] ++ mFLInfo ++ ssl_options_list(opts)
   end
 
   defp security_info(r_state(connection_states: connectionStates)) do
     %{
-      :security_parameters =>
+      security_parameters:
         r_security_parameters(
           client_random: clientRand,
           server_random: serverRand,
@@ -4289,13 +4278,13 @@ defmodule :m_ssl_connection do
 
   defp do_server_hello(
          type,
-         %{:next_protocol_negotiation => nextProtocols} = serverHelloExt,
+         %{next_protocol_negotiation: nextProtocols} = serverHelloExt,
          r_state(
            connection_env: r_connection_env(negotiated_version: version),
            handshake_env: hsEnv,
            session: r_session(session_id: sessId),
            connection_states: connectionStates0,
-           ssl_options: %{:versions => [highestVersion | _]}
+           ssl_options: %{versions: [highestVersion | _]}
          ) = state0,
          connection
        )
@@ -4334,8 +4323,8 @@ defmodule :m_ssl_connection do
 
   defp update_server_random(
          %{
-           :pending_read => %{:security_parameters => readSecParams0} = readState0,
-           :pending_write => %{:security_parameters => writeSecParams0} = writeState0
+           pending_read: %{security_parameters: readSecParams0} = readState0,
+           pending_write: %{security_parameters: writeSecParams0} = writeState0
          } = connectionStates,
          version,
          highestVersion
@@ -4356,9 +4345,9 @@ defmodule :m_ssl_connection do
 
     readSecParams = r_security_parameters(readSecParams0, server_random: readRandom)
     writeSecParams = r_security_parameters(writeSecParams0, server_random: writeRandom)
-    readState = %{readState0 | :security_parameters => readSecParams}
-    writeState = %{writeState0 | :security_parameters => writeSecParams}
-    %{connectionStates | :pending_read => readState, :pending_write => writeState}
+    readState = Map.put(readState0, :security_parameters, readSecParams)
+    writeState = Map.put(writeState0, :security_parameters, writeSecParams)
+    Map.merge(connectionStates, %{pending_read: readState, pending_write: writeState})
   end
 
   defp override_server_random(
@@ -4464,7 +4453,7 @@ defmodule :m_ssl_connection do
 
   defp server_hello(serverHello, state0, connection) do
     cipherSuite = r_server_hello(serverHello, :cipher_suite)
-    %{:key_exchange => keyAlgorithm} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+    %{key_exchange: keyAlgorithm} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
 
     r_state(handshake_env: hsEnv) =
       state =
@@ -4498,7 +4487,7 @@ defmodule :m_ssl_connection do
         session: r_session(session, peer_certificate: peerCert)
       )
 
-    %{:key_exchange => keyAlgorithm} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
+    %{key_exchange: keyAlgorithm} = :ssl_cipher_format.suite_bin_to_map(cipherSuite)
     state = handle_peer_cert_key(role, peerCert, publicKeyInfo, keyAlgorithm, state1)
     connection.next_event(:certify, :no_record, state, actions)
   end
@@ -4701,7 +4690,7 @@ defmodule :m_ssl_connection do
 
   defp certify_client_key_exchange(
          r_client_psk_identity() = clientKey,
-         r_state(ssl_options: %{:user_lookup_fun => pSKLookup}) = state0,
+         r_state(ssl_options: %{user_lookup_fun: pSKLookup}) = state0,
          connection
        ) do
     premasterSecret =
@@ -4721,7 +4710,7 @@ defmodule :m_ssl_connection do
                diffie_hellman_params: r_DHParameter() = params,
                kex_keys: {_, serverDhPrivateKey}
              ),
-           ssl_options: %{:user_lookup_fun => pSKLookup}
+           ssl_options: %{user_lookup_fun: pSKLookup}
          ) = state0,
          connection
        ) do
@@ -4735,7 +4724,7 @@ defmodule :m_ssl_connection do
          r_client_ecdhe_psk_identity() = clientKey,
          r_state(
            handshake_env: r_handshake_env(kex_keys: serverEcDhPrivateKey),
-           ssl_options: %{:user_lookup_fun => pSKLookup}
+           ssl_options: %{user_lookup_fun: pSKLookup}
          ) = state,
          connection
        ) do
@@ -4753,7 +4742,7 @@ defmodule :m_ssl_connection do
          r_client_rsa_psk_identity() = clientKey,
          r_state(
            connection_env: r_connection_env(private_key: key),
-           ssl_options: %{:user_lookup_fun => pSKLookup}
+           ssl_options: %{user_lookup_fun: pSKLookup}
          ) = state0,
          connection
        ) do
@@ -4838,7 +4827,7 @@ defmodule :m_ssl_connection do
               kexAlg == :dh_anon do
     dHKeys = :public_key.generate_key(params)
 
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -4905,7 +4894,7 @@ defmodule :m_ssl_connection do
               kexAlg == :ecdh_anon do
     eCDHKeys = :public_key.generate_key(eCCCurve)
 
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -4937,7 +4926,7 @@ defmodule :m_ssl_connection do
          r_state(
            static_env: r_static_env(role: :server),
            handshake_env: r_handshake_env(kex_algorithm: :psk),
-           ssl_options: %{:psk_identity => :undefined}
+           ssl_options: %{psk_identity: :undefined}
          ) = state,
          _
        ) do
@@ -4947,7 +4936,7 @@ defmodule :m_ssl_connection do
   defp key_exchange(
          r_state(
            static_env: r_static_env(role: :server),
-           ssl_options: %{:psk_identity => pskIdentityHint},
+           ssl_options: %{psk_identity: pskIdentityHint},
            handshake_env:
              r_handshake_env(
                kex_algorithm: :psk,
@@ -4962,7 +4951,7 @@ defmodule :m_ssl_connection do
          ) = state0,
          connection
        ) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -4986,7 +4975,7 @@ defmodule :m_ssl_connection do
   defp key_exchange(
          r_state(
            static_env: r_static_env(role: :server),
-           ssl_options: %{:psk_identity => pskIdentityHint},
+           ssl_options: %{psk_identity: pskIdentityHint},
            handshake_env:
              r_handshake_env(
                kex_algorithm: :dhe_psk,
@@ -5004,7 +4993,7 @@ defmodule :m_ssl_connection do
        ) do
     dHKeys = :public_key.generate_key(params)
 
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -5036,7 +5025,7 @@ defmodule :m_ssl_connection do
   defp key_exchange(
          r_state(
            static_env: r_static_env(role: :server),
-           ssl_options: %{:psk_identity => pskIdentityHint},
+           ssl_options: %{psk_identity: pskIdentityHint},
            handshake_env:
              r_handshake_env(
                kex_algorithm: :ecdhe_psk,
@@ -5054,7 +5043,7 @@ defmodule :m_ssl_connection do
        ) do
     eCDHKeys = :public_key.generate_key(eCCCurve)
 
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -5087,7 +5076,7 @@ defmodule :m_ssl_connection do
          r_state(
            static_env: r_static_env(role: :server),
            handshake_env: r_handshake_env(kex_algorithm: :rsa_psk),
-           ssl_options: %{:psk_identity => :undefined}
+           ssl_options: %{psk_identity: :undefined}
          ) = state,
          _
        ) do
@@ -5097,7 +5086,7 @@ defmodule :m_ssl_connection do
   defp key_exchange(
          r_state(
            static_env: r_static_env(role: :server),
-           ssl_options: %{:psk_identity => pskIdentityHint},
+           ssl_options: %{psk_identity: pskIdentityHint},
            handshake_env:
              r_handshake_env(
                kex_algorithm: :rsa_psk,
@@ -5112,7 +5101,7 @@ defmodule :m_ssl_connection do
          ) = state0,
          connection
        ) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -5136,7 +5125,7 @@ defmodule :m_ssl_connection do
   defp key_exchange(
          r_state(
            static_env: r_static_env(role: :server),
-           ssl_options: %{:user_lookup_fun => lookupFun},
+           ssl_options: %{user_lookup_fun: lookupFun},
            handshake_env:
              r_handshake_env(
                kex_algorithm: kexAlg,
@@ -5165,7 +5154,7 @@ defmodule :m_ssl_connection do
           keys0
       end
 
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -5269,7 +5258,7 @@ defmodule :m_ssl_connection do
            static_env: r_static_env(role: :client),
            handshake_env: r_handshake_env(kex_algorithm: :psk),
            connection_env: r_connection_env(negotiated_version: version),
-           ssl_options: %{:psk_identity => pSKIdentity}
+           ssl_options: %{psk_identity: pSKIdentity}
          ) = state0,
          connection
        ) do
@@ -5292,7 +5281,7 @@ defmodule :m_ssl_connection do
                kex_keys: {dhPubKey, _}
              ),
            connection_env: r_connection_env(negotiated_version: version),
-           ssl_options: %{:psk_identity => pSKIdentity}
+           ssl_options: %{psk_identity: pSKIdentity}
          ) = state0,
          connection
        ) do
@@ -5315,7 +5304,7 @@ defmodule :m_ssl_connection do
                kex_keys: eCDHKeys
              ),
            connection_env: r_connection_env(negotiated_version: version),
-           ssl_options: %{:psk_identity => pSKIdentity}
+           ssl_options: %{psk_identity: pSKIdentity}
          ) = state0,
          connection
        ) do
@@ -5339,7 +5328,7 @@ defmodule :m_ssl_connection do
                premaster_secret: premasterSecret
              ),
            connection_env: r_connection_env(negotiated_version: version),
-           ssl_options: %{:psk_identity => pSKIdentity}
+           ssl_options: %{psk_identity: pSKIdentity}
          ) = state0,
          connection
        ) do
@@ -5395,9 +5384,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_connection, :rsa_key_exchange, 3},
-          :line => 2288,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :rsa_key_exchange, 3},
+          line: 2288,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         },
         reason: :pub_key_is_not_rsa
       )
@@ -5431,9 +5420,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 40,
         where: %{
-          :mfa => {:ssl_connection, :rsa_psk_key_exchange, 4},
-          :line => 2305,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :rsa_psk_key_exchange, 4},
+          line: 2305,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         },
         reason: :pub_key_is_not_rsa
       )
@@ -5459,12 +5448,12 @@ defmodule :m_ssl_connection do
                cert_db_ref: certDbRef
              ),
            connection_env: r_connection_env(negotiated_version: version),
-           ssl_options: %{:verify => :verify_peer, :signature_algs => supportedHashSigns},
+           ssl_options: %{verify: :verify_peer, signature_algs: supportedHashSigns},
            connection_states: connectionStates0
          ) = state0,
          connection
        ) do
-    %{:security_parameters => r_security_parameters(cipher_suite: cipherSuite)} =
+    %{security_parameters: r_security_parameters(cipher_suite: cipherSuite)} =
       :ssl_record.pending_connection_state(
         connectionStates0,
         :read
@@ -5492,7 +5481,7 @@ defmodule :m_ssl_connection do
   end
 
   defp request_client_cert(
-         r_state(ssl_options: %{:verify => :verify_none}) = state,
+         r_state(ssl_options: %{verify: :verify_none}) = state,
          _
        ) do
     state
@@ -5701,7 +5690,7 @@ defmodule :m_ssl_connection do
          ) = serverKey,
          r_state(
            handshake_env: hsEnv,
-           ssl_options: %{:user_lookup_fun => pSKLookup}
+           ssl_options: %{user_lookup_fun: pSKLookup}
          ) = state,
          connection
        ) do
@@ -5725,7 +5714,7 @@ defmodule :m_ssl_connection do
 
   defp calculate_secret(
          r_server_ecdhe_psk_params(dh_params: r_server_ecdh_params(curve: eCCurve)) = serverKey,
-         r_state(ssl_options: %{:user_lookup_fun => pSKLookup}) =
+         r_state(ssl_options: %{user_lookup_fun: pSKLookup}) =
            r_state(
              handshake_env: hsEnv,
              session: session
@@ -5751,7 +5740,7 @@ defmodule :m_ssl_connection do
          r_server_srp_params(srp_n: prime, srp_g: generator) = serverKey,
          r_state(
            handshake_env: hsEnv,
-           ssl_options: %{:srp_identity => sRPId}
+           ssl_options: %{srp_identity: sRPId}
          ) = state,
          connection
        ) do
@@ -5802,9 +5791,9 @@ defmodule :m_ssl_connection do
       level: 2,
       description: 47,
       where: %{
-        :mfa => {:ssl_connection, :generate_srp_server_keys, 2},
-        :line => 2484,
-        :file => 'otp/lib/ssl/src/ssl_connection.erl'
+        mfa: {:ssl_connection, :generate_srp_server_keys, 2},
+        line: 2484,
+        file: 'otp/lib/ssl/src/ssl_connection.erl'
       }
     )
   end
@@ -5832,9 +5821,9 @@ defmodule :m_ssl_connection do
       level: 2,
       description: 47,
       where: %{
-        :mfa => {:ssl_connection, :generate_srp_client_keys, 3},
-        :line => 2497,
-        :file => 'otp/lib/ssl/src/ssl_connection.erl'
+        mfa: {:ssl_connection, :generate_srp_client_keys, 3},
+        line: 2497,
+        file: 'otp/lib/ssl/src/ssl_connection.erl'
       }
     )
   end
@@ -5872,9 +5861,9 @@ defmodule :m_ssl_connection do
             level: 2,
             description: 47,
             where: %{
-              :mfa => {:ssl_connection, :handle_srp_identity, 2},
-              :line => 2519,
-              :file => 'otp/lib/ssl/src/ssl_connection.erl'
+              mfa: {:ssl_connection, :handle_srp_identity, 2},
+              line: 2519,
+              file: 'otp/lib/ssl/src/ssl_connection.erl'
             }
           )
         )
@@ -5954,7 +5943,7 @@ defmodule :m_ssl_connection do
   end
 
   defp get_current_prf(cStates, direction) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.current_connection_state(
         cStates,
         direction
@@ -5964,7 +5953,7 @@ defmodule :m_ssl_connection do
   end
 
   defp get_pending_prf(cStates, direction) do
-    %{:security_parameters => secParams} =
+    %{security_parameters: secParams} =
       :ssl_record.pending_connection_state(
         cStates,
         direction
@@ -6212,7 +6201,7 @@ defmodule :m_ssl_connection do
 
   def hibernate_after(
         :connection = stateName,
-        r_state(ssl_options: %{:hibernate_after => hibernateAfter}) = state,
+        r_state(ssl_options: %{hibernate_after: hibernateAfter}) = state,
         actions
       ) do
     {:next_state, stateName, state, [{:timeout, hibernateAfter, :hibernate} | actions]}
@@ -6227,9 +6216,9 @@ defmodule :m_ssl_connection do
       level: 1,
       description: 0,
       where: %{
-        :mfa => {:ssl_connection, :terminate_alert, 1},
-        :line => 2701,
-        :file => 'otp/lib/ssl/src/ssl_connection.erl'
+        mfa: {:ssl_connection, :terminate_alert, 1},
+        line: 2701,
+        file: 'otp/lib/ssl/src/ssl_connection.erl'
       }
     )
   end
@@ -6241,9 +6230,9 @@ defmodule :m_ssl_connection do
       level: 1,
       description: 0,
       where: %{
-        :mfa => {:ssl_connection, :terminate_alert, 1},
-        :line => 2704,
-        :file => 'otp/lib/ssl/src/ssl_connection.erl'
+        mfa: {:ssl_connection, :terminate_alert, 1},
+        line: 2704,
+        file: 'otp/lib/ssl/src/ssl_connection.erl'
       }
     )
   end
@@ -6253,14 +6242,14 @@ defmodule :m_ssl_connection do
       level: 2,
       description: 80,
       where: %{
-        :mfa => {:ssl_connection, :terminate_alert, 1},
-        :line => 2706,
-        :file => 'otp/lib/ssl/src/ssl_connection.erl'
+        mfa: {:ssl_connection, :terminate_alert, 1},
+        line: 2706,
+        file: 'otp/lib/ssl/src/ssl_connection.erl'
       }
     )
   end
 
-  def handle_trusted_certs_db(r_state(ssl_options: %{:cacertfile => <<>>, :cacerts => []})) do
+  def handle_trusted_certs_db(r_state(ssl_options: %{cacertfile: <<>>, cacerts: []})) do
     :ok
   end
 
@@ -6271,7 +6260,7 @@ defmodule :m_ssl_connection do
               cert_db_ref: ref,
               cert_db: certDb
             ),
-          ssl_options: %{:cacertfile => <<>>}
+          ssl_options: %{cacertfile: <<>>}
         )
       )
       when certDb !== :undefined do
@@ -6289,7 +6278,7 @@ defmodule :m_ssl_connection do
               cert_db_ref: ref,
               file_ref_db: refDb
             ),
-          ssl_options: %{:cacertfile => file}
+          ssl_options: %{cacertfile: file}
         )
       ) do
     case :ssl_pkix_db.ref_count(ref, refDb, -1) do
@@ -6362,7 +6351,7 @@ defmodule :m_ssl_connection do
 
   defp handle_session(
          :server,
-         %{:reuse_sessions => true},
+         %{reuse_sessions: true},
          _Host,
          _Port,
          trackers,
@@ -6382,7 +6371,7 @@ defmodule :m_ssl_connection do
 
   defp handle_session(
          role = :client,
-         %{:verify => :verify_peer, :reuse_sessions => reuse} = sslOpts,
+         %{verify: :verify_peer, reuse_sessions: reuse} = sslOpts,
          host,
          port,
          _,
@@ -6423,7 +6412,7 @@ defmodule :m_ssl_connection do
     session
   end
 
-  defp host_id(:client, _Host, %{:server_name_indication => hostname})
+  defp host_id(:client, _Host, %{server_name_indication: hostname})
        when is_list(hostname) do
     hostname
   end
@@ -6588,9 +6577,9 @@ defmodule :m_ssl_connection do
         level: 2,
         description: 0,
         where: %{
-          :mfa => {:ssl_connection, :handle_active_option, 5},
-          :line => 2875,
-          :file => 'otp/lib/ssl/src/ssl_connection.erl'
+          mfa: {:ssl_connection, :handle_active_option, 5},
+          line: 2875,
+          file: 'otp/lib/ssl/src/ssl_connection.erl'
         },
         reason: :all_data_deliverd
       )
@@ -6975,13 +6964,7 @@ defmodule :m_ssl_connection do
     :ssl_logger.log(
       :notice,
       level,
-      %{
-        :protocol => protocolName,
-        :role => role,
-        :statename => stateName,
-        :alert => alert,
-        :alerter => :own
-      },
+      %{protocol: protocolName, role: role, statename: stateName, alert: alert, alerter: :own},
       r_alert(alert, :where)
     )
   end
@@ -6990,13 +6973,7 @@ defmodule :m_ssl_connection do
     :ssl_logger.log(
       :notice,
       level,
-      %{
-        :protocol => protocolName,
-        :role => role,
-        :statename => stateName,
-        :alert => alert,
-        :alerter => :peer
-      },
+      %{protocol: protocolName, role: role, statename: stateName, alert: alert, alerter: :peer},
       r_alert(alert, :where)
     )
   end
@@ -7057,9 +7034,9 @@ defmodule :m_ssl_connection do
           level: 2,
           description: 112,
           where: %{
-            :mfa => {:ssl_connection, :check_hostname, 2},
-            :line => 3123,
-            :file => 'otp/lib/ssl/src/ssl_connection.erl'
+            mfa: {:ssl_connection, :check_hostname, 2},
+            line: 3123,
+            file: 'otp/lib/ssl/src/ssl_connection.erl'
           },
           reason: {:sni_included_trailing_dot, hostname}
         )
@@ -7067,7 +7044,7 @@ defmodule :m_ssl_connection do
   end
 
   defp is_hostname_recognized(
-         %{:sni_fun => :undefined, :sni_hosts => sNIHosts},
+         %{sni_fun: :undefined, sni_hosts: sNIHosts},
          hostname
        ) do
     :proplists.is_defined(hostname, sNIHosts)
@@ -7116,9 +7093,9 @@ defmodule :m_ssl_connection do
           level: 2,
           description: 112,
           where: %{
-            :mfa => {:ssl_connection, :do_handle_sni_extension, 2},
-            :line => 3163,
-            :file => 'otp/lib/ssl/src/ssl_connection.erl'
+            mfa: {:ssl_connection, :do_handle_sni_extension, 2},
+            line: 3163,
+            file: 'otp/lib/ssl/src/ssl_connection.erl'
           },
           reason: {:sni_included_trailing_dot, hostname}
         )
@@ -7146,14 +7123,14 @@ defmodule :m_ssl_connection do
       _ ->
         {:ok,
          %{
-           :cert_db_ref => ref,
-           :cert_db_handle => certDbHandle,
-           :fileref_db_handle => fileRefHandle,
-           :session_cache => cacheHandle,
-           :crl_db_info => cRLDbHandle,
-           :private_key => key,
-           :dh_params => dHParams,
-           :own_certificate => ownCert
+           cert_db_ref: ref,
+           cert_db_handle: certDbHandle,
+           fileref_db_handle: fileRefHandle,
+           session_cache: cacheHandle,
+           crl_db_info: cRLDbHandle,
+           private_key: key,
+           dh_params: dHParams,
+           own_certificate: ownCert
          }} = :ssl_config.init(newOptions, role)
 
         r_state(state0,
@@ -7178,7 +7155,7 @@ defmodule :m_ssl_connection do
   end
 
   defp update_ssl_options_from_sni(
-         %{:sni_fun => sNIFun, :sni_hosts => sNIHosts} = origSSLOptions,
+         %{sni_fun: sNIFun, sni_hosts: sNIHosts} = origSSLOptions,
          sNIHostname
        ) do
     sSLOption =
@@ -7235,22 +7212,22 @@ defmodule :m_ssl_connection do
   end
 
   defp ocsp_info(
-         %{:ocsp_expect => :stapled, :ocsp_response => certStatus} = ocspState,
-         %{:ocsp_responder_certs => ocspResponderCerts},
+         %{ocsp_expect: :stapled, ocsp_response: certStatus} = ocspState,
+         %{ocsp_responder_certs: ocspResponderCerts},
          peerCert
        ) do
     %{
-      :cert_ext => %{:public_key.pkix_subject_id(peerCert) => [certStatus]},
-      :ocsp_responder_certs => ocspResponderCerts,
-      :ocsp_state => ocspState
+      cert_ext: %{:public_key.pkix_subject_id(peerCert) => [certStatus]},
+      ocsp_responder_certs: ocspResponderCerts,
+      ocsp_state: ocspState
     }
   end
 
-  defp ocsp_info(%{:ocsp_expect => :no_staple} = ocspState, _, peerCert) do
+  defp ocsp_info(%{ocsp_expect: :no_staple} = ocspState, _, peerCert) do
     %{
-      :cert_ext => %{:public_key.pkix_subject_id(peerCert) => []},
-      :ocsp_responder_certs => [],
-      :ocsp_state => ocspState
+      cert_ext: %{:public_key.pkix_subject_id(peerCert) => []},
+      ocsp_responder_certs: [],
+      ocsp_state: ocspState
     }
   end
 end

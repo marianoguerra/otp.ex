@@ -1034,26 +1034,26 @@ defmodule :m_ssl_crl_hash_dir do
            :public_key.pkix_normalize_name(issuer),
            dir
          ) do
-      {%{:reason => []}, dERs} ->
+      {%{reason: []}, dERs} ->
         dERs
 
-      {%{:reason => [_ | _]} = report, dERs} ->
+      {%{reason: [_ | _]} = report, dERs} ->
         {:logger,
          {:notice, report,
           %{
-            :mfa => {:ssl_crl_hash_dir, :select, 2},
-            :line => 54,
-            :file => 'otp/lib/ssl/src/ssl_crl_hash_dir.erl'
+            mfa: {:ssl_crl_hash_dir, :select, 2},
+            line: 54,
+            file: 'otp/lib/ssl/src/ssl_crl_hash_dir.erl'
           }}, dERs}
 
       {:error, error} ->
         {:logger,
          {:error,
-          %{:description => 'CRL retrival', :reason => [{:cannot_find_crl, error}, {:dir, dir}]},
+          %{description: 'CRL retrival', reason: [{:cannot_find_crl, error}, {:dir, dir}]},
           %{
-            :mfa => {:ssl_crl_hash_dir, :select, 2},
-            :line => 58,
-            :file => 'otp/lib/ssl/src/ssl_crl_hash_dir.erl'
+            mfa: {:ssl_crl_hash_dir, :select, 2},
+            line: 58,
+            file: 'otp/lib/ssl/src/ssl_crl_hash_dir.erl'
           }}, []}
     end
   end
@@ -1066,15 +1066,14 @@ defmodule :m_ssl_crl_hash_dir do
     case :filelib.is_dir(dir) do
       true ->
         hash = :public_key.short_name_hash(issuer)
-
-        find_crls(issuer, hash, dir, 0, [], %{:description => 'CRL file traversal', :reason => []})
+        find_crls(issuer, hash, dir, 0, [], %{description: 'CRL file traversal', reason: []})
 
       false ->
         {:error, :not_a_directory}
     end
   end
 
-  defp find_crls(issuer, hash, dir, n, acc, %{:reason => reason} = report) do
+  defp find_crls(issuer, hash, dir, n, acc, %{reason: reason} = report) do
     filename =
       :filename.join(
         dir,
@@ -1090,13 +1089,17 @@ defmodule :m_ssl_crl_hash_dir do
           maybe_parse_pem(bin)
         catch
           :error, error ->
-            find_crls(issuer, hash, dir, n + 1, acc, %{
-              report
-              | :reason => [
-                  {{:crl_parse_error, error}, {:filename, filename}}
-                  | reason
-                ]
-            })
+            find_crls(
+              issuer,
+              hash,
+              dir,
+              n + 1,
+              acc,
+              Map.put(report, :reason, [
+                {{:crl_parse_error, error}, {:filename, filename}}
+                | reason
+              ])
+            )
         else
           dER when is_binary(dER) ->
             find_crls(issuer, hash, dir, n + 1, [dER] ++ acc, report)

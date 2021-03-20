@@ -560,11 +560,7 @@ defmodule :m_ct_ssh do
         allOpts1
       )
 
-    finalOptions = [
-      [{:silently_accept_hosts, true}, {:user_interaction, false}]
-      | options
-    ]
-
+    finalOptions = [{:silently_accept_hosts, true}, {:user_interaction, false} | options]
     _ = :crypto.start()
     _ = :ssh.start()
 
@@ -587,7 +583,16 @@ defmodule :m_ct_ssh do
         try_log(
           heading(:init, keyOrName),
           'Opened ~w connection:\nHost: ~tp (~p)\nUser: ~tp\nPassword: ~p\n',
-          [connType, addr, port, user, :lists.duplicate(:string.length(password), ?*)]
+          [
+            connType,
+            addr,
+            port,
+            user,
+            :lists.duplicate(
+              :string.length(password),
+              ?*
+            )
+          ]
         )
 
         {:ok, sSHRef, r_state(ssh_ref: sSHRef, conn_type: connType, target: keyOrName)}
@@ -1176,7 +1181,7 @@ defmodule :m_ct_ssh do
   end
 
   defp mod(cmd) do
-    [[op, _Server] | args] = :erlang.tuple_to_list(cmd)
+    [op, _Server | args] = :erlang.tuple_to_list(cmd)
     :erlang.list_to_tuple([op | args])
   end
 

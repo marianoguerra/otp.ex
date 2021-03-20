@@ -143,11 +143,11 @@ defmodule :m_error_logger_file_h do
     :io_lib.build_text(format)
   end
 
-  defp limit_format([%{:control_char => c0} = m0 | t], depth)
+  defp limit_format([%{control_char: c0} = m0 | t], depth)
        when c0 === ?p or c0 === ?w do
     c = c0 - (?a - ?A)
-    %{:args => args} = m0
-    m = %{m0 | :control_char => c, :args => args ++ [depth]}
+    %{args: args} = m0
+    m = %{m0 | control_char: c, args: args ++ [depth]}
     [m | limit_format(t, depth)]
   end
 

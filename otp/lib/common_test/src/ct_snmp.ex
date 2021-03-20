@@ -761,7 +761,8 @@ defmodule :m_ct_snmp do
         end
 
       :snmpm.register_agent(uid, target_name(agentName), [
-        [{:address, newAgentIp}, {:port, agentUdpPort}]
+        {:address, newAgentIp},
+        {:port, agentUdpPort}
         | agentConf
       ])
     end

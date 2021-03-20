@@ -301,7 +301,7 @@ defmodule :m_xmerl_uri do
 
   defp scan_host2([?. | c0], acc, curF, host, hostF)
        when curF !== 0 do
-    scan_host2(c0, [], 0, [['.', acc] | host], [curF | hostF])
+    scan_host2(c0, [], 0, ['.', acc | host], [curF | hostF])
   end
 
   defp scan_host2(c0, acc, curF, host, hostF) do
@@ -331,7 +331,7 @@ defmodule :m_xmerl_uri do
   defp scan_pathsegments(c0, acc) do
     case scan_segment(c0, []) do
       {'/' ++ c1, segment} ->
-        scan_pathsegments(c1, [['/', segment] | acc])
+        scan_pathsegments(c1, ['/', segment | acc])
 
       {c1, segment} ->
         {c1, :lists.reverse(:lists.append([segment | acc]))}
@@ -358,7 +358,7 @@ defmodule :m_xmerl_uri do
     :lists.reverse(acc)
   end
 
-  defp scan_query([[?%, h1, h2] | c0], acc) do
+  defp scan_query([?%, h1, h2 | c0], acc) do
     scan_query([hex2dec(h1) * 16 + hex2dec(h2) | c0], acc)
   end
 
@@ -386,7 +386,7 @@ defmodule :m_xmerl_uri do
 
   defp scan_query([h | c0], acc) when 0 <= h and h <= 127 do
     {h1, h2} = dec2hex(h)
-    scan_query(c0, [[h2, h1, ?%] | acc])
+    scan_query(c0, [h2, h1, ?% | acc])
   end
 
   defp scan_query([_H | _C0], _Acc) do
@@ -397,7 +397,7 @@ defmodule :m_xmerl_uri do
     {[], acc}
   end
 
-  defp scan_pchars([[?%, h1, h2] | c0], acc) do
+  defp scan_pchars([?%, h1, h2 | c0], acc) do
     scan_pchars([hex2dec(h1) * 16 + hex2dec(h2) | c0], acc)
   end
 
@@ -427,7 +427,7 @@ defmodule :m_xmerl_uri do
               h !== ?? and h !== ?; and h !== ?/ and
               h !== ?# do
     {h1, h2} = dec2hex(h)
-    scan_pchars(c0, [[h2, h1, ?%] | acc])
+    scan_pchars(c0, [h2, h1, ?% | acc])
   end
 
   defp scan_pchars(c0, acc) do

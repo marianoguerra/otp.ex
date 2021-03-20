@@ -458,17 +458,30 @@ defmodule :m_observer_pro_wx do
            id: 210,
            text: 'Accumulate',
            type: :check,
-           check: call(holder, {:get_accum, self()})
+           check:
+             call(
+               holder,
+               {:get_accum, self()}
+             )
          ),
          :separator,
-         r_create_menu(id: 203, text: 'Refresh\tCtrl-R'),
-         r_create_menu(id: 204, text: 'Refresh Interval')
+         r_create_menu(
+           id: 203,
+           text: 'Refresh\tCtrl-R'
+         ),
+         r_create_menu(
+           id: 204,
+           text: 'Refresh Interval'
+         )
        ]},
       {'Trace',
        [
          r_create_menu(id: 206, text: 'Trace processes'),
          r_create_menu(id: 207, text: 'Trace named processes (all nodes)'),
-         r_create_menu(id: 208, text: 'Trace new processes')
+         r_create_menu(
+           id: 208,
+           text: 'Trace new processes'
+         )
        ]}
     ]
 
@@ -687,7 +700,7 @@ defmodule :m_observer_pro_wx do
           false
       end
 
-    {:reply, %{conf | :acc => accum}, state}
+    {:reply, Map.put(conf, :acc, accum), state}
   end
 
   def handle_call(msg, _From, state) do

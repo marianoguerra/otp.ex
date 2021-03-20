@@ -398,7 +398,7 @@ defmodule :m_net_kernel do
             case setup(node, connId, :normal, from, state) do
               {:ok, setupPid} ->
                 owners = r_state(state, :conn_owners)
-                {:noreply, r_state(state, conn_owners: %{owners | setupPid => node})}
+                {:noreply, r_state(state, conn_owners: Map.put(owners, setupPid, node))}
 
               _Error ->
                 :noop
@@ -441,7 +441,7 @@ defmodule :m_net_kernel do
     case setup(node, connId, type, from, state) do
       {:ok, setupPid} ->
         owners = r_state(state, :conn_owners)
-        {:noreply, r_state(state, conn_owners: %{owners | setupPid => node})}
+        {:noreply, r_state(state, conn_owners: Map.put(owners, setupPid, node))}
 
       _Error ->
         :noop
@@ -790,7 +790,7 @@ defmodule :m_net_kernel do
              node(ctrlr) == node() ->
         :erlang.link(ctrlr)
         :ets.insert(:sys_dist, r_connection(conn, ctrlr: ctrlr))
-        {:noreply, r_state(state, dist_ctrlrs: %{distCtrlrs | ctrlr => node})}
+        {:noreply, r_state(state, dist_ctrlrs: Map.put(distCtrlrs, ctrlr, node))}
 
       _ ->
         error_msg('Net kernel got ~tw~n', [msg])
@@ -863,7 +863,7 @@ defmodule :m_net_kernel do
             :ets.insert(:sys_dist, r_connection(conn, owner: acceptPid))
             send(acceptPid, {self(), {:accept_pending, :ok_pending}})
             owners = :maps.remove(oldOwner, r_state(state, :conn_owners))
-            {:noreply, r_state(state, conn_owners: %{owners | acceptPid => node})}
+            {:noreply, r_state(state, conn_owners: Map.put(owners, acceptPid, node))}
         end
 
       [r_connection(state: :up) = conn] ->
@@ -875,7 +875,7 @@ defmodule :m_net_kernel do
         )
 
         pend = r_state(state, :pend_owners)
-        {:noreply, r_state(state, pend_owners: %{pend | acceptPid => node})}
+        {:noreply, r_state(state, pend_owners: Map.put(pend, acceptPid, node))}
 
       [r_connection(state: :up_pending)] ->
         send(acceptPid, {self(), {:accept_pending, :already_pending}})
@@ -915,7 +915,7 @@ defmodule :m_net_kernel do
 
             send(acceptPid, {self(), {:accept_pending, ret}})
             owners = r_state(state, :conn_owners)
-            {:noreply, r_state(state, conn_owners: %{owners | acceptPid => node})}
+            {:noreply, r_state(state, conn_owners: Map.put(owners, acceptPid, node))}
         end
     end
   end
@@ -1045,7 +1045,7 @@ defmodule :m_net_kernel do
         {:erlang.list_to_atom(name ++ '@' ++ host), create_creation(), state0}
 
       [{node, creation} | rest] ->
-        {node, creation, r_state(state0, dyn_name_pool: %{namePool | host => rest})}
+        {node, creation, r_state(state0, dyn_name_pool: Map.put(namePool, host, rest))}
     end
   end
 
@@ -1302,7 +1302,7 @@ defmodule :m_net_kernel do
 
     state1 =
       r_state(state,
-        conn_owners: %{owners | acceptPid => node},
+        conn_owners: Map.put(owners, acceptPid, node),
         pend_owners: pend
       )
 
@@ -1382,7 +1382,7 @@ defmodule :m_net_kernel do
         dynNames = :maps.get(host, namePool0, [])
         false = :lists.keyfind(node, 1, dynNames)
         freeName = {node, next_creation(r_connection(conn, :creation))}
-        namePool1 = %{namePool0 | host => [freeName | dynNames]}
+        namePool1 = Map.put(namePool0, host, [freeName | dynNames])
         r_state(state, dyn_name_pool: namePool1)
 
       :static ->
@@ -1636,7 +1636,7 @@ defmodule :m_net_kernel do
   end
 
   def do_spawn(spawnFuncArgs, spawnOpts, state) do
-    [[_, from] | _] = spawnFuncArgs
+    [_, from | _] = spawnFuncArgs
 
     case (try do
             :erlang.spawn_opt(:net_kernel, :spawn_func, spawnFuncArgs, spawnOpts)
@@ -1830,10 +1830,10 @@ defmodule :m_net_kernel do
 
     host1 =
       case {host, longOrShortNames} do
-        {[[?@, _] | _] = ^host, :longnames} ->
+        {[?@, _ | _] = ^host, :longnames} ->
           validate_hostname(host)
 
-        {[[?@, _] | _], :shortnames} ->
+        {[?@, _ | _], :shortnames} ->
           case :lists.member(?., host) do
             true ->
               {:error, :short}

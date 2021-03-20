@@ -920,7 +920,12 @@ defmodule :m_et_wx_contents_viewer do
           [
             menuitem(menu, -1, 'Forward from this event   (s)', {:mode, modeS}),
             menuitem(menu, -1, 'Reverse from this event   (r)', {:mode, modeR}),
-            menuitem(menu, -1, 'Abort search. Display all (a)', {:mode, :all})
+            menuitem(
+              menu,
+              -1,
+              'Abort search. Display all (a)',
+              {:mode, :all}
+            )
           ]
 
         true ->
@@ -931,7 +936,12 @@ defmodule :m_et_wx_contents_viewer do
           [
             menuitem(menu, -1, 'Forward from this event   (s)', {:mode, modeS}),
             menuitem(menu, -1, 'Reverse from this event   (r)', {:mode, modeR}),
-            menuitem(menu, -1, 'Abort search. Display all (a)', {:mode, :all})
+            menuitem(
+              menu,
+              -1,
+              'Abort search. Display all (a)',
+              {:mode, :all}
+            )
           ]
       end
 
@@ -1002,11 +1012,26 @@ defmodule :m_et_wx_contents_viewer do
       '-',
       pad_string(d, 2, ?0, :left),
       'T',
-      pad_string(h, 2, ?0, :left),
+      pad_string(
+        h,
+        2,
+        ?0,
+        :left
+      ),
       ':',
-      pad_string(mi, 2, ?0, :left),
+      pad_string(
+        mi,
+        2,
+        ?0,
+        :left
+      ),
       ':',
-      pad_string(s, 2, ?0, :left),
+      pad_string(
+        s,
+        2,
+        ?0,
+        :left
+      ),
       '.',
       micro
     ])

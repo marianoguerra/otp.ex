@@ -1009,9 +1009,9 @@ defmodule :m_v3_core do
   end
 
   defp expr({:call, l, {:remote, _, m, f}, as0}, st0) do
-    {[[m1, f1] | as1], aps, st1} =
+    {[m1, f1 | as1], aps, st1} =
       safe_list(
-        [[m, f] | as0],
+        [m, f | as0],
         st0
       )
 
@@ -1623,7 +1623,7 @@ defmodule :m_v3_core do
   end
 
   defp bitstr(
-         {:bin_element, _, e0, size0, [[type, {:unit, unit}] | flags]},
+         {:bin_element, _, e0, size0, [type, {:unit, unit} | flags]},
          st0
        ) do
     {e1, eps0, st1} = safe(e0, st0)
@@ -2084,15 +2084,7 @@ defmodule :m_v3_core do
 
     {e, pre, st} = expr({:bin, line, elements}, st0)
     r_a(anno: a) = anno0 = get_anno(e)
-
-    anno =
-      r_a(anno0,
-        anno: [
-          [:compiler_generated, :single_use]
-          | a
-        ]
-      )
-
+    anno = r_a(anno0, anno: [:compiler_generated, :single_use | a])
     {set_anno(e, anno), pre0 ++ pre, st}
   end
 
@@ -2474,7 +2466,7 @@ defmodule :m_v3_core do
     {[v1, v2], st} = new_vars(2, st1)
     set1 = r_iset(var: v1, arg: bc_mul(addExpr, r_c_literal(val: u)))
     set2 = r_iset(var: v2, arg: bc_add(v1, e0))
-    bc_mul_pairs(t, v2, [[set2, set1] | reverse(addPre, pre)], st)
+    bc_mul_pairs(t, v2, [set2, set1 | reverse(addPre, pre)], st)
   end
 
   defp bc_mul_pairs([], e, pre, st) do
@@ -2943,7 +2935,7 @@ defmodule :m_v3_core do
               %{a | k => [pair | aliases]}
 
             %{} ->
-              %{a | k => [pair]}
+              Map.put(a, k, [pair])
           end
         end,
         %{},
@@ -3021,7 +3013,7 @@ defmodule :m_v3_core do
 
   defp pat_segment({:bin_element, l, val, size0, type0}, st) do
     {size1, type1} = make_bit_type(l, size0, type0)
-    [[type, {:unit, unit}] | flags] = type1
+    [type, {:unit, unit} | flags] = type1
     anno = lineno_anno(l, st)
     {pval0, st1} = pattern(val, st)
     pval = coerce_to_float(pval0, type0)

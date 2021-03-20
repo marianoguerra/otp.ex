@@ -1091,7 +1091,7 @@ defmodule :m_crashdump_viewer do
     {:lists.reverse(acc), str}
   end
 
-  defp split(_Char, [[?\r, ?\n] | str], acc) do
+  defp split(_Char, [?\r, ?\n | str], acc) do
     {:lists.reverse(acc), str}
   end
 
@@ -1811,8 +1811,8 @@ defmodule :m_crashdump_viewer do
   defp get_link_list(fd) do
     case get_chunk(fd) do
       {:ok, <<"[", bin::binary>>} ->
-        %{:links => links, :mons => monitors, :mon_by => monitoredBy} =
-          get_link_list(fd, bin, %{:links => [], :mons => [], :mon_by => []})
+        %{links: links, mons: monitors, mon_by: monitoredBy} =
+          get_link_list(fd, bin, %{links: [], mons: [], mon_by: []})
 
         {:lists.reverse(links), :lists.reverse(monitors), :lists.reverse(monitoredBy)}
 
@@ -1845,32 +1845,32 @@ defmodule :m_crashdump_viewer do
 
   defp get_link(
          <<"#Port", _::binary>> = portBin,
-         %{:links => links} = acc
+         %{links: links} = acc
        ) do
     portStr = :erlang.binary_to_list(portBin)
-    %{acc | :links => [{portStr, portStr} | links]}
+    Map.put(acc, :links, [{portStr, portStr} | links])
   end
 
   defp get_link(
          <<"<", _::binary>> = pidBin,
-         %{:links => links} = acc
+         %{links: links} = acc
        ) do
     pidStr = :erlang.binary_to_list(pidBin)
-    %{acc | :links => [{pidStr, pidStr} | links]}
+    Map.put(acc, :links, [{pidStr, pidStr} | links])
   end
 
   defp get_link(
          <<"{to,", bin::binary>>,
-         %{:mons => monitors} = acc
+         %{mons: monitors} = acc
        ) do
-    %{acc | :mons => [parse_monitor(bin) | monitors]}
+    Map.put(acc, :mons, [parse_monitor(bin) | monitors])
   end
 
   defp get_link(
          <<"{from,", bin::binary>>,
-         %{:mon_by => monitoredBy} = acc
+         %{mon_by: monitoredBy} = acc
        ) do
-    %{acc | :mon_by => [parse_monitor(bin) | monitoredBy]}
+    Map.put(acc, :mon_by, [parse_monitor(bin) | monitoredBy])
   end
 
   defp get_link(unexpected, acc) do
@@ -2409,7 +2409,7 @@ defmodule :m_crashdump_viewer do
 
       'Chain Length Min' ->
         val = bytes(fd)
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :chain_min => val}), wS)
+        get_etsinfo(fd, r_ets_table(etsTable, details: Map.put(ds, :chain_min, val)), wS)
 
       'Chain Length Avg' ->
         val =
@@ -2420,28 +2420,33 @@ defmodule :m_crashdump_viewer do
               '-'
           end
 
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :chain_avg => val}), wS)
+        get_etsinfo(fd, r_ets_table(etsTable, details: Map.put(ds, :chain_avg, val)), wS)
 
       'Chain Length Max' ->
         val = bytes(fd)
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :chain_max => val}), wS)
+        get_etsinfo(fd, r_ets_table(etsTable, details: Map.put(ds, :chain_max, val)), wS)
 
       'Chain Length Std Dev' ->
         val = bytes(fd)
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :chain_stddev => val}), wS)
+
+        get_etsinfo(
+          fd,
+          r_ets_table(etsTable, details: Map.put(ds, :chain_stddev, val)),
+          wS
+        )
 
       'Chain Length Expected Std Dev' ->
         val = bytes(fd)
 
         get_etsinfo(
           fd,
-          r_ets_table(etsTable, details: %{ds | :chain_exp_stddev => val}),
+          r_ets_table(etsTable, details: Map.put(ds, :chain_exp_stddev, val)),
           wS
         )
 
       'Fixed' ->
         val = bytes(fd)
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :fixed => val}), wS)
+        get_etsinfo(fd, r_ets_table(etsTable, details: Map.put(ds, :fixed, val)), wS)
 
       'Type' ->
         val = bytes(fd)
@@ -2449,19 +2454,19 @@ defmodule :m_crashdump_viewer do
 
       'Protection' ->
         val = bytes(fd)
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :protection => val}), wS)
+        get_etsinfo(fd, r_ets_table(etsTable, details: Map.put(ds, :protection, val)), wS)
 
       'Compressed' ->
         val = bytes(fd)
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :compressed => val}), wS)
+        get_etsinfo(fd, r_ets_table(etsTable, details: Map.put(ds, :compressed, val)), wS)
 
       'Write Concurrency' ->
         val = bytes(fd)
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :write_c => val}), wS)
+        get_etsinfo(fd, r_ets_table(etsTable, details: Map.put(ds, :write_c, val)), wS)
 
       'Read Concurrency' ->
         val = bytes(fd)
-        get_etsinfo(fd, r_ets_table(etsTable, details: %{ds | :read_c => val}), wS)
+        get_etsinfo(fd, r_ets_table(etsTable, details: Map.put(ds, :read_c, val)), wS)
 
       other ->
         unexpected(fd, other, 'ETS info')
@@ -3559,22 +3564,22 @@ defmodule :m_crashdump_viewer do
         {:more, r_sched(sched, port: bytes(fd, 'None'))}
 
       'Scheduler Sleep Info Flags' ->
-        {:more, r_sched(sched, details: %{ds | :sleep_info => bytes(fd, 'None')})}
+        {:more, r_sched(sched, details: Map.put(ds, :sleep_info, bytes(fd, 'None')))}
 
       'Scheduler Sleep Info Aux Work' ->
-        {:more, r_sched(sched, details: %{ds | :sleep_aux => bytes(fd, 'None')})}
+        {:more, r_sched(sched, details: Map.put(ds, :sleep_aux, bytes(fd, 'None')))}
 
       'Current Process State' ->
-        {:more, r_sched(sched, details: %{ds | :currp_state => bytes(fd)})}
+        {:more, r_sched(sched, details: Map.put(ds, :currp_state, bytes(fd)))}
 
       'Current Process Internal State' ->
-        {:more, r_sched(sched, details: %{ds | :currp_int_state => bytes(fd)})}
+        {:more, r_sched(sched, details: Map.put(ds, :currp_int_state, bytes(fd)))}
 
       'Current Process Program counter' ->
-        {:more, r_sched(sched, details: %{ds | :currp_prg_cnt => string(fd)})}
+        {:more, r_sched(sched, details: Map.put(ds, :currp_prg_cnt, string(fd)))}
 
       'Current Process CP' ->
-        {:more, r_sched(sched, details: %{ds | :currp_cp => string(fd)})}
+        {:more, r_sched(sched, details: Map.put(ds, :currp_cp, string(fd)))}
 
       'Current Process Limited Stack Trace' ->
         {:done, r_sched(sched, details: get_limited_stack(fd, 0, ds))}
@@ -3624,7 +3629,7 @@ defmodule :m_crashdump_viewer do
         {:more,
          r_sched(sched,
            run_q: rQ,
-           details: %{ds | :runq_max => rQMax}
+           details: Map.put(ds, :runq_max, rQMax)
          )}
 
       'Run Queue High Length' ->
@@ -3634,7 +3639,7 @@ defmodule :m_crashdump_viewer do
         {:more,
          r_sched(sched,
            run_q: rQ,
-           details: %{ds | :runq_high => rQHigh}
+           details: Map.put(ds, :runq_high, rQHigh)
          )}
 
       'Run Queue Normal Length' ->
@@ -3644,7 +3649,7 @@ defmodule :m_crashdump_viewer do
         {:more,
          r_sched(sched,
            run_q: rQ,
-           details: %{ds | :runq_norm => rQNorm}
+           details: Map.put(ds, :runq_norm, rQNorm)
          )}
 
       'Run Queue Low Length' ->
@@ -3654,7 +3659,7 @@ defmodule :m_crashdump_viewer do
         {:more,
          r_sched(sched,
            run_q: rQ,
-           details: %{ds | :runq_low => rQLow}
+           details: Map.put(ds, :runq_low, rQLow)
          )}
 
       'Run Queue Port Length' ->
@@ -3662,7 +3667,7 @@ defmodule :m_crashdump_viewer do
         {:more, r_sched(sched, port_q: rQ)}
 
       'Run Queue Flags' ->
-        {:more, r_sched(sched, details: %{ds | :runq_flags => bytes(fd, 'None')})}
+        {:more, r_sched(sched, details: Map.put(ds, :runq_flags, bytes(fd, 'None')))}
 
       '=' ++ _next_tag ->
         {:done, sched}
@@ -3676,13 +3681,13 @@ defmodule :m_crashdump_viewer do
   defp get_limited_stack(fd, n, ds) do
     case string(fd) do
       addr = '0x' ++ _ ->
-        get_limited_stack(fd, n + 1, %{ds | {:currp_stack, n} => addr})
+        get_limited_stack(fd, n + 1, Map.put(ds, {:currp_stack, n}, addr))
 
       '=' ++ _next_tag ->
         ds
 
       line ->
-        get_limited_stack(fd, n + 1, %{ds | {:currp_stack, n} => line})
+        get_limited_stack(fd, n + 1, Map.put(ds, {:currp_stack, n}, line))
     end
   end
 
@@ -4210,7 +4215,7 @@ defmodule :m_crashdump_viewer do
     {:erlang.list_to_binary(:lists.reverse(acc)), line}
   end
 
-  defp get_binary_hex(n, [[a, b] | line], acc, progress) do
+  defp get_binary_hex(n, [a, b | line], acc, progress) do
     byte = get_hex_digit(a) <<< 4 ||| get_hex_digit(b)
     progress and update_progress()
     get_binary_hex(n - 1, line, [byte | acc], progress)

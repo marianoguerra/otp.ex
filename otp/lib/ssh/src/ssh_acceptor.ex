@@ -114,8 +114,15 @@ defmodule :m_ssh_acceptor do
       :ssh_options.get_value(:user_options, :transport, options, :ssh_acceptor, 58)
 
     sockOpts = [
-      [{:active, false}, {:reuseaddr, true}]
-      | :ssh_options.get_value(:user_options, :socket_options, options, :ssh_acceptor, 59)
+      {:active, false},
+      {:reuseaddr, true}
+      | :ssh_options.get_value(
+          :user_options,
+          :socket_options,
+          options,
+          :ssh_acceptor,
+          59
+        )
     ]
 
     case callback.listen(port, sockOpts) do

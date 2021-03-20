@@ -158,7 +158,7 @@ defmodule :m_logger_server do
     primaryConfig =
       :maps.merge(
         default_config(:primary),
-        %{:handlers => [:simple]}
+        %{handlers: [:simple]}
       )
 
     :logger_config.create(tid, :primary, primaryConfig)
@@ -170,8 +170,8 @@ defmodule :m_logger_server do
           :logger_simple_h
         ),
         %{
-          :filter_default => :stop,
-          :filters => [
+          filter_default: :stop,
+          filters: [
             {:remote_gl, {&:logger_filters.remote_gl/2, :stop}},
             {:domain, {&:logger_filters.domain/2, {:log, :super, [:otp]}}},
             {:no_domain, {&:logger_filters.domain/2, {:log, :undefined, []}}}
@@ -207,7 +207,15 @@ defmodule :m_logger_server do
                     )
 
                   handlers = :maps.get(:handlers, config, [])
-                  :logger_config.set(tid, :primary, %{config | :handlers => [id | handlers]})
+
+                  :logger_config.set(
+                    tid,
+                    :primary,
+                    Map.put(config, :handlers, [
+                      id
+                      | handlers
+                    ])
+                  )
 
                 false ->
                   {:error, {:invalid_handler, {:function_not_exported, {module, :log, 2}}}}
@@ -224,7 +232,7 @@ defmodule :m_logger_server do
 
   def handle_call({:remove_handler, handlerId}, from, r_state(tid: tid) = state) do
     case :logger_config.get(tid, handlerId) do
-      {:ok, %{:module => module} = hConfig} ->
+      {:ok, %{module: module} = hConfig} ->
         {:ok, config} = :logger_config.get(tid, :primary)
         handlers0 = :maps.get(:handlers, config, [])
         handlers = :lists.delete(handlerId, handlers0)
@@ -234,7 +242,7 @@ defmodule :m_logger_server do
             call_h(module, :removing_handler, [hConfig], :ok)
           end,
           fn _Res ->
-            :logger_config.set(tid, :primary, %{config | :handlers => handlers})
+            :logger_config.set(tid, :primary, Map.put(config, :handlers, handlers))
             :logger_config.delete(tid, handlerId)
             :ok
           end,
@@ -286,7 +294,7 @@ defmodule :m_logger_server do
   end
 
   def handle_call({:change_config, setOrUpd, :primary, config0}, _From, r_state(tid: tid) = state) do
-    {:ok, %{:handlers => handlers} = oldConfig} =
+    {:ok, %{handlers: handlers} = oldConfig} =
       :logger_config.get(
         tid,
         :primary
@@ -302,7 +310,7 @@ defmodule :m_logger_server do
       end
 
     config = :maps.merge(default, config0)
-    reply = :logger_config.set(tid, :primary, %{config | :handlers => handlers})
+    reply = :logger_config.set(tid, :primary, Map.put(config, :handlers, handlers))
     {:reply, reply, state}
   end
 
@@ -312,13 +320,13 @@ defmodule :m_logger_server do
         r_state(tid: tid) = state
       ) do
     {:ok, oldConfig} = :logger_config.get(tid, :primary)
-    reply = :logger_config.set(tid, :primary, %{oldConfig | key => value})
+    reply = :logger_config.set(tid, :primary, Map.put(oldConfig, key, value))
     {:reply, reply, state}
   end
 
   def handle_call({:change_config, setOrUpd, handlerId, config0}, from, r_state(tid: tid) = state) do
     case :logger_config.get(tid, handlerId) do
-      {:ok, %{:module => module} = oldConfig} ->
+      {:ok, %{module: module} = oldConfig} ->
         default =
           case setOrUpd do
             :set ->
@@ -362,8 +370,8 @@ defmodule :m_logger_server do
         r_state(tid: tid) = state
       ) do
     case :logger_config.get(tid, handlerId) do
-      {:ok, %{:module => module} = oldConfig} ->
-        config = %{oldConfig | key => value}
+      {:ok, %{module: module} = oldConfig} ->
+        config = Map.put(oldConfig, key, value)
 
         case check_config_change(oldConfig, config) do
           :ok ->
@@ -398,11 +406,11 @@ defmodule :m_logger_server do
       ) do
     reply =
       case :logger_config.get(tid, handlerId) do
-        {:ok, %{:formatter => {fMod, oldFConfig}} = config} ->
+        {:ok, %{formatter: {fMod, oldFConfig}} = config} ->
           try do
             fConfig = :maps.merge(oldFConfig, newFConfig)
             check_formatter({fMod, fConfig})
-            :logger_config.set(tid, handlerId, %{config | :formatter => {fMod, fConfig}})
+            :logger_config.set(tid, handlerId, Map.put(config, :formatter, {fMod, fConfig}))
           catch
             reason ->
               {:error, reason}
@@ -464,9 +472,9 @@ defmodule :m_logger_server do
           :logger_server.do_internal_log(
             :debug,
             %{
-              :mfa => {:logger_server, :handle_info, 2},
-              :line => 355,
-              :file => 'otp/lib/kernel/src/logger_server.erl'
+              mfa: {:logger_server, :handle_info, 2},
+              line: 355,
+              file: 'otp/lib/kernel/src/logger_server.erl'
             },
             %{},
             [[{:logger, :got_unexpected_message}, {:process, :logger}, {:message, unexpected}]]
@@ -488,9 +496,9 @@ defmodule :m_logger_server do
           :logger_server.do_internal_log(
             :info,
             %{
-              :mfa => {:logger_server, :handle_info, 2},
-              :line => 362,
-              :file => 'otp/lib/kernel/src/logger_server.erl'
+              mfa: {:logger_server, :handle_info, 2},
+              line: 362,
+              file: 'otp/lib/kernel/src/logger_server.erl'
             },
             %{},
             [[{:logger, :got_unexpected_message}, {:process, :logger}, {:message, unexpected}]]
@@ -534,7 +542,7 @@ defmodule :m_logger_server do
             {:error, {:already_exist, fId}}
 
           false ->
-            :logger_config.set(tid, id, %{config | :filters => [filter | filters]})
+            :logger_config.set(tid, id, Map.put(config, :filters, [filter | filters]))
         end
 
       error ->
@@ -549,7 +557,7 @@ defmodule :m_logger_server do
 
         case :lists.keytake(filterId, 1, filters0) do
           {:value, _, filters} ->
-            :logger_config.set(tid, id, %{config | :filters => filters})
+            :logger_config.set(tid, id, Map.put(config, :filters, filters))
 
           false ->
             {:error, {:not_found, filterId}}
@@ -561,21 +569,15 @@ defmodule :m_logger_server do
   end
 
   defp default_config(:primary) do
-    %{:level => :notice, :filters => [], :filter_default => :log}
+    %{level: :notice, filters: [], filter_default: :log}
   end
 
   defp default_config(id) do
-    %{
-      :id => id,
-      :level => :all,
-      :filters => [],
-      :filter_default => :log,
-      :formatter => {:logger_formatter, %{}}
-    }
+    %{id: id, level: :all, filters: [], filter_default: :log, formatter: {:logger_formatter, %{}}}
   end
 
   defp default_config(id, module) do
-    %{default_config(id) | :module => module}
+    Map.put(default_config(id), :module, module)
   end
 
   defp sanity_check(owner, key, value) do
@@ -734,8 +736,8 @@ defmodule :m_logger_server do
   end
 
   defp check_config_change(
-         %{:id => id, :module => module},
-         %{:id => id, :module => module}
+         %{id: id, module: module},
+         %{id: id, module: module}
        ) do
     :ok
   end
@@ -782,9 +784,9 @@ defmodule :m_logger_server do
                   :logger_server.do_internal_log(
                     :error,
                     %{
-                      :mfa => {:logger_server, :call_h, 4},
-                      :line => 548,
-                      :file => 'otp/lib/kernel/src/logger_server.erl'
+                      mfa: {:logger_server, :call_h, 4},
+                      line: 548,
+                      file: 'otp/lib/kernel/src/logger_server.erl'
                     },
                     %{},
                     [[{:logger, :callback_crashed}, {:process, :logger}, {:reason, {c, r, sT}}]]
@@ -870,9 +872,9 @@ defmodule :m_logger_server do
           :logger_server.do_internal_log(
             :error,
             %{
-              :mfa => {:logger_server, :call_h_reply, 2},
-              :line => 591,
-              :file => 'otp/lib/kernel/src/logger_server.erl'
+              mfa: {:logger_server, :call_h_reply, 2},
+              line: 591,
+              file: 'otp/lib/kernel/src/logger_server.erl'
             },
             %{},
             [[{:logger, :process_exited}, {:process, pid}, {:reason, reason}]]
@@ -897,9 +899,9 @@ defmodule :m_logger_server do
           :logger_server.do_internal_log(
             :info,
             %{
-              :mfa => {:logger_server, :call_h_reply, 2},
-              :line => 600,
-              :file => 'otp/lib/kernel/src/logger_server.erl'
+              mfa: {:logger_server, :call_h_reply, 2},
+              line: 600,
+              file: 'otp/lib/kernel/src/logger_server.erl'
             },
             %{},
             [[{:logger, :got_unexpected_message}, {:process, :logger}, {:message, unexpected}]]
@@ -923,7 +925,7 @@ defmodule :m_logger_server do
   end
 
   defp diffs([{k, v1} | t1], [{k, v2} | t2], d1, d2) do
-    diffs(t1, t2, %{d1 | k => v1}, %{d2 | k => v2})
+    diffs(t1, t2, Map.put(d1, k, v1), Map.put(d2, k, v2))
   end
 
   defp diffs([], [], d1, d2) do
@@ -948,15 +950,19 @@ defmodule :m_logger_server do
       )
 
     case log do
-      %{:meta => %{:internal_log_event => true}} ->
-        _ = spawn(:logger_simple_h, :log, [%{:level => level, :msg => msg, :meta => meta}, %{}])
+      %{meta: %{internal_log_event: true}} ->
+        _ = spawn(:logger_simple_h, :log, [%{level: level, msg: msg, meta: meta}, %{}])
 
       _ ->
         _ =
           spawn(
             :logger,
             :macro_log,
-            [[location, level] | data] ++ [%{meta | :internal_log_event => true}]
+            [
+              location,
+              level
+              | data
+            ] ++ [Map.put(meta, :internal_log_event, true)]
           )
     end
   end

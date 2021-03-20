@@ -4,7 +4,7 @@ defmodule :m_code do
   Record.defrecord(:r_docs_v1, :docs_v1, anno: :undefined,
                                    beam_language: :erlang, format: "application/erlang+html",
                                    module_doc: :undefined,
-                                   metadata: %{:otp_doc_vsn => {1, 0, 0}},
+                                   metadata: %{otp_doc_vsn: {1, 0, 0}},
                                    docs: :undefined)
   Record.defrecord(:r_docs_v1_entry, :docs_v1_entry, kind_name_arity: :undefined,
                                          anno: :undefined,
@@ -38,7 +38,7 @@ defmodule :m_code do
            {:new_stacktrace, [{mod, _, l, loc} | rest]}} = ((try do
                                                               :erlang.error(:new_stacktrace,
                                                                               [beam,
-                                                                                 chunk])
+                                                                                   chunk])
                                                             catch
                                                               :error, e -> {:EXIT, {e, __STACKTRACE__}}
                                                               :exit, e -> {:EXIT, e}
@@ -208,7 +208,7 @@ defmodule :m_code do
       '.beam' ->
         case (:maps.is_key(file, acc)) do
           false ->
-            all_available(path, t, %{acc | file => path})
+            all_available(path, t, Map.put(acc, file, path))
           true ->
             all_available(path, t, acc)
         end
@@ -687,7 +687,8 @@ defmodule :m_code do
 
   defp load_code_server_prerequisites() do
     needed = [:binary, :ets, :filename, :gb_sets, :gb_trees,
-                :hipe_unified_loader, :lists, :os, :unicode]
+                                                      :hipe_unified_loader,
+                                                          :lists, :os, :unicode]
     _ = (for m <- needed do
            ^m = m.module_info(:module)
          end)
@@ -733,9 +734,9 @@ defmodule :m_code do
             case (:logger.allow(:warning, :code)) do
               true ->
                 apply(:logger, :macro_log,
-                        [%{:mfa => {:code, :start_get_mode, 0}, :line => 804,
-                             :file => 'otp/lib/kernel/src/code.erl'},
-                           :warning, 'Multiple -mode given to erl, using the first, ~p', [firstMode]])
+                        [%{mfa: {:code, :start_get_mode, 0}, line: 804,
+                             file: 'otp/lib/kernel/src/code.erl'},
+                             :warning, 'Multiple -mode given to erl, using the first, ~p', [firstMode]])
               false ->
                 :ok
             end
@@ -800,7 +801,7 @@ defmodule :m_code do
     case (which(mod)) do
       :preloaded ->
         fn__ = :filename.join([:code.lib_dir(:erts), 'ebin',
-                                 :erlang.atom_to_list(mod) ++ '.beam'])
+                                                         :erlang.atom_to_list(mod) ++ '.beam'])
         get_doc_chunk(fn__, mod)
       error when is_atom(error) ->
         {:error, error}
@@ -853,8 +854,7 @@ defmodule :m_code do
         docs = get_function_docs_from_ast(aST)
         {:ok,
            r_docs_v1(anno: 0, beam_language: :erlang, module_doc: :none,
-               metadata: %{:generated => true,
-                             :otp_doc_vsn => {1, 0, 0}},
+               metadata: %{generated: true, otp_doc_vsn: {1, 0, 0}},
                docs: docs)}
       {:ok, {_Mod, [{:abstract_code, :no_abstract_code}]}} ->
         {:error, :missing}
@@ -886,7 +886,7 @@ defmodule :m_code do
                             aST)
     specMd = (case (specs) do
                 [s] ->
-                  %{:signature => [s]}
+                  %{signature: [s]}
                 [] ->
                   %{}
               end)

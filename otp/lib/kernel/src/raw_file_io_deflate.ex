@@ -32,14 +32,14 @@ defmodule :m_raw_file_io_deflate do
     monitor = :erlang.monitor(:process, owner)
     z = :zlib.open()
     :ok = :zlib.deflateInit(z, :default, :deflated, 16 + 15, 8, :default)
-    data = %{:owner => owner, :monitor => monitor, :secret => secret, :position => 0, :zlib => z}
+    data = %{owner: owner, monitor: monitor, secret: secret, position: 0, zlib: z}
     {:ok, :opening, data}
   end
 
-  def opening({:call, from}, {:"$open", secret, filename, modes}, %{:secret => secret} = data) do
+  def opening({:call, from}, {:"$open", secret, filename, modes}, %{secret: secret} = data) do
     case :raw_file_io.open(filename, modes) do
       {:ok, privateFd} ->
-        newData = %{data | :handle => privateFd}
+        newData = Map.put(data, :handle, privateFd)
         {:next_state, :opened, newData, [{:reply, from, :ok}]}
 
       other ->
@@ -54,7 +54,7 @@ defmodule :m_raw_file_io_deflate do
   def opened(
         :info,
         {:DOWN, monitor, :process, _Owner, reason},
-        %{:monitor => monitor} = data
+        %{monitor: monitor} = data
       ) do
     cond do
       reason !== :kill ->
@@ -71,8 +71,8 @@ defmodule :m_raw_file_io_deflate do
     :keep_state_and_data
   end
 
-  def opened({:call, {owner, _Tag} = from}, [:close], %{:owner => owner} = data) do
-    %{:handle => privateFd} = data
+  def opened({:call, {owner, _Tag} = from}, [:close], %{owner: owner} = data) do
+    %{handle: privateFd} = data
 
     response =
       case flush_deflate_state(data) do
@@ -86,7 +86,7 @@ defmodule :m_raw_file_io_deflate do
     {:stop_and_reply, :normal, [{:reply, from, response}]}
   end
 
-  def opened({:call, {owner, _Tag} = from}, [:position, mark], %{:owner => owner} = data) do
+  def opened({:call, {owner, _Tag} = from}, [:position, mark], %{owner: owner} = data) do
     case position(data, mark) do
       {:ok, newData, result} ->
         response = {:ok, result}
@@ -97,7 +97,7 @@ defmodule :m_raw_file_io_deflate do
     end
   end
 
-  def opened({:call, {owner, _Tag} = from}, [:write, iOVec], %{:owner => owner} = data) do
+  def opened({:call, {owner, _Tag} = from}, [:write, iOVec], %{owner: owner} = data) do
     case write(data, iOVec) do
       {:ok, newData} ->
         {:keep_state, newData, [{:reply, from, :ok}]}
@@ -107,17 +107,17 @@ defmodule :m_raw_file_io_deflate do
     end
   end
 
-  def opened({:call, {owner, _Tag} = from}, [:read, _Size], %{:owner => owner}) do
+  def opened({:call, {owner, _Tag} = from}, [:read, _Size], %{owner: owner}) do
     response = {:error, :ebadf}
     {:keep_state_and_data, [{:reply, from, response}]}
   end
 
-  def opened({:call, {owner, _Tag} = from}, [:read_line], %{:owner => owner}) do
+  def opened({:call, {owner, _Tag} = from}, [:read_line], %{owner: owner}) do
     response = {:error, :ebadf}
     {:keep_state_and_data, [{:reply, from, response}]}
   end
 
-  def opened({:call, {owner, _Tag} = from}, _Command, %{:owner => owner}) do
+  def opened({:call, {owner, _Tag} = from}, _Command, %{owner: owner}) do
     response = {:error, :enotsup}
     {:keep_state_and_data, [{:reply, from, response}]}
   end
@@ -131,12 +131,12 @@ defmodule :m_raw_file_io_deflate do
   end
 
   defp write(data, iOVec) do
-    %{:handle => privateFd, :position => position, :zlib => z} = data
+    %{handle: privateFd, position: position, zlib: z} = data
     uncompressedSize = :erlang.iolist_size(iOVec)
 
     case apply(r_file_descriptor(privateFd, :module), :write, [privateFd, :zlib.deflate(z, iOVec)]) do
       :ok ->
-        {:ok, %{data | :position => position + uncompressedSize}}
+        {:ok, %{data | position: position + uncompressedSize}}
 
       other ->
         other
@@ -156,7 +156,7 @@ defmodule :m_raw_file_io_deflate do
   end
 
   defp position(data, {:cur, offset}) when is_integer(offset) do
-    %{:position => position} = data
+    %{position: position} = data
     position_1(data, position + offset)
   end
 
@@ -169,11 +169,11 @@ defmodule :m_raw_file_io_deflate do
     {:error, :badarg}
   end
 
-  defp position_1(%{:position => desired} = data, desired) do
+  defp position_1(%{position: desired} = data, desired) do
     {:ok, data, desired}
   end
 
-  defp position_1(%{:position => current} = data, desired)
+  defp position_1(%{position: current} = data, desired)
        when current < desired do
     bytesToWrite = min(desired - current, 4 <<< 20)
 
@@ -189,12 +189,12 @@ defmodule :m_raw_file_io_deflate do
     end
   end
 
-  defp position_1(%{:position => current}, desired)
+  defp position_1(%{position: current}, desired)
        when current > desired do
     {:error, :einval}
   end
 
-  defp flush_deflate_state(%{:handle => privateFd, :zlib => z}) do
+  defp flush_deflate_state(%{handle: privateFd, zlib: z}) do
     case apply(r_file_descriptor(privateFd, :module), :write, [
            privateFd,
            :zlib.deflate(z, [], :finish)

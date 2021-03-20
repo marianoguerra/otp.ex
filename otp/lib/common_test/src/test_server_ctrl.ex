@@ -287,7 +287,7 @@ defmodule :m_test_server_ctrl do
     parse_cmd_line(cmds, [], [], :local, false, false, :undefined)
   end
 
-  defp parse_cmd_line([[:SPEC, spec] | cmds], specList, names, param, trc, cov, tCCB) do
+  defp parse_cmd_line([:SPEC, spec | cmds], specList, names, param, trc, cov, tCCB) do
     case :file.consult(spec) do
       {:ok, termList} ->
         name = :filename.rootname(spec)
@@ -299,7 +299,7 @@ defmodule :m_test_server_ctrl do
     end
   end
 
-  defp parse_cmd_line([[:NAME, name] | cmds], specList, names, param, trc, cov, tCCB) do
+  defp parse_cmd_line([:NAME, name | cmds], specList, names, param, trc, cov, tCCB) do
     parse_cmd_line(
       cmds,
       specList,
@@ -311,7 +311,7 @@ defmodule :m_test_server_ctrl do
     )
   end
 
-  defp parse_cmd_line([[:SKIPMOD, mod] | cmds], specList, names, param, trc, cov, tCCB) do
+  defp parse_cmd_line([:SKIPMOD, mod | cmds], specList, names, param, trc, cov, tCCB) do
     parse_cmd_line(
       cmds,
       [{:skip, {mod, 'by command line'}} | specList],
@@ -323,7 +323,7 @@ defmodule :m_test_server_ctrl do
     )
   end
 
-  defp parse_cmd_line([[:SKIPCASE, mod, case__] | cmds], specList, names, param, trc, cov, tCCB) do
+  defp parse_cmd_line([:SKIPCASE, mod, case__ | cmds], specList, names, param, trc, cov, tCCB) do
     parse_cmd_line(
       cmds,
       [{:skip, {mod, case__, 'by command line'}} | specList],
@@ -335,7 +335,7 @@ defmodule :m_test_server_ctrl do
     )
   end
 
-  defp parse_cmd_line([[:DIR, dir] | cmds], specList, names, param, trc, cov, tCCB) do
+  defp parse_cmd_line([:DIR, dir | cmds], specList, names, param, trc, cov, tCCB) do
     name = :filename.basename(dir)
 
     parse_cmd_line(
@@ -349,7 +349,7 @@ defmodule :m_test_server_ctrl do
     )
   end
 
-  defp parse_cmd_line([[:MODULE, mod] | cmds], specList, names, param, trc, cov, tCCB) do
+  defp parse_cmd_line([:MODULE, mod | cmds], specList, names, param, trc, cov, tCCB) do
     parse_cmd_line(
       cmds,
       [{:topcase, {mod, :all}} | specList],
@@ -361,7 +361,7 @@ defmodule :m_test_server_ctrl do
     )
   end
 
-  defp parse_cmd_line([[:CASE, mod, case__] | cmds], specList, names, param, trc, cov, tCCB) do
+  defp parse_cmd_line([:CASE, mod, case__ | cmds], specList, names, param, trc, cov, tCCB) do
     parse_cmd_line(
       cmds,
       [{:topcase, {mod, case__}} | specList],
@@ -373,31 +373,15 @@ defmodule :m_test_server_ctrl do
     )
   end
 
-  defp parse_cmd_line([[:TRACE, trc] | cmds], specList, names, param, _Trc, cov, tCCB) do
+  defp parse_cmd_line([:TRACE, trc | cmds], specList, names, param, _Trc, cov, tCCB) do
     parse_cmd_line(cmds, specList, names, param, trc, cov, tCCB)
   end
 
-  defp parse_cmd_line(
-         [[:COVER, app, cF, analyse] | cmds],
-         specList,
-         names,
-         param,
-         trc,
-         _Cov,
-         tCCB
-       ) do
+  defp parse_cmd_line([:COVER, app, cF, analyse | cmds], specList, names, param, trc, _Cov, tCCB) do
     parse_cmd_line(cmds, specList, names, param, trc, {{app, cF}, analyse}, tCCB)
   end
 
-  defp parse_cmd_line(
-         [[:TESTCASE_CALLBACK, mod, func] | cmds],
-         specList,
-         names,
-         param,
-         trc,
-         cov,
-         _
-       ) do
+  defp parse_cmd_line([:TESTCASE_CALLBACK, mod, func | cmds], specList, names, param, trc, cov, _) do
     parse_cmd_line(cmds, specList, names, param, trc, cov, {mod, func})
   end
 
@@ -7172,7 +7156,16 @@ defmodule :m_test_server_ctrl do
   defp format_analyse(m, cov, notCov, {:file, file}) do
     :io_lib.fwrite(
       '<tr><td><a href="~ts">~w</a></td><td align=right>~w %</td><td align=right>~w</td><td align=right>~w</td></tr>\n',
-      [uri_encode(:filename.basename(file)), m, pc(cov, notCov), cov, notCov]
+      [
+        uri_encode(:filename.basename(file)),
+        m,
+        pc(
+          cov,
+          notCov
+        ),
+        cov,
+        notCov
+      ]
     )
   end
 

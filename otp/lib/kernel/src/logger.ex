@@ -137,7 +137,7 @@ defmodule :m_logger do
     log_allowed(location, level, {funOrFormat, args}, meta)
   end
 
-  def format_otp_report(%{:label => _, :report => report}) do
+  def format_otp_report(%{label: _, report: report}) do
     format_report(report)
   end
 
@@ -179,7 +179,7 @@ defmodule :m_logger do
           'p'
       end
 
-    format_term_list(t, ['    ~tp: ~t' ++ porS | format], [[data, tag] | args])
+    format_term_list(t, ['    ~tp: ~t' ++ porS | format], [data, tag | args])
   end
 
   defp format_term_list([data | t], format, args) do
@@ -287,7 +287,7 @@ defmodule :m_logger do
 
   def get_handler_config(handlerId) do
     case :logger_config.get(:logger, handlerId) do
-      {:ok, %{:module => module} = config} ->
+      {:ok, %{module: module} = config} ->
         {:ok,
          try do
            module.filter_config(config)
@@ -309,7 +309,12 @@ defmodule :m_logger do
   end
 
   def get_handler_ids() do
-    {:ok, %{:handlers => handlerIds}} = :logger_config.get(:logger, :primary)
+    {:ok, %{handlers: handlerIds}} =
+      :logger_config.get(
+        :logger,
+        :primary
+      )
+
     handlerIds
   end
 
@@ -453,20 +458,16 @@ defmodule :m_logger do
 
   def get_config() do
     %{
-      :primary => get_primary_config(),
-      :handlers => get_handler_config(),
-      :proxy => get_proxy_config(),
-      :module_levels => :lists.keysort(1, get_module_level())
+      primary: get_primary_config(),
+      handlers: get_handler_config(),
+      proxy: get_proxy_config(),
+      module_levels: :lists.keysort(1, get_module_level())
     }
   end
 
   def i() do
-    %{
-      :primary => primary,
-      :handlers => handlerConfigs,
-      :proxy => proxy,
-      :module_levels => modules
-    } = get_config()
+    %{primary: primary, handlers: handlerConfigs, proxy: proxy, module_levels: modules} =
+      get_config()
 
     m = modifier()
     i_primary(primary, m)
@@ -506,7 +507,7 @@ defmodule :m_logger do
   end
 
   defp i_primary(
-         %{:level => level, :filters => filters, :filter_default => filterDefault},
+         %{level: level, filters: filters, filter_default: filterDefault},
          m
        ) do
     :io.format('Primary configuration: ~n', [])
@@ -574,12 +575,12 @@ defmodule :m_logger do
 
   defp print_handlers(
          %{
-           :id => id,
-           :module => module,
-           :level => level,
-           :filters => filters,
-           :filter_default => filterDefault,
-           :formatter => {formatterModule, formatterConfig}
+           id: id,
+           module: module,
+           level: level,
+           filters: filters,
+           filter_default: filterDefault,
+           formatter: {formatterModule, formatterConfig}
          } = config,
          m
        ) do
@@ -717,9 +718,9 @@ defmodule :m_logger do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:logger, :internal_init_logger, 0},
-                :line => 823,
-                :file => 'otp/lib/kernel/src/logger.erl'
+                mfa: {:logger, :internal_init_logger, 0},
+                line: 823,
+                file: 'otp/lib/kernel/src/logger.erl'
               },
               :error,
               'Invalid logger config: ~p',
@@ -752,9 +753,9 @@ defmodule :m_logger do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:logger, :init_kernel_handlers, 1},
-                :line => 841,
-                :file => 'otp/lib/kernel/src/logger.erl'
+                mfa: {:logger, :init_kernel_handlers, 1},
+                line: 841,
+                file: 'otp/lib/kernel/src/logger.erl'
               },
               :error,
               'Invalid default handler config: ~p',
@@ -810,7 +811,7 @@ defmodule :m_logger do
                    :filters,
                    config
                  ) ->
-              defConfig = %{:filter_default => :stop, :filters => get_default_handler_filters()}
+              defConfig = %{filter_default: :stop, filters: get_default_handler_filters()}
 
               setup_handler(
                 id,
@@ -860,9 +861,9 @@ defmodule :m_logger do
           true ->
             apply(:logger, :macro_log, [
               %{
-                :mfa => {:logger, :add_handlers, 2},
-                :line => 900,
-                :file => 'otp/lib/kernel/src/logger.erl'
+                mfa: {:logger, :add_handlers, 2},
+                line: 900,
+                file: 'otp/lib/kernel/src/logger.erl'
               },
               :error,
               'Invalid logger handler config: ~p',
@@ -1022,10 +1023,10 @@ defmodule :m_logger do
               type == :standard_error or
               :erlang.element(1, type) == :file do
     defaultFormatter = %{
-      :formatter => {:logger_formatter, %{:legacy_header => true, :single_line => false}}
+      formatter: {:logger_formatter, %{legacy_header: true, single_line: false}}
     }
 
-    defaultConfig = %{defaultFormatter | :config => %{:type => type}}
+    defaultConfig = Map.put(defaultFormatter, :config, %{type: type})
 
     newLoggerEnv =
       case :lists.keyfind(:default, 2, env) do
@@ -1085,7 +1086,7 @@ defmodule :m_logger do
     :application.get_env(app, :logger, [])
   end
 
-  defp do_log(level, msg, %{:mfa => {module, _, _}} = meta) do
+  defp do_log(level, msg, %{mfa: {module, _, _}} = meta) do
     case :logger_config.allow(level, module) do
       true ->
         log_allowed(%{}, level, msg, meta)
@@ -1170,7 +1171,7 @@ defmodule :m_logger do
               (is_atom(format) and
                  is_list(args) and is_map(meta)) do
     :logger_backend.log_allowed(
-      %{:level => level, :msg => msg, :meta => meta},
+      %{level: level, msg: msg, meta: meta},
       tid
     )
   end
@@ -1183,7 +1184,7 @@ defmodule :m_logger do
               (is_list(report) and is_tuple(hd(report)) and
                  is_map(meta)) do
     :logger_backend.log_allowed(
-      %{:level => level, :msg => {:report, report}, :meta => meta},
+      %{level: level, msg: {:report, report}, meta: meta},
       tid
     )
   end
@@ -1196,7 +1197,7 @@ defmodule :m_logger do
               (is_binary(string) and
                  is_map(meta)) do
     :logger_backend.log_allowed(
-      %{:level => level, :msg => {:string, string}, :meta => meta},
+      %{level: level, msg: {:string, string}, meta: meta},
       tid
     )
   end
@@ -1230,7 +1231,7 @@ defmodule :m_logger do
       false ->
         add_default_metadata(
           keys,
-          %{meta | key => default(key)}
+          Map.put(meta, key, default(key))
         )
     end
   end

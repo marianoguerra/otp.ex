@@ -25,11 +25,9 @@ defmodule :m_beam_block do
   end
 
   defp swap_opt([
-         [
-           {:move, reg1, {:x, x} = temp} = move1,
-           {:move, reg2, reg1} = move2,
-           {:move, temp, reg2} = move3
-         ]
+         {:move, reg1, {:x, x} = temp} = move1,
+         {:move, reg2, reg1} = move2,
+         {:move, temp, reg2} = move3
          | is
        ])
        when reg1 !== temp do
@@ -38,7 +36,7 @@ defmodule :m_beam_block do
         [{:swap, reg1, reg2} | swap_opt(is)]
 
       false ->
-        [move1 | swap_opt([[move2, move3] | is])]
+        [move1 | swap_opt([move2, move3 | is])]
     end
   end
 
@@ -245,7 +243,9 @@ defmodule :m_beam_block do
 
   defp embed_lines(
          [
-           [{:block, b2}, {:line, _} = line, {:block, b1}]
+           {:block, b2},
+           {:line, _} = line,
+           {:block, b1}
            | t
          ],
          acc
@@ -254,7 +254,7 @@ defmodule :m_beam_block do
     embed_lines([b | t], acc)
   end
 
-  defp embed_lines([[{:block, b1}, {:line, _} = line] | t], acc) do
+  defp embed_lines([{:block, b1}, {:line, _} = line | t], acc) do
     b = {:block, [{:set, [], [], line} | b1]}
     embed_lines([b | t], acc)
   end

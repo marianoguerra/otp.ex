@@ -246,7 +246,10 @@ defmodule :m_ct_conn_log_h do
         :io.format(fd, str, [
           format_head(connMod, logType, time, ' ERROR'),
           format_title(logType, info),
-          format_error(logType, report)
+          format_error(
+            logType,
+            report
+          )
         ])
     end
   end

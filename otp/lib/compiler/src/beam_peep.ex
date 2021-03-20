@@ -63,7 +63,7 @@ defmodule :m_beam_peep do
     peep(is, seenTests, [i | acc])
   end
 
-  defp peep([[{:jump, {:f, l}}, {:label, l} = i] | is], _, acc) do
+  defp peep([{:jump, {:f, l}}, {:label, l} = i | is], _, acc) do
     peep(is, :gb_sets.empty(), [i | acc])
   end
 
@@ -75,7 +75,8 @@ defmodule :m_beam_peep do
 
       [{:atom, _} = value, lbl] ->
         is1 = [
-          [{:test, :is_eq_exact, f, [r, value]}, {:jump, lbl}]
+          {:test, :is_eq_exact, f, [r, value]},
+          {:jump, lbl}
           | is
         ]
 
@@ -83,18 +84,15 @@ defmodule :m_beam_peep do
 
       [{:integer, _} = value, lbl] ->
         is1 = [
-          [{:test, :is_eq_exact, f, [r, value]}, {:jump, lbl}]
+          {:test, :is_eq_exact, f, [r, value]},
+          {:jump, lbl}
           | is
         ]
 
         peep(is1, seenTests0, acc0)
 
       [{:atom, b1}, lbl, {:atom, b2}, lbl] when b1 === not b2 ->
-        is1 = [
-          [{:test, :is_boolean, f, [r]}, {:jump, lbl}]
-          | is
-        ]
-
+        is1 = [{:test, :is_boolean, f, [r]}, {:jump, lbl} | is]
         peep(is1, seenTests0, acc0)
 
       [_ | _] = vls ->
@@ -196,12 +194,12 @@ defmodule :m_beam_peep do
     []
   end
 
-  defp prune_redundant_values([[_Val, f] | vls], f) do
+  defp prune_redundant_values([_Val, f | vls], f) do
     prune_redundant_values(vls, f)
   end
 
-  defp prune_redundant_values([[val, lbl] | vls], f) do
-    [[val, lbl] | prune_redundant_values(vls, f)]
+  defp prune_redundant_values([val, lbl | vls], f) do
+    [val, lbl | prune_redundant_values(vls, f)]
   end
 
   defp prune_redundant_values([], _) do
@@ -223,7 +221,7 @@ defmodule :m_beam_peep do
             :error
 
           false ->
-            list = [[key, dst] | list1]
+            list = [key, dst | list1]
             {:ok, [{:get_map_elements, fail, src, {:list, list}} | acc]}
         end
 

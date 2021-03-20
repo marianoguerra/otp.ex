@@ -552,7 +552,7 @@ defmodule :m_ms_transform do
     throw({:error, line, 1})
   end
 
-  defp ms_clause_expand({:clause, line, parameters, guard = [[_, _] | _], body}) do
+  defp ms_clause_expand({:clause, line, parameters, guard = [_, _ | _], body}) do
     for x <- guard do
       {:clause, line, parameters, [x], body}
     end
@@ -760,7 +760,9 @@ defmodule :m_ms_transform do
           true ->
             tg(
               :erlang.list_to_tuple([
-                [:op, line2, funName]
+                :op,
+                line2,
+                funName
                 | paraList
               ]),
               b

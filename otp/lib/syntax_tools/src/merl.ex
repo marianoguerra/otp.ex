@@ -21,11 +21,7 @@ defmodule :m_merl do
         :erl_syntax.revert(f)
       end
 
-    options = [
-      [:verbose, :report_errors, :report_warnings, :binary]
-      | options0
-    ]
-
+    options = [:verbose, :report_errors, :report_warnings, :binary | options0]
     :compile.noenv_forms(forms, options)
   end
 
@@ -104,13 +100,7 @@ defmodule :m_merl do
   end
 
   defp pp_1([g | gs], i) do
-    [
-      [pp_2(g, i), :lists.duplicate(i, ?\s), '+\n']
-      | pp_1(
-          gs,
-          i
-        )
-    ]
+    [pp_2(g, i), :lists.duplicate(i, ?\s), '+\n' | pp_1(gs, i)]
   end
 
   defp pp_1([], _I) do
@@ -139,7 +129,7 @@ defmodule :m_merl do
     limit([?\s | cs], n)
   end
 
-  defp limit([[?\s, ?\s] | cs], n) do
+  defp limit([?\s, ?\s | cs], n) do
     limit([?\s | cs], n)
   end
 
@@ -151,7 +141,7 @@ defmodule :m_merl do
     [c | limit(cs, n - 1)]
   end
 
-  defp limit([[_C1, _C2, _C3, _C4] | _Cs], 3) do
+  defp limit([_C1, _C2, _C3, _C4 | _Cs], 3) do
     '...'
   end
 
@@ -159,7 +149,7 @@ defmodule :m_merl do
     cs
   end
 
-  defp limit([[_C1, _C2, _C3] | _], 2) do
+  defp limit([_C1, _C2, _C3 | _], 2) do
     '..'
   end
 
@@ -167,7 +157,7 @@ defmodule :m_merl do
     cs
   end
 
-  defp limit([[_C1, _C2] | _], 1) do
+  defp limit([_C1, _C2 | _], 1) do
     '.'
   end
 
@@ -288,10 +278,7 @@ defmodule :m_merl do
   defp parse_3(ts, es) do
     a = a0()
 
-    case :erl_parse.parse_exprs([
-           [{:try, a}, {:atom, a, true}, {:catch, a}]
-           | ts
-         ]) do
+    case :erl_parse.parse_exprs([{:try, a}, {:atom, a, true}, {:catch, a} | ts]) do
       {:ok, [{:try, _, _, _, _, _} = x]} ->
         :erl_syntax.try_expr_handlers(x)
 
@@ -315,10 +302,7 @@ defmodule :m_merl do
   defp parse_5(ts, es) do
     a = a0()
 
-    case :erl_parse.parse_exprs([
-           [{:case, a}, {:atom, a, true}, {:of, a}]
-           | ts
-         ]) do
+    case :erl_parse.parse_exprs([{:case, a}, {:atom, a, true}, {:of, a} | ts]) do
       {:ok, [{:case, _, _, cs}]} ->
         cs
 

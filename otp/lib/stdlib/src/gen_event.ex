@@ -624,16 +624,16 @@ defmodule :m_gen_event do
           true ->
             :erlang.apply(:logger, :macro_log, [
               %{
-                :mfa => {:gen_event, :server_update, 4},
-                :line => 632,
-                :file => 'otp/lib/stdlib/src/gen_event.erl'
+                mfa: {:gen_event, :server_update, 4},
+                line: 632,
+                file: 'otp/lib/stdlib/src/gen_event.erl'
               },
               :warning,
-              %{:label => {:gen_event, :no_handle_info}, :module => mod1, :message => event},
+              %{label: {:gen_event, :no_handle_info}, module: mod1, message: event},
               %{
-                :domain => [:otp],
-                :report_cb => &:gen_event.format_log/2,
-                :error_logger => %{:tag => :warning_msg, :report_cb => &:gen_event.format_log/1}
+                domain: [:otp],
+                report_cb: &:gen_event.format_log/2,
+                error_logger: %{tag: :warning_msg, report_cb: &:gen_event.format_log/1}
               }
             ])
 
@@ -871,24 +871,23 @@ defmodule :m_gen_event do
       true ->
         :erlang.apply(:logger, :macro_log, [
           %{
-            :mfa => {:gen_event, :report_error, 5},
-            :line => 792,
-            :file => 'otp/lib/stdlib/src/gen_event.erl'
+            mfa: {:gen_event, :report_error, 5},
+            line: 792,
+            file: 'otp/lib/stdlib/src/gen_event.erl'
           },
           :error,
           %{
-            :label => {:gen_event, :terminate},
-            :handler => handler(handler),
-            :name => sName,
-            :last_message => lastIn,
-            :state =>
-              format_status(:terminate, r_handler(handler, :module), :erlang.get(), state),
-            :reason => reason
+            label: {:gen_event, :terminate},
+            handler: handler(handler),
+            name: sName,
+            last_message: lastIn,
+            state: format_status(:terminate, r_handler(handler, :module), :erlang.get(), state),
+            reason: reason
           },
           %{
-            :domain => [:otp],
-            :report_cb => &:gen_event.format_log/2,
-            :error_logger => %{:tag => :error, :report_cb => &:gen_event.format_log/1}
+            domain: [:otp],
+            report_cb: &:gen_event.format_log/2,
+            error_logger: %{tag: :error, report_cb: &:gen_event.format_log/1}
           }
         ])
 
@@ -899,13 +898,7 @@ defmodule :m_gen_event do
 
   def format_log(report) do
     depth = :error_logger.get_format_depth()
-
-    formatOpts = %{
-      :chars_limit => :unlimited,
-      :depth => depth,
-      :single_line => false,
-      :encoding => :utf8
-    }
+    formatOpts = %{chars_limit: :unlimited, depth: depth, single_line: false, encoding: :utf8}
 
     format_log_multi(
       limit_report(report, depth),
@@ -918,45 +911,34 @@ defmodule :m_gen_event do
   end
 
   defp limit_report(
-         %{
-           :label => {:gen_event, :terminate},
-           :last_message => lastIn,
-           :state => state,
-           :reason => reason
-         } = report,
+         %{label: {:gen_event, :terminate}, last_message: lastIn, state: state, reason: reason} =
+           report,
          depth
        ) do
-    %{
-      report
-      | :last_message => :io_lib.limit_term(lastIn, depth),
-        :state => :io_lib.limit_term(state, depth),
-        :reason => :io_lib.limit_term(reason, depth)
-    }
+    Map.merge(report, %{
+      last_message: :io_lib.limit_term(lastIn, depth),
+      state: :io_lib.limit_term(state, depth),
+      reason: :io_lib.limit_term(reason, depth)
+    })
   end
 
   defp limit_report(
-         %{:label => {:gen_event, :no_handle_info}, :message => msg} = report,
+         %{label: {:gen_event, :no_handle_info}, message: msg} = report,
          depth
        ) do
-    %{report | :message => :io_lib.limit_term(msg, depth)}
+    Map.put(report, :message, :io_lib.limit_term(msg, depth))
   end
 
   def format_log(report, formatOpts0) do
-    default = %{
-      :chars_limit => :unlimited,
-      :depth => :unlimited,
-      :single_line => false,
-      :encoding => :utf8
-    }
-
+    default = %{chars_limit: :unlimited, depth: :unlimited, single_line: false, encoding: :utf8}
     formatOpts = :maps.merge(default, formatOpts0)
 
     ioOpts =
       case formatOpts do
-        %{:chars_limit => :unlimited} ->
+        %{chars_limit: :unlimited} ->
           []
 
-        %{:chars_limit => limit} ->
+        %{chars_limit: limit} ->
           [{:chars_limit, limit}]
       end
 
@@ -966,14 +948,14 @@ defmodule :m_gen_event do
 
   defp format_log_single(
          %{
-           :label => {:gen_event, :terminate},
-           :handler => handler,
-           :name => sName,
-           :last_message => lastIn,
-           :state => state,
-           :reason => reason
+           label: {:gen_event, :terminate},
+           handler: handler,
+           name: sName,
+           last_message: lastIn,
+           state: state,
+           reason: reason
          },
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     reason1 = fix_reason(reason)
@@ -1006,8 +988,8 @@ defmodule :m_gen_event do
   end
 
   defp format_log_single(
-         %{:label => {:gen_event, :no_handle_info}, :module => mod, :message => msg},
-         %{:single_line => true, :depth => depth} = formatOpts
+         %{label: {:gen_event, :no_handle_info}, module: mod, message: msg},
+         %{single_line: true, depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = :lists.append(['Undefined handle_info in ', p, '. Unhandled message: ', p, '.'])
@@ -1030,14 +1012,14 @@ defmodule :m_gen_event do
 
   defp format_log_multi(
          %{
-           :label => {:gen_event, :terminate},
-           :handler => handler,
-           :name => sName,
-           :last_message => lastIn,
-           :state => state,
-           :reason => reason
+           label: {:gen_event, :terminate},
+           handler: handler,
+           name: sName,
+           last_message: lastIn,
+           state: state,
+           reason: reason
          },
-         %{:depth => depth} = formatOpts
+         %{depth: depth} = formatOpts
        ) do
     reason1 = fix_reason(reason)
     p = p(formatOpts)
@@ -1074,8 +1056,8 @@ defmodule :m_gen_event do
   end
 
   defp format_log_multi(
-         %{:label => {:gen_event, :no_handle_info}, :module => mod, :message => msg},
-         %{:depth => depth} = formatOpts
+         %{label: {:gen_event, :no_handle_info}, module: mod, message: msg},
+         %{depth: depth} = formatOpts
        ) do
     p = p(formatOpts)
     format = '** Undefined handle_info in ~p\n** Unhandled message: ' ++ p ++ '\n'
@@ -1116,7 +1098,7 @@ defmodule :m_gen_event do
     reason
   end
 
-  defp p(%{:single_line => single, :depth => depth, :encoding => enc}) do
+  defp p(%{single_line: single, depth: depth, encoding: enc}) do
     '~' ++ single(single) ++ mod(enc) ++ p(depth)
   end
 

@@ -1792,15 +1792,11 @@ defmodule :m_ssl do
   end
 
   def filter_cipher_suites(suites, filters0) do
-    %{
-      :key_exchange_filters => kexF,
-      :cipher_filters => cipherF,
-      :mac_filters => macF,
-      :prf_filters => prfF
-    } = :ssl_cipher.crypto_support_filters()
+    %{key_exchange_filters: kexF, cipher_filters: cipherF, mac_filters: macF, prf_filters: prfF} =
+      :ssl_cipher.crypto_support_filters()
 
     filters = %{
-      :key_exchange_filters =>
+      key_exchange_filters:
         add_filter(
           :proplists.get_value(
             :key_exchange,
@@ -1808,13 +1804,13 @@ defmodule :m_ssl do
           ),
           kexF
         ),
-      :cipher_filters =>
+      cipher_filters:
         add_filter(
           :proplists.get_value(:cipher, filters0),
           cipherF
         ),
-      :mac_filters => add_filter(:proplists.get_value(:mac, filters0), macF),
-      :prf_filters => add_filter(:proplists.get_value(:prf, filters0), prfF)
+      mac_filters: add_filter(:proplists.get_value(:mac, filters0), macF),
+      prf_filters: add_filter(:proplists.get_value(:prf, filters0), prfF)
     }
 
     :ssl_cipher.filter_suites(suites, filters)
@@ -2144,8 +2140,9 @@ defmodule :m_ssl do
     ]
   end
 
-  def renegotiate(r_sslsocket(pid: [[pid, sender] | _]))
-      when is_pid(pid) and is_pid(sender) do
+  def renegotiate(r_sslsocket(pid: [pid, sender | _]))
+      when is_pid(pid) and
+             is_pid(sender) do
     case :tls_sender.renegotiate(sender) do
       {:ok, write} ->
         :tls_connection.renegotiation(pid, write)
@@ -2167,7 +2164,7 @@ defmodule :m_ssl do
     {:error, :enotconn}
   end
 
-  def update_keys(r_sslsocket(pid: [[pid, sender] | _]), type0)
+  def update_keys(r_sslsocket(pid: [pid, sender | _]), type0)
       when is_pid(pid) and is_pid(sender) and (type0 === :write or type0 === :read_write) do
     type =
       case type0 do
@@ -2326,67 +2323,67 @@ defmodule :m_ssl do
       expand_options(
         opts0,
         %{
-          :alpn_advertised_protocols => {:undefined, [:versions]},
-          :alpn_preferred_protocols => {:undefined, [:versions]},
-          :anti_replay => {:undefined, [:versions, :session_tickets]},
-          :beast_mitigation => {:one_n_minus_one, [:versions]},
-          :cacertfile => {:undefined, [:versions, :verify_fun, :cacerts]},
-          :cacerts => {:undefined, [:versions]},
-          :cert => {:undefined, [:versions]},
-          :certfile => {<<>>, [:versions]},
-          :ciphers => {[], [:versions]},
-          :client_renegotiation => {:undefined, [:versions]},
-          :cookie => {true, [:versions]},
-          :crl_cache => {{:ssl_crl_cache, {:internal, []}}, [:versions]},
-          :crl_check => {false, [:versions]},
-          :customize_hostname_check => {[], [:versions]},
-          :depth => {1, [:versions]},
-          :dh => {:undefined, [:versions]},
-          :dhfile => {:undefined, [:versions]},
-          :eccs => {:undefined, [:versions]},
-          :erl_dist => {false, [:versions]},
-          :fail_if_no_peer_cert => {false, [:versions]},
-          :fallback => {false, [:versions]},
-          :handshake => {:full, [:versions]},
-          :hibernate_after => {:infinity, [:versions]},
-          :honor_cipher_order => {false, [:versions]},
-          :honor_ecc_order => {:undefined, [:versions]},
-          :key => {:undefined, [:versions]},
-          :keyfile => {:undefined, [:versions, :certfile]},
-          :key_update_at => {388_736_063_997, [:versions]},
-          :log_level => {:notice, [:versions]},
-          :max_handshake_size => {256 * 1024, [:versions]},
-          :middlebox_comp_mode => {true, [:versions]},
-          :max_fragment_length => {:undefined, [:versions]},
-          :next_protocol_selector => {:undefined, [:versions]},
-          :next_protocols_advertised => {:undefined, [:versions]},
-          :ocsp_stapling => {false, [:versions]},
-          :ocsp_responder_certs => {[], [:versions, :ocsp_stapling]},
-          :ocsp_nonce => {true, [:versions, :ocsp_stapling]},
-          :padding_check => {true, [:versions]},
-          :partial_chain =>
+          alpn_advertised_protocols: {:undefined, [:versions]},
+          alpn_preferred_protocols: {:undefined, [:versions]},
+          anti_replay: {:undefined, [:versions, :session_tickets]},
+          beast_mitigation: {:one_n_minus_one, [:versions]},
+          cacertfile: {:undefined, [:versions, :verify_fun, :cacerts]},
+          cacerts: {:undefined, [:versions]},
+          cert: {:undefined, [:versions]},
+          certfile: {<<>>, [:versions]},
+          ciphers: {[], [:versions]},
+          client_renegotiation: {:undefined, [:versions]},
+          cookie: {true, [:versions]},
+          crl_cache: {{:ssl_crl_cache, {:internal, []}}, [:versions]},
+          crl_check: {false, [:versions]},
+          customize_hostname_check: {[], [:versions]},
+          depth: {1, [:versions]},
+          dh: {:undefined, [:versions]},
+          dhfile: {:undefined, [:versions]},
+          eccs: {:undefined, [:versions]},
+          erl_dist: {false, [:versions]},
+          fail_if_no_peer_cert: {false, [:versions]},
+          fallback: {false, [:versions]},
+          handshake: {:full, [:versions]},
+          hibernate_after: {:infinity, [:versions]},
+          honor_cipher_order: {false, [:versions]},
+          honor_ecc_order: {:undefined, [:versions]},
+          key: {:undefined, [:versions]},
+          keyfile: {:undefined, [:versions, :certfile]},
+          key_update_at: {388_736_063_997, [:versions]},
+          log_level: {:notice, [:versions]},
+          max_handshake_size: {256 * 1024, [:versions]},
+          middlebox_comp_mode: {true, [:versions]},
+          max_fragment_length: {:undefined, [:versions]},
+          next_protocol_selector: {:undefined, [:versions]},
+          next_protocols_advertised: {:undefined, [:versions]},
+          ocsp_stapling: {false, [:versions]},
+          ocsp_responder_certs: {[], [:versions, :ocsp_stapling]},
+          ocsp_nonce: {true, [:versions, :ocsp_stapling]},
+          padding_check: {true, [:versions]},
+          partial_chain:
             {fn _ ->
                :unknown_ca
              end, [:versions]},
-          :password => {'', [:versions]},
-          :protocol => {:tls, []},
-          :psk_identity => {:undefined, [:versions]},
-          :renegotiate_at => {268_435_456, [:versions]},
-          :reuse_session => {:undefined, [:versions]},
-          :reuse_sessions => {true, [:versions]},
-          :secure_renegotiate => {true, [:versions]},
-          :server_name_indication => {:undefined, [:versions]},
-          :session_tickets => {:disabled, [:versions]},
-          :signature_algs => {:undefined, [:versions]},
-          :signature_algs_cert => {:undefined, [:versions]},
-          :sni_fun => {:undefined, [:versions, :sni_hosts]},
-          :sni_hosts => {[], [:versions]},
-          :srp_identity => {:undefined, [:versions]},
-          :supported_groups => {:undefined, [:versions]},
-          :use_ticket => {:undefined, [:versions]},
-          :user_lookup_fun => {:undefined, [:versions]},
-          :verify => {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
-          :verify_fun =>
+          password: {'', [:versions]},
+          protocol: {:tls, []},
+          psk_identity: {:undefined, [:versions]},
+          renegotiate_at: {268_435_456, [:versions]},
+          reuse_session: {:undefined, [:versions]},
+          reuse_sessions: {true, [:versions]},
+          secure_renegotiate: {true, [:versions]},
+          server_name_indication: {:undefined, [:versions]},
+          session_tickets: {:disabled, [:versions]},
+          signature_algs: {:undefined, [:versions]},
+          signature_algs_cert: {:undefined, [:versions]},
+          sni_fun: {:undefined, [:versions, :sni_hosts]},
+          sni_hosts: {[], [:versions]},
+          srp_identity: {:undefined, [:versions]},
+          supported_groups: {:undefined, [:versions]},
+          use_ticket: {:undefined, [:versions]},
+          user_lookup_fun: {:undefined, [:versions]},
+          verify: {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
+          verify_fun:
             {{fn
                 _, {:bad_cert, _}, userState ->
                   {:valid, userState}
@@ -2403,74 +2400,74 @@ defmodule :m_ssl do
                 _, :valid_peer, userState ->
                   {:valid, userState}
               end, []}, [:versions, :verify]},
-          :versions => {[], [:protocol]}
+          versions: {[], [:protocol]}
         }
       )
 
     process_options(sslOpts, inheritedSslOpts, %{
-      :role => role,
-      :rules => %{
-        :alpn_advertised_protocols => {:undefined, [:versions]},
-        :alpn_preferred_protocols => {:undefined, [:versions]},
-        :anti_replay => {:undefined, [:versions, :session_tickets]},
-        :beast_mitigation => {:one_n_minus_one, [:versions]},
-        :cacertfile => {:undefined, [:versions, :verify_fun, :cacerts]},
-        :cacerts => {:undefined, [:versions]},
-        :cert => {:undefined, [:versions]},
-        :certfile => {<<>>, [:versions]},
-        :ciphers => {[], [:versions]},
-        :client_renegotiation => {:undefined, [:versions]},
-        :cookie => {true, [:versions]},
-        :crl_cache => {{:ssl_crl_cache, {:internal, []}}, [:versions]},
-        :crl_check => {false, [:versions]},
-        :customize_hostname_check => {[], [:versions]},
-        :depth => {1, [:versions]},
-        :dh => {:undefined, [:versions]},
-        :dhfile => {:undefined, [:versions]},
-        :eccs => {:undefined, [:versions]},
-        :erl_dist => {false, [:versions]},
-        :fail_if_no_peer_cert => {false, [:versions]},
-        :fallback => {false, [:versions]},
-        :handshake => {:full, [:versions]},
-        :hibernate_after => {:infinity, [:versions]},
-        :honor_cipher_order => {false, [:versions]},
-        :honor_ecc_order => {:undefined, [:versions]},
-        :key => {:undefined, [:versions]},
-        :keyfile => {:undefined, [:versions, :certfile]},
-        :key_update_at => {388_736_063_997, [:versions]},
-        :log_level => {:notice, [:versions]},
-        :max_handshake_size => {256 * 1024, [:versions]},
-        :middlebox_comp_mode => {true, [:versions]},
-        :max_fragment_length => {:undefined, [:versions]},
-        :next_protocol_selector => {:undefined, [:versions]},
-        :next_protocols_advertised => {:undefined, [:versions]},
-        :ocsp_stapling => {false, [:versions]},
-        :ocsp_responder_certs => {[], [:versions, :ocsp_stapling]},
-        :ocsp_nonce => {true, [:versions, :ocsp_stapling]},
-        :padding_check => {true, [:versions]},
-        :partial_chain =>
+      role: role,
+      rules: %{
+        alpn_advertised_protocols: {:undefined, [:versions]},
+        alpn_preferred_protocols: {:undefined, [:versions]},
+        anti_replay: {:undefined, [:versions, :session_tickets]},
+        beast_mitigation: {:one_n_minus_one, [:versions]},
+        cacertfile: {:undefined, [:versions, :verify_fun, :cacerts]},
+        cacerts: {:undefined, [:versions]},
+        cert: {:undefined, [:versions]},
+        certfile: {<<>>, [:versions]},
+        ciphers: {[], [:versions]},
+        client_renegotiation: {:undefined, [:versions]},
+        cookie: {true, [:versions]},
+        crl_cache: {{:ssl_crl_cache, {:internal, []}}, [:versions]},
+        crl_check: {false, [:versions]},
+        customize_hostname_check: {[], [:versions]},
+        depth: {1, [:versions]},
+        dh: {:undefined, [:versions]},
+        dhfile: {:undefined, [:versions]},
+        eccs: {:undefined, [:versions]},
+        erl_dist: {false, [:versions]},
+        fail_if_no_peer_cert: {false, [:versions]},
+        fallback: {false, [:versions]},
+        handshake: {:full, [:versions]},
+        hibernate_after: {:infinity, [:versions]},
+        honor_cipher_order: {false, [:versions]},
+        honor_ecc_order: {:undefined, [:versions]},
+        key: {:undefined, [:versions]},
+        keyfile: {:undefined, [:versions, :certfile]},
+        key_update_at: {388_736_063_997, [:versions]},
+        log_level: {:notice, [:versions]},
+        max_handshake_size: {256 * 1024, [:versions]},
+        middlebox_comp_mode: {true, [:versions]},
+        max_fragment_length: {:undefined, [:versions]},
+        next_protocol_selector: {:undefined, [:versions]},
+        next_protocols_advertised: {:undefined, [:versions]},
+        ocsp_stapling: {false, [:versions]},
+        ocsp_responder_certs: {[], [:versions, :ocsp_stapling]},
+        ocsp_nonce: {true, [:versions, :ocsp_stapling]},
+        padding_check: {true, [:versions]},
+        partial_chain:
           {fn _ ->
              :unknown_ca
            end, [:versions]},
-        :password => {'', [:versions]},
-        :protocol => {:tls, []},
-        :psk_identity => {:undefined, [:versions]},
-        :renegotiate_at => {268_435_456, [:versions]},
-        :reuse_session => {:undefined, [:versions]},
-        :reuse_sessions => {true, [:versions]},
-        :secure_renegotiate => {true, [:versions]},
-        :server_name_indication => {:undefined, [:versions]},
-        :session_tickets => {:disabled, [:versions]},
-        :signature_algs => {:undefined, [:versions]},
-        :signature_algs_cert => {:undefined, [:versions]},
-        :sni_fun => {:undefined, [:versions, :sni_hosts]},
-        :sni_hosts => {[], [:versions]},
-        :srp_identity => {:undefined, [:versions]},
-        :supported_groups => {:undefined, [:versions]},
-        :use_ticket => {:undefined, [:versions]},
-        :user_lookup_fun => {:undefined, [:versions]},
-        :verify => {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
-        :verify_fun =>
+        password: {'', [:versions]},
+        protocol: {:tls, []},
+        psk_identity: {:undefined, [:versions]},
+        renegotiate_at: {268_435_456, [:versions]},
+        reuse_session: {:undefined, [:versions]},
+        reuse_sessions: {true, [:versions]},
+        secure_renegotiate: {true, [:versions]},
+        server_name_indication: {:undefined, [:versions]},
+        session_tickets: {:disabled, [:versions]},
+        signature_algs: {:undefined, [:versions]},
+        signature_algs_cert: {:undefined, [:versions]},
+        sni_fun: {:undefined, [:versions, :sni_hosts]},
+        sni_hosts: {[], [:versions]},
+        srp_identity: {:undefined, [:versions]},
+        supported_groups: {:undefined, [:versions]},
+        use_ticket: {:undefined, [:versions]},
+        user_lookup_fun: {:undefined, [:versions]},
+        verify: {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
+        verify_fun:
           {{fn
               _, {:bad_cert, _}, userState ->
                 {:valid, userState}
@@ -2487,7 +2484,7 @@ defmodule :m_ssl do
               _, :valid_peer, userState ->
                 {:valid, userState}
             end, []}, [:versions, :verify]},
-        :versions => {[], [:protocol]}
+        versions: {[], [:protocol]}
       }
     })
   end
@@ -2497,67 +2494,67 @@ defmodule :m_ssl do
       expand_options(
         opts0,
         %{
-          :alpn_advertised_protocols => {:undefined, [:versions]},
-          :alpn_preferred_protocols => {:undefined, [:versions]},
-          :anti_replay => {:undefined, [:versions, :session_tickets]},
-          :beast_mitigation => {:one_n_minus_one, [:versions]},
-          :cacertfile => {:undefined, [:versions, :verify_fun, :cacerts]},
-          :cacerts => {:undefined, [:versions]},
-          :cert => {:undefined, [:versions]},
-          :certfile => {<<>>, [:versions]},
-          :ciphers => {[], [:versions]},
-          :client_renegotiation => {:undefined, [:versions]},
-          :cookie => {true, [:versions]},
-          :crl_cache => {{:ssl_crl_cache, {:internal, []}}, [:versions]},
-          :crl_check => {false, [:versions]},
-          :customize_hostname_check => {[], [:versions]},
-          :depth => {1, [:versions]},
-          :dh => {:undefined, [:versions]},
-          :dhfile => {:undefined, [:versions]},
-          :eccs => {:undefined, [:versions]},
-          :erl_dist => {false, [:versions]},
-          :fail_if_no_peer_cert => {false, [:versions]},
-          :fallback => {false, [:versions]},
-          :handshake => {:full, [:versions]},
-          :hibernate_after => {:infinity, [:versions]},
-          :honor_cipher_order => {false, [:versions]},
-          :honor_ecc_order => {:undefined, [:versions]},
-          :key => {:undefined, [:versions]},
-          :keyfile => {:undefined, [:versions, :certfile]},
-          :key_update_at => {388_736_063_997, [:versions]},
-          :log_level => {:notice, [:versions]},
-          :max_handshake_size => {256 * 1024, [:versions]},
-          :middlebox_comp_mode => {true, [:versions]},
-          :max_fragment_length => {:undefined, [:versions]},
-          :next_protocol_selector => {:undefined, [:versions]},
-          :next_protocols_advertised => {:undefined, [:versions]},
-          :ocsp_stapling => {false, [:versions]},
-          :ocsp_responder_certs => {[], [:versions, :ocsp_stapling]},
-          :ocsp_nonce => {true, [:versions, :ocsp_stapling]},
-          :padding_check => {true, [:versions]},
-          :partial_chain =>
+          alpn_advertised_protocols: {:undefined, [:versions]},
+          alpn_preferred_protocols: {:undefined, [:versions]},
+          anti_replay: {:undefined, [:versions, :session_tickets]},
+          beast_mitigation: {:one_n_minus_one, [:versions]},
+          cacertfile: {:undefined, [:versions, :verify_fun, :cacerts]},
+          cacerts: {:undefined, [:versions]},
+          cert: {:undefined, [:versions]},
+          certfile: {<<>>, [:versions]},
+          ciphers: {[], [:versions]},
+          client_renegotiation: {:undefined, [:versions]},
+          cookie: {true, [:versions]},
+          crl_cache: {{:ssl_crl_cache, {:internal, []}}, [:versions]},
+          crl_check: {false, [:versions]},
+          customize_hostname_check: {[], [:versions]},
+          depth: {1, [:versions]},
+          dh: {:undefined, [:versions]},
+          dhfile: {:undefined, [:versions]},
+          eccs: {:undefined, [:versions]},
+          erl_dist: {false, [:versions]},
+          fail_if_no_peer_cert: {false, [:versions]},
+          fallback: {false, [:versions]},
+          handshake: {:full, [:versions]},
+          hibernate_after: {:infinity, [:versions]},
+          honor_cipher_order: {false, [:versions]},
+          honor_ecc_order: {:undefined, [:versions]},
+          key: {:undefined, [:versions]},
+          keyfile: {:undefined, [:versions, :certfile]},
+          key_update_at: {388_736_063_997, [:versions]},
+          log_level: {:notice, [:versions]},
+          max_handshake_size: {256 * 1024, [:versions]},
+          middlebox_comp_mode: {true, [:versions]},
+          max_fragment_length: {:undefined, [:versions]},
+          next_protocol_selector: {:undefined, [:versions]},
+          next_protocols_advertised: {:undefined, [:versions]},
+          ocsp_stapling: {false, [:versions]},
+          ocsp_responder_certs: {[], [:versions, :ocsp_stapling]},
+          ocsp_nonce: {true, [:versions, :ocsp_stapling]},
+          padding_check: {true, [:versions]},
+          partial_chain:
             {fn _ ->
                :unknown_ca
              end, [:versions]},
-          :password => {'', [:versions]},
-          :protocol => {:tls, []},
-          :psk_identity => {:undefined, [:versions]},
-          :renegotiate_at => {268_435_456, [:versions]},
-          :reuse_session => {:undefined, [:versions]},
-          :reuse_sessions => {true, [:versions]},
-          :secure_renegotiate => {true, [:versions]},
-          :server_name_indication => {:undefined, [:versions]},
-          :session_tickets => {:disabled, [:versions]},
-          :signature_algs => {:undefined, [:versions]},
-          :signature_algs_cert => {:undefined, [:versions]},
-          :sni_fun => {:undefined, [:versions, :sni_hosts]},
-          :sni_hosts => {[], [:versions]},
-          :srp_identity => {:undefined, [:versions]},
-          :supported_groups => {:undefined, [:versions]},
-          :use_ticket => {:undefined, [:versions]},
-          :user_lookup_fun => {:undefined, [:versions]},
-          :verify => {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
-          :verify_fun =>
+          password: {'', [:versions]},
+          protocol: {:tls, []},
+          psk_identity: {:undefined, [:versions]},
+          renegotiate_at: {268_435_456, [:versions]},
+          reuse_session: {:undefined, [:versions]},
+          reuse_sessions: {true, [:versions]},
+          secure_renegotiate: {true, [:versions]},
+          server_name_indication: {:undefined, [:versions]},
+          session_tickets: {:disabled, [:versions]},
+          signature_algs: {:undefined, [:versions]},
+          signature_algs_cert: {:undefined, [:versions]},
+          sni_fun: {:undefined, [:versions, :sni_hosts]},
+          sni_hosts: {[], [:versions]},
+          srp_identity: {:undefined, [:versions]},
+          supported_groups: {:undefined, [:versions]},
+          use_ticket: {:undefined, [:versions]},
+          user_lookup_fun: {:undefined, [:versions]},
+          verify: {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
+          verify_fun:
             {{fn
                 _, {:bad_cert, _}, userState ->
                   {:valid, userState}
@@ -2574,7 +2571,7 @@ defmodule :m_ssl do
                 _, :valid_peer, userState ->
                   {:valid, userState}
               end, []}, [:versions, :verify]},
-          :versions => {[], [:protocol]}
+          versions: {[], [:protocol]}
         }
       )
 
@@ -2582,67 +2579,67 @@ defmodule :m_ssl do
       add_missing_options(
         sslOpts0,
         %{
-          :alpn_advertised_protocols => {:undefined, [:versions]},
-          :alpn_preferred_protocols => {:undefined, [:versions]},
-          :anti_replay => {:undefined, [:versions, :session_tickets]},
-          :beast_mitigation => {:one_n_minus_one, [:versions]},
-          :cacertfile => {:undefined, [:versions, :verify_fun, :cacerts]},
-          :cacerts => {:undefined, [:versions]},
-          :cert => {:undefined, [:versions]},
-          :certfile => {<<>>, [:versions]},
-          :ciphers => {[], [:versions]},
-          :client_renegotiation => {:undefined, [:versions]},
-          :cookie => {true, [:versions]},
-          :crl_cache => {{:ssl_crl_cache, {:internal, []}}, [:versions]},
-          :crl_check => {false, [:versions]},
-          :customize_hostname_check => {[], [:versions]},
-          :depth => {1, [:versions]},
-          :dh => {:undefined, [:versions]},
-          :dhfile => {:undefined, [:versions]},
-          :eccs => {:undefined, [:versions]},
-          :erl_dist => {false, [:versions]},
-          :fail_if_no_peer_cert => {false, [:versions]},
-          :fallback => {false, [:versions]},
-          :handshake => {:full, [:versions]},
-          :hibernate_after => {:infinity, [:versions]},
-          :honor_cipher_order => {false, [:versions]},
-          :honor_ecc_order => {:undefined, [:versions]},
-          :key => {:undefined, [:versions]},
-          :keyfile => {:undefined, [:versions, :certfile]},
-          :key_update_at => {388_736_063_997, [:versions]},
-          :log_level => {:notice, [:versions]},
-          :max_handshake_size => {256 * 1024, [:versions]},
-          :middlebox_comp_mode => {true, [:versions]},
-          :max_fragment_length => {:undefined, [:versions]},
-          :next_protocol_selector => {:undefined, [:versions]},
-          :next_protocols_advertised => {:undefined, [:versions]},
-          :ocsp_stapling => {false, [:versions]},
-          :ocsp_responder_certs => {[], [:versions, :ocsp_stapling]},
-          :ocsp_nonce => {true, [:versions, :ocsp_stapling]},
-          :padding_check => {true, [:versions]},
-          :partial_chain =>
+          alpn_advertised_protocols: {:undefined, [:versions]},
+          alpn_preferred_protocols: {:undefined, [:versions]},
+          anti_replay: {:undefined, [:versions, :session_tickets]},
+          beast_mitigation: {:one_n_minus_one, [:versions]},
+          cacertfile: {:undefined, [:versions, :verify_fun, :cacerts]},
+          cacerts: {:undefined, [:versions]},
+          cert: {:undefined, [:versions]},
+          certfile: {<<>>, [:versions]},
+          ciphers: {[], [:versions]},
+          client_renegotiation: {:undefined, [:versions]},
+          cookie: {true, [:versions]},
+          crl_cache: {{:ssl_crl_cache, {:internal, []}}, [:versions]},
+          crl_check: {false, [:versions]},
+          customize_hostname_check: {[], [:versions]},
+          depth: {1, [:versions]},
+          dh: {:undefined, [:versions]},
+          dhfile: {:undefined, [:versions]},
+          eccs: {:undefined, [:versions]},
+          erl_dist: {false, [:versions]},
+          fail_if_no_peer_cert: {false, [:versions]},
+          fallback: {false, [:versions]},
+          handshake: {:full, [:versions]},
+          hibernate_after: {:infinity, [:versions]},
+          honor_cipher_order: {false, [:versions]},
+          honor_ecc_order: {:undefined, [:versions]},
+          key: {:undefined, [:versions]},
+          keyfile: {:undefined, [:versions, :certfile]},
+          key_update_at: {388_736_063_997, [:versions]},
+          log_level: {:notice, [:versions]},
+          max_handshake_size: {256 * 1024, [:versions]},
+          middlebox_comp_mode: {true, [:versions]},
+          max_fragment_length: {:undefined, [:versions]},
+          next_protocol_selector: {:undefined, [:versions]},
+          next_protocols_advertised: {:undefined, [:versions]},
+          ocsp_stapling: {false, [:versions]},
+          ocsp_responder_certs: {[], [:versions, :ocsp_stapling]},
+          ocsp_nonce: {true, [:versions, :ocsp_stapling]},
+          padding_check: {true, [:versions]},
+          partial_chain:
             {fn _ ->
                :unknown_ca
              end, [:versions]},
-          :password => {'', [:versions]},
-          :protocol => {:tls, []},
-          :psk_identity => {:undefined, [:versions]},
-          :renegotiate_at => {268_435_456, [:versions]},
-          :reuse_session => {:undefined, [:versions]},
-          :reuse_sessions => {true, [:versions]},
-          :secure_renegotiate => {true, [:versions]},
-          :server_name_indication => {:undefined, [:versions]},
-          :session_tickets => {:disabled, [:versions]},
-          :signature_algs => {:undefined, [:versions]},
-          :signature_algs_cert => {:undefined, [:versions]},
-          :sni_fun => {:undefined, [:versions, :sni_hosts]},
-          :sni_hosts => {[], [:versions]},
-          :srp_identity => {:undefined, [:versions]},
-          :supported_groups => {:undefined, [:versions]},
-          :use_ticket => {:undefined, [:versions]},
-          :user_lookup_fun => {:undefined, [:versions]},
-          :verify => {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
-          :verify_fun =>
+          password: {'', [:versions]},
+          protocol: {:tls, []},
+          psk_identity: {:undefined, [:versions]},
+          renegotiate_at: {268_435_456, [:versions]},
+          reuse_session: {:undefined, [:versions]},
+          reuse_sessions: {true, [:versions]},
+          secure_renegotiate: {true, [:versions]},
+          server_name_indication: {:undefined, [:versions]},
+          session_tickets: {:disabled, [:versions]},
+          signature_algs: {:undefined, [:versions]},
+          signature_algs_cert: {:undefined, [:versions]},
+          sni_fun: {:undefined, [:versions, :sni_hosts]},
+          sni_hosts: {[], [:versions]},
+          srp_identity: {:undefined, [:versions]},
+          supported_groups: {:undefined, [:versions]},
+          use_ticket: {:undefined, [:versions]},
+          user_lookup_fun: {:undefined, [:versions]},
+          verify: {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
+          verify_fun:
             {{fn
                 _, {:bad_cert, _}, userState ->
                   {:valid, userState}
@@ -2659,77 +2656,77 @@ defmodule :m_ssl do
                 _, :valid_peer, userState ->
                   {:valid, userState}
               end, []}, [:versions, :verify]},
-          :versions => {[], [:protocol]}
+          versions: {[], [:protocol]}
         }
       )
 
     sslOpts =
-      %{:protocol => protocol} =
+      %{protocol: protocol} =
       process_options(sslOpts1, %{}, %{
-        :role => role,
-        :host => host,
-        :rules => %{
-          :alpn_advertised_protocols => {:undefined, [:versions]},
-          :alpn_preferred_protocols => {:undefined, [:versions]},
-          :anti_replay => {:undefined, [:versions, :session_tickets]},
-          :beast_mitigation => {:one_n_minus_one, [:versions]},
-          :cacertfile => {:undefined, [:versions, :verify_fun, :cacerts]},
-          :cacerts => {:undefined, [:versions]},
-          :cert => {:undefined, [:versions]},
-          :certfile => {<<>>, [:versions]},
-          :ciphers => {[], [:versions]},
-          :client_renegotiation => {:undefined, [:versions]},
-          :cookie => {true, [:versions]},
-          :crl_cache => {{:ssl_crl_cache, {:internal, []}}, [:versions]},
-          :crl_check => {false, [:versions]},
-          :customize_hostname_check => {[], [:versions]},
-          :depth => {1, [:versions]},
-          :dh => {:undefined, [:versions]},
-          :dhfile => {:undefined, [:versions]},
-          :eccs => {:undefined, [:versions]},
-          :erl_dist => {false, [:versions]},
-          :fail_if_no_peer_cert => {false, [:versions]},
-          :fallback => {false, [:versions]},
-          :handshake => {:full, [:versions]},
-          :hibernate_after => {:infinity, [:versions]},
-          :honor_cipher_order => {false, [:versions]},
-          :honor_ecc_order => {:undefined, [:versions]},
-          :key => {:undefined, [:versions]},
-          :keyfile => {:undefined, [:versions, :certfile]},
-          :key_update_at => {388_736_063_997, [:versions]},
-          :log_level => {:notice, [:versions]},
-          :max_handshake_size => {256 * 1024, [:versions]},
-          :middlebox_comp_mode => {true, [:versions]},
-          :max_fragment_length => {:undefined, [:versions]},
-          :next_protocol_selector => {:undefined, [:versions]},
-          :next_protocols_advertised => {:undefined, [:versions]},
-          :ocsp_stapling => {false, [:versions]},
-          :ocsp_responder_certs => {[], [:versions, :ocsp_stapling]},
-          :ocsp_nonce => {true, [:versions, :ocsp_stapling]},
-          :padding_check => {true, [:versions]},
-          :partial_chain =>
+        role: role,
+        host: host,
+        rules: %{
+          alpn_advertised_protocols: {:undefined, [:versions]},
+          alpn_preferred_protocols: {:undefined, [:versions]},
+          anti_replay: {:undefined, [:versions, :session_tickets]},
+          beast_mitigation: {:one_n_minus_one, [:versions]},
+          cacertfile: {:undefined, [:versions, :verify_fun, :cacerts]},
+          cacerts: {:undefined, [:versions]},
+          cert: {:undefined, [:versions]},
+          certfile: {<<>>, [:versions]},
+          ciphers: {[], [:versions]},
+          client_renegotiation: {:undefined, [:versions]},
+          cookie: {true, [:versions]},
+          crl_cache: {{:ssl_crl_cache, {:internal, []}}, [:versions]},
+          crl_check: {false, [:versions]},
+          customize_hostname_check: {[], [:versions]},
+          depth: {1, [:versions]},
+          dh: {:undefined, [:versions]},
+          dhfile: {:undefined, [:versions]},
+          eccs: {:undefined, [:versions]},
+          erl_dist: {false, [:versions]},
+          fail_if_no_peer_cert: {false, [:versions]},
+          fallback: {false, [:versions]},
+          handshake: {:full, [:versions]},
+          hibernate_after: {:infinity, [:versions]},
+          honor_cipher_order: {false, [:versions]},
+          honor_ecc_order: {:undefined, [:versions]},
+          key: {:undefined, [:versions]},
+          keyfile: {:undefined, [:versions, :certfile]},
+          key_update_at: {388_736_063_997, [:versions]},
+          log_level: {:notice, [:versions]},
+          max_handshake_size: {256 * 1024, [:versions]},
+          middlebox_comp_mode: {true, [:versions]},
+          max_fragment_length: {:undefined, [:versions]},
+          next_protocol_selector: {:undefined, [:versions]},
+          next_protocols_advertised: {:undefined, [:versions]},
+          ocsp_stapling: {false, [:versions]},
+          ocsp_responder_certs: {[], [:versions, :ocsp_stapling]},
+          ocsp_nonce: {true, [:versions, :ocsp_stapling]},
+          padding_check: {true, [:versions]},
+          partial_chain:
             {fn _ ->
                :unknown_ca
              end, [:versions]},
-          :password => {'', [:versions]},
-          :protocol => {:tls, []},
-          :psk_identity => {:undefined, [:versions]},
-          :renegotiate_at => {268_435_456, [:versions]},
-          :reuse_session => {:undefined, [:versions]},
-          :reuse_sessions => {true, [:versions]},
-          :secure_renegotiate => {true, [:versions]},
-          :server_name_indication => {:undefined, [:versions]},
-          :session_tickets => {:disabled, [:versions]},
-          :signature_algs => {:undefined, [:versions]},
-          :signature_algs_cert => {:undefined, [:versions]},
-          :sni_fun => {:undefined, [:versions, :sni_hosts]},
-          :sni_hosts => {[], [:versions]},
-          :srp_identity => {:undefined, [:versions]},
-          :supported_groups => {:undefined, [:versions]},
-          :use_ticket => {:undefined, [:versions]},
-          :user_lookup_fun => {:undefined, [:versions]},
-          :verify => {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
-          :verify_fun =>
+          password: {'', [:versions]},
+          protocol: {:tls, []},
+          psk_identity: {:undefined, [:versions]},
+          renegotiate_at: {268_435_456, [:versions]},
+          reuse_session: {:undefined, [:versions]},
+          reuse_sessions: {true, [:versions]},
+          secure_renegotiate: {true, [:versions]},
+          server_name_indication: {:undefined, [:versions]},
+          session_tickets: {:disabled, [:versions]},
+          signature_algs: {:undefined, [:versions]},
+          signature_algs_cert: {:undefined, [:versions]},
+          sni_fun: {:undefined, [:versions, :sni_hosts]},
+          sni_hosts: {[], [:versions]},
+          srp_identity: {:undefined, [:versions]},
+          supported_groups: {:undefined, [:versions]},
+          use_ticket: {:undefined, [:versions]},
+          user_lookup_fun: {:undefined, [:versions]},
+          verify: {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
+          verify_fun:
             {{fn
                 _, {:bad_cert, _}, userState ->
                   {:valid, userState}
@@ -2746,7 +2743,7 @@ defmodule :m_ssl do
                 _, :valid_peer, userState ->
                   {:valid, userState}
               end, []}, [:versions, :verify]},
-          :versions => {[], [:protocol]}
+          versions: {[], [:protocol]}
         }
       })
 
@@ -2791,21 +2788,21 @@ defmodule :m_ssl do
     end
   end
 
-  defp handle_option(:anti_replay = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:anti_replay = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :anti_replay = option,
          value0,
-         %{:session_tickets => sessionTickets, :versions => versions} = optionsMap,
-         %{:rules => rules}
+         %{session_tickets: sessionTickets, versions: versions} = optionsMap,
+         %{rules: rules}
        ) do
     assert_option_dependency(option, :versions, versions, [:"tlsv1.3"])
     assert_option_dependency(option, :session_tickets, [sessionTickets], [:stateless])
@@ -2813,38 +2810,33 @@ defmodule :m_ssl do
     case sessionTickets do
       :stateless ->
         value = validate_option(option, value0)
-        %{optionsMap | option => value}
+        Map.put(optionsMap, option, value)
 
       _ ->
-        %{optionsMap | option => default_value(option, rules)}
+        Map.put(optionsMap, option, default_value(option, rules))
     end
   end
 
-  defp handle_option(:beast_mitigation = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:beast_mitigation = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(
-         :beast_mitigation = option,
-         value0,
-         %{:versions => versions} = optionsMap,
-         _Env
-       ) do
+  defp handle_option(:beast_mitigation = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(option, :versions, versions, [:tlsv1])
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :cacertfile = option,
          :unbound,
-         %{:cacerts => caCerts, :verify => verify, :verify_fun => verifyFun} = optionsMap,
+         %{cacerts: caCerts, verify: verify, verify_fun: verifyFun} = optionsMap,
          _Env
        )
        when verify === :verify_none or verify === 0 do
@@ -2854,13 +2846,13 @@ defmodule :m_ssl do
         ca_cert_default(:verify_none, verifyFun, caCerts)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :cacertfile = option,
          :unbound,
-         %{:cacerts => caCerts, :verify => verify, :verify_fun => verifyFun} = optionsMap,
+         %{cacerts: caCerts, verify: verify, verify_fun: verifyFun} = optionsMap,
          _Env
        )
        when verify === :verify_peer or verify === 1 or verify === 2 do
@@ -2870,16 +2862,16 @@ defmodule :m_ssl do
         ca_cert_default(:verify_peer, verifyFun, caCerts)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(:cacertfile = option, value0, optionsMap, _Env) do
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:ciphers = option, :unbound, %{:versions => versions} = optionsMap, %{
-         :rules => rules
+  defp handle_option(:ciphers = option, :unbound, %{versions: versions} = optionsMap, %{
+         rules: rules
        }) do
     value =
       handle_cipher_option(
@@ -2890,133 +2882,123 @@ defmodule :m_ssl do
         versions
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:ciphers = option, value0, %{:versions => versions} = optionsMap, _Env) do
+  defp handle_option(:ciphers = option, value0, %{versions: versions} = optionsMap, _Env) do
     value = handle_cipher_option(value0, versions)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:client_renegotiation = option, :unbound, optionsMap, %{:role => role}) do
+  defp handle_option(:client_renegotiation = option, :unbound, optionsMap, %{role: role}) do
     value = default_option_role(:server, true, role)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :client_renegotiation = option,
          value0,
-         %{:versions => versions} = optionsMap,
-         %{:role => role}
+         %{versions: versions} = optionsMap,
+         %{role: role}
        ) do
     assert_role(:server_only, role, option, value0)
     assert_option_dependency(option, :versions, versions, [:tlsv1, :"tlsv1.1", :"tlsv1.2"])
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(
-         :eccs = option,
-         :unbound,
-         %{:versions => [highestVersion | _]} = optionsMap,
-         %{:rules => _Rules}
-       ) do
+  defp handle_option(:eccs = option, :unbound, %{versions: [highestVersion | _]} = optionsMap, %{
+         rules: _Rules
+       }) do
     value = handle_eccs_option(eccs(), highestVersion)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(
-         :eccs = option,
-         value0,
-         %{:versions => [highestVersion | _]} = optionsMap,
-         _Env
-       ) do
+  defp handle_option(:eccs = option, value0, %{versions: [highestVersion | _]} = optionsMap, _Env) do
     value = handle_eccs_option(value0, highestVersion)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:fallback = option, :unbound, optionsMap, %{:role => role}) do
+  defp handle_option(:fallback = option, :unbound, optionsMap, %{role: role}) do
     value = default_option_role(:client, false, role)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:fallback = option, value0, optionsMap, %{:role => role}) do
+  defp handle_option(:fallback = option, value0, optionsMap, %{role: role}) do
     assert_role(:client_only, role, option, value0)
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:cookie = option, :unbound, optionsMap, %{:role => role}) do
+  defp handle_option(:cookie = option, :unbound, optionsMap, %{role: role}) do
     value = default_option_role(:server, true, role)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:cookie = option, value0, %{:versions => versions} = optionsMap, %{
-         :role => role
-       }) do
+  defp handle_option(:cookie = option, value0, %{versions: versions} = optionsMap, %{role: role}) do
     assert_option_dependency(option, :versions, versions, [:"tlsv1.3"])
     assert_role(:server_only, role, option, value0)
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:honor_cipher_order = option, :unbound, optionsMap, %{:role => role}) do
+  defp handle_option(:honor_cipher_order = option, :unbound, optionsMap, %{role: role}) do
     value = default_option_role(:server, false, role)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:honor_cipher_order = option, value0, optionsMap, %{:role => role}) do
+  defp handle_option(:honor_cipher_order = option, value0, optionsMap, %{role: role}) do
     assert_role(:server_only, role, option, value0)
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:honor_ecc_order = option, :unbound, optionsMap, %{:role => role}) do
+  defp handle_option(:honor_ecc_order = option, :unbound, optionsMap, %{role: role}) do
     value = default_option_role(:server, false, role)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:honor_ecc_order = option, value0, optionsMap, %{:role => role}) do
+  defp handle_option(:honor_ecc_order = option, value0, optionsMap, %{role: role}) do
     assert_role(:server_only, role, option, value0)
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:keyfile = option, :unbound, %{:certfile => certFile} = optionsMap, _Env) do
+  defp handle_option(:keyfile = option, :unbound, %{certfile: certFile} = optionsMap, _Env) do
     value = validate_option(option, certFile)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:key_update_at = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:key_update_at = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:key_update_at = option, value0, %{:versions => versions} = optionsMap, _Env) do
+  defp handle_option(:key_update_at = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(option, :versions, versions, [:"tlsv1.3"])
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:next_protocols_advertised = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:next_protocols_advertised = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :next_protocols_advertised = option,
          value0,
-         %{:versions => versions} = optionsMap,
+         %{versions: versions} = optionsMap,
          _Env
        ) do
     assert_option_dependency(:next_protocols_advertised, :versions, versions, [
@@ -3026,18 +3008,18 @@ defmodule :m_ssl do
     ])
 
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:next_protocol_selector = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:next_protocol_selector = option, :unbound, optionsMap, %{rules: rules}) do
     value = default_value(option, rules)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :next_protocol_selector = option,
          value0,
-         %{:versions => versions} = optionsMap,
+         %{versions: versions} = optionsMap,
          _Env
        ) do
     assert_option_dependency(:client_preferred_next_protocols, :versions, versions, [
@@ -3054,55 +3036,55 @@ defmodule :m_ssl do
         )
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:padding_check = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:padding_check = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:padding_check = option, value0, %{:versions => versions} = optionsMap, _Env) do
+  defp handle_option(:padding_check = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(option, :versions, versions, [:tlsv1])
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:psk_identity = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:psk_identity = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:psk_identity = option, value0, %{:versions => versions} = optionsMap, _Env) do
+  defp handle_option(:psk_identity = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(option, :versions, versions, [:tlsv1, :"tlsv1.1", :"tlsv1.2"])
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:secure_renegotiate = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:secure_renegotiate = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :secure_renegotiate = option,
          value0,
-         %{:versions => versions} = optionsMap,
+         %{versions: versions} = optionsMap,
          _Env
        ) do
     assert_option_dependency(:secure_renegotiate, :versions, versions, [
@@ -3112,10 +3094,10 @@ defmodule :m_ssl do
     ])
 
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:reuse_session = option, :unbound, optionsMap, %{:role => role}) do
+  defp handle_option(:reuse_session = option, :unbound, optionsMap, %{role: role}) do
     value =
       case role do
         :client ->
@@ -3127,32 +3109,27 @@ defmodule :m_ssl do
           end
       end
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:reuse_session = option, value0, %{:versions => versions} = optionsMap, _Env) do
+  defp handle_option(:reuse_session = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(:reuse_session, :versions, versions, [:tlsv1, :"tlsv1.1", :"tlsv1.2"])
 
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:reuse_sessions = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:reuse_sessions = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(
-         :reuse_sessions = option,
-         value0,
-         %{:versions => versions} = optionsMap,
-         _Env
-       ) do
+  defp handle_option(:reuse_sessions = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(:reuse_sessions, :versions, versions, [
       :tlsv1,
       :"tlsv1.1",
@@ -3160,34 +3137,34 @@ defmodule :m_ssl do
     ])
 
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(:server_name_indication = option, :unbound, optionsMap, %{
-         :host => host,
-         :role => role
+         host: host,
+         role: role
        }) do
     value = default_option_role(:client, server_name_indication_default(host), role)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(:server_name_indication = option, value0, optionsMap, _Env) do
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:session_tickets = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:session_tickets = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:session_tickets = option, value0, %{:versions => versions} = optionsMap, %{
-         :role => role
+  defp handle_option(:session_tickets = option, value0, %{versions: versions} = optionsMap, %{
+         role: role
        }) do
     assert_option_dependency(option, :versions, versions, [:"tlsv1.3"])
 
@@ -3198,14 +3175,14 @@ defmodule :m_ssl do
     ])
 
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :signature_algs = option,
          :unbound,
-         %{:versions => [highestVersion | _]} = optionsMap,
-         %{:role => role}
+         %{versions: [highestVersion | _]} = optionsMap,
+         %{role: role}
        ) do
     value =
       handle_hashsigns_option(
@@ -3218,13 +3195,13 @@ defmodule :m_ssl do
         tls_version(highestVersion)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :signature_algs = option,
          value0,
-         %{:versions => [highestVersion | _]} = optionsMap,
+         %{versions: [highestVersion | _]} = optionsMap,
          _Env
        ) do
     value =
@@ -3233,13 +3210,13 @@ defmodule :m_ssl do
         tls_version(highestVersion)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :signature_algs_cert = option,
          :unbound,
-         %{:versions => [highestVersion | _]} = optionsMap,
+         %{versions: [highestVersion | _]} = optionsMap,
          _Env
        ) do
     value =
@@ -3248,13 +3225,13 @@ defmodule :m_ssl do
         tls_version(highestVersion)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :signature_algs_cert = option,
          value0,
-         %{:versions => [highestVersion | _]} = optionsMap,
+         %{versions: [highestVersion | _]} = optionsMap,
          _Env
        ) do
     value =
@@ -3263,12 +3240,12 @@ defmodule :m_ssl do
         tls_version(highestVersion)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:sni_fun = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:sni_fun = option, :unbound, optionsMap, %{rules: rules}) do
     value = default_value(option, rules)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(:sni_fun = option, value0, optionsMap, _Env) do
@@ -3287,30 +3264,30 @@ defmodule :m_ssl do
           throw({:error, {:conflict_options, [:sni_fun, :sni_hosts]}})
       end
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:srp_identity = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:srp_identity = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:srp_identity = option, value0, %{:versions => versions} = optionsMap, _Env) do
+  defp handle_option(:srp_identity = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(:srp_identity, :versions, versions, [:tlsv1, :"tlsv1.1", :"tlsv1.2"])
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :supported_groups = option,
          :unbound,
-         %{:versions => [highestVersion | _]} = optionsMap,
-         %{:rules => _Rules}
+         %{versions: [highestVersion | _]} = optionsMap,
+         %{rules: _Rules}
        ) do
     value =
       handle_supported_groups_option(
@@ -3318,13 +3295,13 @@ defmodule :m_ssl do
         highestVersion
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(
          :supported_groups = option,
          value0,
-         %{:versions => [highestVersion | _] = versions} = optionsMap,
+         %{versions: [highestVersion | _] = versions} = optionsMap,
          _Env
        ) do
     assert_option_dependency(option, :versions, versions, [:"tlsv1.3"])
@@ -3335,47 +3312,42 @@ defmodule :m_ssl do
         highestVersion
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:use_ticket = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:use_ticket = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:use_ticket = option, value0, %{:versions => versions} = optionsMap, _Env) do
+  defp handle_option(:use_ticket = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(option, :versions, versions, [:"tlsv1.3"])
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:user_lookup_fun = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:user_lookup_fun = option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(
-         :user_lookup_fun = option,
-         value0,
-         %{:versions => versions} = optionsMap,
-         _Env
-       ) do
+  defp handle_option(:user_lookup_fun = option, value0, %{versions: versions} = optionsMap, _Env) do
     assert_option_dependency(option, :versions, versions, [:tlsv1, :"tlsv1.1", :"tlsv1.2"])
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:verify = option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(:verify = option, :unbound, optionsMap, %{rules: rules}) do
     handle_verify_option(
       default_value(option, rules),
       optionsMap
@@ -3386,24 +3358,24 @@ defmodule :m_ssl do
     handle_verify_option(value, optionsMap)
   end
 
-  defp handle_option(:verify_fun = option, :unbound, %{:verify => verify} = optionsMap, %{
-         :rules => rules
+  defp handle_option(:verify_fun = option, :unbound, %{verify: verify} = optionsMap, %{
+         rules: rules
        })
        when verify === :verify_none do
-    %{optionsMap | option => default_value(option, rules)}
+    Map.put(optionsMap, option, default_value(option, rules))
   end
 
-  defp handle_option(:verify_fun = option, :unbound, %{:verify => verify} = optionsMap, _Env)
+  defp handle_option(:verify_fun = option, :unbound, %{verify: verify} = optionsMap, _Env)
        when verify === :verify_peer do
-    %{optionsMap | option => :undefined}
+    Map.put(optionsMap, option, :undefined)
   end
 
   defp handle_option(:verify_fun = option, value0, optionsMap, _Env) do
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:versions = option, :unbound, %{:protocol => protocol} = optionsMap, _Env) do
+  defp handle_option(:versions = option, :unbound, %{protocol: protocol} = optionsMap, _Env) do
     recordCb = record_cb(protocol)
     vsns0 = recordCb.supported_protocol_versions()
 
@@ -3413,10 +3385,10 @@ defmodule :m_ssl do
         vsns0
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:versions = option, vsns0, %{:protocol => protocol} = optionsMap, _Env) do
+  defp handle_option(:versions = option, vsns0, %{protocol: protocol} = optionsMap, _Env) do
     validate_option(:versions, vsns0)
     recordCb = record_cb(protocol)
 
@@ -3431,40 +3403,40 @@ defmodule :m_ssl do
         vsns1
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(:cb_info = option, :unbound, %{:protocol => protocol} = optionsMap, _Env) do
+  defp handle_option(:cb_info = option, :unbound, %{protocol: protocol} = optionsMap, _Env) do
     default = default_cb_info(protocol)
     validate_option(option, default)
     value = handle_cb_info(default)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(:cb_info = option, value0, optionsMap, _Env) do
     validate_option(option, value0)
     value = handle_cb_info(value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
-  defp handle_option(option, :unbound, optionsMap, %{:rules => rules}) do
+  defp handle_option(option, :unbound, optionsMap, %{rules: rules}) do
     value =
       validate_option(
         option,
         default_value(option, rules)
       )
 
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option(option, value0, optionsMap, _Env) do
     value = validate_option(option, value0)
-    %{optionsMap | option => value}
+    Map.put(optionsMap, option, value)
   end
 
   defp handle_option_cb_info(options, protocol) do
     value = :proplists.get_value(:cb_info, options, default_cb_info(protocol))
-    %{:cb_info => cbInfo} = handle_option(:cb_info, value, %{:protocol => protocol}, %{})
+    %{cb_info: cbInfo} = handle_option(:cb_info, value, %{protocol: protocol}, %{})
     cbInfo
   end
 
@@ -3740,7 +3712,7 @@ defmodule :m_ssl do
     {keyType, value}
   end
 
-  defp validate_option(:key, %{:algorithm => _} = value) do
+  defp validate_option(:key, %{algorithm: _} = value) do
     value
   end
 
@@ -4147,67 +4119,67 @@ defmodule :m_ssl do
   defp validate_option(opt, :undefined = value) do
     allOpts =
       :maps.keys(%{
-        :alpn_advertised_protocols => {:undefined, [:versions]},
-        :alpn_preferred_protocols => {:undefined, [:versions]},
-        :anti_replay => {:undefined, [:versions, :session_tickets]},
-        :beast_mitigation => {:one_n_minus_one, [:versions]},
-        :cacertfile => {:undefined, [:versions, :verify_fun, :cacerts]},
-        :cacerts => {:undefined, [:versions]},
-        :cert => {:undefined, [:versions]},
-        :certfile => {<<>>, [:versions]},
-        :ciphers => {[], [:versions]},
-        :client_renegotiation => {:undefined, [:versions]},
-        :cookie => {true, [:versions]},
-        :crl_cache => {{:ssl_crl_cache, {:internal, []}}, [:versions]},
-        :crl_check => {false, [:versions]},
-        :customize_hostname_check => {[], [:versions]},
-        :depth => {1, [:versions]},
-        :dh => {:undefined, [:versions]},
-        :dhfile => {:undefined, [:versions]},
-        :eccs => {:undefined, [:versions]},
-        :erl_dist => {false, [:versions]},
-        :fail_if_no_peer_cert => {false, [:versions]},
-        :fallback => {false, [:versions]},
-        :handshake => {:full, [:versions]},
-        :hibernate_after => {:infinity, [:versions]},
-        :honor_cipher_order => {false, [:versions]},
-        :honor_ecc_order => {:undefined, [:versions]},
-        :key => {:undefined, [:versions]},
-        :keyfile => {:undefined, [:versions, :certfile]},
-        :key_update_at => {388_736_063_997, [:versions]},
-        :log_level => {:notice, [:versions]},
-        :max_handshake_size => {256 * 1024, [:versions]},
-        :middlebox_comp_mode => {true, [:versions]},
-        :max_fragment_length => {:undefined, [:versions]},
-        :next_protocol_selector => {:undefined, [:versions]},
-        :next_protocols_advertised => {:undefined, [:versions]},
-        :ocsp_stapling => {false, [:versions]},
-        :ocsp_responder_certs => {[], [:versions, :ocsp_stapling]},
-        :ocsp_nonce => {true, [:versions, :ocsp_stapling]},
-        :padding_check => {true, [:versions]},
-        :partial_chain =>
+        alpn_advertised_protocols: {:undefined, [:versions]},
+        alpn_preferred_protocols: {:undefined, [:versions]},
+        anti_replay: {:undefined, [:versions, :session_tickets]},
+        beast_mitigation: {:one_n_minus_one, [:versions]},
+        cacertfile: {:undefined, [:versions, :verify_fun, :cacerts]},
+        cacerts: {:undefined, [:versions]},
+        cert: {:undefined, [:versions]},
+        certfile: {<<>>, [:versions]},
+        ciphers: {[], [:versions]},
+        client_renegotiation: {:undefined, [:versions]},
+        cookie: {true, [:versions]},
+        crl_cache: {{:ssl_crl_cache, {:internal, []}}, [:versions]},
+        crl_check: {false, [:versions]},
+        customize_hostname_check: {[], [:versions]},
+        depth: {1, [:versions]},
+        dh: {:undefined, [:versions]},
+        dhfile: {:undefined, [:versions]},
+        eccs: {:undefined, [:versions]},
+        erl_dist: {false, [:versions]},
+        fail_if_no_peer_cert: {false, [:versions]},
+        fallback: {false, [:versions]},
+        handshake: {:full, [:versions]},
+        hibernate_after: {:infinity, [:versions]},
+        honor_cipher_order: {false, [:versions]},
+        honor_ecc_order: {:undefined, [:versions]},
+        key: {:undefined, [:versions]},
+        keyfile: {:undefined, [:versions, :certfile]},
+        key_update_at: {388_736_063_997, [:versions]},
+        log_level: {:notice, [:versions]},
+        max_handshake_size: {256 * 1024, [:versions]},
+        middlebox_comp_mode: {true, [:versions]},
+        max_fragment_length: {:undefined, [:versions]},
+        next_protocol_selector: {:undefined, [:versions]},
+        next_protocols_advertised: {:undefined, [:versions]},
+        ocsp_stapling: {false, [:versions]},
+        ocsp_responder_certs: {[], [:versions, :ocsp_stapling]},
+        ocsp_nonce: {true, [:versions, :ocsp_stapling]},
+        padding_check: {true, [:versions]},
+        partial_chain:
           {fn _ ->
              :unknown_ca
            end, [:versions]},
-        :password => {'', [:versions]},
-        :protocol => {:tls, []},
-        :psk_identity => {:undefined, [:versions]},
-        :renegotiate_at => {268_435_456, [:versions]},
-        :reuse_session => {:undefined, [:versions]},
-        :reuse_sessions => {true, [:versions]},
-        :secure_renegotiate => {true, [:versions]},
-        :server_name_indication => {:undefined, [:versions]},
-        :session_tickets => {:disabled, [:versions]},
-        :signature_algs => {:undefined, [:versions]},
-        :signature_algs_cert => {:undefined, [:versions]},
-        :sni_fun => {:undefined, [:versions, :sni_hosts]},
-        :sni_hosts => {[], [:versions]},
-        :srp_identity => {:undefined, [:versions]},
-        :supported_groups => {:undefined, [:versions]},
-        :use_ticket => {:undefined, [:versions]},
-        :user_lookup_fun => {:undefined, [:versions]},
-        :verify => {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
-        :verify_fun =>
+        password: {'', [:versions]},
+        protocol: {:tls, []},
+        psk_identity: {:undefined, [:versions]},
+        renegotiate_at: {268_435_456, [:versions]},
+        reuse_session: {:undefined, [:versions]},
+        reuse_sessions: {true, [:versions]},
+        secure_renegotiate: {true, [:versions]},
+        server_name_indication: {:undefined, [:versions]},
+        session_tickets: {:disabled, [:versions]},
+        signature_algs: {:undefined, [:versions]},
+        signature_algs_cert: {:undefined, [:versions]},
+        sni_fun: {:undefined, [:versions, :sni_hosts]},
+        sni_hosts: {[], [:versions]},
+        srp_identity: {:undefined, [:versions]},
+        supported_groups: {:undefined, [:versions]},
+        use_ticket: {:undefined, [:versions]},
+        user_lookup_fun: {:undefined, [:versions]},
+        verify: {:verify_none, [:versions, :fail_if_no_peer_cert, :partial_chain]},
+        verify_fun:
           {{fn
               _, {:bad_cert, _}, userState ->
                 {:valid, userState}
@@ -4224,7 +4196,7 @@ defmodule :m_ssl do
               _, :valid_peer, userState ->
                 {:valid, userState}
             end, []}, [:versions, :verify]},
-        :versions => {[], [:protocol]}
+        versions: {[], [:protocol]}
       })
 
     case :lists.member(opt, allOpts) do
@@ -4533,11 +4505,11 @@ defmodule :m_ssl do
   end
 
   defp tuple_to_map({kex, cipher, mac}) do
-    %{:key_exchange => kex, :cipher => cipher, :mac => mac, :prf => :default_prf}
+    %{key_exchange: kex, cipher: cipher, mac: mac, prf: :default_prf}
   end
 
   defp tuple_to_map({kex, cipher, mac, prf}) do
-    %{:key_exchange => kex, :cipher => cipher, :mac => tuple_to_map_mac(cipher, mac), :prf => prf}
+    %{key_exchange: kex, cipher: cipher, mac: tuple_to_map_mac(cipher, mac), prf: prf}
   end
 
   defp tuple_to_map_mac(:aes_128_gcm, _) do
@@ -4731,15 +4703,12 @@ defmodule :m_ssl do
 
   defp handle_verify_option(
          :verify_none,
-         %{:fail_if_no_peer_cert => false} = optionsMap
+         %{fail_if_no_peer_cert: false} = optionsMap
        ) do
-    %{optionsMap | :verify => :verify_none}
+    Map.put(optionsMap, :verify, :verify_none)
   end
 
-  defp handle_verify_option(
-         :verify_none,
-         %{:fail_if_no_peer_cert => true}
-       ) do
+  defp handle_verify_option(:verify_none, %{fail_if_no_peer_cert: true}) do
     throw(
       {:error, {:options, :incompatible, {:verify, :verify_none}, {:fail_if_no_peer_cert, true}}}
     )
@@ -4747,13 +4716,13 @@ defmodule :m_ssl do
 
   defp handle_verify_option(
          :verify_peer,
-         %{:verify => :verify_none} = optionsMap
+         %{verify: :verify_none} = optionsMap
        ) do
-    %{optionsMap | :verify => :verify_peer, :verify_fun => :undefined}
+    Map.merge(optionsMap, %{verify: :verify_peer, verify_fun: :undefined})
   end
 
   defp handle_verify_option(:verify_peer, optionsMap) do
-    %{optionsMap | :verify => :verify_peer}
+    Map.put(optionsMap, :verify, :verify_peer)
   end
 
   defp handle_verify_option(value, _) do

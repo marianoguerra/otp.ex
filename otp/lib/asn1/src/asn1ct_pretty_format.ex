@@ -43,13 +43,13 @@ defmodule :m_asn1ct_pretty_format do
   defp write_simple_list([h | t], indent) do
     {_, s1} = term(h, indent)
     {_, s2} = write_simple_list_tail(t, indent)
-    {indent, [[?[, s1] | s2]}
+    {indent, [?[, s1 | s2]}
   end
 
   defp write_simple_list_tail([h | t], indent) do
     {_, s1} = term(h, indent)
     {_, s2} = write_simple_list_tail(t, indent)
-    {indent, [[?,, s1] | s2]}
+    {indent, [?,, s1 | s2]}
   end
 
   defp write_simple_list_tail([], indent) do
@@ -64,7 +64,7 @@ defmodule :m_asn1ct_pretty_format do
   defp write_complex_list([h | t], indent) do
     {i1, s1} = term(h, indent + 1)
     {_, s2} = write_complex_list_tail(t, i1)
-    {indent, [[?[, s1] | s2]}
+    {indent, [?[, s1 | s2]}
   end
 
   defp write_complex_list_tail([h | t], indent) do

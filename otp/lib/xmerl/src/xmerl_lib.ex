@@ -522,7 +522,7 @@ defmodule :m_xmerl_lib do
         expand_content(t, pos, parents, norm)
 
       {c, s2} ->
-        expand_content([[{f, s2}, c] | t], pos, parents, norm)
+        expand_content([{f, s2}, c | t], pos, parents, norm)
     end
   end
 
@@ -555,7 +555,7 @@ defmodule :m_xmerl_lib do
         expand_attributes(t, pos, parents)
 
       {a, s2} ->
-        expand_attributes([[{p, s2}, a] | t], pos, parents)
+        expand_attributes([{p, s2}, a | t], pos, parents)
     end
   end
 
@@ -833,84 +833,84 @@ defmodule :m_xmerl_lib do
     end
   end
 
-  defp autodetect(:undefined, [[0, 0, 254, 255] | input]) do
+  defp autodetect(:undefined, [0, 0, 254, 255 | input]) do
     {:auto, :xmerl_ucs.from_ucs4be(input)}
   end
 
-  defp autodetect(:"iso-10646-utf-1", [[0, 0, 254, 255] | input]) do
+  defp autodetect(:"iso-10646-utf-1", [0, 0, 254, 255 | input]) do
     {:external, :xmerl_ucs.from_ucs4be(input)}
   end
 
-  defp autodetect(:undefined, [[255, 254, 0, 0] | input]) do
+  defp autodetect(:undefined, [255, 254, 0, 0 | input]) do
     {:auto, :xmerl_ucs.from_ucs4le(input)}
   end
 
-  defp autodetect(:"iso-10646-utf-1", [[255, 254, 0, 0] | input]) do
+  defp autodetect(:"iso-10646-utf-1", [255, 254, 0, 0 | input]) do
     {:external, :xmerl_ucs.from_ucs4le(input)}
   end
 
-  defp autodetect(:undefined, [[254, 255] | input]) do
+  defp autodetect(:undefined, [254, 255 | input]) do
     {:auto, :xmerl_ucs.from_utf16be(input)}
   end
 
-  defp autodetect(:"utf-16be", [[254, 255] | input]) do
+  defp autodetect(:"utf-16be", [254, 255 | input]) do
     {:external, :xmerl_ucs.from_utf16be(input)}
   end
 
-  defp autodetect(:undefined, [[255, 254] | input]) do
+  defp autodetect(:undefined, [255, 254 | input]) do
     {:auto, :xmerl_ucs.from_utf16le(input)}
   end
 
-  defp autodetect(:"utf-16le", [[255, 254] | input]) do
+  defp autodetect(:"utf-16le", [255, 254 | input]) do
     {:external, :xmerl_ucs.from_utf16le(input)}
   end
 
-  defp autodetect(:undefined, [[239, 187, 191] | input]) do
+  defp autodetect(:undefined, [239, 187, 191 | input]) do
     {:auto, :xmerl_ucs.from_utf8(input)}
   end
 
-  defp autodetect(:"utf-8", [[239, 187, 191] | input]) do
+  defp autodetect(:"utf-8", [239, 187, 191 | input]) do
     {:external, :xmerl_ucs.from_utf8(input)}
   end
 
-  defp autodetect(:"utf-8", [[255, 254] | input]) do
+  defp autodetect(:"utf-8", [255, 254 | input]) do
     {:external, :xmerl_ucs.from_utf16le(input)}
   end
 
-  defp autodetect(:"utf-8", [[254, 255] | input]) do
+  defp autodetect(:"utf-8", [254, 255 | input]) do
     {:external, :xmerl_ucs.from_utf16be(input)}
   end
 
-  defp autodetect(:undefined, [[0, 0, 0, 60] | input]) do
-    {:auto, :xmerl_ucs.from_ucs4be([[0, 0, 0, 60] | input])}
+  defp autodetect(:undefined, [0, 0, 0, 60 | input]) do
+    {:auto, :xmerl_ucs.from_ucs4be([0, 0, 0, 60 | input])}
   end
 
-  defp autodetect(:"iso-10646-utf-1", [[0, 0, 0, 60] | input]) do
-    {:external, :xmerl_ucs.from_ucs4be([[0, 0, 0, 60] | input])}
+  defp autodetect(:"iso-10646-utf-1", [0, 0, 0, 60 | input]) do
+    {:external, :xmerl_ucs.from_ucs4be([0, 0, 0, 60 | input])}
   end
 
-  defp autodetect(:undefined, [[60, 0, 0, 0] | input]) do
-    {:auto, :xmerl_ucs.from_ucs4le([[60, 0, 0, 0] | input])}
+  defp autodetect(:undefined, [60, 0, 0, 0 | input]) do
+    {:auto, :xmerl_ucs.from_ucs4le([60, 0, 0, 0 | input])}
   end
 
-  defp autodetect(:"iso-10646-utf-1", [[60, 0, 0, 0] | input]) do
-    {:external, :xmerl_ucs.from_ucs4le([[60, 0, 0, 0] | input])}
+  defp autodetect(:"iso-10646-utf-1", [60, 0, 0, 0 | input]) do
+    {:external, :xmerl_ucs.from_ucs4le([60, 0, 0, 0 | input])}
   end
 
-  defp autodetect(:undefined, [[0, 60, 0, 63] | input]) do
-    {:auto, :xmerl_ucs.from_utf16be([[0, 60, 0, 63] | input])}
+  defp autodetect(:undefined, [0, 60, 0, 63 | input]) do
+    {:auto, :xmerl_ucs.from_utf16be([0, 60, 0, 63 | input])}
   end
 
-  defp autodetect(:"utf-16be", [[0, 60, 0, 63] | input]) do
-    {:external, :xmerl_ucs.from_utf16be([[0, 60, 0, 63] | input])}
+  defp autodetect(:"utf-16be", [0, 60, 0, 63 | input]) do
+    {:external, :xmerl_ucs.from_utf16be([0, 60, 0, 63 | input])}
   end
 
-  defp autodetect(:undefined, [[60, 0, 63, 0] | input]) do
-    {:auto, :xmerl_ucs.from_utf16le([[60, 0, 63, 0] | input])}
+  defp autodetect(:undefined, [60, 0, 63, 0 | input]) do
+    {:auto, :xmerl_ucs.from_utf16le([60, 0, 63, 0 | input])}
   end
 
-  defp autodetect(:"utf-16le", [[60, 0, 63, 0] | input]) do
-    {:external, :xmerl_ucs.from_utf16le([[60, 0, 63, 0] | input])}
+  defp autodetect(:"utf-16le", [60, 0, 63, 0 | input]) do
+    {:external, :xmerl_ucs.from_utf16le([60, 0, 63, 0 | input])}
   end
 
   defp autodetect(extCharset, content) do

@@ -279,7 +279,10 @@ defmodule :m_dialyzer_behaviours do
                      behaviour,
                      function,
                      arity,
-                     :erl_types.t_to_string(extraType, records),
+                     :erl_types.t_to_string(
+                       extraType,
+                       records
+                     ),
                      :erl_types.t_to_string(
                        cbReturnType,
                        records
@@ -347,8 +350,14 @@ defmodule :m_dialyzer_behaviours do
           function,
           arity,
           n,
-          :erl_types.t_to_string(type, records),
-          :erl_types.t_to_string(cbType, records)
+          :erl_types.t_to_string(
+            type,
+            records
+          ),
+          :erl_types.t_to_string(
+            cbType,
+            records
+          )
         ]
 
         newAcc = [
@@ -357,7 +366,7 @@ defmodule :m_dialyzer_behaviours do
               {:callback_arg_type_mismatch, info}
 
             {:spec, file, line} ->
-              {:callback_spec_arg_type_mismatch, [[file, line] | info]}
+              {:callback_spec_arg_type_mismatch, [file, line | info]}
           end
           | acc
         ]
@@ -393,13 +402,13 @@ defmodule :m_dialyzer_behaviours do
     {category, {r_state(state, :filename), line, module}, warn}
   end
 
-  defp add_tag_warning_info(module, {tag, [[file, line] | r]}, _State)
+  defp add_tag_warning_info(module, {tag, [file, line | r]}, _State)
        when tag === :callback_spec_type_mismatch or
               tag === :callback_spec_arg_type_mismatch do
     {:warn_behaviour, {file, line, module}, {tag, r}}
   end
 
-  defp add_tag_warning_info(module, {_Tag, [[_B, fun, arity] | _R]} = warn, state) do
+  defp add_tag_warning_info(module, {_Tag, [_B, fun, arity | _R]} = warn, state) do
     {_A, funCode} =
       :dialyzer_codeserver.lookup_mfa_code(
         {module, fun, arity},

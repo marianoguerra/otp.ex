@@ -1327,7 +1327,11 @@ defmodule :m_mnesia_bup do
     args = [
       {:file, tmpFile},
       {:keypos, 2},
-      {:type, :mnesia_lib.disk_type(tab, r_cstruct(cs, :type))}
+      {:type,
+       :mnesia_lib.disk_type(
+         tab,
+         r_cstruct(cs, :type)
+       )}
     ]
 
     fn t, lT when t === r_local_tab(lT, :name) ->

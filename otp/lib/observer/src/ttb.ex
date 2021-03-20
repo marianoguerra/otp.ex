@@ -950,7 +950,7 @@ defmodule :m_ttb do
         funStr
 
       ^h ->
-        :lists.reverse([[?., h] | rest])
+        :lists.reverse([?., h | rest])
     end
   end
 
@@ -1143,7 +1143,8 @@ defmodule :m_ttb do
     send(parent, {:started, self()})
 
     newSessionInfo = [
-      [{:partials, 0}, {:dead_nodes, []}]
+      {:partials, 0},
+      {:dead_nodes, []}
       | sessionInfo
     ]
 
@@ -1611,13 +1612,13 @@ defmodule :m_ttb do
                 absFile
             end
 
-          traci1 = [[{:node, n}, {:file, c}] | traci]
+          traci1 = [{:node, n}, {:file, c} | traci]
           {:ok, port} = :dbg.get_tracer(n)
           send(:ttb, {:init_node, n, {:local, metaFile, port}, pI, traci1})
 
         {n, c, f} ->
           metaFile = f ++ '.ti'
-          traci1 = [[{:node, n}, {:file, c}] | traci]
+          traci1 = [{:node, n}, {:file, c} | traci]
           send(:ttb, {:init_node, n, metaFile, pI, traci1})
       end,
       nodes

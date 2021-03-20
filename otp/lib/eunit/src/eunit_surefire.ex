@@ -580,7 +580,7 @@ defmodule :m_eunit_surefire do
     ['0.', digit3, digit2, digit1]
   end
 
-  defp format_time_s([[digit1, digit2, digit3] | tail]) do
+  defp format_time_s([digit1, digit2, digit3 | tail]) do
     [:lists.reverse(tail), ?., digit3, digit2, digit1]
   end
 
@@ -653,19 +653,19 @@ defmodule :m_eunit_surefire do
   end
 
   defp escape_xml([?< | tail], acc, forAttr) do
-    escape_xml(tail, [[?;, ?t, ?l, ?&] | acc], forAttr)
+    escape_xml(tail, [?;, ?t, ?l, ?& | acc], forAttr)
   end
 
   defp escape_xml([?> | tail], acc, forAttr) do
-    escape_xml(tail, [[?;, ?t, ?g, ?&] | acc], forAttr)
+    escape_xml(tail, [?;, ?t, ?g, ?& | acc], forAttr)
   end
 
   defp escape_xml([?& | tail], acc, forAttr) do
-    escape_xml(tail, [[?;, ?p, ?m, ?a, ?&] | acc], forAttr)
+    escape_xml(tail, [?;, ?p, ?m, ?a, ?& | acc], forAttr)
   end
 
   defp escape_xml([?" | tail], acc, true) do
-    escape_xml(tail, [[?;, ?t, ?o, ?u, ?q, ?&] | acc], true)
+    escape_xml(tail, [?;, ?t, ?o, ?u, ?q, ?& | acc], true)
   end
 
   defp escape_xml([char | tail], acc, forAttr)

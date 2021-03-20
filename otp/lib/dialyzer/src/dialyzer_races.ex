@@ -1308,7 +1308,7 @@ defmodule :m_dialyzer_races do
                   end
 
                 :warn_mnesia_dirty_read_write ->
-                  [[wVA1, wVA2] | t] = warnVarArgs1
+                  [wVA1, wVA2 | t] = warnVarArgs1
 
                   vars =
                     :lists.flatten(
@@ -1328,7 +1328,7 @@ defmodule :m_dialyzer_races do
                       {warnVarArgs, false}
 
                     _ ->
-                      {[[vars, wVA2] | t], false}
+                      {[vars, wVA2 | t], false}
                   end
               end
 
@@ -2764,8 +2764,8 @@ defmodule :m_dialyzer_races do
   end
 
   defp compare_first_arg(oldWarnVarArgs, newWarnVarArgs, raceVarMap) do
-    [[old1, old2] | _OldT] = oldWarnVarArgs
-    [[new1, new2] | _NewT] = newWarnVarArgs
+    [old1, old2 | _OldT] = oldWarnVarArgs
+    [new1, new2 | _NewT] = newWarnVarArgs
 
     case any_args(old2) do
       true ->
@@ -2890,8 +2890,8 @@ defmodule :m_dialyzer_races do
           end
 
       :warn_mnesia_dirty_read_write ->
-        [[vA1, vA2] | _] = varArgs
-        [[wVA1, wVA2] | _] = warnVarArgs
+        [vA1, vA2 | _] = varArgs
+        [wVA1, wVA2 | _] = warnVarArgs
 
         case any_args(vA2) do
           true ->
@@ -3297,7 +3297,7 @@ defmodule :m_dialyzer_races do
 
   defp mnesia_record_tab(recordStr) do
     case :erl_scan.string(recordStr) do
-      {:ok, [[{:"#", _}, {:atom, _, name}] | _], _} ->
+      {:ok, [{:"#", _}, {:atom, _, name} | _], _} ->
         :io_lib.write_string(:erlang.atom_to_list(name), ?')
 
       _ ->
@@ -3720,17 +3720,14 @@ defmodule :m_dialyzer_races do
         ]
 
       :warn_mnesia_dirty_read_write ->
-        [[wVA1, wVA2] | t] = warnVarArgs
+        [wVA1, wVA2 | t] = warnVarArgs
         argNos = lists_key_members_lists(wVA1, funDefArgs)
 
         [
-          [
-            for n <- argNos do
-              lists_get(n, funCallArgs)
-            end,
-            wVA2
-          ]
-          | t
+          for n <- argNos do
+            lists_get(n, funCallArgs)
+          end,
+          wVA2 | t
         ]
     end
   end
@@ -3837,7 +3834,7 @@ defmodule :m_dialyzer_races do
         end
 
       :warn_mnesia_dirty_read_write ->
-        [[wVA1, wVA2] | t] = warnVarArgs
+        [wVA1, wVA2 | t] = warnVarArgs
 
         arity =
           case t do
@@ -3852,7 +3849,7 @@ defmodule :m_dialyzer_races do
 
         case lists_key_member_lists(vars, funVarArgs) do
           0 ->
-            [[vars, wVA2] | t]
+            [vars, wVA2 | t]
 
           n when is_integer(n) ->
             newWVA2 =
@@ -3870,7 +3867,7 @@ defmodule :m_dialyzer_races do
                   :string.lexemes(:lists.nth(n + 1, funVarArgs), ' |')
               end
 
-            [[vars, newWVA2] | t]
+            [vars, newWVA2 | t]
         end
     end
   end

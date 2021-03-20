@@ -3246,7 +3246,7 @@ defmodule :m_sys_core_fold do
   end
 
   defp update_types(v, r_c_tuple() = p, r_sub(t: tdb) = sub) do
-    r_sub(sub, t: %{tdb | v => p})
+    r_sub(sub, t: Map.put(tdb, v, p))
   end
 
   defp update_types(_, _, sub) do
@@ -3278,7 +3278,7 @@ defmodule :m_sys_core_fold do
   defp copy_type(v, r_c_var(name: src), tdb) do
     case tdb do
       %{^src => type} ->
-        %{tdb | v => type}
+        Map.put(tdb, v, type)
 
       _ ->
         tdb

@@ -73,7 +73,10 @@ defmodule :m_dialyzer_callgraph do
             :callgraph_self_rec,
             :callgraph_calls
           ] do
-        :ets.new(n, [:public, {:read_concurrency, true}])
+        :ets.new(
+          n,
+          [:public, {:read_concurrency, true}]
+        )
       end
 
     r_callgraph(
@@ -393,7 +396,7 @@ defmodule :m_dialyzer_callgraph do
                 [key | acc]
 
               {:ok, name} ->
-                [[key, name] | acc]
+                [key, name | acc]
             end
 
           _, acc ->

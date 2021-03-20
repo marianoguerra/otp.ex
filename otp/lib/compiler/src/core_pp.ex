@@ -160,7 +160,14 @@ defmodule :m_core_pp do
   end
 
   defp format_anno(tuple, ctxt) when is_tuple(tuple) do
-    [?{, format_anno_list(:erlang.tuple_to_list(tuple), ctxt), ?}]
+    [
+      ?{,
+      format_anno_list(
+        :erlang.tuple_to_list(tuple),
+        ctxt
+      ),
+      ?}
+    ]
   end
 
   defp format_anno(val, ctxt) when is_atom(val) do
@@ -172,7 +179,7 @@ defmodule :m_core_pp do
   end
 
   defp format_anno_list([h | [_ | _] = t], ctxt) do
-    [[format_anno(h, ctxt), ?,] | format_anno_list(t, ctxt)]
+    [format_anno(h, ctxt), ?, | format_anno_list(t, ctxt)]
   end
 
   defp format_anno_list([h], ctxt) do
@@ -282,7 +289,7 @@ defmodule :m_core_pp do
             s
 
           [?_ | _] ->
-            [[?_, ?X] | s]
+            [?_, ?X | s]
 
           _ ->
             [?_ | s]
@@ -365,31 +372,42 @@ defmodule :m_core_pp do
         ctxt1 = add_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
         [
-          [
-            'let ',
-            format_values(vs, add_indent(ctxt, 4)),
-            ' =',
-            nl_indent(ctxt1),
-            format(a, ctxt1),
-            nl_indent(ctxt),
-            'in  '
-          ]
-          | format(b, add_indent(ctxt, 4))
+          'let ',
+          format_values(vs, add_indent(ctxt, 4)),
+          ' =',
+          nl_indent(ctxt1),
+          format(a, ctxt1),
+          nl_indent(ctxt),
+          'in  '
+          | format(
+              b,
+              add_indent(
+                ctxt,
+                4
+              )
+            )
         ]
 
       true ->
         ctxt1 = add_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
         [
-          [
-            'let ',
-            format_values(vs, add_indent(ctxt, 4)),
-            ' = ',
-            format(a, ctxt1),
-            nl_indent(ctxt),
-            'in  '
-          ]
-          | format(b, add_indent(ctxt, 4))
+          'let ',
+          format_values(vs, add_indent(ctxt, 4)),
+          ' = ',
+          format(
+            a,
+            ctxt1
+          ),
+          nl_indent(ctxt),
+          'in  '
+          | format(
+              b,
+              add_indent(
+                ctxt,
+                4
+              )
+            )
         ]
     end
   end
@@ -398,8 +416,18 @@ defmodule :m_core_pp do
     ctxt1 = add_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
     [
-      ['letrec', nl_indent(ctxt1), format_funcs(fs, ctxt1), nl_indent(ctxt), 'in  ']
-      | format(b, add_indent(ctxt, 4))
+      'letrec',
+      nl_indent(ctxt1),
+      format_funcs(fs, ctxt1),
+      nl_indent(ctxt),
+      'in  '
+      | format(
+          b,
+          add_indent(
+            ctxt,
+            4
+          )
+        )
     ]
   end
 
@@ -407,7 +435,9 @@ defmodule :m_core_pp do
     ctxt1 = add_indent(ctxt, 4)
 
     [
-      ['do  ', format(a, ctxt1), nl_indent(ctxt1)]
+      'do  ',
+      format(a, ctxt1),
+      nl_indent(ctxt1)
       | format(
           b,
           ctxt1
@@ -419,15 +449,12 @@ defmodule :m_core_pp do
     ctxt1 = add_indent(ctxt, r_ctxt(ctxt, :item_indent))
 
     [
-      [
-        'case ',
-        format(a, add_indent(ctxt, 5)),
-        ' of',
-        nl_indent(ctxt1),
-        format_clauses(cs, ctxt1),
-        nl_indent(ctxt)
-      ]
-      | 'end'
+      'case ',
+      format(a, add_indent(ctxt, 5)),
+      ' of',
+      nl_indent(ctxt1),
+      format_clauses(cs, ctxt1),
+      nl_indent(ctxt) | 'end'
     ]
   end
 
@@ -440,7 +467,10 @@ defmodule :m_core_pp do
       format_clauses(cs, ctxt1),
       nl_indent(ctxt),
       'after ',
-      format(t, add_indent(ctxt, 6)),
+      format(
+        t,
+        add_indent(ctxt, 6)
+      ),
       ' ->',
       nl_indent(ctxt1),
       format(a, ctxt1)
@@ -451,8 +481,10 @@ defmodule :m_core_pp do
     ctxt1 = add_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
     [
-      ['fun (', format_hseq(vs, ',', add_indent(ctxt, 5), &format/2), ') ->', nl_indent(ctxt1)]
-      | format(b, ctxt1)
+      'fun (',
+      format_hseq(vs, ',', add_indent(ctxt, 5), &format/2),
+      ') ->',
+      nl_indent(ctxt1) | format(b, ctxt1)
     ]
   end
 
@@ -485,7 +517,12 @@ defmodule :m_core_pp do
       name,
       nl_indent(ctxt3),
       ?(,
-      format_hseq(as, ', ', add_indent(ctxt3, 1), &format/2),
+      format_hseq(
+        as,
+        ', ',
+        add_indent(ctxt3, 1),
+        &format/2
+      ),
       ?)
     ]
   end
@@ -517,23 +554,36 @@ defmodule :m_core_pp do
     ctxt1 = add_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
     [
-      [
-        'try',
-        nl_indent(ctxt1),
-        format(e, ctxt1),
-        nl_indent(ctxt),
-        'of ',
-        format_values(vs, add_indent(ctxt, 3)),
-        ' ->',
-        nl_indent(ctxt1),
-        format(b, ctxt1),
-        nl_indent(ctxt),
-        'catch ',
-        format_values(evs, add_indent(ctxt, 6)),
-        ' ->',
-        nl_indent(ctxt1)
-      ]
-      | format(h, ctxt1)
+      'try',
+      nl_indent(ctxt1),
+      format(e, ctxt1),
+      nl_indent(ctxt),
+      'of ',
+      format_values(
+        vs,
+        add_indent(
+          ctxt,
+          3
+        )
+      ),
+      ' ->',
+      nl_indent(ctxt1),
+      format(b, ctxt1),
+      nl_indent(ctxt),
+      'catch ',
+      format_values(
+        evs,
+        add_indent(
+          ctxt,
+          6
+        )
+      ),
+      ' ->',
+      nl_indent(ctxt1)
+      | format(
+          h,
+          ctxt1
+        )
     ]
   end
 
@@ -544,19 +594,20 @@ defmodule :m_core_pp do
     mod = ['module ', format(n, ctxt)]
 
     [
-      [
-        mod,
-        ' [',
-        format_vseq(es, '', ',', add_indent(ctxt, width(mod, ctxt) + 2), &format/2),
-        ']',
-        nl_indent(ctxt),
-        '    attributes [',
-        format_vseq(as, '', ',', add_indent(ctxt, 16), &format_def/2),
-        ']',
-        nl_indent(ctxt),
-        format_funcs(ds, ctxt),
-        nl_indent(ctxt)
-      ]
+      mod,
+      ' [',
+      format_vseq(es, '', ',', add_indent(ctxt, width(mod, ctxt) + 2), &format/2),
+      ']',
+      nl_indent(ctxt),
+      '    attributes [',
+      format_vseq(as, '', ',', add_indent(ctxt, 16), &format_def/2),
+      ']',
+      nl_indent(ctxt),
+      format_funcs(
+        ds,
+        ctxt
+      ),
+      nl_indent(ctxt)
       | 'end'
     ]
   end
@@ -569,7 +620,9 @@ defmodule :m_core_pp do
     ctxt1 = add_indent(ctxt0, r_ctxt(ctxt0, :body_indent))
 
     [
-      [format(n, ctxt0), ' =', nl_indent(ctxt1)]
+      format(n, ctxt0),
+      ' =',
+      nl_indent(ctxt1)
       | format(
           v,
           ctxt1
@@ -609,24 +662,28 @@ defmodule :m_core_pp do
     ctxt2 = add_indent(ctxt, r_ctxt(ctxt, :body_indent))
 
     [
-      [
-        ptxt,
-        case is_trivial_guard(g) do
-          true ->
-            [
-              ' when ',
-              format_guard(
-                g,
-                add_indent(ctxt, width(ptxt, ctxt) + 6)
-              )
-            ]
+      ptxt,
+      case is_trivial_guard(g) do
+        true ->
+          [
+            ' when ',
+            format_guard(
+              g,
+              add_indent(ctxt, width(ptxt, ctxt) + 6)
+            )
+          ]
 
-          false ->
-            [nl_indent(ctxt2), 'when ', format_guard(g, add_indent(ctxt2, 2))]
-        end ++ ' ->',
-        nl_indent(ctxt2)
-      ]
-      | format(b, ctxt2)
+        false ->
+          [
+            nl_indent(ctxt2),
+            'when ',
+            format_guard(
+              g,
+              add_indent(ctxt2, 2)
+            )
+          ]
+      end ++ ' ->',
+      nl_indent(ctxt2) | format(b, ctxt2)
     ]
   end
 
@@ -685,7 +742,10 @@ defmodule :m_core_pp do
 
   defp format_vseq([h | t], pre, suf, ctxt, fun) do
     [
-      [fun.(h, ctxt), suf, nl_indent(ctxt), pre]
+      fun.(h, ctxt),
+      suf,
+      nl_indent(ctxt),
+      pre
       | format_vseq(t, pre, suf, ctxt, fun)
     ]
   end

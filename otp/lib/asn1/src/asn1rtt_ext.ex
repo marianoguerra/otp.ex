@@ -19,14 +19,14 @@ defmodule :m_asn1rtt_ext do
   defp transform_to_EXTERNAL1990([{:syntax, syntax} | rest], acc) do
     transform_to_EXTERNAL1990(
       rest,
-      [[:asn1_NOVALUE, syntax] | acc]
+      [:asn1_NOVALUE, syntax | acc]
     )
   end
 
   defp transform_to_EXTERNAL1990([{:"presentation-context-id", pCid} | rest], acc) do
     transform_to_EXTERNAL1990(
       rest,
-      [[pCid, :asn1_NOVALUE] | acc]
+      [pCid, :asn1_NOVALUE | acc]
     )
   end
 
@@ -35,7 +35,7 @@ defmodule :m_asn1rtt_ext do
 
     transform_to_EXTERNAL1990(
       rest,
-      [[presentation_Cid, transfer_syntax] | acc]
+      [presentation_Cid, transfer_syntax | acc]
     )
   end
 
@@ -45,21 +45,13 @@ defmodule :m_asn1rtt_ext do
 
   defp transform_to_EXTERNAL1990([data_val_desc, data_value], acc)
        when is_list(data_value) or is_binary(data_value) do
-    :erlang.list_to_tuple(
-      :lists.reverse([
-        [{:"octet-aligned", data_value}, data_val_desc]
-        | acc
-      ])
-    )
+    :erlang.list_to_tuple(:lists.reverse([{:"octet-aligned", data_value}, data_val_desc | acc]))
   end
 
   defp transform_to_EXTERNAL1990([data_val_desc, data_value], acc)
        when is_binary(data_value) do
     :erlang.list_to_tuple(
-      :lists.reverse([
-        [{:"single-ASN1-type", data_value}, data_val_desc]
-        | acc
-      ])
+      :lists.reverse([{:"single-ASN1-type", data_value}, data_val_desc | acc])
     )
   end
 
@@ -74,33 +66,32 @@ defmodule :m_asn1rtt_ext do
     )
   end
 
-  def transform_to_EXTERNAL1990_maps(%{:identification => id, :"data-value" => value} = v) do
+  def transform_to_EXTERNAL1990_maps(%{identification: id, "data-value": value} = v) do
     m0 =
       case id do
         {:syntax, dRef} ->
-          %{:"direct-reference" => dRef}
+          %{"direct-reference": dRef}
 
         {:"presentation-context-id", indRef} ->
-          %{:"indirect-reference" => indRef}
+          %{"indirect-reference": indRef}
 
-        {:"context-negotiation",
-         %{:"presentation-context-id" => indRef, :"transfer-syntax" => dRef}} ->
-          %{:"direct-reference" => dRef, :"indirect-reference" => indRef}
+        {:"context-negotiation", %{"presentation-context-id": indRef, "transfer-syntax": dRef}} ->
+          %{"direct-reference": dRef, "indirect-reference": indRef}
       end
 
     m =
       case v do
-        %{:"data-value-descriptor" => dvd} ->
-          %{m0 | :"data-value-descriptor" => dvd}
+        %{"data-value-descriptor": dvd} ->
+          Map.put(m0, :"data-value-descriptor", dvd)
 
         %{} ->
           m0
       end
 
-    %{m | :encoding => {:"octet-aligned", value}}
+    Map.put(m, :encoding, {:"octet-aligned", value})
   end
 
-  def transform_to_EXTERNAL1990_maps(%{:encoding => _} = v) do
+  def transform_to_EXTERNAL1990_maps(%{encoding: _} = v) do
     v
   end
 
@@ -129,29 +120,28 @@ defmodule :m_asn1rtt_ext do
   def transform_to_EXTERNAL1994_maps(v0) do
     identification =
       case v0 do
-        %{:"direct-reference" => dRef, :"indirect-reference" => :asn1_NOVALUE} ->
+        %{"direct-reference": dRef, "indirect-reference": :asn1_NOVALUE} ->
           {:syntax, dRef}
 
-        %{:"direct-reference" => :asn1_NOVALUE, :"indirect-reference" => indRef} ->
+        %{"direct-reference": :asn1_NOVALUE, "indirect-reference": indRef} ->
           {:"presentation-context-id", indRef}
 
-        %{:"direct-reference" => dRef, :"indirect-reference" => indRef} ->
-          {:"context-negotiation",
-           %{:"transfer-syntax" => dRef, :"presentation-context-id" => indRef}}
+        %{"direct-reference": dRef, "indirect-reference": indRef} ->
+          {:"context-negotiation", %{"transfer-syntax": dRef, "presentation-context-id": indRef}}
       end
 
     case v0 do
-      %{:encoding => {:"octet-aligned", val}}
+      %{encoding: {:"octet-aligned", val}}
       when is_list(val) or
              is_binary(val) ->
-        v = %{:identification => identification, :"data-value" => val}
+        v = %{identification: identification, "data-value": val}
 
         case v0 do
-          %{:"data-value-descriptor" => :asn1_NOVALUE} ->
+          %{"data-value-descriptor": :asn1_NOVALUE} ->
             v
 
-          %{:"data-value-descriptor" => dvd} ->
-            %{v | :"data-value-descriptor" => dvd}
+          %{"data-value-descriptor": dvd} ->
+            Map.put(v, :"data-value-descriptor", dvd)
         end
 
       _ ->

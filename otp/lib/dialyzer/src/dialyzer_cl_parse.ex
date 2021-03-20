@@ -142,7 +142,7 @@ defmodule :m_dialyzer_cl_parse do
     cl_error('no include directory specified after -I')
   end
 
-  defp cl([['-I', dir] | t]) do
+  defp cl(['-I', dir | t]) do
     append_include(dir)
     cl(t)
   end
@@ -185,7 +185,7 @@ defmodule :m_dialyzer_cl_parse do
     cl_error('No outfile specified')
   end
 
-  defp cl([['--output', output] | t]) do
+  defp cl(['--output', output | t]) do
     :erlang.put(:dialyzer_output, output)
     cl(t)
   end
@@ -194,12 +194,12 @@ defmodule :m_dialyzer_cl_parse do
     cl_error('No outfile specified for --output_plt')
   end
 
-  defp cl([['--output_plt', output] | t]) do
+  defp cl(['--output_plt', output | t]) do
     :erlang.put(:dialyzer_output_plt, output)
     cl(t)
   end
 
-  defp cl([['-o', output] | t]) do
+  defp cl(['-o', output | t]) do
     :erlang.put(:dialyzer_output, output)
     cl(t)
   end
@@ -224,7 +224,7 @@ defmodule :m_dialyzer_cl_parse do
     cl(t)
   end
 
-  defp cl([['-pa', path] | t]) do
+  defp cl(['-pa', path | t]) do
     case :code.add_patha(path) do
       true ->
         cl(t)
@@ -238,7 +238,7 @@ defmodule :m_dialyzer_cl_parse do
     :erlang.error('No plt specified for --plt')
   end
 
-  defp cl([['--plt', pLT] | t]) do
+  defp cl(['--plt', pLT | t]) do
     :erlang.put(:dialyzer_init_plts, [pLT])
     cl(t)
   end
@@ -320,7 +320,7 @@ defmodule :m_dialyzer_cl_parse do
     cl_error('No outfile specified for --dump_callgraph')
   end
 
-  defp cl([['--dump_callgraph', file] | t]) do
+  defp cl(['--dump_callgraph', file | t]) do
     :erlang.put(:dialyzer_callgraph_file, file)
     cl(t)
   end
@@ -330,7 +330,7 @@ defmodule :m_dialyzer_cl_parse do
     cl(t)
   end
 
-  defp cl([['--solver', solver] | t]) do
+  defp cl(['--solver', solver | t]) do
     append_var(
       :dialyzer_solvers,
       [:erlang.list_to_atom(solver)]
@@ -487,18 +487,16 @@ defmodule :m_dialyzer_cl_parse do
 
   defp cl_options() do
     [
-      [
-        {:files, :erlang.get(:dialyzer_options_files)},
-        {:files_rec, :erlang.get(:dialyzer_options_files_rec)},
-        {:output_file, :erlang.get(:dialyzer_output)},
-        {:output_format, :erlang.get(:dialyzer_output_format)},
-        {:filename_opt, :erlang.get(:dialyzer_filename_opt)},
-        {:indent_opt, :erlang.get(:dialyzer_indent_opt)},
-        {:analysis_type, :erlang.get(:dialyzer_options_analysis_type)},
-        {:get_warnings, :erlang.get(:dialyzer_options_get_warnings)},
-        {:timing, :erlang.get(:dialyzer_timing)},
-        {:callgraph_file, :erlang.get(:dialyzer_callgraph_file)}
-      ]
+      {:files, :erlang.get(:dialyzer_options_files)},
+      {:files_rec, :erlang.get(:dialyzer_options_files_rec)},
+      {:output_file, :erlang.get(:dialyzer_output)},
+      {:output_format, :erlang.get(:dialyzer_output_format)},
+      {:filename_opt, :erlang.get(:dialyzer_filename_opt)},
+      {:indent_opt, :erlang.get(:dialyzer_indent_opt)},
+      {:analysis_type, :erlang.get(:dialyzer_options_analysis_type)},
+      {:get_warnings, :erlang.get(:dialyzer_options_get_warnings)},
+      {:timing, :erlang.get(:dialyzer_timing)},
+      {:callgraph_file, :erlang.get(:dialyzer_callgraph_file)}
       | common_options()
     ]
   end

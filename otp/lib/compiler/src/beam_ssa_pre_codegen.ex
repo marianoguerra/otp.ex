@@ -141,7 +141,7 @@ defmodule :m_beam_ssa_pre_codegen do
       r_b_function(f, bs: blocks, cnt: count)
     catch
       class, error ->
-        %{:func_info => {_, name, arity}} = anno
+        %{func_info: {_, name, arity}} = anno
         :io.fwrite('Function: ~w/~w\n', [name, arity])
         :erlang.raise(class, error, __STACKTRACE__)
     end
@@ -192,7 +192,7 @@ defmodule :m_beam_ssa_pre_codegen do
       r_b_set(op: :bs_start_match, dst: dst), a ->
         [{dst, {:context, dst}} | a]
 
-      r_b_set(op: :bs_match, dst: dst, args: [[_, parentCtx] | _]), a ->
+      r_b_set(op: :bs_match, dst: dst, args: [_, parentCtx | _]), a ->
         [{dst, parentCtx} | a]
 
       _, a ->
@@ -385,7 +385,7 @@ defmodule :m_beam_ssa_pre_codegen do
         join_positions(t, %{d | l => mapPos})
 
       %{} ->
-        join_positions(t, %{d | l => mapPos0})
+        join_positions(t, Map.put(d, l, mapPos0))
     end
   end
 
@@ -422,7 +422,7 @@ defmodule :m_beam_ssa_pre_codegen do
 
   defp bs_restores_is([r_b_set(op: :bs_start_match, dst: start) | is], ctxChain, sPos0, _FPos, rs) do
     fPos = sPos0
-    sPos = %{sPos0 | start => start}
+    sPos = Map.put(sPos0, start, start)
     bs_restores_is(is, ctxChain, sPos, fPos, rs)
   end
 
@@ -437,7 +437,7 @@ defmodule :m_beam_ssa_pre_codegen do
          rs0
        ) do
     start = bs_subst_ctx(newPos, ctxChain)
-    [[_, fromPos] | _] = args
+    [_, fromPos | _] = args
 
     case sPos0 do
       %{^start => ^fromPos} ->
@@ -462,13 +462,13 @@ defmodule :m_beam_ssa_pre_codegen do
           :test_unit ->
             sPos = %{sPos0 | start => fromPos}
             fPos = sPos
-            rs = %{rs0 | newPos => {start, fromPos}}
+            rs = Map.put(rs0, newPos, {start, fromPos})
             bs_restores_is(is, ctxChain, sPos, fPos, rs)
 
           :plain ->
             sPos = %{sPos0 | start => newPos}
             fPos = %{sPos0 | start => fromPos}
-            rs = %{rs0 | newPos => {start, fromPos}}
+            rs = Map.put(rs0, newPos, {start, fromPos})
             bs_restores_is(is, ctxChain, sPos, fPos, rs)
         end
     end
@@ -587,7 +587,7 @@ defmodule :m_beam_ssa_pre_codegen do
 
       %{^start => _} ->
         pos = %{pos0 | start => arg}
-        rs = %{rs0 | dst => {start, arg}}
+        rs = Map.put(rs0, dst, {start, arg})
         bs_restore_args(args, pos, ctxChain, dst, rs)
 
       %{} ->
@@ -711,10 +711,10 @@ defmodule :m_beam_ssa_pre_codegen do
 
     i =
       case {op, args} do
-        {:bs_match, [[r_b_literal(val: :skip), ctx, type] | as]} ->
-          r_b_set(i1, op: :bs_skip, args: [[type, ctx] | as])
+        {:bs_match, [r_b_literal(val: :skip), ctx, type | as]} ->
+          r_b_set(i1, op: :bs_skip, args: [type, ctx | as])
 
-        {:bs_match, [[r_b_literal(val: :string), ctx] | as]} ->
+        {:bs_match, [r_b_literal(val: :string), ctx | as]} ->
           r_b_set(i1, op: :bs_match_string, args: [ctx | as])
 
         {_, _} ->
@@ -730,7 +730,11 @@ defmodule :m_beam_ssa_pre_codegen do
 
   defp bs_combine(dst, ctx, [{l, r_b_blk(is: is0) = blk} | acc]) do
     [
-      [r_b_set() = succeeded, r_b_set(op: :bs_match, args: [[type, _] | as]) = bsMatch]
+      r_b_set() = succeeded,
+      r_b_set(
+        op: :bs_match,
+        args: [type, _ | as]
+      ) = bsMatch
       | is1
     ] = reverse(is0)
 
@@ -738,7 +742,7 @@ defmodule :m_beam_ssa_pre_codegen do
       reverse(
         is1,
         [
-          r_b_set(bsMatch, op: :bs_get, dst: dst, args: [[type, ctx] | as]),
+          r_b_set(bsMatch, op: :bs_get, dst: dst, args: [type, ctx | as]),
           r_b_set(succeeded, args: [dst])
         ]
       )
@@ -836,11 +840,11 @@ defmodule :m_beam_ssa_pre_codegen do
         succI = r_b_set(succI0, args: [tempDst])
         copy = r_b_set(op: :copy, dst: dst, args: [tempDst])
         r_b_br(bool: ^succDst, succ: succL) = last
-        copies = %{copies0 | succL => copy}
-        legacy_bs_is([], last, isYreg, count, copies, [[succI, i] | acc])
+        copies = Map.put(copies0, succL, copy)
+        legacy_bs_is([], last, isYreg, count, copies, [succI, i | acc])
 
       false ->
-        legacy_bs_is([], last, isYreg, count0, copies0, [[succI0, i0] | acc])
+        legacy_bs_is([], last, isYreg, count0, copies0, [succI0, i0 | acc])
     end
   end
 
@@ -915,7 +919,7 @@ defmodule :m_beam_ssa_pre_codegen do
         {mapVar, count} = new_var(:"@ssa_map", count0)
         i = r_b_set(i0, args: [mapVar, key])
         copy = r_b_set(op: :copy, dst: mapVar, args: [map])
-        sanitize_is(is, last, count, values, true, [[i, copy] | acc])
+        sanitize_is(is, last, count, values, true, [i, copy | acc])
 
       [_, _] = ^args0 ->
         sanitize_is(is, last, count0, values, changed, [i0 | acc])
@@ -963,7 +967,7 @@ defmodule :m_beam_ssa_pre_codegen do
 
       r_b_literal() ->
         value = r_b_literal(val: true)
-        {reverse(acc0), last, count, %{values | dst => value}}
+        {reverse(acc0), last, count, Map.put(values, dst, value)}
     end
   end
 
@@ -982,7 +986,7 @@ defmodule :m_beam_ssa_pre_codegen do
 
       r_b_literal() ->
         value = r_b_literal(val: true)
-        {reverse(acc), last, count, %{values | dst => value}}
+        {reverse(acc), last, count, Map.put(values, dst, value)}
     end
   end
 
@@ -1061,7 +1065,7 @@ defmodule :m_beam_ssa_pre_codegen do
     case sanitize_instr(op, args, i0) do
       {:value, value0} ->
         value = r_b_literal(val: value0)
-        sanitize_is(is, last, count, %{values | dst => value}, true, acc)
+        sanitize_is(is, last, count, Map.put(values, dst, value), true, acc)
 
       {:ok, i} ->
         sanitize_is(is, last, count, values, true, [i | acc])
@@ -1175,7 +1179,7 @@ defmodule :m_beam_ssa_pre_codegen do
     end
   end
 
-  defp sanitize_instr(:bs_add, [[arg1, arg2, _] | _], i0) do
+  defp sanitize_instr(:bs_add, [arg1, arg2, _ | _], i0) do
     case all(
            fn
              r_b_literal(val: size) ->
@@ -1194,7 +1198,7 @@ defmodule :m_beam_ssa_pre_codegen do
     end
   end
 
-  defp sanitize_instr(:bs_init, [[r_b_literal(val: :new), r_b_literal(val: sz)] | _], i0) do
+  defp sanitize_instr(:bs_init, [r_b_literal(val: :new), r_b_literal(val: sz) | _], i0) do
     cond do
       is_integer(sz) and sz >= 0 ->
         :ok
@@ -1204,7 +1208,7 @@ defmodule :m_beam_ssa_pre_codegen do
     end
   end
 
-  defp sanitize_instr(:bs_init, [[r_b_literal(), _, r_b_literal(val: sz)] | _], i0) do
+  defp sanitize_instr(:bs_init, [r_b_literal(), _, r_b_literal(val: sz) | _], i0) do
     cond do
       is_integer(sz) and sz >= 0 ->
         :ok
@@ -1299,16 +1303,14 @@ defmodule :m_beam_ssa_pre_codegen do
 
   defp match_fail_instrs_blk(
          [
-           [
-             r_b_set(op: :put_tuple, dst: dst, args: [r_b_literal(val: tag), val]),
-             r_b_set(
-               op: :call,
-               args: [
-                 r_b_remote(mod: r_b_literal(val: :erlang), name: r_b_literal(val: :error)),
-                 dst
-               ]
-             ) = call
-           ]
+           r_b_set(op: :put_tuple, dst: dst, args: [r_b_literal(val: tag), val]),
+           r_b_set(
+             op: :call,
+             args: [
+               r_b_remote(mod: r_b_literal(val: :erlang), name: r_b_literal(val: :error)),
+               dst
+             ]
+           ) = call
            | is
          ],
          _Arity,
@@ -1581,7 +1583,7 @@ defmodule :m_beam_ssa_pre_codegen do
               %{acc | var => c + 1}
 
             %{} ->
-              %{acc | var => 1}
+              Map.put(acc, var, 1)
           end
         end,
         countMap,
@@ -1914,7 +1916,7 @@ defmodule :m_beam_ssa_pre_codegen do
     toExit = r_b_br(bool: r_b_literal(val: true), succ: exit, fail: exit)
     fromBlk = r_b_blk(fromBlk0, last: rce_reroute_terminator(last0, exit, count))
     edgeBlk = r_b_blk(anno: %{}, is: [], last: toExit)
-    blocks = %{blocks0 | count => edgeBlk, l => fromBlk}
+    blocks = Map.merge(blocks0, %{count => edgeBlk, l => fromBlk})
     {blocks, count + 1}
   end
 
@@ -2043,7 +2045,7 @@ defmodule :m_beam_ssa_pre_codegen do
     {blocks, count}
   end
 
-  defp find_loop_exit([[_, _] | _] = rmBlocks, blocks) do
+  defp find_loop_exit([_, _ | _] = rmBlocks, blocks) do
     {dominators, _} = :beam_ssa.dominators(blocks)
     rmSet = :cerl_sets.from_list(rmBlocks)
     rpo = :beam_ssa.rpo(rmBlocks, blocks)
@@ -2248,7 +2250,7 @@ defmodule :m_beam_ssa_pre_codegen do
         find_update_succ(ss, dK0, d)
 
       %{} ->
-        d = %{d0 | s => dK0}
+        d = Map.put(d0, s, dK0)
         find_update_succ(ss, dK0, d)
     end
   end
@@ -2342,7 +2344,7 @@ defmodule :m_beam_ssa_pre_codegen do
   end
 
   defp used_args([r_b_remote(mod: mod, name: name) | as]) do
-    used_args([[mod, name] | as])
+    used_args([mod, name | as])
   end
 
   defp used_args([_ | as]) do
@@ -2359,10 +2361,11 @@ defmodule :m_beam_ssa_pre_codegen do
   end
 
   defp copy_retval_1([f | fs], blocks0, count0) do
-    r_b_blk(
-      anno: %{:yregs => yregs0},
-      is: is
-    ) = :erlang.map_get(f, blocks0)
+    r_b_blk(anno: %{yregs: yregs0}, is: is) =
+      :erlang.map_get(
+        f,
+        blocks0
+      )
 
     yregs = collect_yregs(is, yregs0)
     ls = :beam_ssa.rpo([f], blocks0)
@@ -2421,12 +2424,12 @@ defmodule :m_beam_ssa_pre_codegen do
             copy_retval_2(ls, yregs, :none, blocks0, count0)
 
           false ->
-            blocks = %{blocks0 | l => r_b_blk(blk, is: is)}
+            blocks = Map.put(blocks0, l, r_b_blk(blk, is: is))
             copy_retval_2(ls, yregs, :none, blocks, count)
         end
 
       {is, count, copy} ->
-        blocks = %{blocks0 | l => r_b_blk(blk, is: is)}
+        blocks = Map.put(blocks0, l, r_b_blk(blk, is: is))
         copy_retval_2(ls, yregs, copy, blocks, count)
     end
   end
@@ -2594,11 +2597,8 @@ defmodule :m_beam_ssa_pre_codegen do
 
   defp opt_get_list_is(
          [
-           [
-             r_b_set(op: :get_hd, dst: hd, args: [cons]) = getHd,
-             r_b_set(op: :get_tl, dst: tl, args: [cons]) = getTl
-           ]
-           | is
+           r_b_set(op: :get_hd, dst: hd, args: [cons]) = getHd,
+           r_b_set(op: :get_tl, dst: tl, args: [cons]) = getTl | is
          ],
          res,
          acc,
@@ -2688,7 +2688,7 @@ defmodule :m_beam_ssa_pre_codegen do
     []
   end
 
-  defp merge_ranges_1([[{a, n}, {n, z}] | rs]) do
+  defp merge_ranges_1([{a, n}, {n, z} | rs]) do
     merge_ranges_1([{a, z} | rs])
   end
 
@@ -2724,7 +2724,7 @@ defmodule :m_beam_ssa_pre_codegen do
         v
       end
 
-    liveMap = %{liveMap0 | l => live}
+    liveMap = Map.put(liveMap0, l, live)
     vars = make_block_ranges(useDef, firstNumber, vars0)
     live_interval_blk(ls, blocks, vars, liveMap)
   end
@@ -2922,7 +2922,7 @@ defmodule :m_beam_ssa_pre_codegen do
 
   defp reserve_try_tags_is([r_b_set(op: :new_try_tag, dst: v) | is], active) do
     n = map_size(active)
-    reserve_try_tags_is(is, %{active | v => n})
+    reserve_try_tags_is(is, Map.put(active, v, n))
   end
 
   defp reserve_try_tags_is(
@@ -2943,11 +2943,11 @@ defmodule :m_beam_ssa_pre_codegen do
   defp update_act_map([l | ls], active0, actMap0) do
     case actMap0 do
       %{^l => active1} ->
-        actMap = %{actMap0 | l => :maps.merge(active0, active1)}
+        actMap = Map.put(actMap0, l, :maps.merge(active0, active1))
         update_act_map(ls, active0, actMap)
 
       %{} ->
-        actMap = %{actMap0 | l => active0}
+        actMap = Map.put(actMap0, l, active0)
         update_act_map(ls, active0, actMap)
     end
   end
@@ -3326,7 +3326,7 @@ defmodule :m_beam_ssa_pre_codegen do
     is2 = res_place_gc_instrs(is1, [])
     is = res_place_allocate(anno, is2)
     {res, xs} = reserve_xregs_is(is, res0, xs0, [])
-    xsMap = %{xsMap0 | l => xs}
+    xsMap = Map.put(xsMap0, l, xs)
     reserve_xregs(ls, blocks, xsMap, res)
   end
 
@@ -3346,10 +3346,10 @@ defmodule :m_beam_ssa_pre_codegen do
         res_place_gc_instrs(is, [i | acc])
 
       [gC | _] when gC === :gc or gC === :test_heap ->
-        res_place_gc_instrs(is, [[i, :gc] | acc])
+        res_place_gc_instrs(is, [i, :gc | acc])
 
       [_ | _] ->
-        res_place_gc_instrs(is, [[i, :gc] | acc])
+        res_place_gc_instrs(is, [i, :gc | acc])
     end
   end
 
@@ -3358,7 +3358,7 @@ defmodule :m_beam_ssa_pre_codegen do
       :neutral ->
         case acc0 do
           [:test_heap | acc] ->
-            res_place_gc_instrs(is, [[:test_heap, i] | acc])
+            res_place_gc_instrs(is, [:test_heap, i | acc])
 
           acc ->
             res_place_gc_instrs(is, [i | acc])
@@ -3374,7 +3374,7 @@ defmodule :m_beam_ssa_pre_codegen do
         res_place_gc_instrs(is, res_place_test_heap(i, acc0))
 
       :gc ->
-        res_place_gc_instrs(is, [[:gc, i] | acc0])
+        res_place_gc_instrs(is, [:gc, i | acc0])
     end
   end
 
@@ -3385,10 +3385,10 @@ defmodule :m_beam_ssa_pre_codegen do
   defp res_place_test_heap(i, acc) do
     case acc do
       [:test_heap | ^acc] ->
-        [[:test_heap, i] | acc]
+        [:test_heap, i | acc]
 
       _ ->
-        [[:test_heap, i] | acc]
+        [:test_heap, i | acc]
     end
   end
 
@@ -3412,7 +3412,7 @@ defmodule :m_beam_ssa_pre_codegen do
     acc
   end
 
-  defp res_place_allocate(%{:yregs => _}, is) do
+  defp res_place_allocate(%{yregs: _}, is) do
     is ++ [:gc]
   end
 
@@ -3528,7 +3528,7 @@ defmodule :m_beam_ssa_pre_codegen do
       [v] ->
         case res do
           %{^dst => {:prefer, reg}} ->
-            res_xregs_from_phi(is, pred, res, %{acc | v => reg})
+            res_xregs_from_phi(is, pred, res, Map.put(acc, v, reg))
 
           %{^dst => _} ->
             res_xregs_from_phi(is, pred, res, acc)
@@ -3545,7 +3545,7 @@ defmodule :m_beam_ssa_pre_codegen do
   end
 
   defp reserve_call_args([r_b_var() = var | as], x, xs) do
-    reserve_call_args(as, x + 1, %{xs | var => {:x, x}})
+    reserve_call_args(as, x + 1, Map.put(xs, var, {:x, x}))
   end
 
   defp reserve_call_args([r_b_literal() | as], x, xs) do
@@ -3564,10 +3564,10 @@ defmodule :m_beam_ssa_pre_codegen do
       %{} ->
         case xs do
           %{^v => x} ->
-            %{res | v => {:prefer, x}}
+            Map.put(res, v, {:prefer, x})
 
           %{} ->
-            %{res | v => :x}
+            Map.put(res, v, :x)
         end
     end
   end
@@ -3697,9 +3697,9 @@ defmodule :m_beam_ssa_pre_codegen do
 
   defp init_free(res) do
     free0 = rel2fam([{:x, {:x, 0}} | init_free_1(res)])
-    %{:x => xs0} = free1 = :maps.from_list(free0)
+    %{x: xs0} = free1 = :maps.from_list(free0)
     xs = init_xregs(xs0)
-    free = %{free1 | :x => xs}
+    free = %{free1 | x: xs}
 
     next =
       :maps.fold(
@@ -3745,7 +3745,7 @@ defmodule :m_beam_ssa_pre_codegen do
     []
   end
 
-  defp init_xregs([[{:x, n}, {:x, m}] | is]) when n + 1 === m do
+  defp init_xregs([{:x, n}, {:x, m} | is]) when n + 1 === m do
     [{:x, n} | init_xregs([{:x, m} | is])]
   end
 

@@ -319,7 +319,7 @@ defmodule :m_file do
   end
 
   defp do_write_file(name, iOData, modeList) do
-    case open(name, [[:binary, :write] | modeList]) do
+    case open(name, [:binary, :write | modeList]) do
       {:ok, handle} ->
         case write(handle, iOData) do
           :ok ->
